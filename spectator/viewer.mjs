@@ -3920,6 +3920,29 @@ const mistsBaking = new Set();         // crossings whose paint is being baked
 let mistsFeather = null;               // the sheet's feathered edge, baked once
 const mistsBellState = { ctx: null, out: null, rung: false, armed: false };
 const MISTS_FAR_M = 200000;    // the wall runs out past anything the camera can reach
+// THE ROLL-IN WAITS FOR THE TOUR (Darko 2026-10-11): a first visitor is greeted
+// by the tour card, which dims the map, so a roll-in under it is a roll-in
+// missed. The session's first Mists roll in (and arm the bell) only with the
+// tour down: paint that arrives under the tour waits, hidden, until it closes,
+// and a roll-in the tour interrupts is taken back and played again after.
+// Pure: the viewer asks it what to do and does the painting itself.
+export function mistsIntroGate() {
+  let held = null, playing = null;
+  return {
+    get held() { return held; },
+    // the session's first Mists have arrived: "roll" now, or "hold" for the tour
+    arrive(item, tourUp) { if (tourUp) { held = item; playing = null; return "hold"; } playing = item; return "roll"; },
+    // the paint was drawn again while it waits: the new paint waits instead
+    rehold(item) { if (!held) return false; held = item; return true; },
+    // the tour opened: a roll-in still running goes back to wait (answered), any other is done
+    tourOpened(isRunning) { const back = playing && isRunning(playing) ? playing : null; playing = null; if (back) held = back; return back; },
+    // the tour closed: what waited rolls in now (answered), once
+    tourClosed() { const go = held; held = null; playing = go; return go; },
+    // the roll-in has finished: nothing left to take back
+    done(item) { if (playing === item) playing = null; },
+  };
+}
+const mistsRollIn = mistsIntroGate();
 export function mistsVeilSVG(m, { originPx, mPerPx }) {
   if (!m || !(m.veil > 0)) return "";
   const r = MISTS_FAR_M / mPerPx, n = (v) => v.toFixed(1);
@@ -9846,7 +9869,7 @@ export function mountViewer(appEl) {
   // they roll in from the edges and the bell is armed.
   function paintMists(m) {
     const bellBtn = root.querySelector(".wv-bell");
-    if (!m) { if (bellBtn) bellBtn.hidden = true; mapCtx?.svg?.querySelector(".wv-sheet-feather")?.remove(); return; }
+    if (!m) { if (bellBtn) bellBtn.hidden = true; mapCtx?.svg?.querySelector(".wv-sheet-feather")?.remove(); unmaskSheetWashes(); return; }
     // the town the paint keeps clear: every sited mark the world holds (the
     // whole fold, not the resident path's ground set)
     const keepMarks = data?.worldState?.marks ?? allMarks();
@@ -9933,7 +9956,8 @@ export function mountViewer(appEl) {
     if (!mistsFeather || mistsFeather.key !== key) {
       const colour = /^#[0-9a-f]{6}$/i.test(night) ? night : "#14171d";
       const fb = bakeSheetFeather(frame, colour, { canvas: document.createElement("canvas") });
-      mistsFeather = { key, ...fb, url: fb.canvas.toDataURL("image/png") };
+      const fm = bakeSheetFeather(frame, colour, { canvas: document.createElement("canvas"), invert: true });
+      mistsFeather = { key, ...fb, url: fb.canvas.toDataURL("image/png"), maskUrl: fm.canvas.toDataURL("image/png") };
     }
     const { originPx, mPerPx } = mapCtx, n = (x) => x.toFixed(1), F = mistsFeather;
     mapCtx.svg.querySelector(".wv-sheet-feather")?.remove();
@@ -9944,22 +9968,50 @@ export function mountViewer(appEl) {
       x: n(originPx.x + F.box.minX / mPerPx), y: n(originPx.y + F.box.minY / mPerPx), width: n(F.w / mPerPx), height: n(F.h / mPerPx) })) img.setAttribute(k, val);
     const under = mapCtx.svg.querySelector(":scope > g.region") ?? mapCtx.placedArtLayer;
     mapCtx.svg.insertBefore(img, under);
+    // the sheet-sized washes of light (the daylight and the night's pool) lie over
+    // the regions, so the feather under them cannot hide their straight sides: they
+    // take the same feather as a mask, and the sheet's edge does not show through
+    unmaskSheetWashes();
+    const box = { x: n(originPx.x + F.box.minX / mPerPx), y: n(originPx.y + F.box.minY / mPerPx), width: n(F.w / mPerPx), height: n(F.h / mPerPx) };
+    const mask = document.createElementNS("http://www.w3.org/2000/svg", "mask");
+    mask.setAttribute("id", "wv-sheet-unfeather"); mask.setAttribute("class", "wv-sheet-unfeather"); mask.setAttribute("maskUnits", "userSpaceOnUse");
+    for (const [k, val] of Object.entries(box)) mask.setAttribute(k, val);
+    mask.innerHTML = `<image href="${F.maskUrl}" x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" preserveAspectRatio="none"/>`;
+    mapCtx.svg.insertBefore(mask, img);
+    for (const r of sheetWashes()) r.setAttribute("mask", "url(#wv-sheet-unfeather)");
+  }
+  function sheetWashes() { return mapCtx?.svg ? [...mapCtx.svg.querySelectorAll(':scope > rect[fill^="url(#daylight"], :scope > rect[fill^="url(#nightpool"]')] : []; }
+  function unmaskSheetWashes() {
+    mapCtx?.svg?.querySelector(".wv-sheet-unfeather")?.remove();
+    for (const r of sheetWashes()) if (r.getAttribute("mask") === "url(#wv-sheet-unfeather)") r.removeAttribute("mask");
   }
   function sessionOnce(k) {
     try { if (sessionStorage.getItem(k)) return false; sessionStorage.setItem(k, "1"); return true; }
     catch { if (mistsOnce.has(k)) return false; mistsOnce.add(k); return true; }
   }
   function mistsIntro(m, g) {
+    // paint drawn again while the roll-in waits on the tour waits with it
+    if (mistsRollIn.rehold({ m, g })) { g.style.opacity = "0"; return; }
     if (!sessionOnce("pm_world_mists_intro")) return;
+    const item = { m, g };
+    if (mistsRollIn.arrive(item, tourShown()) === "hold") { g.style.opacity = "0"; return; }
+    mistsRollInPlay(item);
+  }
+  function mistsRollInPlay(item) {
+    const { m, g } = item;
+    g.style.opacity = "";
     const reduced = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!reduced && typeof g.animate === "function") {
       const { originPx, mPerPx } = mapCtx;
       const cx = originPx.x + (m.clear.minX + m.clear.maxX) / 2 / mPerPx, cy = originPx.y + (m.clear.minY + m.clear.maxY) / 2 / mPerPx;
       g.style.transformOrigin = `${cx.toFixed(1)}px ${cy.toFixed(1)}px`;
-      g.animate([{ transform: "scale(1.55)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: 3600, easing: "cubic-bezier(.22,.61,.36,1)" });
-    }
+      item.anim = g.animate([{ transform: "scale(1.55)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: 3600, easing: "cubic-bezier(.22,.61,.36,1)" });
+      item.anim.onfinish = () => mistsRollIn.done(item);
+    } else mistsRollIn.done(item);
     mistsBellArm(m);
   }
+  // the tour's card is up (it dims the map, and its clicks are not the bell's)
+  function tourShown() { const t = root.querySelector(".wv-tour"); return !!t && !t.hidden; }
   // THE BELL: a low struck bell (mists-render.mjs § ringBell), once per browser
   // session as the Mists arrive. Browsers hold sound until a gesture, so it
   // rings on the first click, tap or key if it could not ring before. Never
@@ -9967,7 +10019,7 @@ export function mountViewer(appEl) {
   function bellOn() { try { return localStorage.getItem("pm_world_bell") !== "off"; } catch { return true; } }
   function mistsBellRing(m, fromGesture = false) {
     const bell = bellFor(m);
-    if (!bell || !bellOn() || mistsBellState.rung) return;
+    if (!bell || !bellOn() || mistsBellState.rung || tourShown()) return;
     // no AudioContext before the reader has touched the page: browsers refuse it
     // anyway, and where one would allow it the bell must still wait for a gesture
     if (!fromGesture && !navigator.userActivation?.hasBeenActive) return;
@@ -12606,6 +12658,9 @@ export function mountViewer(appEl) {
     writeTourSeen(localStore, tourWho());
     $(root, ".wv-tour-open")?.classList.remove("is-unseen");
     renderTour();
+    // a roll-in under way goes back to wait for the tour to close
+    const back = mistsRollIn.tourOpened((it) => it.anim?.playState === "running");
+    if (back) { try { back.anim.cancel(); } catch { /* already gone */ } back.g.style.opacity = "0"; }
   }
   // THE GREETING IS FOR A RESIDENT, ONCE (Keemin, 2026-08-05) — overruled
   // 2026-08-12: the door opened to strangers, so a spectator is greeted EVERY
@@ -12635,6 +12690,9 @@ export function mountViewer(appEl) {
     const el = tourEl();
     if (el) el.hidden = true;
     $(root, ".wv-tour-open")?.focus?.();
+    // the session's first Mists, held for the tour, roll in now
+    const go = mistsRollIn.tourClosed();
+    if (go && go.g.isConnected && mapCtx) mistsRollInPlay(go);
   }
   function stepTour(action) {
     const next = tourStep(tourAt, action, TOUR_SLIDES.length);

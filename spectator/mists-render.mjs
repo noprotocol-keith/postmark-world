@@ -29,6 +29,9 @@ export const MISTS_PAINT = {
   reachM: [380, 900],    // how far the banks reach inward, at the first and the deepest veil
   cornerM: 600,          // the clear ground's corners, rounded into banks
   depthM: 1600,          // from the face to the core's full darkness
+  depthJagM: [-220, 620], // how far the darkness wanders from the face's own line (lighter, darker): its own noise, so the foot is never a ruled band
+  tongueM: 480,          // how far the short tongues reach in, at any veil: a noise that never saturates, so no stretch of the face runs straight (Darko 10-11)
+  tongueScaleM: 380,     // and their size
   softM: 50,             // a bank's own soft edge, inside the clear ground only
   pxM: 56,               // metres per baked pixel, upscaled smooth (the fog is soft; this keeps a phone's bake small)
   clearingPx: 320,       // a clearing's bake is at most this many pixels across (they are far off)
@@ -39,6 +42,7 @@ export const MISTS_PAINT = {
   frameInsetM: 260,      // how far over the painted sheet's own edge the fog reaches before its noise
   townMaxM: 2600,        // past this a mark is open country, not the town
   faceRampM: 80,         // the least band over which the wall's face rises inside the town's margin
+  faceJagM: 700,         // and how far beyond that it may reach, by noise, where the marks leave room
   faceClearM: 70,        // and no part of that band comes nearer a mark than this
   keepHaze: 0.06,        // the most any one layer may lay over the town (three of them: under 0.2)
   layers: [              // back to front: the back layer is the opaque one
@@ -116,11 +120,14 @@ export function mistsRenderAt(m, x, y, layer = 0, keep = null) {
   const dPaint = Math.max(paintDistance(m, x, y), dTrue, mistsFrameDistance(m, x, y));
   // the visible face, pushed inward by the noise and never outward (offset ≤ 0)
   // (two scales, the long banks and their tongues, stretched apart so the reach is uneven)
-  const v = smooth(0.32, 0.68, 0.65 * mistsFbm(x / L.scaleM, y / L.scaleM, L.seed) + 0.35 * mistsFbm(x * 4 / L.scaleM, y * 4 / L.scaleM, L.seed + 3));
-  const edge = -reach * (0.3 + 0.7 * v);
+  const v = smooth(0.25, 0.75, 0.65 * mistsFbm(x / L.scaleM, y / L.scaleM, L.seed) + 0.35 * mistsFbm(x * 4 / L.scaleM, y * 4 / L.scaleM, L.seed + 3));
+  // and short tongues that never saturate: the banks' term goes flat where its
+  // noise runs past either end, and a flat term over a straight face (the
+  // sheet's edge, the clear ground's side) was a ruled line (Darko 10-11)
+  const ts = MISTS_PAINT.tongueScaleM, tn = 0.72 * mistsFbm(x / ts, y / ts, L.seed + 5, 3) + 0.28 * mistsFbm(x * 2.6 / ts, y * 2.6 / ts, L.seed + 6, 2);
+  const tongue = MISTS_PAINT.tongueM * Math.max(0, Math.min(1, 0.5 + 1.8 * (tn - 0.5)));
+  const edge = -reach * (0.3 + 0.7 * v) - tongue;
   const e = dPaint - edge;   // ≥ reach·0.3 > softM wherever dTrue > 0
-  // depth, broken by the same banks: lighter tongues, darker gaps
-  const depth = Math.max(0, Math.min(1, smooth(0, MISTS_PAINT.depthM, e) + (v - 0.5) * 0.35 * (1 - smooth(0, MISTS_PAINT.depthM, e))));
   let bank = smooth(-MISTS_PAINT.softM, 0, e) * (layer === 0 ? 1 : L.alpha);
   if (layer === 0 && e >= 0) bank = 1;
   // the engine's fringe: haze over fringe_m on the clear side of the true face
@@ -136,14 +143,29 @@ export function mistsRenderAt(m, x, y, layer = 0, keep = null) {
   const k = keep ? keep(x, y) : 0;
   if (k > 0 && (layer > 0 || !(dTrue > 0))) alpha = Math.min(alpha, alpha + (MISTS_PAINT.keepHaze - alpha) * k);
   // where the town's margin meets the wall's face, the back layer does not step
-  // from haze to wall in a straight line: it rises over a ragged band, starting
-  // 80-128 m out from the face (the nearest mark to any face, 130 m, keeps more)
+  // from haze to wall in a straight line: a ragged bank stands out from the face
+  // into the room the marks leave (the nearest mark to any face, 130 m, keeps
+  // faceClearM of it). Its reach is a share of the room at the face, the point's
+  // own room plus its way back to the face, so it is not pinned to the room's
+  // line; two scales and no saturation, so it never runs straight (Darko 10-11).
+  let eDepth = e;
   if (layer === 0 && k > 0) {
     const room = (keep.dist ? keep.dist(x, y) : 0) - MISTS_PAINT.faceClearM;   // how far the nearest mark stands, less its clearance
-    const width = Math.min(MISTS_PAINT.faceRampM + 600 * smooth(0.35, 0.65, mistsFbm(x / 900, y / 900, 151, 3)), room);
-    if (width > 20) alpha = Math.max(alpha, smooth(-width, 0, dTrue));
+    const span = room + Math.max(0, -dTrue);   // the room at the face, about: never less than the point's own
+    const jag = 0.6 * mistsFbm(x / 900, y / 900, 151, 3) + 0.4 * mistsFbm(x / 260, y / 260, 157, 2);
+    // fog here only where it is short of the bank's reach, and the reach is never
+    // more than the span, so a point with no room of its own (room < 0) stays clear
+    const width = Math.min(span, MISTS_PAINT.faceRampM + Math.min(span - MISTS_PAINT.faceRampM, MISTS_PAINT.faceJagM) * Math.max(0, Math.min(1, (jag - 0.15) / 0.7)));
+    if (width > 20) alpha = Math.max(alpha, smooth(-width, -width + MISTS_PAINT.faceRampM * 0.75, dTrue));
+    // the fog here is lit from this face, not from the far one the margin hid
+    eDepth = e + (Math.min(e, dTrue + Math.max(0, width)) - e) * k;
   }
   if (layer === 0 && dTrue > 0) alpha = 1;
+  // depth, broken by the same banks (lighter tongues, darker gaps) and by its own
+  // noise, so the darkness does not follow the face in a ruled band
+  const [jl, jd] = MISTS_PAINT.depthJagM;
+  const s = smooth(0, MISTS_PAINT.depthM, eDepth + jl + (jd - jl) * mistsFbm(x / 800, y / 800, L.seed + 9, 3));
+  const depth = Math.max(0, Math.min(1, s + (v - 0.5) * 0.35 * (1 - s)));
   return { alpha, depth };
 }
 
@@ -167,12 +189,12 @@ export function mistsFrameDistance(m, x, y) {
 export function mistsBakeAt(m, layer, x, y, keep = null, far = mistsBakeFar(m, layer)) {
   const dT = mistsTrueDistance(m, x, y);
   if (Math.max(dT, mistsFrameDistance(m, x, y)) < -far) return { alpha: 0, depth: 0 };
-  if (dT >= MISTS_PAINT.depthM) return { alpha: layer === 0 ? 1 : MISTS_PAINT.layers[layer].alpha, depth: 1 };
+  if (dT >= MISTS_PAINT.depthM - MISTS_PAINT.depthJagM[0]) return { alpha: layer === 0 ? 1 : MISTS_PAINT.layers[layer].alpha, depth: 1 };
   return mistsRenderAt(m, x, y, layer, keep);
 }
 /** How far into the clear ground a layer's paint can reach (the bake's skip). */
 export function mistsBakeFar(m, layer) {
-  return mistsReachM(m) * MISTS_PAINT.layers[layer].reach + (m.fringeM || 0) + MISTS_PAINT.softM;
+  return mistsReachM(m) * MISTS_PAINT.layers[layer].reach + MISTS_PAINT.tongueM + (m.fringeM || 0) + MISTS_PAINT.softM;
 }
 
 // ── the town's keep-out ─────────────────────────────────────────────────────
@@ -207,8 +229,9 @@ export function mistsKeepRects(marks, clearings = []) {
 /** How kept-clear a point is, 0..1: 1 within a mark's margin less the soft
  *  band, 0 outside every rectangle. Pure (the tests' instrument); the bake uses
  *  a raster of the same rule. */
-// two scales stretched apart (as the banks' edge is), so the margin's edge wanders well clear of a straight line
-const keepWobble = (x, y) => MISTS_PAINT.keepNoiseM * smooth(0.4, 0.6, 0.6 * mistsFbm(x / 650, y / 650, 71, 3) + 0.4 * mistsFbm(x / 210, y / 210, 73, 2));
+// two scales stretched apart (as the banks' edge is), so the margin's edge wanders well clear of a straight line;
+// stretched only so far that it seldom saturates (a saturated wobble is a flat margin: a ruled edge, Darko 10-11)
+const keepWobble = (x, y) => MISTS_PAINT.keepNoiseM * Math.max(0, Math.min(1, 0.5 + 2.4 * (0.45 * mistsFbm(x / 650, y / 650, 71, 3) + 0.55 * mistsFbm(x / 190, y / 190, 73, 2) - 0.5)));
 const KEEP_CELL = 1000;
 export function mistsKeepAt(rects) {
   const soft = MISTS_PAINT.keepSoftM, pad = MISTS_PAINT.keepNoiseM;
@@ -378,9 +401,10 @@ export function mistsCreatures(m, { first = 244, keep = null } = {}) {
   const apart = (x, y, size) => out.every((o) => Math.hypot(o.x - x, o.y - y) > (o.sizeM + size) * 0.75);
   const place = (kind, dIn, dOut, extra) => {
     for (let tries = 0; tries < 60; tries++) {
-      const p = onBand(dIn, dOut), size = C.sizeM[kind] * (0.8 + 0.4 * r());
-      if (!clearOfTown(p.x, p.y, size) || !apart(p.x, p.y, size)) continue;
-      const cr = { kind, x: Math.round(p.x), y: Math.round(p.y), sizeM: Math.round(size), flip: r() < 0.5, phase: +r().toFixed(3), ...extra() };
+      // judged where it is drawn (whole metres), so a margin's edge never falls between the two
+      const p = onBand(dIn, dOut), x = Math.round(p.x), y = Math.round(p.y), size = Math.round(C.sizeM[kind] * (0.8 + 0.4 * r()));
+      if (!clearOfTown(x, y, size) || !apart(x, y, size)) continue;
+      const cr = { kind, x, y, sizeM: size, flip: r() < 0.5, phase: +r().toFixed(3), ...extra() };
       out.push(cr);
       return cr;
     }
@@ -396,9 +420,9 @@ export function mistsCreatures(m, { first = 244, keep = null } = {}) {
     if (!lead || r() >= 0.45) continue;
     // a three: two more close by, if they too stand clear of the town
     for (const [dx, dy] of [[1.6, -0.7], [-1.3, 0.9]]) {
-      const x = lead.x + dx * lead.sizeM, y = lead.y + dy * lead.sizeM;
+      const x = Math.round(lead.x + dx * lead.sizeM), y = Math.round(lead.y + dy * lead.sizeM), size = Math.round(lead.sizeM * 0.8);
       const dd = mistsTrueDistance(m, x, y);
-      if (dd >= -reach * 0.8 && dd <= 220 && clearOfTown(x, y, lead.sizeM * 0.8)) out.push({ ...lead, x: Math.round(x), y: Math.round(y), sizeM: Math.round(lead.sizeM * 0.8), phase: +r().toFixed(3) });
+      if (dd >= -reach * 0.8 && dd <= 220 && clearOfTown(x, y, size)) out.push({ ...lead, x, y, sizeM: size, phase: +r().toFixed(3) });
     }
   }
   return out;
@@ -500,28 +524,35 @@ export function ringBell(ctx, dest, when, bell) {
 // opaque at the sheet's edge and gone sheetFeatherM inside it. It lies on the
 // sheet's ground, under the regions and their art, so nothing a resident made
 // is cut by it.
-export const MISTS_SHEET = { featherM: 560, wobbleM: 420, pxM: 90 };   // the feather is soft: a coarse bake, upscaled smooth
+export const MISTS_SHEET = { featherM: 560, wobbleM: 420, pxM: 60 };   // the feather is soft: a coarse bake, upscaled smooth (fine enough for its shortest wobble)
 /** How much of the open country covers the sheet at a point, 0..1. Pure. */
 export function mistsSheetFeatherAt(frame, x, y) {
-  const wob = 0.65 * mistsFbm(x / 2200, y / 2200, 97, 3) + 0.35 * mistsFbm(x / 600, y / 600, 131, 2);
-  const d = sdBox(x, y, frame) + MISTS_SHEET.wobbleM * (wob - 0.5) * 2.4;
+  // three scales, the shortest unsaturated, so its line never runs straight over the sea (Darko 10-11)
+  const wob = 0.45 * mistsFbm(x / 1600, y / 1600, 97, 3) + 0.35 * mistsFbm(x / 480, y / 480, 131, 2) + 0.2 * mistsFbm(x / 170, y / 170, 137, 2);
+  // the wobble only ever moves the feather inward, so it is whole at the sheet's
+  // own edge everywhere (a feather thin there showed the edge as a ruled seam)
+  const d = sdBox(x, y, frame) + MISTS_SHEET.wobbleM * (1 + Math.max(-1, Math.min(1, (wob - 0.5) * 3.2)));
   return smooth(-MISTS_SHEET.featherM, 0, d);
 }
 /** The feather baked over the sheet's border, in the open country's colour. */
-export function bakeSheetFeather(frame, colour, { canvas = null, pxM = MISTS_SHEET.pxM } = {}) {
+/** `invert`: the same feather as a mask, white where the sheet shows (alpha
+ *  1 - feather), for the sheet-sized washes drawn over the record's ground. */
+export function bakeSheetFeather(frame, colour, { canvas = null, pxM = MISTS_SHEET.pxM, invert = false } = {}) {
   const pad = MISTS_SHEET.wobbleM + 2 * pxM;
   const box = { minX: frame.minX - pad, minY: frame.minY - pad, maxX: frame.maxX + pad, maxY: frame.maxY + pad };
   const w = Math.ceil((box.maxX - box.minX) / pxM), h = Math.ceil((box.maxY - box.minY) / pxM);
   const cv = canvas ?? Object.assign(document.createElement("canvas"), { width: w, height: h });
   cv.width = w; cv.height = h;
   const ctx = cv.getContext("2d"), img = ctx.createImageData(w, h), px = img.data, [r, g, b] = rgbOf(colour);
-  const inner = MISTS_SHEET.featherM + MISTS_SHEET.wobbleM + pxM;
+  const inner = MISTS_SHEET.featherM + 2 * MISTS_SHEET.wobbleM + pxM;
   for (let j = 0; j < h; j++) {
     const y = box.minY + (j + 0.5) * pxM;
     for (let i = 0; i < w; i++) {
       const x = box.minX + (i + 0.5) * pxM, o = (j * w + i) * 4;
-      if (sdBox(x, y, frame) < -inner) continue;   // deep inside the sheet: nothing
-      px[o] = r; px[o + 1] = g; px[o + 2] = b; px[o + 3] = Math.round(255 * mistsSheetFeatherAt(frame, x, y));
+      const f = sdBox(x, y, frame) < -inner ? 0 : mistsSheetFeatherAt(frame, x, y);   // deep inside the sheet: nothing
+      if (invert) { px[o] = px[o + 1] = px[o + 2] = 255; px[o + 3] = Math.round(255 * (1 - f)); continue; }
+      if (!f) continue;
+      px[o] = r; px[o + 1] = g; px[o + 2] = b; px[o + 3] = Math.round(255 * f);
     }
   }
   ctx.putImageData(img, 0, 0);
