@@ -63,17 +63,30 @@
 //              word on a mark no younger than the parcel is ignored, because the
 //              holders of the OLDER mark are the ones who speak on a newcomer,
 //              never the reverse. Age is the FIRST-LAID instant on both sides,
-//              never an amend's date (Darko, 2026-10-07, POS-449). And it never reaches the town's own marks,
-//              whatever their date: the town alone is sovereign over the parcel
-//              (LOGOS the-response-function § residents: the word is for every
-//              SUB-constitutional edge into their ground). The lint names both.
+//              never an amend's date (Darko, 2026-10-07, POS-449). And it never
+//              reaches the town's own marks, whatever their date: the town alone
+//              is sovereign over the parcel (LOGOS the-response-function §
+//              residents: the word is for every SUB-constitutional edge into
+//              their ground). The lint names both.
 //
-//              ON COMMONS TREE EDGES it is EARNED (§9.2's own arithmetic):
+//              IN THE MARKET it is EARNED, by density (§9.2's own arithmetic):
 //                  child_eff = child_own − parent_density
-//              and the child is returned only if that falls to zero or below. A
-//              strongly-backed parent can veto a weak child; an unstaked parent's
-//              veto moves nothing at all. Influence is proportional to backing,
-//              so a veto has to be earned rather than merely asserted.
+//              and the newcomer is returned only if that falls to zero or below.
+//              A strongly-backed senior can veto a weak newcomer; an unstaked
+//              senior's veto moves nothing at all. Influence is proportional to
+//              backing, so a veto has to be earned rather than merely asserted.
+//
+//              WHO HOLDS THE WORD is SENIORITY AT CONTACT, never containment
+//              (LOGOS conflict-matrix § Roles from seniority, RULED 2026-10-04,
+//              POS-369): contact is geometric (the two marks' true shapes
+//              overlap), seniority is temporal (first laid strictly earlier, by
+//              claim-instant.mjs), and the senior at contact holds the word over
+//              the newcomer. So a later mark drawn over an earlier one has no
+//              word on it, however big or dense; the earlier one may oppose the
+//              later, whichever contains which; and a partial overlap gets a role
+//              that containment never assigned. A mark with no extent of its own
+//              (a predicate, a name) touches only its declared parent, so that
+//              edge is its contact.
 //
 // ── RETURNED, NOT DROPPED ────────────────────────────────────────────────────
 //
@@ -137,6 +150,7 @@
 //              declared neutral.
 
 import { claimInstant } from "./claim-instant.mjs";
+import { COVERAGE_CELL_M, coverage, isIrregular, marksOverlapArea, pointInPolygon, pointInRect, polygonOf } from "./geometry.mjs";
 
 export const CONSENT_FIELD = "consent";
 export const CONSENT_WORDS = new Set(["opposed", "welcomed"]);
@@ -170,6 +184,71 @@ export function cameAfter(target, parcelMk) {
   return Number.isFinite(tt) && Number.isFinite(tp) && tt > tp;
 }
 
+// SENIORITY AT CONTACT (conflict-matrix § Roles from seniority, RULED
+// 2026-10-04): does `grantor` hold the word over `target`? Contact is geometric:
+// two marks with extent touch where their true shapes overlap (rings honoured,
+// geometry.mjs § marksOverlapArea), and a mark with no extent of its own touches
+// only the parent it declares. Seniority is temporal: the grantor was first laid
+// strictly before the target, by the same reading as a parcel's reach (a twin
+// instant, or a date that proves nothing, gives neither a word). A parcel is
+// neither side: its holder's word is its own law above, and over a parcel the
+// town alone is sovereign. Shared with the lint so both answer the same.
+export function seniorAtContact(grantor, target) {
+  if (!grantor || !target || grantor.kind === "parcel" || target.kind === "parcel") return false;
+  return inContact(grantor, target) && cameAfter(target, grantor);
+}
+/** Contact alone, the geometric half of § seniorAtContact (the lint tells the two refusals apart). */
+export function inContact(grantor, target) {
+  if (!grantor?.at || !target) return false;                        // no extent, no ground to speak from
+  return target.at ? marksOverlapArea(grantor, target) > 0 : target.parent === grantor.id;
+}
+
+// THE NEWCOMER'S MOST CONTESTED CELL among its opposing seniors: where the most
+// density stands against it. Multiple incumbents compose, each lending its own
+// density on the ground it shares (conflict-matrix § Roles from seniority), so
+// on a cell two opposers both cover, the two densities add. One opposer is its
+// own density. Several are summed cell by cell: over the grid their rect edges
+// cut inside the newcomer, or over the newcomer's coverage cells when anyone
+// carries a true shape (geometry.mjs's 5 m cells, as marksOverlapArea counts).
+// Never below the strongest single opposer, which touches the newcomer by
+// construction. → { density, ids } (ids: the opposers standing on that cell)
+function strongestShared(newcomer, opposing, rectOf) {
+  const single = opposing.reduce((a, b) => (b.density > a.density ? b : a));
+  let best = { density: single.density, ids: [single.id] };
+  if (opposing.length === 1) return best;
+  const coversOf = (mk) => {
+    const ring = polygonOf(mk), r = rectOf(mk);
+    return ring ? (x, y) => pointInPolygon(x, y, ring) : (x, y) => pointInRect(x, y, r);
+  };
+  const tests = opposing.map((o) => ({ o, at: coversOf(o.mk) }));
+  const inNewcomer = coversOf(newcomer);
+  const consider = (x, y) => {
+    if (!inNewcomer(x, y)) return;
+    const here = tests.filter((t) => t.at(x, y));
+    const d = here.reduce((n, t) => n + t.o.density, 0);
+    if (d > best.density) best = { density: d, ids: here.map((t) => t.o.id) };
+  };
+  const irregular = isIrregular(newcomer) || opposing.some((o) => isIrregular(o.mk));
+  const cells = irregular ? coverage(newcomer) : null;
+  if (cells) {
+    const mid = (i) => (i + 0.5) * COVERAGE_CELL_M;
+    for (const k of cells) { const [cx, cy] = k.split(",").map(Number); consider(mid(cx), mid(cy)); }
+    return best;
+  }
+  const r = rectOf(newcomer);
+  const [x0, x1, y0, y1] = [r.x - r.w / 2, r.x + r.w / 2, r.y - r.h / 2, r.y + r.h / 2];
+  const xs = new Set([x0, x1]), ys = new Set([y0, y1]);
+  for (const o of opposing) {
+    const q = rectOf(o.mk);
+    for (const x of [q.x - q.w / 2, q.x + q.w / 2]) if (x > x0 && x < x1) xs.add(x);
+    for (const y of [q.y - q.h / 2, q.y + q.h / 2]) if (y > y0 && y < y1) ys.add(y);
+  }
+  const sx = [...xs].sort((a, b) => a - b), sy = [...ys].sort((a, b) => a - b);
+  for (let i = 0; i + 1 < sx.length; i++)
+    for (let j = 0; j + 1 < sy.length; j++) consider((sx[i] + sx[i + 1]) / 2, (sy[j] + sy[j + 1]) / 2);
+  return best;
+}
+
 const areaOf = (r) => Math.max((r?.w ?? 1) * (r?.h ?? 1), 1e-9);
 const overlapsRect = (a, b) => {
   const dx = Math.min(a.x + a.w / 2, b.x + b.w / 2) - Math.max(a.x - a.w / 2, b.x - b.w / 2);
@@ -184,7 +263,9 @@ const overlapsRect = (a, b) => {
  *   credOf    (handle) -> credential household key
  *   parcels   [{ id, household, _r }]  — the admitted parcels, as the fold builds them
  *   ownStamps Map(id -> own escrow on that mark)
- *   parentOf  Map(childId -> parentId)  — the computed containment edges
+ *   parentOf  Map(childId -> parentId)  — the computed containment edges: the
+ *             subtree a return walks and the fan-up tree. Who holds a word is
+ *             NOT read off it (§ seniorAtContact)
  *   rectOf    (mark) -> {x,y,w,h}
  *   townWords Map(id -> "neutral" | "opposed") or a plain object; optional —
  *             the town's standing word per mark (see § THE TOWN'S WORD)
@@ -240,37 +321,60 @@ export function resolveConsent({ byId, credOf, parcels, ownStamps, parentOf, rec
     }
   }
 
-  // ---- the commons tree edge ----
-  const edgeVeto = new Map();       // childId -> { parent, grantor, child_own, parent_density, child_eff }
-  for (const [child, parent] of parentOf) {
-    const word = words.get(wordKey(parent, child));
-    if (!word) continue;
-    const c = byId.get(child), p = byId.get(parent);
-    if (!c || !p) continue;
-    if (credOfMark(c) === credOfMark(p)) continue;          // structural +1 already; a word here is ignored (the lint warns)
-    if (word === "welcomed") { kept.add(child); continue; }
+  // ---- the market: the senior at contact holds the word, by density ----
+  // Every authored word, wherever it is filed, asks one question first: does its
+  // grantor hold the word over its target (§ seniorAtContact)? Containment is not
+  // asked. A later mark drawn over an earlier one is no grantor of it, so its
+  // word, welcomed or opposed, does nothing; the earlier one's word counts on the
+  // later one whichever contains which. Parcels answer their own law above.
+  const opposersOf = new Map();     // targetId -> [grantorId]
+  for (const [key, word] of words) {
+    const [g, t] = key.split("\0");
+    const gm = byId.get(g), tm = byId.get(t);
+    if (!gm || !tm) continue;                               // the lint warns; the fold does not invent a mark
+    if (credOfMark(gm) === credOfMark(tm)) continue;        // structural +1 already; a word here is ignored (the lint warns)
+    if (!seniorAtContact(gm, tm)) continue;                 // no contact, or a newcomer's word on what stood there first
+    if (word === "welcomed") { kept.add(t); continue; }
+    if (!opposersOf.has(t)) opposersOf.set(t, []);
+    opposersOf.get(t).push(g);
+  }
 
+  const edgeVeto = new Map();       // childId -> { parent, grantor, child_own, parent_density, child_eff, opposers? }
+  for (const [child, grantors] of opposersOf) {
+    const c = byId.get(child);
     // §9.2's arithmetic, in densities, which is the unit §9.2 argues in
     // throughout ("a mark defends each cell it covers at effective-stamps/area").
-    // The parent's strength is its OWN stamps, never its fan-up total: fan-up
-    // would include the very child being vetoed, and the ruling is explicit that
-    // an UNSTAKED parent's veto moves nothing.
-    //
-    // A predicated child has no extent of its own — it is its parent continued —
-    // so it spreads over the parent's area, and the comparison reduces to the
-    // plain one: does the child carry more stamps than the parent does.
-    const parentArea = areaOf(rectOf(p));
-    const childArea = c.at ? areaOf(rectOf(c)) : parentArea;
-    const childOwn = own(child) / childArea;
-    const parentDensity = own(parent) / parentArea;
-    const childEff = childOwn - parentDensity;
-    // `an unstaked parent's veto moves nothing` is its own clause, not a
+    // A senior's strength is its OWN stamps, never its fan-up total: fan-up
+    // would include the very mark being vetoed, and the ruling is explicit that
+    // an UNSTAKED parent's veto moves nothing. That clause is its own, not a
     // consequence of the arithmetic: with nobody backing either side the
-    // subtraction lands on exactly 0, and `≤ 0` would return the child on the
-    // strength of a parent who has staked nothing at all. The veto has to be
-    // EARNED, so an unbacked parent's word is simply a word.
-    if (parentDensity > 0 && childEff <= 0)
-      edgeVeto.set(child, { parent, grantor: p.household, child_own: childOwn, parent_density: parentDensity, child_eff: childEff });
+    // subtraction lands on exactly 0, and `≤ 0` would return the newcomer on
+    // the strength of a senior who has staked nothing at all. So an unbacked
+    // senior's word is simply a word, and lends nothing to the others.
+    const opposing = grantors
+      .map((g) => ({ id: g, mk: byId.get(g), density: own(g) / areaOf(rectOf(byId.get(g))) }))
+      .filter((o) => o.density > 0)
+      .sort((a, b) => (a.id < b.id ? -1 : 1));
+    if (!opposing.length) continue;
+    // A predicated child has no extent of its own — it is its parent continued —
+    // so it spreads over its parent's area (its one possible senior), and the
+    // comparison reduces to the plain one: does the child carry more stamps than
+    // the parent does.
+    const childArea = c.at ? areaOf(rectOf(c)) : areaOf(rectOf(opposing[0].mk));
+    const childOwn = own(child) / childArea;
+    // MULTIPLE INCUMBENTS COMPOSE, each lending its density on the ground it
+    // shares, PER CELL (conflict-matrix: "whoever first covered a cell is that
+    // cell's incumbent"). The newcomer is weighed on its most contested cell.
+    const strongest = c.at ? strongestShared(c, opposing, rectOf) : { density: opposing[0].density, ids: [opposing[0].id] };
+    const childEff = childOwn - strongest.density;
+    if (childEff <= 0) {
+      const lead = strongest.ids[0];
+      edgeVeto.set(child, {
+        parent: lead, grantor: byId.get(lead)?.household ?? null,
+        child_own: childOwn, parent_density: strongest.density, child_eff: childEff,
+        ...(strongest.ids.length > 1 ? { opposers: strongest.ids } : {}),
+      });
+    }
   }
 
   // ---- the town's word: infinite backing, in the veto comparison only ----
@@ -340,7 +444,7 @@ export function resolveConsent({ byId, credOf, parcels, ownStamps, parentOf, rec
     ...[...townVeto].map((id) => ({ id, kind: "town", ground: TOWN, grantor: TOWN, detail: null })),
     ...[...parcelVeto].map(([id, v]) => ({ id, kind: "parcel", ground: v.parcel, grantor: v.grantor, detail: null })),
     ...[...edgeVeto].map(([id, v]) => ({ id, kind: "commons", ground: v.parent, grantor: v.grantor,
-      detail: { child_own: v.child_own, parent_density: v.parent_density, child_eff: v.child_eff } })),
+      detail: { child_own: v.child_own, parent_density: v.parent_density, child_eff: v.child_eff, ...(v.opposers ? { opposers: v.opposers } : {}) } })),
   ].sort((a, b) => (a.id < b.id ? -1 : 1));
 
   for (const v of vetoed) {
@@ -373,7 +477,9 @@ export function resolveConsent({ byId, credOf, parcels, ownStamps, parentOf, rec
     const p = byId.get(parentId), c = byId.get(childId);
     if (!p || !c) return "none";
     if (credOfMark(p) === credOfMark(c)) return "structural";
-    const w = words.get(wordKey(parentId, childId));
+    // a cross-household word counts only from the senior at contact: a later
+    // parent's welcome lends it nothing (conflict-matrix § Roles from seniority)
+    const w = seniorAtContact(p, c) ? words.get(wordKey(parentId, childId)) : undefined;
     if (w === "welcomed") return "welcomed";
     if (w === "opposed") return "opposed";
     return "neutral";
