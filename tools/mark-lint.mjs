@@ -750,11 +750,11 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
       const container = containedBy.get(t.id) ?? null;
       const opposes = word === "opposed";
       if (!isParcel && opposes && !inContact(rec, t) && container !== rec.id) {
-        err(rec, `${CONSENT_FIELD}: "${target}" does not touch this mark and this is not a parcel — you may oppose on your own parcel's ground, or a mark that overlaps your own, and nothing else${cite("the-town/the-own-hand")}`);
+        err(rec, `${CONSENT_FIELD}: "${target}" does not touch this mark and this is not a parcel — you may speak for your own parcel's ground, or for a mark that overlaps your own, and for nothing else${cite("the-town/the-own-hand")}`);
         continue;
       }
       if (!isParcel && !opposes && container !== rec.id) {
-        err(rec, `${CONSENT_FIELD}: "${target}" is not inside this mark and this is not a parcel — you may welcome onto your own parcel's ground, or what stands inside your own mark, and nothing else${cite("the-town/the-own-hand")}`);
+        err(rec, `${CONSENT_FIELD}: "${target}" is not inside this mark and this is not a parcel — you may speak for your own parcel's ground, or for what stands inside your own mark, and for nothing else${cite("the-town/the-own-hand")}`);
         continue;
       }
       if (credOf(t.household) === credOf(rec.household)) {
