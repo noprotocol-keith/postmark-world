@@ -38,6 +38,7 @@ import { parseEnterExitLedger, occupancyAt, occupantsOf, withinOf, isMark, isEnt
 // is not allowed to hold one, and `tools/record-sources.test.mjs` reads these
 // bytes to prove it.
 import { recordSources, recordAbsenceMessage } from "../tools/record-sources.mjs";
+import { MISTS_PAINT, bakeSheetFeather, mistsBakePlan, mistsBaker, mistsKeepRasterBuilder, mistsCoreHex, mistsKeepRects, mistsKeepAt, mistsCreatures, mistsCreatureSVG, bellFor, ringBell } from "./mists-render.mjs";
 // THE PARCEL'S COLUMN — the atlas's right-hand panel, back (Keemin 2026-09-11).
 // It owns its own markdown reader, its own builder and its own dress, and it
 // takes no viewer internals: the door read, the shelf gate and the handle rule
@@ -3912,7 +3913,12 @@ export function mistBandSVG({ from, to, banks = MIST_BANKS, id = "wv-mist" } = {
 // Geometry only, laid down once per crossing (static gradients, no filter), for
 // the same reason the open water is: panning must cost nothing. `m` null (no
 // Mists this crossing) draws nothing at all.
-const MISTS_INK = "#b7bec8";
+const MISTS_INK_FLAT = "#b7bec8";
+const mistsBaked = new Map();          // a crossing's baked paint, kept while it is on screen
+const mistsOnce = new Set();           // sessionStorage's stand-in when storage is shut
+const mistsBaking = new Set();         // crossings whose paint is being baked
+let mistsFeather = null;               // the sheet's feathered edge, baked once
+const mistsBellState = { ctx: null, out: null, rung: false, armed: false };
 const MISTS_FAR_M = 200000;    // the wall runs out past anything the camera can reach
 export function mistsVeilSVG(m, { originPx, mPerPx }) {
   if (!m || !(m.veil > 0)) return "";
@@ -3920,8 +3926,12 @@ export function mistsVeilSVG(m, { originPx, mPerPx }) {
   return `<rect class="wv-mists-veil" data-src="mists:veil" aria-hidden="true" x="${n(originPx.x - r)}" y="${n(originPx.y - r)}"`
     + ` width="${n(2 * r)}" height="${n(2 * r)}" fill="#060d18" fill-opacity="${(0.6 * m.veil).toFixed(3)}" pointer-events="none"/>`;
 }
-export function mistsWallSVG(m, { originPx, mPerPx, id = "wv-mists" }) {
+export function mistsWallSVG(m, { originPx, mPerPx, id = "wv-mists", painted = false }) {
   if (!m) return "";
+  // PAINTED (POS-553): the wall keeps its exact geometry and its pointer, in the
+  // paint's core colour; the fringe and the clearings' rings are the paint's
+  // (mists-render.mjs), so the vector strips stand down.
+  const MISTS_INK = painted ? mistsCoreHex(m) : MISTS_INK_FLAT;
   const px = (p) => ({ x: originPx.x + p.x / mPerPx, y: originPx.y + p.y / mPerPx });
   const n = (v) => v.toFixed(1);
   const a = px({ x: m.clear.minX, y: m.clear.minY }), b = px({ x: m.clear.maxX, y: m.clear.maxY });
@@ -3944,6 +3954,7 @@ export function mistsWallSVG(m, { originPx, mPerPx, id = "wv-mists" }) {
   }).join("");
   // the fringe: four soft strips on the map side, each fading inward from the wall
   const f = Math.min(m.fringeM / mPerPx, (b.x - a.x) / 2, (b.y - a.y) / 2);
+  if (painted) return `<g class="wv-mists" aria-hidden="true">${wall}</g>`;
   if (!(f > 0) || !(m.density > 0) || !(b.x > a.x) || !(b.y > a.y)) return `<g class="wv-mists" aria-hidden="true">${rings}${wall}</g>`;
   const op = Math.min(1, m.density).toFixed(3);
   const grad = (side, x1, y1, x2, y2) => `<linearGradient id="${id}-${side}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">`
@@ -4964,6 +4975,15 @@ const STYLE = `
 .wv-main { --rail:212px; display:grid; grid-template-columns:var(--rail) 33rem minmax(0,1fr);
   gap:0; align-items:start; transition:grid-template-columns .3s cubic-bezier(.4,0,.2,1); }
 @media (prefers-reduced-motion:reduce){ .wv-main { transition:none; } }
+.wv-mists-drift { animation:wv-mists-drift 60s ease-in-out infinite alternate; }
+@keyframes wv-mists-drift { from { transform:translate(calc(var(--wv-dx) * -1), calc(var(--wv-dy) * -1)); } to { transform:translate(var(--wv-dx), var(--wv-dy)); } }
+.wv-mc-flit { animation:wv-mc-flit 4.2s ease-in-out infinite alternate; }
+@keyframes wv-mc-flit { 0% { transform:translate(-14px,4px) rotate(-6deg); } 50% { transform:translate(6px,-8px) rotate(5deg); } 100% { transform:translate(16px,3px) rotate(-3deg); } }
+.wv-mc-lift { animation:wv-mc-lift 9s ease-in-out infinite alternate; }
+@keyframes wv-mc-lift { from { transform:translate(-10px,6px); } to { transform:translate(14px,-12px); } }
+.wv-mc-eyes { animation:wv-mc-blink 9s steps(1,end) infinite; }
+@keyframes wv-mc-blink { 0%, 46%, 50%, 100% { opacity:1; } 47% { opacity:0; } 90% { opacity:.35; } }
+@media (prefers-reduced-motion:reduce){ .wv-mists-drift, .wv-mc-flit, .wv-mc-lift, .wv-mc-eyes { animation:none; } }
 .wv-main.no-map { grid-template-columns:var(--rail) minmax(0,1fr); }
 @media (max-width:1160px){ .wv-main,.wv-main.no-map { grid-template-columns:var(--rail) minmax(0,1fr); }
   .wv-map { grid-column:1 / -1; border-top:1px solid var(--line); } .wv-map .wv-sticky { position:static; } }
@@ -7770,6 +7790,9 @@ export function mountViewer(appEl) {
     boxEl.appendChild(townKeep.svg);
     reattach();
     mapCtx = townKeep.ctx;
+    // the Mists drawn afresh on the way out, from the baked cache (a bake that
+    // finished while we were inside could not paint them)
+    mapCtx.mistsKey = null;
     boxEl.classList.add("pannable");
     mapCtx.refit();          // the pane may have changed shape while we were inside
     mapCtx.settleFrame?.();
@@ -9811,7 +9834,194 @@ export function mountViewer(appEl) {
     if (mapCtx.mistsKey === key) return;
     mapCtx.mistsKey = key;
     mapCtx.veilLayer.innerHTML = mistsVeilSVG(m, mapCtx);
-    mapCtx.mistsLayer.innerHTML = mistsWallSVG(m, mapCtx);
+    mapCtx.mistsLayer.innerHTML = mistsWallSVG(m, { ...mapCtx, painted: true });
+    paintMists(m);
+  }
+
+  // THE MISTS, PAINTED (POS-553). Over the vector wall: the baked banks and
+  // wisps (mists-render.mjs), one canvas per layer per crossing, kept as images
+  // in the painting's own frame so panning costs nothing, the weather layers
+  // drifting slowly on their own (held still under reduced motion). On the first
+  // Mists of a browser session, at the live crossing (never one dialled ahead),
+  // they roll in from the edges and the bell is armed.
+  function paintMists(m) {
+    const bellBtn = root.querySelector(".wv-bell");
+    if (!m) { if (bellBtn) bellBtn.hidden = true; mapCtx?.svg?.querySelector(".wv-sheet-feather")?.remove(); return; }
+    // the town the paint keeps clear: every sited mark the world holds (the
+    // whole fold, not the resident path's ground set)
+    const keepMarks = data?.worldState?.marks ?? allMarks();
+    // the painted sheet's own rectangle, in metres: the fog stands past it too
+    const { originPx: o0, mPerPx: s0, full: fv0 } = mapCtx;
+    const frame = fv0 ? { minX: (fv0.x - o0.x) * s0, minY: (fv0.y - o0.y) * s0, maxX: (fv0.x + fv0.w - o0.x) * s0, maxY: (fv0.y + fv0.h - o0.y) * s0 } : null;
+    const drawn = m;
+    m = frame ? { ...m, frame } : m;
+    // the sheet's straight edge, feathered into the open country (under the record)
+    if (frame) setTimeout(() => { if (mapCtx) paintSheetFeather(frame); }, 0);   // its own task, after the wall
+    const key = JSON.stringify(m) + "|" + (keepMarks?.length ?? 0);
+    const baked = mistsBaked.get(key);
+    // not baked yet: bake it a piece at a time between frames (the vector wall
+    // already stands), then paint, if this crossing is still the one on screen
+    if (!baked) { bakeMists(m, key, mistsKeepRects(keepMarks, drawn.clearings), JSON.stringify(drawn)); mistsBellButton(drawn); return; }
+    const { originPx, mPerPx } = mapCtx, n = (v) => v.toFixed(1);
+    let html = "";
+    // the creatures, in the back layer's banks (so the front layers veil them)
+    const firstMists = data?.skeleton?.mists?.schedule?.[0]?.crossing;
+    const ink = mistsCoreHex(m);
+    const creatures = mistsCreatures(m, { first: firstMists, keep: mistsKeepAt(mistsKeepRects(keepMarks, drawn.clearings)) })
+      .map((cr) => mistsCreatureSVG(cr, { originPx, mPerPx, ink })).join("");
+    MISTS_PAINT.layers.forEach((L, li) => {
+      const d = L.driftM / mPerPx;
+      html += `<g class="wv-mists-drift" style="--wv-dx:${n(d)}px;--wv-dy:${n(d * 0.45)}px;animation-duration:${L.driftS}s">`
+        + baked.filter((b) => b.li === li).map((b) => `<image href="${b.url}" x="${n(originPx.x + b.box.minX / mPerPx)}" y="${n(originPx.y + b.box.minY / mPerPx)}"`
+          + ` width="${n(b.w / mPerPx)}" height="${n(b.h / mPerPx)}" preserveAspectRatio="none"/>`).join("")
+        + (li === 0 ? `<g class="wv-mists-creatures">${creatures}</g>` : "") + `</g>`;
+    });
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.setAttribute("class", "wv-mists-paint"); g.setAttribute("pointer-events", "none"); g.setAttribute("aria-hidden", "true");
+    g.innerHTML = html;
+    mapCtx.mistsLayer.appendChild(g);
+    // the roll-in and the bell belong to the live crossing: dialling ahead shows
+    // the paint (as it shows the wall) but neither spends the session's roll-in
+    // nor rings the bell
+    if (state.crossing <= liveCrossing()) mistsIntro(m, g);
+    mistsBellButton(m);
+  }
+  function bakeMists(m, key, keepRects, drawnKey) {
+    if (mistsBaking.has(key)) return;
+    mistsBaking.add(key);
+    const plan = mistsBakePlan(m), out = [], rasters = new Map();
+    let baker = null, rows = 2, rasterJob = null, per = 2;
+    // every slice is timed and sized to stay near 6 ms (starting small, growing at
+    // most twofold a slice), so a slow phone keeps its frames
+    const timed = (fn, n, set) => { const t = performance.now(); const more = fn(n); const ms = performance.now() - t; set(Math.max(1, Math.min(400, Math.round(n * Math.min(2, ms > 0 ? 6 / ms : 2))))); return more; };
+    const quit = () => { mistsBaking.delete(key); for (const b of out) if (b.url.startsWith("blob:")) URL.revokeObjectURL(b.url); };
+    // the town's own scene: a room visit mounts another, and the bake carries on
+    const town = mapCtx;
+    const step = () => {
+      // the town has moved on to another crossing: stop, so a scrubbed dial never
+      // queues one bake per crossing it passed
+      if (town?.mistsKey !== drawnKey) { quit(); return; }
+      try { stepOnce(); } catch { quit(); }   // e.g. a null 2d context: free the key, so a later draw retries
+    };
+    const stepOnce = () => {
+      const p = plan[out.length];
+      const rk = p.box.minX + "," + p.box.minY + "," + p.pxM;
+      if (!rasters.has(rk)) {
+        rasterJob = rasterJob ?? mistsKeepRasterBuilder(keepRects, p.box, p.pxM);
+        if (timed((n) => rasterJob.next(n), per, (n) => { per = n; })) { setTimeout(step, 0); return; }
+        rasters.set(rk, rasterJob.raster); rasterJob = null;
+      }
+      baker = baker ?? mistsBaker(m, p.li, p.box, { pxM: p.pxM, keepRaster: rasters.get(rk), canvas: document.createElement("canvas") });
+      // a slice of rows, sized to stay near 8 ms, so a phone keeps its frames
+      if (timed((n) => baker.next(n), rows, (n) => { rows = n; })) { setTimeout(step, 0); return; }
+      // encoded off the main thread; the page shows it by an object URL
+      const done = baker; baker = null;
+      done.canvas.toBlob((blob) => { try {
+        out.push({ li: p.li, box: p.box, w: done.width * p.pxM, h: done.height * p.pxM, url: blob ? URL.createObjectURL(blob) : done.canvas.toDataURL("image/png") });
+        if (out.length < plan.length) { setTimeout(step, 0); return; }
+        mistsBaking.delete(key);
+        mistsBaked.set(key, out);
+        if (mistsBaked.size > 4) { const old = mistsBaked.keys().next().value; for (const b of mistsBaked.get(old)) if (b.url.startsWith("blob:")) URL.revokeObjectURL(b.url); mistsBaked.delete(old); }
+        if (mapCtx === town && town.mistsKey === drawnKey) paintMists(JSON.parse(drawnKey));
+      } catch { quit(); } }, "image/png");
+    };
+    setTimeout(step, 0);
+  }
+  function paintSheetFeather(frame) {
+    const night = (getComputedStyle(mapCtx.svg).getPropertyValue("--night") || "#14171d").trim();
+    const key = JSON.stringify(frame) + night;
+    if (!mistsFeather || mistsFeather.key !== key) {
+      const colour = /^#[0-9a-f]{6}$/i.test(night) ? night : "#14171d";
+      const fb = bakeSheetFeather(frame, colour, { canvas: document.createElement("canvas") });
+      mistsFeather = { key, ...fb, url: fb.canvas.toDataURL("image/png") };
+    }
+    const { originPx, mPerPx } = mapCtx, n = (x) => x.toFixed(1), F = mistsFeather;
+    mapCtx.svg.querySelector(".wv-sheet-feather")?.remove();
+    // on the sheet's ground: just under the first region (or the placed art), so
+    // the regions and everything on them stay whole on top of it
+    const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    for (const [k, val] of Object.entries({ class: "wv-sheet-feather", "pointer-events": "none", "aria-hidden": "true", href: F.url, preserveAspectRatio: "none",
+      x: n(originPx.x + F.box.minX / mPerPx), y: n(originPx.y + F.box.minY / mPerPx), width: n(F.w / mPerPx), height: n(F.h / mPerPx) })) img.setAttribute(k, val);
+    const under = mapCtx.svg.querySelector(":scope > g.region") ?? mapCtx.placedArtLayer;
+    mapCtx.svg.insertBefore(img, under);
+  }
+  function sessionOnce(k) {
+    try { if (sessionStorage.getItem(k)) return false; sessionStorage.setItem(k, "1"); return true; }
+    catch { if (mistsOnce.has(k)) return false; mistsOnce.add(k); return true; }
+  }
+  function mistsIntro(m, g) {
+    if (!sessionOnce("pm_world_mists_intro")) return;
+    const reduced = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduced && typeof g.animate === "function") {
+      const { originPx, mPerPx } = mapCtx;
+      const cx = originPx.x + (m.clear.minX + m.clear.maxX) / 2 / mPerPx, cy = originPx.y + (m.clear.minY + m.clear.maxY) / 2 / mPerPx;
+      g.style.transformOrigin = `${cx.toFixed(1)}px ${cy.toFixed(1)}px`;
+      g.animate([{ transform: "scale(1.55)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: 3600, easing: "cubic-bezier(.22,.61,.36,1)" });
+    }
+    mistsBellArm(m);
+  }
+  // THE BELL: a low struck bell (mists-render.mjs § ringBell), once per browser
+  // session as the Mists arrive. Browsers hold sound until a gesture, so it
+  // rings on the first click, tap or key if it could not ring before. Never
+  // looped. The viewer's choice (on or off) is remembered on this device.
+  function bellOn() { try { return localStorage.getItem("pm_world_bell") !== "off"; } catch { return true; } }
+  function mistsBellRing(m, fromGesture = false) {
+    const bell = bellFor(m);
+    if (!bell || !bellOn() || mistsBellState.rung) return;
+    // no AudioContext before the reader has touched the page: browsers refuse it
+    // anyway, and where one would allow it the bell must still wait for a gesture
+    if (!fromGesture && !navigator.userActivation?.hasBeenActive) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      const ctx = mistsBellState.ctx ?? (mistsBellState.ctx = new AC());
+      const go = () => {
+        if (mistsBellState.rung || !bellOn()) return;
+        mistsBellState.rung = true;
+        const out = ctx.createGain(); out.connect(ctx.destination); mistsBellState.out = out;
+        ringBell(ctx, out, ctx.currentTime + 0.05, bell);
+      };
+      if (ctx.state === "running") go(); else ctx.resume().then(() => { if (ctx.state === "running") go(); }).catch(() => {});
+    } catch { /* no sound is a quiet page, not a broken one */ }
+  }
+  function mistsBellArm(m) {
+    mistsBellRing(m);
+    if (mistsBellState.armed) return;
+    mistsBellState.armed = true;
+    // a touch's pointerdown does not unlock audio (pointerup, click or a key does),
+    // so listen for those too, and let go only once the bell has rung
+    const GESTURES = ["pointerup", "click", "keydown"];
+    const first = () => {
+      const cur = sceneRoomId || state.crossing > liveCrossing() ? null : mistsAt(state.crossing, data?.skeleton?.mists);
+      if (cur) mistsBellRing(cur, true);
+      if (mistsBellState.rung) for (const ev of GESTURES) document.removeEventListener(ev, first, true);
+    };
+    for (const ev of GESTURES) document.addEventListener(ev, first, true);
+  }
+  function mistsBellButton(m) {
+    let btn = root.querySelector(".wv-bell");
+    if (!btn) {
+      const home = root.querySelector(".wv-map-home"); if (!home) return;
+      btn = document.createElement("button"); btn.type = "button"; btn.className = "ctl wv-bell";
+      home.after(btn);
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const on = !bellOn();
+        try { localStorage.setItem("pm_world_bell", on ? "on" : "off"); } catch { /* the choice lasts this page */ }
+        if (!on && mistsBellState.out) { try { mistsBellState.out.gain.setTargetAtTime(0, mistsBellState.ctx.currentTime, 0.15); } catch { /* already quiet */ } }
+        paintBell(btn);
+        const cur = sceneRoomId ? null : mistsAt(state.crossing, data?.skeleton?.mists);
+        if (on && cur) mistsBellRing(cur, true);
+      });
+    }
+    btn.hidden = false;
+    paintBell(btn);
+  }
+  function paintBell(btn) {
+    const on = bellOn();
+    btn.textContent = on ? "🔔" : "🔕";
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", on ? "the bell is on" : "the bell is off");
+    btn.title = on ? "the bell: on (it rings once when the Mists come in)" : "the bell: off";
   }
 
   function drawOverlay(radial) {
