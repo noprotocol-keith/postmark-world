@@ -352,7 +352,8 @@ test("POS-369 · a market opposition: the senior at contact may oppose a straddl
     mkdirSync(join(root, slug), { recursive: true });
     writeFileSync(join(root, slug, "mark.md"), `---\n${fm}\n---\n\n${body}\n`);
   };
-  put("the-old-field", 'kind: sited\nby: fieldhh\ndate: 2026-08-01\nat: { x: 300, y: 300 }\nextent: { w: 100, h: 100 }\nconsent: {"barnhh/the-new-barn": "opposed", "farhh/the-far-hut": "opposed"}', "A field that was here first.");
+  put("the-old-field", 'kind: sited\nby: fieldhh\ndate: 2026-08-01\nat: { x: 300, y: 300 }\nextent: { w: 100, h: 100 }\nconsent: {"barnhh/the-new-barn": "opposed", "farhh/the-far-hut": "opposed", "parcelhh/the-far-parcel": "opposed"}', "A field that was here first.");
+  put("the-far-parcel", "kind: parcel\nby: parcelhh\ndate: 2026-08-20\nat: { x: 700, y: 700 }\nextent: { w: 25, h: 25 }", "A parcel nowhere near the field.");
   put("the-new-barn", "kind: sited\nby: barnhh\ndate: 2026-08-20\nat: { x: 360, y: 300 }\nextent: { w: 40, h: 40 }", "A barn over the field's edge.");
   put("the-far-hut", "kind: sited\nby: farhh\ndate: 2026-08-20\nat: { x: 900, y: 900 }\nextent: { w: 10, h: 10 }", "A hut nowhere near.");
   put("the-late-estate", 'kind: sited\nby: estatehh\ndate: 2026-08-25\nat: { x: 300, y: 300 }\nextent: { w: 400, h: 400 }\nconsent: {"fieldhh/the-old-field": "opposed", "pondhh/the-old-pond": "welcomed"}', "An estate drawn around the field later.");
@@ -361,5 +362,7 @@ test("POS-369 · a market opposition: the senior at contact may oppose a straddl
   assert.doesNotMatch(out, /"barnhh\/the-new-barn"[^\n]*(ignored|does not touch)/, "the senior speaks on the straddler, though neither contains the other");
   assert.match(out, /"fieldhh\/the-old-field" was not laid after this mark — ignored/, "the later container has no word on the elder inside it");
   assert.match(out, /\[ERROR\][^\n]*"farhh\/the-far-hut" does not touch this mark/, "a mark that touches nothing of yours is not yours to speak for");
+  assert.match(out, /"parcelhh\/the-far-parcel" is a parcel — ignored/, "an opposition on a parcel is told the parcel rule first");
+  assert.doesNotMatch(out, /"parcelhh\/the-far-parcel" does not touch/, "not that it does not touch");
   assert.doesNotMatch(out, /"pondhh\/the-old-pond"[^\n]*(ignored|not inside)/, "held for POS-572: a welcome on what stands inside your mark is read as before");
 });

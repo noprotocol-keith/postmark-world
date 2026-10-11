@@ -745,10 +745,17 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
         warn(rec, `${CONSENT_FIELD}: "${target}" names no mark in the tree — a word about a mark that never landed. Harmless, and it does nothing`);
         continue;
       }
-      // A WELCOME is still read along the containment edge (held for the
-      // sitting), so it keeps the old test: what stands inside your own mark.
+      // A WELCOME is still read along the containment edge (held for
+      // POS-572), so it keeps the old test: what stands inside your own mark.
       const container = containedBy.get(t.id) ?? null;
       const opposes = word === "opposed";
+      const parcelIgnored = `${CONSENT_FIELD}: "${target}" is a parcel — ignored. A parcel answers its holder and the town, never the market`;
+      // An opposition on a parcel is told that first: whether it touches yours
+      // or not, the market's word does not reach a parcel.
+      if (!isParcel && opposes && t.kind === "parcel") {
+        warn(rec, parcelIgnored);
+        continue;
+      }
       if (!isParcel && opposes && !inContact(rec, t) && container !== rec.id) {
         err(rec, `${CONSENT_FIELD}: "${target}" does not touch this mark and this is not a parcel — you may speak for your own parcel's ground, or for a mark that overlaps your own, and for nothing else${cite("the-town/the-own-hand")}`);
         continue;
@@ -762,7 +769,7 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
         continue;
       }
       if (!isParcel && t.kind === "parcel") {
-        warn(rec, `${CONSENT_FIELD}: "${target}" is a parcel — ignored. A parcel answers its holder and the town, never the market`);
+        warn(rec, parcelIgnored);
         continue;
       }
       if (!isParcel && opposes && !seniorAtContact(rec, t, { container })) {

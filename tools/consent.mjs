@@ -305,8 +305,8 @@ export function resolveConsent({ byId, credOf, parcels, ownStamps, parentOf, rec
   // ---- the market: the senior at contact may oppose, by density ----
   // Every authored opposition, wherever it is filed, asks one question first:
   // may its grantor oppose its target (§ seniorAtContact)? Containment is not
-  // asked, except where the first-laid order proves nothing (held for the
-  // sitting). A later mark drawn over an earlier one cannot oppose it; the
+  // asked, except where the first-laid order proves nothing (held for
+  // POS-572). A later mark drawn over an earlier one cannot oppose it; the
   // earlier one's word counts on the later one whichever contains which.
   // Parcels answer their own law above.
   const edgeVeto = new Map();       // childId -> { parent, grantor, child_own, parent_density, child_eff }
