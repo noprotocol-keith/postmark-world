@@ -186,6 +186,34 @@ test("A PARCEL SPEAKS ONLY ON WHAT CAME AFTER IT: an older neighbour stands, a n
   assert.equal(onNewcomer.returned[0].authority, "parcel (absolute)");
 });
 
+test("POS-449 · AN AMEND DOES NOT MAKE AN ELDER YOUNG: an elder amended after the parcel stays out of its reach; a newcomer laid after it is in", () => {
+  // Darko, 2026-10-07: a parcel's reach reads a mark's FIRST-LAID date, the start
+  // of its claim chain (`claimed_at`, the origin claim's instant), never the date
+  // its latest amend restamped. The hall was first laid 07-20 and amended 08-05,
+  // inside a parcel laid 08-01.
+  const word = { consent: { "foreign/hall": "opposed" } };
+  const amendedElder = sited("hall", "foreign", 0, 0, 10, 10, { date: "2026-08-05T00:00:00Z", claimed_at: "2026-07-20T00:00:00Z" });
+  const elder = fold({ marks: [parcel("home", "holder", 0, 0, word), amendedElder], terrain, tick: 1, stakes: [] });
+  assert.equal(standing(elder, "foreign/hall"), true, "the hall was there first; its amend does not make it a newcomer");
+  assert.deepEqual(elder.returned, []);
+
+  // the control: first laid after the parcel, and amended later still
+  const newcomer = sited("hall", "foreign", 0, 0, 10, 10, { date: "2026-08-05T00:00:00Z", claimed_at: "2026-08-02T00:00:00Z" });
+  const onNewcomer = fold({ marks: [parcel("home", "holder", 0, 0, word), newcomer], terrain, tick: 1, stakes: [] });
+  assert.equal(standing(onNewcomer, "foreign/hall"), false, "a newcomer on the parcel answers its holder");
+  assert.equal(onNewcomer.returned[0].authority, "parcel (absolute)");
+});
+
+test("POS-449 · the PARCEL's age is its first claim too: a parcel amended later still reaches a mark laid between its claim and its amend", () => {
+  // The parcel was claimed 08-01 and moved on 08-10; the hall was laid 08-05.
+  // Read by `date`, the moved parcel would be younger than the hall and lose its
+  // word over a mark that landed on its ground after it.
+  const moved = parcel("home", "holder", 0, 0, { consent: { "foreign/hall": "opposed" }, date: "2026-08-10T00:00:00Z", claimed_at: "2026-08-01T00:00:00Z" });
+  const state = fold({ marks: [moved, sited("hall", "foreign", 0, 0, 10, 10, { date: "2026-08-05T00:00:00Z" })], terrain, tick: 1, stakes: [] });
+  assert.equal(standing(state, "foreign/hall"), false, "the hall came after the parcel's first claim");
+  assert.equal(state.returned[0].authority, "parcel (absolute)");
+});
+
 test("a parcel's word is ABSOLUTE where a commons parent's is EARNED — the same unstaked grantor, two outcomes", () => {
   // Both grantors have staked nothing. On parcel ground that changes nothing: the
   // holder's word stands on its own, and the hall is returned. On a commons edge
@@ -249,6 +277,123 @@ test("an UNSTAKED parent's veto moves nothing — with nobody backing either sid
   });
   assert.equal(standing(state, "b/shed"), true, "influence is proportional to backing, and this parent has none");
   assert.equal(state.returned.length, 0);
+});
+
+// ── POS-369: the senior at contact holds the word, never the container ──────
+// LOGOS conflict-matrix § Roles from seniority, RULED 2026-10-04: contact is
+// geometric, seniority is temporal, the senior at contact holds the `m`; the
+// opposition is by density. Darko: a later geometric parent declaring a stance
+// on an earlier child is incorrect. The rest of the role law is HELD FOR THE
+// SITTING (Darko, 2026-10-10) and keeps the fold's old answer: the welcome, a
+// twin instant, and several seniors (judged one at a time, never summed).
+
+test("POS-369 · a LATER, denser mark drawn over an earlier one cannot oppose it", () => {
+  const shed = sited("shed", "b", 0, 0, 100, 100, { date: "2026-08-01" });
+  const estate = (consent) => sited("estate", "a", 0, 0, 1000, 1000, { date: "2026-08-20", consent });
+  const opposed = fold({ marks: [estate({ "b/shed": "opposed" }), shed], terrain, tick: 1, stakes: [stake("s", "a/estate", 100)] });
+  assert.equal(standing(opposed, "b/shed"), true, "the shed was there first; a later container is no grantor of it");
+  assert.deepEqual(opposed.returned, []);
+});
+
+test("POS-369 · HELD FOR POS-572: a welcome is read along the containment edge as before, whatever the dates", () => {
+  const shed = sited("shed", "b", 0, 0, 100, 100, { date: "2026-08-01" });
+  const estate = sited("estate", "a", 0, 0, 1000, 1000, { date: "2026-08-20", consent: { "b/shed": "welcomed" } });
+  const state = fold({ marks: [estate, shed], terrain, tick: 1, stakes: [stake("s", "b/shed", 6)] });
+  assert.equal(w(state, "a/estate"), 6, "the container's welcome still opens the fan-up edge");
+  assert.equal(state.marks.find((m) => m.id === "b/shed").kept, true, "and still keeps the mark");
+});
+
+test("POS-369 · the EARLIER mark may oppose the later one, whichever contains which, by density", () => {
+  const shed = sited("shed", "b", 0, 0, 100, 100, { date: "2026-08-01", consent: { "a/estate": "opposed" } });
+  const estate = sited("estate", "a", 0, 0, 1000, 1000, { date: "2026-08-20" });
+  const strong = fold({ marks: [estate, shed], terrain, tick: 1, stakes: [stake("s", "b/shed", 100)] });
+  assert.equal(standing(strong, "a/estate"), false, "a senior at density 1e-2 turns away a newcomer at 0");
+  const r = strong.returned.find((x) => x.mark === "a/estate");
+  assert.equal(r.authority, "commons edge (earned)");
+  assert.equal(r.returned_from, "b/shed");
+  assert.deepEqual(r.stays, ["b/shed"], "ruling B: the newcomer leaves alone, and the senior inside it stays");
+
+  const outmatched = fold({ marks: [estate, shed], terrain, tick: 1, stakes: [stake("s", "b/shed", 1), stake("s", "a/estate", 1000)] });
+  assert.equal(standing(outmatched, "a/estate"), true, "a newcomer at 1e-3 outweighs a senior at 1e-4 and stands");
+  assert.equal(outmatched.returned.length, 0);
+});
+
+test("POS-369 · a PARTIAL overlap gets a role: the field that was first holds the word over the barn straddling its edge, never the reverse", () => {
+  const field = (consent) => sited("field", "a", 0, 0, 100, 100, { date: "2026-08-01", consent });
+  const barn = (consent) => sited("barn", "b", 60, 0, 40, 40, { date: "2026-08-20", consent });
+  const fieldSays = fold({ marks: [field({ "b/barn": "opposed" }), barn()], terrain, tick: 1, stakes: [stake("s", "a/field", 100)] });
+  assert.equal(standing(fieldSays, "b/barn"), false, "neither contains the other, and the senior at contact still speaks");
+  assert.equal(fieldSays.returned[0].returned_from, "a/field");
+
+  const barnSays = fold({ marks: [field(), barn({ "a/field": "opposed" })], terrain, tick: 1, stakes: [stake("s", "b/barn", 1000)] });
+  assert.equal(standing(barnSays, "a/field"), true, "the newcomer has no word on the field, however dense");
+
+  const apart = fold({ marks: [field({ "b/barn": "opposed" }), sited("barn", "b", 200, 0, 40, 40, { date: "2026-08-20" })], terrain, tick: 1, stakes: [stake("s", "a/field", 100)] });
+  assert.equal(standing(apart, "b/barn"), true, "no contact, no word");
+});
+
+test("POS-369 · contact is the TRUE shape: a ringed senior whose box covers the newcomer but whose ring does not has no word on it", () => {
+  // a right triangle in the box's lower-left half (x + y <= 100 over 0..100)
+  const wedge = sited("wedge", "a", 50, 50, 100, 100, { date: "2026-08-01", points: [[0, 0], [100, 0], [0, 100]], consent: { "b/far": "opposed", "b/near": "opposed" } });
+  const state = fold({
+    marks: [wedge, sited("far", "b", 90, 90, 10, 10, { date: "2026-08-20" }), sited("near", "b", 20, 20, 10, 10, { date: "2026-08-20" })],
+    terrain, tick: 1, stakes: [stake("s", "a/wedge", 100)],
+  });
+  assert.equal(standing(state, "b/far"), true, "inside the box, outside the ring: no contact");
+  assert.equal(standing(state, "b/near"), false, "inside the ring: the senior speaks");
+});
+
+test("POS-369 · HELD FOR POS-572: where the first-laid order proves nothing, the containment edge answers as before", () => {
+  // a twin instant: the backed container still opposes what it holds
+  const twins = fold({
+    marks: [sited("estate", "a", 0, 0, 1000, 1000, { date: "2026-08-10", consent: { "b/shed": "opposed" } }), sited("shed", "b", 0, 0, 100, 100, { date: "2026-08-10" })],
+    terrain, tick: 1, stakes: [stake("s", "a/estate", 100)],
+  });
+  assert.equal(standing(twins, "b/shed"), false, "the same instant proves no precedence, so the old edge holds");
+  assert.equal(twins.returned[0].returned_from, "a/estate");
+
+  // an undated newcomer inside the container: the same
+  const undated = fold({
+    marks: [sited("estate", "a", 0, 0, 1000, 1000, { date: "2026-08-01", consent: { "b/shed": "opposed" } }), sited("shed", "b", 0, 0, 100, 100, { date: undefined })],
+    terrain, tick: 1, stakes: [stake("s", "a/estate", 100)],
+  });
+  assert.equal(standing(undated, "b/shed"), false, "a date that proves nothing leaves the old edge in place");
+
+  // a twin that only straddles: no containment edge, so no role, as before
+  const straddle = fold({
+    marks: [sited("field", "a", 0, 0, 100, 100, { date: "2026-08-10", consent: { "b/barn": "opposed" } }), sited("barn", "b", 60, 0, 40, 40, { date: "2026-08-10" })],
+    terrain, tick: 1, stakes: [stake("s", "a/field", 100)],
+  });
+  assert.equal(standing(straddle, "b/barn"), true, "no edge before, no edge now");
+});
+
+test("POS-369 + POS-449 · an AMENDED elder keeps its seniority: a mark laid between its first claim and its amend has no word on it", () => {
+  // the shed was first laid 08-01 and amended 08-25; the estate came on 08-20
+  const shed = (consent) => sited("shed", "b", 0, 0, 100, 100, { date: "2026-08-25T00:00:00Z", claimed_at: "2026-08-01T00:00:00Z", consent });
+  const estate = (consent) => sited("estate", "a", 0, 0, 1000, 1000, { date: "2026-08-20", consent });
+  const estateSays = fold({ marks: [estate({ "b/shed": "opposed" }), shed()], terrain, tick: 1, stakes: [stake("s", "a/estate", 100)] });
+  assert.equal(standing(estateSays, "b/shed"), true, "the amend did not make the shed the newcomer");
+  const shedSays = fold({ marks: [estate(), shed({ "a/estate": "opposed" })], terrain, tick: 1, stakes: [stake("s", "b/shed", 100)] });
+  assert.equal(standing(shedSays, "a/estate"), false, "and the shed still holds the word over the estate");
+});
+
+test("POS-369 · HELD FOR POS-572: several opposing seniors are judged ONE AT A TIME, never summed", () => {
+  // Each senior: 100 stamps over 100x100 = 1e-2. The newcomer: 1.5 over 10x10 =
+  // 1.5e-2, above either senior alone (and below the two summed, which is the
+  // sitting's question). Its own stake would hold any return (the escrow
+  // guard), so the instrument is the veto itself.
+  const west = (x) => sited("west", "a", x, 0, 100, 100, { date: "2026-08-01", consent: { "c/kiosk": "opposed" } });
+  const east = (x) => sited("east", "b", x, 0, 100, 100, { date: "2026-08-02", consent: { "c/kiosk": "opposed" } });
+  const kiosk = sited("kiosk", "c", 0, 0, 10, 10, { date: "2026-08-20" });
+
+  const both = fold({ marks: [west(-20), east(20), kiosk], terrain, tick: 1, stakes: [stake("s", "a/west", 100), stake("s", "b/east", 100), stake("s", "c/kiosk", 1.5)] });
+  assert.equal(both.returned.length, 0, "neither senior alone outweighs the kiosk, and the two are not summed");
+
+  const one = fold({ marks: [west(-20), east(20), kiosk], terrain, tick: 1, stakes: [stake("s", "a/west", 200), stake("s", "b/east", 100), stake("s", "c/kiosk", 1.5)] });
+  const r = one.returned.find((x) => x.mark === "c/kiosk");
+  assert.ok(r, "a senior at 2e-2 outweighs the kiosk on its own");
+  assert.equal(r.returned_from, "a/west", "and the return names that senior");
+  assert.equal(r.state, "pending-escrow");
 });
 
 // ── returned, never dropped ──────────────────────────────────────────────────

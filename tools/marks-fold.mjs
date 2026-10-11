@@ -825,20 +825,11 @@ export const PARCEL_EXTENT_M = 25;
  * first, which matches how `> PARCEL_CAP_LAW_DATE` already treats it: an absent
  * date is not post-law, so it is never the refusal.
  */
-// ── THE FIRST CLAIM, NOT THE LATEST DATE (POS-364 review, 2026-10-08) ─────────
-//
-// Every leave and every amendment restamps a record's `date` (the office's door,
-// and the store's materialize replaces the record's data on amend). Ordered by
-// `date`, moving a held parcel would send it to the back of its household's
-// claims: the parcel it was would lose its slot to one claimed after it, and a
-// pre-law parcel moved today would count as post-law. A claim's place is when it
-// was FIRST claimed. A record may carry that instant as `claimed_at` (the
-// office's settlement fold reads it from the mark's origin claim; a tree record
-// carries none, and its `date` is the only instant there is), and the claim
-// order and the cap's law date both read it first.
-export const CLAIMED_AT_FIELD = "claimed_at";
-/** A record's claim instant: when it was first claimed if the record says, else its date. */
-export const claimInstant = (mk) => mk?.[CLAIMED_AT_FIELD] ?? mk?.date;
+// ── THE FIRST CLAIM, NOT THE LATEST DATE: claim-instant.mjs (POS-364 review,
+// 2026-10-08; POS-449). The claim order and the cap's law date read a record's
+// `claimed_at` first, its `date` only when it carries none.
+export { CLAIMED_AT_FIELD, claimInstant } from "./claim-instant.mjs";
+import { claimInstant } from "./claim-instant.mjs";
 
 export function compareClaimOrder(a, b) {
   const ta = Date.parse(String(claimInstant(a) ?? ""));

@@ -82,8 +82,17 @@ child or is generally touched by the mark that is chronologically coming
 later"*, and for market marks *"the opposition should always be based on
 density"*. Both reserved calls ruled as proposed: seniority is **per-cell**,
 and under positive `m` the fan-up goes to the senior's whole extent,
-**diffusely**. A parcel holder's veto is a different law and is untouched:
-absolute on their parcel whatever came first, the town alone sovereign over it.
+**diffusely**. The engine applies only the first part so far, that the senior
+at contact may oppose by density (POS-369): per-cell seniority, incumbents
+composing, the fan-up under positive `m` and a twin instant are held for the
+sitting that walks them (POS-572, 2026-10-10) and keep the containment answer
+until it rules, and an expansion is not yet a newcomer on its new cells
+(POS-571). A parcel holder's veto is a different law: absolute on their
+parcel, but only over marks laid after the parcel (Darko, 2026-10-05: *"they
+only get to declare stance on things that came after them"*), and never over
+the town's own marks, the town alone sovereign over it. A mark's age is its
+first-laid date, the start of its claim chain; an amend does not make an elder
+mark young (ruled 2026-10-07, POS-449).
 
 ## Granularity
 

@@ -34,7 +34,7 @@ import {
   containmentParents,
 } from "./marks-fold.mjs";
 import { markStanding } from "./mark-standing.mjs";
-import { consentMap, CONSENT_WORDS, CONSENT_FIELD, townOwnedMark, cameAfter } from "./consent.mjs";
+import { consentMap, CONSENT_WORDS, CONSENT_FIELD, townOwnedMark, cameAfter, inContact, seniorAtContact } from "./consent.mjs";
 import { crossHouseholdRiders, householdResolver } from "./household-frames.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -725,14 +725,15 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
       continue;
     }
     // who may speak at all: a parcel holder (about ground) or a mark's author
-    // (about what stands inside it).
+    // about what touches it (consent.mjs § seniorAtContact). Asked of the
+    // ground, never the containment tree (LOGOS conflict-matrix § Roles from
+    // seniority, RULED 2026-10-04, POS-369): a word on a mark that touches
+    // nothing of yours speaks for ground that is not yours, and is refused; a
+    // word on a mark that was there before yours is a newcomer's, and is named
+    // and ignored, as a parcel's word on an older mark is. Where the first-laid
+    // order proves nothing, the containment edge answers, as it always did (held
+    // for POS-572, consent.mjs § IN THE MARKET).
     const isParcel = rec.kind === "parcel";
-    // "what stands inside your own mark" — asked of the ground (re-keyed
-    // 2026-08-25). The old test read the directory, so a neighbour's mark
-    // standing inside yours but filed at its id was not something you could
-    // speak about, and your word about it was refused as speaking for ground
-    // that is not yours.
-    const speaksFor = new Set(marks.filter((m) => containedBy.get(m.id) === rec.id).map((m) => m.id));
 
     for (const [target, word] of Object.entries(map)) {
       if (!CONSENT_WORDS.has(word)) {
@@ -744,12 +745,35 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
         warn(rec, `${CONSENT_FIELD}: "${target}" names no mark in the tree — a word about a mark that never landed. Harmless, and it does nothing`);
         continue;
       }
-      if (!isParcel && !speaksFor.has(target)) {
+      // A WELCOME is still read along the containment edge (held for
+      // POS-572), so it keeps the old test: what stands inside your own mark.
+      const container = containedBy.get(t.id) ?? null;
+      const opposes = word === "opposed";
+      const parcelIgnored = `${CONSENT_FIELD}: "${target}" is a parcel — ignored. A parcel answers its holder and the town, never the market`;
+      // An opposition on a parcel is told that first: whether it touches yours
+      // or not, the market's word does not reach a parcel.
+      if (!isParcel && opposes && t.kind === "parcel") {
+        warn(rec, parcelIgnored);
+        continue;
+      }
+      if (!isParcel && opposes && !inContact(rec, t) && container !== rec.id) {
+        err(rec, `${CONSENT_FIELD}: "${target}" does not touch this mark and this is not a parcel — you may speak for your own parcel's ground, or for a mark that overlaps your own, and for nothing else${cite("the-town/the-own-hand")}`);
+        continue;
+      }
+      if (!isParcel && !opposes && container !== rec.id) {
         err(rec, `${CONSENT_FIELD}: "${target}" is not inside this mark and this is not a parcel — you may speak for your own parcel's ground, or for what stands inside your own mark, and for nothing else${cite("the-town/the-own-hand")}`);
         continue;
       }
       if (credOf(t.household) === credOf(rec.household)) {
         warn(rec, `${CONSENT_FIELD}: "${target}" is your own household's mark — ignored. Ownership already composes; a household never has to ask itself for permission`);
+        continue;
+      }
+      if (!isParcel && t.kind === "parcel") {
+        warn(rec, parcelIgnored);
+        continue;
+      }
+      if (!isParcel && opposes && !seniorAtContact(rec, t, { container })) {
+        warn(rec, `${CONSENT_FIELD}: "${target}" was not laid after this mark — ignored. The senior at contact holds the word: the holders of the older mark speak on a newcomer, never the reverse`);
         continue;
       }
       // a word needs ground under it: a parcel's authority runs over whatever

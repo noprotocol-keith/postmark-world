@@ -27,6 +27,9 @@ export const ENGINE_FILES = [
   // joined 2026-10-07 (POS-441): the lint's household gate asks the one question
   // household-frames.mjs holds, so the gate's fixtures carry it.
   "household-frames.mjs",
+  // joined 2026-10-10 (POS-449): a mark's first-laid instant, read by both
+  // marks-fold.mjs and consent.mjs, so neither imports the other for it.
+  "claim-instant.mjs",
 ];
 
 // Fixtures that additionally exercise the gate or the sketchbook wall name the

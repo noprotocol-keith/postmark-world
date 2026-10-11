@@ -329,3 +329,40 @@ test("a parcel's word: the town's own mark and an older mark are named as ignore
   assert.match(out, /"elderhh\/the-elder-shed" did not come after this parcel — ignored/, "the elder is named");
   assert.doesNotMatch(out, /"newhh\/the-new-shed"[^\n]*ignored/, "the newcomer is a word the parcel may say");
 });
+
+test("POS-449 · a parcel's word: an elder AMENDED after the parcel is still named as ignored, by its first-laid date", () => {
+  const { dir, root } = fixtureTree();
+  const put = (slug, fm, body) => {
+    mkdirSync(join(root, slug), { recursive: true });
+    writeFileSync(join(root, slug, "mark.md"), `---\n${fm}\n---\n\n${body}\n`);
+  };
+  // first laid 07-25, amended 08-20: the amend restamped `date`, and the origin
+  // claim's instant rides as `claimed_at` (the office prints it from the store)
+  put("the-amended-shed", "kind: sited\nby: elderhh\ndate: 2026-08-20\nclaimed_at: 2026-07-25\nat: { x: 66, y: 66 }\nextent: { w: 10, h: 10 }", "A shed that was here first, since repainted.");
+  put("the-new-shed", "kind: sited\nby: newhh\ndate: 2026-08-20\nat: { x: 54, y: 54 }\nextent: { w: 10, h: 10 }", "A shed laid after the parcel.");
+  put("holder-parcel", 'kind: parcel\nby: holderhh\ndate: 2026-08-10\nat: { x: 60, y: 60 }\nextent: { w: 25, h: 25 }\nconsent: {"elderhh/the-amended-shed": "opposed", "newhh/the-new-shed": "opposed"}', "My parcel.");
+  const out = runLint(dir);
+  assert.match(out, /"elderhh\/the-amended-shed" did not come after this parcel — ignored/, "the amended elder is still the elder");
+  assert.doesNotMatch(out, /"newhh\/the-new-shed"[^\n]*ignored/, "the newcomer is a word the parcel may say");
+});
+
+test("POS-369 · a market opposition: the senior at contact may oppose a straddling newcomer; a later container's opposition on an elder is named and ignored; a mark that touches nothing of yours is refused; a welcome keeps the old test", () => {
+  const { dir, root } = fixtureTree();
+  const put = (slug, fm, body) => {
+    mkdirSync(join(root, slug), { recursive: true });
+    writeFileSync(join(root, slug, "mark.md"), `---\n${fm}\n---\n\n${body}\n`);
+  };
+  put("the-old-field", 'kind: sited\nby: fieldhh\ndate: 2026-08-01\nat: { x: 300, y: 300 }\nextent: { w: 100, h: 100 }\nconsent: {"barnhh/the-new-barn": "opposed", "farhh/the-far-hut": "opposed", "parcelhh/the-far-parcel": "opposed"}', "A field that was here first.");
+  put("the-far-parcel", "kind: parcel\nby: parcelhh\ndate: 2026-08-20\nat: { x: 700, y: 700 }\nextent: { w: 25, h: 25 }", "A parcel nowhere near the field.");
+  put("the-new-barn", "kind: sited\nby: barnhh\ndate: 2026-08-20\nat: { x: 360, y: 300 }\nextent: { w: 40, h: 40 }", "A barn over the field's edge.");
+  put("the-far-hut", "kind: sited\nby: farhh\ndate: 2026-08-20\nat: { x: 900, y: 900 }\nextent: { w: 10, h: 10 }", "A hut nowhere near.");
+  put("the-late-estate", 'kind: sited\nby: estatehh\ndate: 2026-08-25\nat: { x: 300, y: 300 }\nextent: { w: 400, h: 400 }\nconsent: {"fieldhh/the-old-field": "opposed", "pondhh/the-old-pond": "welcomed"}', "An estate drawn around the field later.");
+  put("the-old-pond", "kind: sited\nby: pondhh\ndate: 2026-08-01\nat: { x: 200, y: 200 }\nextent: { w: 20, h: 20 }", "A pond the estate was drawn around.");
+  const out = runLint(dir);
+  assert.doesNotMatch(out, /"barnhh\/the-new-barn"[^\n]*(ignored|does not touch)/, "the senior speaks on the straddler, though neither contains the other");
+  assert.match(out, /"fieldhh\/the-old-field" was not laid after this mark — ignored/, "the later container has no word on the elder inside it");
+  assert.match(out, /\[ERROR\][^\n]*"farhh\/the-far-hut" does not touch this mark/, "a mark that touches nothing of yours is not yours to speak for");
+  assert.match(out, /"parcelhh\/the-far-parcel" is a parcel — ignored/, "an opposition on a parcel is told the parcel rule first");
+  assert.doesNotMatch(out, /"parcelhh\/the-far-parcel" does not touch/, "not that it does not touch");
+  assert.doesNotMatch(out, /"pondhh\/the-old-pond"[^\n]*(ignored|not inside)/, "held for POS-572: a welcome on what stands inside your mark is read as before");
+});
