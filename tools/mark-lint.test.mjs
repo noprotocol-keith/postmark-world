@@ -361,5 +361,5 @@ test("POS-369 · a market opposition: the senior at contact may oppose a straddl
   assert.doesNotMatch(out, /"barnhh\/the-new-barn"[^\n]*(ignored|does not touch)/, "the senior speaks on the straddler, though neither contains the other");
   assert.match(out, /"fieldhh\/the-old-field" was not laid after this mark — ignored/, "the later container has no word on the elder inside it");
   assert.match(out, /\[ERROR\][^\n]*"farhh\/the-far-hut" does not touch this mark/, "a mark that touches nothing of yours is not yours to speak for");
-  assert.doesNotMatch(out, /"pondhh\/the-old-pond"[^\n]*(ignored|not inside)/, "held for the sitting: a welcome on what stands inside your mark is read as before");
+  assert.doesNotMatch(out, /"pondhh\/the-old-pond"[^\n]*(ignored|not inside)/, "held for POS-572: a welcome on what stands inside your mark is read as before");
 });

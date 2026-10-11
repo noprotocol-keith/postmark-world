@@ -295,7 +295,7 @@ test("POS-369 · a LATER, denser mark drawn over an earlier one cannot oppose it
   assert.deepEqual(opposed.returned, []);
 });
 
-test("POS-369 · HELD FOR THE SITTING: a welcome is read along the containment edge as before, whatever the dates", () => {
+test("POS-369 · HELD FOR POS-572: a welcome is read along the containment edge as before, whatever the dates", () => {
   const shed = sited("shed", "b", 0, 0, 100, 100, { date: "2026-08-01" });
   const estate = sited("estate", "a", 0, 0, 1000, 1000, { date: "2026-08-20", consent: { "b/shed": "welcomed" } });
   const state = fold({ marks: [estate, shed], terrain, tick: 1, stakes: [stake("s", "b/shed", 6)] });
@@ -343,7 +343,7 @@ test("POS-369 · contact is the TRUE shape: a ringed senior whose box covers the
   assert.equal(standing(state, "b/near"), false, "inside the ring: the senior speaks");
 });
 
-test("POS-369 · HELD FOR THE SITTING: where the first-laid order proves nothing, the containment edge answers as before", () => {
+test("POS-369 · HELD FOR POS-572: where the first-laid order proves nothing, the containment edge answers as before", () => {
   // a twin instant: the backed container still opposes what it holds
   const twins = fold({
     marks: [sited("estate", "a", 0, 0, 1000, 1000, { date: "2026-08-10", consent: { "b/shed": "opposed" } }), sited("shed", "b", 0, 0, 100, 100, { date: "2026-08-10" })],
@@ -377,7 +377,7 @@ test("POS-369 + POS-449 · an AMENDED elder keeps its seniority: a mark laid bet
   assert.equal(standing(shedSays, "a/estate"), false, "and the shed still holds the word over the estate");
 });
 
-test("POS-369 · HELD FOR THE SITTING: several opposing seniors are judged ONE AT A TIME, never summed", () => {
+test("POS-369 · HELD FOR POS-572: several opposing seniors are judged ONE AT A TIME, never summed", () => {
   // Each senior: 100 stamps over 100x100 = 1e-2. The newcomer: 1.5 over 10x10 =
   // 1.5e-2, above either senior alone (and below the two summed, which is the
   // sitting's question). Its own stake would hold any return (the escrow

@@ -732,7 +732,7 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
     // word on a mark that was there before yours is a newcomer's, and is named
     // and ignored, as a parcel's word on an older mark is. Where the first-laid
     // order proves nothing, the containment edge answers, as it always did (held
-    // for the sitting, consent.mjs § IN THE MARKET).
+    // for POS-572, consent.mjs § IN THE MARKET).
     const isParcel = rec.kind === "parcel";
 
     for (const [target, word] of Object.entries(map)) {

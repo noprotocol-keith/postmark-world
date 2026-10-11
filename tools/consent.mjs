@@ -88,21 +88,21 @@
 //              (a predicate, a name) touches only its declared parent, so that
 //              edge is its contact.
 //
-//              HELD FOR THE SITTING (Darko, 2026-10-10: the rest of the role
+//              HELD FOR POS-572 (Darko, 2026-10-10: the rest of the role
 //              law goes to a proper sitting), each keeping what the fold did
 //              before POS-369:
 //                · two marks whose first-laid order proves nothing (a twin
 //                  instant, a date that does not parse) fall back to the
 //                  containment edge: the container may oppose what it holds;
 //                · several opposing seniors are judged ONE AT A TIME, never
-//                  summed (whether incumbents compose is the sitting's);
+//                  summed (whether incumbents compose is POS-572's);
 //                · a WELCOME is read along the containment edge as before
 //                  (the fan-up and `kept`): which way a welcome lends, and to
-//                  whom, is the sitting's;
+//                  whom, is POS-572's;
 //                · the same household's structural +1 and the fan-up tree
 //                  stay on containment;
 //                · an expansion is not yet a newcomer on its new cells: the
-//                  whole mark is dated by its first claim (its own issue).
+//                  whole mark is dated by its first claim (POS-571).
 //
 // ── RETURNED, NOT DROPPED ────────────────────────────────────────────────────
 //
@@ -208,7 +208,7 @@ export function cameAfter(target, parcelMk) {
 // before the target, by the same reading as a parcel's reach.
 //
 // Where the first-laid order proves nothing (a twin instant, a date that does
-// not parse), the role is HELD FOR THE SITTING and keeps the fold's old answer:
+// not parse), the role is HELD FOR POS-572 and keeps the fold's old answer:
 // the target's containment parent, `container`, holds it (§ IN THE MARKET).
 // A parcel is neither side: its holder's word is its own law above, and over a
 // parcel the town alone is sovereign. Shared with the lint so both answer the
@@ -330,7 +330,7 @@ export function resolveConsent({ byId, credOf, parcels, ownStamps, parentOf, rec
     // so it spreads over the parent's area, and the comparison reduces to the
     // plain one: does the child carry more stamps than the parent does.
     //
-    // SEVERAL SENIORS ARE JUDGED ONE AT A TIME (held for the sitting): each
+    // SEVERAL SENIORS ARE JUDGED ONE AT A TIME (held for POS-572): each
     // senior's word is weighed alone against the newcomer, never summed with
     // another's, and the first that earns the veto, in id order, is the one the
     // return names.
@@ -348,8 +348,8 @@ export function resolveConsent({ byId, credOf, parcels, ownStamps, parentOf, rec
       edgeVeto.set(child, { parent, grantor: p.household, child_own: childOwn, parent_density: parentDensity, child_eff: childEff });
   }
 
-  // ---- welcomed: read along the containment edge, as before (held for the sitting) ----
-  // Which way a senior's welcome lends, and to whom, is the sitting's; until it
+  // ---- welcomed: read along the containment edge, as before (held for POS-572) ----
+  // Which way a senior's welcome lends, and to whom, is POS-572's; until it
   // rules, a welcome keeps the mark and opens the fan-up edge exactly where it
   // did before POS-369: from the containment parent to its child.
   for (const [child, parent] of parentOf) {
