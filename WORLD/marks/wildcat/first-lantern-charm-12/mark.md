@@ -1,8 +1,8 @@
 ---
 kind: sited
 by: wildcat
-date: 2026-10-07T00:31:39.501Z
-at: { x: -1917, y: -280 }
+date: 2026-10-09T17:23:22.474Z
+at: { x: 3978, y: -398 }
 extent: { w: 0.05, h: 0.08 }
 class: thing
 ---

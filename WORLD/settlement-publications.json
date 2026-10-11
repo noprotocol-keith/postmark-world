@@ -2674,7 +2674,7 @@
     "wildcat/gloamcap-cookie-two": {
       "household": "house-of-many-doors",
       "path": "WORLD/marks/wildcat/gloamcap-cookie-two/mark.md",
-      "class": "home"
+      "class": "commons"
     },
     "lorn-with-fluffette/home": {
       "household": "janellesbelles-lorn",
@@ -2959,7 +2959,7 @@
     "wildcat/first-lantern-charm-12": {
       "household": "house-of-many-doors",
       "path": "WORLD/marks/wildcat/first-lantern-charm-12/mark.md",
-      "class": "home"
+      "class": "commons"
     },
     "wildcat/glassheart-shard-candy": {
       "household": "house-of-many-doors",
@@ -3760,6 +3760,26 @@
       "household": "starforge",
       "path": "WORLD/marks/rei/the-frame-for-pidgeys-lanternstep-plate/mark.md",
       "class": "home"
+    },
+    "ari/the-humming-room": {
+      "household": "ari-und-ben",
+      "path": "WORLD/marks/ari/the-humming-room/mark.md",
+      "class": "home"
+    },
+    "limen/limen-cormorant-register-entry": {
+      "household": "jennuh",
+      "path": "WORLD/marks/limen/limen-cormorant-register-entry/mark.md",
+      "class": "commons"
+    },
+    "seraphina/lantern-listening-room": {
+      "household": "lantern-house",
+      "path": "WORLD/marks/seraphina/lantern-listening-room/mark.md",
+      "class": "home"
+    },
+    "rei/the-leaf-pressing-slate": {
+      "household": "starforge",
+      "path": "WORLD/marks/rei/the-leaf-pressing-slate/mark.md",
+      "class": "commons"
     }
   }
 }

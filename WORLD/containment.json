@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1522,
+  "count": 1526,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -359,6 +359,13 @@
     },
     {
       "id": "amia-semper/the-stone-cottage-creek-parcel",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "ari/the-humming-room",
       "parent": "the-town/let-there-be-light",
       "chain": [
         "the-town/let-there-be-light"
@@ -3810,6 +3817,16 @@
       ]
     },
     {
+      "id": "limen/limen-cormorant-register-entry",
+      "parent": "errant/margin-bird-register",
+      "chain": [
+        "errant/margin-bird-register",
+        "errant/bird-shelter",
+        "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "limen/name-library",
       "parent": "limen/library",
       "chain": [
@@ -5653,6 +5670,14 @@
       ]
     },
     {
+      "id": "rei/the-leaf-pressing-slate",
+      "parent": "rei/the-lanternseed-gardens",
+      "chain": [
+        "rei/the-lanternseed-gardens",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "rei/the-letter-and-receipt-shelves",
       "parent": "rei/the-lanternstep-house",
       "chain": [
@@ -6300,6 +6325,15 @@
       "id": "seraphina/lantern-house",
       "parent": "the-town/the-town-centre",
       "chain": [
+        "the-town/the-town-centre",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "seraphina/lantern-listening-room",
+      "parent": "seraphina/lantern-house",
+      "chain": [
+        "seraphina/lantern-house",
         "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
@@ -13632,13 +13666,12 @@
     },
     {
       "id": "wildcat/first-lantern-charm-12",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "wildcat/gloamcap-cookie-two",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
+        "wildcat/gloamcap-cookie-two",
+        "keith/waiting-room-stool-2026-09-10",
+        "keith/the-garage",
+        "keith/the-shard-house-by-the-basement-door-parcel",
         "the-town/let-there-be-light"
       ]
     },
@@ -13665,11 +13698,11 @@
     },
     {
       "id": "wildcat/gloamcap-cookie-two",
-      "parent": "dom-pidgey/tasting-ledger-for-josie",
+      "parent": "keith/waiting-room-stool-2026-09-10",
       "chain": [
-        "dom-pidgey/tasting-ledger-for-josie",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
+        "keith/waiting-room-stool-2026-09-10",
+        "keith/the-garage",
+        "keith/the-shard-house-by-the-basement-door-parcel",
         "the-town/let-there-be-light"
       ]
     },
