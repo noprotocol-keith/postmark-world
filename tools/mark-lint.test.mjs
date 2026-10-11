@@ -346,7 +346,7 @@ test("POS-449 · a parcel's word: an elder AMENDED after the parcel is still nam
   assert.doesNotMatch(out, /"newhh\/the-new-shed"[^\n]*ignored/, "the newcomer is a word the parcel may say");
 });
 
-test("POS-369 · a market word: the senior at contact may speak on a straddling newcomer; a later container's word on an elder is named and ignored; a mark that touches nothing of yours is refused", () => {
+test("POS-369 · a market opposition: the senior at contact may oppose a straddling newcomer; a later container's opposition on an elder is named and ignored; a mark that touches nothing of yours is refused; a welcome keeps the old test", () => {
   const { dir, root } = fixtureTree();
   const put = (slug, fm, body) => {
     mkdirSync(join(root, slug), { recursive: true });
@@ -355,9 +355,11 @@ test("POS-369 · a market word: the senior at contact may speak on a straddling 
   put("the-old-field", 'kind: sited\nby: fieldhh\ndate: 2026-08-01\nat: { x: 300, y: 300 }\nextent: { w: 100, h: 100 }\nconsent: {"barnhh/the-new-barn": "opposed", "farhh/the-far-hut": "opposed"}', "A field that was here first.");
   put("the-new-barn", "kind: sited\nby: barnhh\ndate: 2026-08-20\nat: { x: 360, y: 300 }\nextent: { w: 40, h: 40 }", "A barn over the field's edge.");
   put("the-far-hut", "kind: sited\nby: farhh\ndate: 2026-08-20\nat: { x: 900, y: 900 }\nextent: { w: 10, h: 10 }", "A hut nowhere near.");
-  put("the-late-estate", 'kind: sited\nby: estatehh\ndate: 2026-08-25\nat: { x: 300, y: 300 }\nextent: { w: 400, h: 400 }\nconsent: {"fieldhh/the-old-field": "opposed"}', "An estate drawn around the field later.");
+  put("the-late-estate", 'kind: sited\nby: estatehh\ndate: 2026-08-25\nat: { x: 300, y: 300 }\nextent: { w: 400, h: 400 }\nconsent: {"fieldhh/the-old-field": "opposed", "pondhh/the-old-pond": "welcomed"}', "An estate drawn around the field later.");
+  put("the-old-pond", "kind: sited\nby: pondhh\ndate: 2026-08-01\nat: { x: 200, y: 200 }\nextent: { w: 20, h: 20 }", "A pond the estate was drawn around.");
   const out = runLint(dir);
   assert.doesNotMatch(out, /"barnhh\/the-new-barn"[^\n]*(ignored|does not touch)/, "the senior speaks on the straddler, though neither contains the other");
   assert.match(out, /"fieldhh\/the-old-field" was not laid after this mark — ignored/, "the later container has no word on the elder inside it");
   assert.match(out, /\[ERROR\][^\n]*"farhh\/the-far-hut" does not touch this mark/, "a mark that touches nothing of yours is not yours to speak for");
+  assert.doesNotMatch(out, /"pondhh\/the-old-pond"[^\n]*(ignored|not inside)/, "held for the sitting: a welcome on what stands inside your mark is read as before");
 });

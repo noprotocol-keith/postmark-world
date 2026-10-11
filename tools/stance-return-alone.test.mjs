@@ -137,7 +137,7 @@ test("R11 · a LAW return is untouched by ruling B: it takes its own household's
 
 test("RULING B · on a commons edge too: a backed parent's opposed word returns a weak child alone, and the child's own child stays", () => {
   const marks = [
-    sited("estate", "a", 0, 0, 1000, 1000, { date: "2026-09-01", consent: { "b/shed": "opposed" } }), // the senior at contact
+    sited("estate", "a", 0, 0, 1000, 1000, { consent: { "b/shed": "opposed" } }),
     sited("shed", "b", 0, 0, 100, 100),
     sited("lamp", "b", 10, 10, 2, 2),
   ];

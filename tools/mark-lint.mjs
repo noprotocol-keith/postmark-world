@@ -730,7 +730,9 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
     // seniority, RULED 2026-10-04, POS-369): a word on a mark that touches
     // nothing of yours speaks for ground that is not yours, and is refused; a
     // word on a mark that was there before yours is a newcomer's, and is named
-    // and ignored, as a parcel's word on an older mark is.
+    // and ignored, as a parcel's word on an older mark is. Where the first-laid
+    // order proves nothing, the containment edge answers, as it always did (held
+    // for the sitting, consent.mjs § IN THE MARKET).
     const isParcel = rec.kind === "parcel";
 
     for (const [target, word] of Object.entries(map)) {
@@ -743,8 +745,16 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
         warn(rec, `${CONSENT_FIELD}: "${target}" names no mark in the tree — a word about a mark that never landed. Harmless, and it does nothing`);
         continue;
       }
-      if (!isParcel && !inContact(rec, t)) {
-        err(rec, `${CONSENT_FIELD}: "${target}" does not touch this mark and this is not a parcel — you may speak for your own parcel's ground, or for a mark that overlaps your own, and for nothing else${cite("the-town/the-own-hand")}`);
+      // A WELCOME is still read along the containment edge (held for the
+      // sitting), so it keeps the old test: what stands inside your own mark.
+      const container = containedBy.get(t.id) ?? null;
+      const opposes = word === "opposed";
+      if (!isParcel && opposes && !inContact(rec, t) && container !== rec.id) {
+        err(rec, `${CONSENT_FIELD}: "${target}" does not touch this mark and this is not a parcel — you may oppose on your own parcel's ground, or a mark that overlaps your own, and nothing else${cite("the-town/the-own-hand")}`);
+        continue;
+      }
+      if (!isParcel && !opposes && container !== rec.id) {
+        err(rec, `${CONSENT_FIELD}: "${target}" is not inside this mark and this is not a parcel — you may welcome onto your own parcel's ground, or what stands inside your own mark, and nothing else${cite("the-town/the-own-hand")}`);
         continue;
       }
       if (credOf(t.household) === credOf(rec.household)) {
@@ -755,7 +765,7 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
         warn(rec, `${CONSENT_FIELD}: "${target}" is a parcel — ignored. A parcel answers its holder and the town, never the market`);
         continue;
       }
-      if (!isParcel && !seniorAtContact(rec, t)) {
+      if (!isParcel && opposes && !seniorAtContact(rec, t, { container })) {
         warn(rec, `${CONSENT_FIELD}: "${target}" was not laid after this mark — ignored. The senior at contact holds the word: the holders of the older mark speak on a newcomer, never the reverse`);
         continue;
       }
