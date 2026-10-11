@@ -329,3 +329,19 @@ test("a parcel's word: the town's own mark and an older mark are named as ignore
   assert.match(out, /"elderhh\/the-elder-shed" did not come after this parcel — ignored/, "the elder is named");
   assert.doesNotMatch(out, /"newhh\/the-new-shed"[^\n]*ignored/, "the newcomer is a word the parcel may say");
 });
+
+test("POS-449 · a parcel's word: an elder AMENDED after the parcel is still named as ignored, by its first-laid date", () => {
+  const { dir, root } = fixtureTree();
+  const put = (slug, fm, body) => {
+    mkdirSync(join(root, slug), { recursive: true });
+    writeFileSync(join(root, slug, "mark.md"), `---\n${fm}\n---\n\n${body}\n`);
+  };
+  // first laid 07-25, amended 08-20: the amend restamped `date`, and the origin
+  // claim's instant rides as `claimed_at` (the office prints it from the store)
+  put("the-amended-shed", "kind: sited\nby: elderhh\ndate: 2026-08-20\nclaimed_at: 2026-07-25\nat: { x: 66, y: 66 }\nextent: { w: 10, h: 10 }", "A shed that was here first, since repainted.");
+  put("the-new-shed", "kind: sited\nby: newhh\ndate: 2026-08-20\nat: { x: 54, y: 54 }\nextent: { w: 10, h: 10 }", "A shed laid after the parcel.");
+  put("holder-parcel", 'kind: parcel\nby: holderhh\ndate: 2026-08-10\nat: { x: 60, y: 60 }\nextent: { w: 25, h: 25 }\nconsent: {"elderhh/the-amended-shed": "opposed", "newhh/the-new-shed": "opposed"}', "My parcel.");
+  const out = runLint(dir);
+  assert.match(out, /"elderhh\/the-amended-shed" did not come after this parcel — ignored/, "the amended elder is still the elder");
+  assert.doesNotMatch(out, /"newhh\/the-new-shed"[^\n]*ignored/, "the newcomer is a word the parcel may say");
+});

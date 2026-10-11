@@ -62,7 +62,8 @@
 //              only get to declare stance on things that came after them"): a
 //              word on a mark no younger than the parcel is ignored, because the
 //              holders of the OLDER mark are the ones who speak on a newcomer,
-//              never the reverse. And it never reaches the town's own marks,
+//              never the reverse. Age is the FIRST-LAID instant on both sides,
+//              never an amend's date (Darko, 2026-10-07, POS-449). And it never reaches the town's own marks,
 //              whatever their date: the town alone is sovereign over the parcel
 //              (LOGOS the-response-function § residents: the word is for every
 //              SUB-constitutional edge into their ground). The lint names both.
@@ -135,6 +136,8 @@
 //              holder's opposition on their own parcel stands whatever the town
 //              declared neutral.
 
+import { claimInstant } from "./claim-instant.mjs";
+
 export const CONSENT_FIELD = "consent";
 export const CONSENT_WORDS = new Set(["opposed", "welcomed"]);
 export const TOWN_WORDS = new Set(["neutral", "opposed"]);
@@ -154,13 +157,16 @@ export function consentMap(mk) {
 // module imports this one.
 export const townOwnedMark = (mk) => (mk?.by ?? mk?.household) === TOWN;
 
-// A parcel's word reaches `target` only if `target` came strictly after the
-// parcel, by parsed instant (marks-fold.mjs § compareClaimOrder's reading: a
-// bare day is its midnight UTC). A date that does not parse proves nothing, so
-// it reaches nothing. Shared with the lint so both answer the same.
+// A parcel's word reaches `target` only if `target` was first laid strictly
+// after the parcel was, by parsed instant (marks-fold.mjs § compareClaimOrder's
+// reading: a bare day is its midnight UTC). Each side's age is its FIRST-LAID
+// instant, the start of its claim chain (claim-instant.mjs): an amend re-dates
+// a record, and an amend does not make an elder mark young (Darko, 2026-10-07,
+// POS-449). A date that does not parse proves nothing, so it reaches nothing.
+// Shared with the lint so both answer the same.
 export function cameAfter(target, parcelMk) {
-  const tt = Date.parse(String(target?.date ?? ""));
-  const tp = Date.parse(String(parcelMk?.date ?? ""));
+  const tt = Date.parse(String(claimInstant(target) ?? ""));
+  const tp = Date.parse(String(claimInstant(parcelMk) ?? ""));
   return Number.isFinite(tt) && Number.isFinite(tp) && tt > tp;
 }
 

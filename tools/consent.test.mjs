@@ -186,6 +186,34 @@ test("A PARCEL SPEAKS ONLY ON WHAT CAME AFTER IT: an older neighbour stands, a n
   assert.equal(onNewcomer.returned[0].authority, "parcel (absolute)");
 });
 
+test("POS-449 · AN AMEND DOES NOT MAKE AN ELDER YOUNG: an elder amended after the parcel stays out of its reach; a newcomer laid after it is in", () => {
+  // Darko, 2026-10-07: a parcel's reach reads a mark's FIRST-LAID date, the start
+  // of its claim chain (`claimed_at`, the origin claim's instant), never the date
+  // its latest amend restamped. The hall was first laid 07-20 and amended 08-05,
+  // inside a parcel laid 08-01.
+  const word = { consent: { "foreign/hall": "opposed" } };
+  const amendedElder = sited("hall", "foreign", 0, 0, 10, 10, { date: "2026-08-05T00:00:00Z", claimed_at: "2026-07-20T00:00:00Z" });
+  const elder = fold({ marks: [parcel("home", "holder", 0, 0, word), amendedElder], terrain, tick: 1, stakes: [] });
+  assert.equal(standing(elder, "foreign/hall"), true, "the hall was there first; its amend does not make it a newcomer");
+  assert.deepEqual(elder.returned, []);
+
+  // the control: first laid after the parcel, and amended later still
+  const newcomer = sited("hall", "foreign", 0, 0, 10, 10, { date: "2026-08-05T00:00:00Z", claimed_at: "2026-08-02T00:00:00Z" });
+  const onNewcomer = fold({ marks: [parcel("home", "holder", 0, 0, word), newcomer], terrain, tick: 1, stakes: [] });
+  assert.equal(standing(onNewcomer, "foreign/hall"), false, "a newcomer on the parcel answers its holder");
+  assert.equal(onNewcomer.returned[0].authority, "parcel (absolute)");
+});
+
+test("POS-449 · the PARCEL's age is its first claim too: a parcel amended later still reaches a mark laid between its claim and its amend", () => {
+  // The parcel was claimed 08-01 and moved on 08-10; the hall was laid 08-05.
+  // Read by `date`, the moved parcel would be younger than the hall and lose its
+  // word over a mark that landed on its ground after it.
+  const moved = parcel("home", "holder", 0, 0, { consent: { "foreign/hall": "opposed" }, date: "2026-08-10T00:00:00Z", claimed_at: "2026-08-01T00:00:00Z" });
+  const state = fold({ marks: [moved, sited("hall", "foreign", 0, 0, 10, 10, { date: "2026-08-05T00:00:00Z" })], terrain, tick: 1, stakes: [] });
+  assert.equal(standing(state, "foreign/hall"), false, "the hall came after the parcel's first claim");
+  assert.equal(state.returned[0].authority, "parcel (absolute)");
+});
+
 test("a parcel's word is ABSOLUTE where a commons parent's is EARNED — the same unstaked grantor, two outcomes", () => {
   // Both grantors have staked nothing. On parcel ground that changes nothing: the
   // holder's word stands on its own, and the hall is returned. On a commons edge
