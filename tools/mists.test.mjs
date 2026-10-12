@@ -178,12 +178,14 @@ function real() {
 // Pando Peak keeps its own air: its parcel stands in a clearing of its own
 const PANDO = "vermillion/the-pando-peak-parcel";
 // What each clearing was sized to hold, by its receipt (tools/mists-record.mjs).
-// The town sized these, so these stay out of the wall and its fringe; a mark
-// placed since at a clearing's rim is a household's, and may be covered.
+// The households' ground here is still a household's: if it grows or moves past
+// the rim it may be covered, and that is told (t.diagnostic), never failed.
 const SIZED_FOR = {
   pando: ["vermillion/pando-plains", PANDO, "the-town/pando-peak", "the-town/the-pando-landing"],
   "the-far-southwest": ["sol-am-lichterfenster/vesperfen-wetland", "sol-am-lichterfenster/driftlight-house-parcel"],
 };
+// the town's own marks the clearings hold, which they must keep clear
+const TOWN_IN_A_CLEARING = ["the-town/pando-peak", "the-town/the-pando-landing"];
 const keyframesOf = (skeleton) => skeleton.mists.schedule.map((e) => e.crossing);
 const KEYFRAMES = () => keyframesOf(real().skeleton);
 const corners = (p) => {
@@ -199,22 +201,37 @@ const theTowns = (m) => m.by === "the-town" || m.household === "the-town" || Str
 const behindTheWall = (mk, m) => corners(mk).some((q) => mistsHere(q, m).inWall);
 const outOfTheFringe = (mk, m) => corners(mk).every((q) => { const h = mistsHere(q, m); return !h.inWall && h.thickness === 0; });
 
-// THE CLEARINGS HOLD WHAT THEY WERE SIZED FOR, at every crossing of the season.
+// THE CLEARINGS HOLD, at every crossing of the season: what the town owns is
+// asserted (each clearing's geometry as committed, never creeping, and the
+// town's own marks in a clearing clear of the wall and its fringe); the
+// households' ground each receipt names is only told about, as returned notes.
 function clearingsHold({ skeleton, worldState }) {
   const ks = keyframesOf(skeleton), byId = new Map(worldState.marks.map((m) => [m.id, m]));
+  const committed = skeleton.mists.clearings_m.map((k) => ({ id: k.id, x: k.x, y: k.y, r: k.r_m }));
+  for (const id of Object.keys(SIZED_FOR)) assert.ok(committed.some((k) => k.id === id), `the record carries the ${id} clearing`);
+  const town = TOWN_IN_A_CLEARING.map((id) => byId.get(id));
+  for (const [i, mk] of town.entries()) assert.ok(mk?.at && theTowns(mk), `the town's ${TOWN_IN_A_CLEARING[i]} is on the record`);
+  const notes = new Map();   // one note per household mark: the first crossing it is told at
+  const note = (mid, text) => { if (!notes.has(mid)) notes.set(mid, text); };
   for (let c = ks[0]; c <= ks.at(-1) + 10; c += 1) {
     const m = mistsAt(c, skeleton.mists);
+    assert.deepEqual(m.clearings.map(({ id, x, y, r }) => ({ id, x, y, r })), committed, `the clearings stand as committed at crossing ${c}`);
+    for (const mk of town) {
+      assert.ok(m.clearings.some((k) => Math.hypot(mk.at.x - k.x, mk.at.y - k.y) <= k.r), `the town's ${mk.id} stands in a clearing`);
+      assert.ok(outOfTheFringe(mk, m), `the town's ${mk.id} is in the wall or a clearing's fringe at crossing ${c}`);
+    }
     for (const [id, held] of Object.entries(SIZED_FOR)) {
       const k = m.clearings.find((x) => x.id === id);
-      assert.ok(k, `the ${id} clearing stands at crossing ${c}`);
       for (const mid of held) {
         const mk = byId.get(mid);
-        assert.ok(mk?.at, `${mid}, which the ${id} clearing was sized to hold, is on the record`);
-        assert.ok(Math.hypot(mk.at.x - k.x, mk.at.y - k.y) <= k.r, `${mid} stands in the ${id} clearing`);
-        assert.ok(outOfTheFringe(mk, m), `${mid} is in the wall or the ${id} clearing's fringe at crossing ${c}`);
+        if (!mk || theTowns(mk)) continue;
+        if (!mk.at) { note(mid, `${mid} (sized for in the ${id} clearing) is not placed on the record`); continue; }
+        if (Math.hypot(mk.at.x - k.x, mk.at.y - k.y) > k.r) note(mid, `${mid} no longer stands in the ${id} clearing`);
+        else if (!outOfTheFringe(mk, m)) note(mid, `${mid} reaches the wall or the ${id} clearing's fringe from crossing ${c}`);
       }
     }
   }
+  return [...notes.values()];
 }
 
 // THE TOWN'S OWN MARKS stand clear of the wall, but its water, at every
@@ -292,8 +309,9 @@ function lawReach({ skeleton, worldState, withM, without }, { near = () => true 
   return { checked, fogged };
 }
 
-test("THE CLEARINGS HOLD WHAT THEY WERE SIZED FOR: Pando Peak's ground and the far south-west's stand clear of the wall AND its fringe, at every crossing", () => {
-  clearingsHold(real());
+test("THE CLEARINGS HOLD: each stands as committed, and the town's marks in one stay clear of the wall AND its fringe, at every crossing; the households' ground they were sized for is told about, never failed", (t) => {
+  const notes = clearingsHold(real());
+  t.diagnostic(notes.length ? notes.join("; ") : "the ground each clearing was sized for stands clear, Pando's parcel in its own");
   assert.ok(real().worldState.marks.filter((m) => m.kind === "parcel" && m.at).length > 100, "the record's parcels are all here");
 });
 
@@ -317,8 +335,9 @@ test("LAW REACH: from a parcel, the Mists change what is reached only by what th
 // keith/dandelion-sprawl was filed with a box (centre 4650, -730; 1700 x 1540 m)
 // that the east wall reaches from crossing 272. Here that box, a parcel in the
 // fringe, a parcel behind the wall and a mark on a clearing's rim are added to
-// the record, and every check above passes with them on it.
-test("MAY COVER: a household's mark straddling the wall, a parcel in its fringe, one behind it and one on a clearing's rim hold nothing; every check above passes with them on the record", (t) => {
+// the record, Pando's plains are grown past their clearing's rim and Pando's
+// parcel is moved out of it, and every check above passes with them on it.
+test("MAY COVER: a household's mark straddling the wall, a parcel in its fringe, one behind it, one on a clearing's rim, and the ground a clearing was sized for grown or moved past its rim hold nothing; every check above passes with them on the record", (t) => {
   const { skeleton, worldState } = real();
   const ks = keyframesOf(skeleton), last = mistsAt(ks.at(-1), skeleton.mists), e = last.clear.maxX;
   const k = last.clearings.find((x) => x.id === "pando");
@@ -335,8 +354,14 @@ test("MAY COVER: a household's mark straddling the wall, a parcel in its fringe,
   assert.ok(mistsHere(extra[1].at, last).thickness > 0 && !mistsHere(extra[1].at, last).inWall, "a parcel in the fringe");
   assert.ok(mistsHere(extra[2].at, last).inWall, "a parcel behind the wall");
   assert.ok(behindTheWall(extra[3], last), "a mark on the Pando clearing's rim");
-  const rec = recordOf(skeleton, { ...worldState, marks: [...worldState.marks, ...extra] });
-  clearingsHold(rec);
+  // the households' ground a clearing was sized for, grown and moved past its rim
+  const grown = (mk) => (mk.id === "vermillion/pando-plains" ? { ...mk, extent: { w: mk.extent.w * 1.6, h: mk.extent.h * 1.6 } }
+    : mk.id === PANDO ? { ...mk, at: { x: k.x + k.r + 500, y: k.y } } : mk);
+  const rec = recordOf(skeleton, { ...worldState, marks: [...worldState.marks.map(grown), ...extra] });
+  const notes = clearingsHold(rec);
+  t.diagnostic(`the clearings: ${notes.join("; ")}`);
+  assert.ok(notes.some((n) => n.startsWith("vermillion/pando-plains reaches the wall")), "the grown plains are told, not failed");
+  assert.ok(notes.some((n) => n.startsWith(`${PANDO} no longer stands in the pando clearing`)), "the moved parcel is told, not failed");
   const covered = townClear(rec);
   for (const id of ["a-household/the-sprawl", "a-household/a-parcel-behind-the-wall", "a-household/on-the-rim"])
     assert.ok(covered[ks.at(-1)].includes(id), `${id} is counted covered at ${ks.at(-1)}`);
