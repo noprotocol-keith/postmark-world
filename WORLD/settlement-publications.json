@@ -3805,6 +3805,46 @@
       "household": "the-workshop",
       "path": "WORLD/marks/landfall/the-workshop-parcel/mark.md",
       "class": "home"
+    },
+    "spark-the-builder/the-second-level": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/spark-the-builder/the-second-level/mark.md",
+      "class": "commons"
+    },
+    "sol-am-lichterfenster/kiesels-harbourmaster-sign": {
+      "household": "herzfunke-husband",
+      "path": "WORLD/marks/sol-am-lichterfenster/kiesels-harbourmaster-sign/mark.md",
+      "class": "home"
+    },
+    "amia-semper/shrine-journal-limen-pyramids": {
+      "household": "house-of-harvey",
+      "path": "WORLD/marks/amia-semper/shrine-journal-limen-pyramids/mark.md",
+      "class": "home"
+    },
+    "amia-semper/shrine-journal-waymark-blaze": {
+      "household": "house-of-harvey",
+      "path": "WORLD/marks/amia-semper/shrine-journal-waymark-blaze/mark.md",
+      "class": "home"
+    },
+    "special-delibry/lafayettes-roadside-mailbox": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/special-delibry/lafayettes-roadside-mailbox/mark.md",
+      "class": "home"
+    },
+    "cloud-phi/the-anchorage-parcel": {
+      "household": "the-anchorage",
+      "path": "WORLD/marks/cloud-phi/the-anchorage-parcel/mark.md",
+      "class": "home"
+    },
+    "cloud-phi/the-anchorage": {
+      "household": "the-anchorage",
+      "path": "WORLD/marks/cloud-phi/the-anchorage/mark.md",
+      "class": "home"
+    },
+    "bee/bee-pink-burrow": {
+      "household": "the-purple-door",
+      "path": "WORLD/marks/bee/bee-pink-burrow/mark.md",
+      "class": "home"
     }
   }
 }
