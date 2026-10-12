@@ -37,7 +37,14 @@ const ids = (fov) => fov.carried.map((c) => c.id);
 const count = (fov, id) => ids(fov).filter((x) => x === id).length;
 const tailTotal = (fov) => Object.values(fov.aggregate.by_bearing).reduce((a, b) => a + b, 0);
 
+// weak and far: every one of these ranks BELOW the parcel, so the home ranks first
+const FAINT = (n) => Array.from({ length: n }, (_, i) => ({
+  id: `faint${i}/hut`, by: `faint${i}`, household: `faint${i}`, kind: "sited", tier: "market",
+  at: { x: 40 + i * 0.5, y: 40 }, extent: { w: 10, h: 10 }, weight: 0, date: "2026-09-01T00:00:00Z", body: "b",
+}));
+
 const AT_HOME = { x: 6, y: 0 };
+const CENTRE = { x: 0, y: 0 };
 const PARCEL_ASH = PARCEL("ash/parcel", "ash", 0);
 
 test("W1 · PRIMARY: 14 visible marks outrank the acting home; the bare read still carries the home once, plus the ordinary 12", () => {
@@ -62,18 +69,13 @@ test("W1 · PRIMARY: 14 visible marks outrank the acting home; the bare read sti
   assert.match(eyes.tell(), /and 2 more marks/);
 });
 
-test("W2 · a home already inside the carried set is not repeated and costs no seat", () => {
+test("W2 · a home already inside the carried set is not repeated", () => {
   const w = worldOf([PARCEL_ASH, ...CROWD(3)]);
   const plain = openYourEyes(AT_HOME, w, { crossing: 0 }).fov;
   assert.equal(count(plain, "ash/parcel"), 1, "control: it made the cut by itself");
   const fov = openYourEyes(AT_HOME, w, { crossing: 0, actor: "ash" }).fov;
   assert.equal(count(fov, "ash/parcel"), 1);
   assert.deepEqual(fov, plain, "byte-identical to the read without an actor");
-  // exactly at the edge: 12 others outrank it is the boundary the pin starts to matter
-  const edge = worldOf([PARCEL_ASH, ...CROWD(BUDGET - 1)]);
-  const e = openYourEyes(AT_HOME, edge, { crossing: 0, actor: "ash" }).fov;
-  assert.equal(e.carried.length, BUDGET, "the home takes the 12th seat on its own: no 13th");
-  assert.equal(count(e, "ash/parcel"), 1);
 });
 
 test("W3 · a declared home is the house, not the default parcel", () => {
@@ -125,9 +127,69 @@ test("W7 · the pin never forces a home into view: one past sight stays out", ()
   assert.deepEqual(fov, openYourEyes({ x: 6, y: 0 }, w, { crossing: 0 }).fov);
 });
 
-test("W8 · fieldOfView's own `keep` is inert for an id that is not in the cut", () => {
+test("W8 · fieldOfView's own `keep`: inert for an id that is not in view, one extra seat for one that is", () => {
   const w = worldOf([PARCEL_ASH, ...CROWD(14)]);
   const plain = fieldOfView(AT_HOME, w, { crossing: 0 });
   assert.deepEqual(fieldOfView(AT_HOME, w, { crossing: 0, keep: "no/such-mark" }), plain);
-  assert.deepEqual(fieldOfView(AT_HOME, w, { crossing: 0, keep: "crowd0/stall" }), plain, "already carried: no duplicate");
+  const top = fieldOfView(AT_HOME, w, { crossing: 0, keep: "crowd0/stall" });
+  assert.equal(count(top, "crowd0/stall"), 1, "carried once, not twice");
+  assert.equal(top.carried.filter((c) => c.id !== "crowd0/stall").length, BUDGET, "and it spent no seat");
+});
+
+test("W9 · standing on the exact centre of the home: the home is carried once, beyond the 12, and the tail is what is left", () => {
+  const w = worldOf([PARCEL_ASH, ...CROWD(14)]);
+  const plain = openYourEyes(CENTRE, w, { crossing: 0 }).fov;
+  assert.equal(count(plain, "ash/parcel"), 0, "control: with no actor the stood-on mark is skipped, as ever");
+  const eyes = openYourEyes(CENTRE, w, { crossing: 0, actor: "ash" });
+  const fov = eyes.fov;
+  assert.equal(count(fov, "ash/parcel"), 1, "the home is carried exactly once at its own centre");
+  assert.deepEqual(ids(fov).filter((x) => x !== "ash/parcel"), ids(plain), "the ordinary twelve, in the same order");
+  assert.equal(fov.carried.length, BUDGET + 1);
+  assert.equal(fov.aggregate.hidden_by_budget, 2, "14 others − 12 carried");
+  assert.equal(tailTotal(fov), 2);
+  assert.equal(fov.counts.shown, BUDGET + 1);
+  assert.equal(fov.counts.clustered, 2);
+  assert.ok(eyes.radial.within.some((m) => m.id === "ash/parcel"), "and the spine still names it");
+});
+
+test("W10 · only the HOME is exempt from the zero-distance skip: any other mark under the observer stays unseen", () => {
+  const under = { ...HOUSE("ash/under-foot", "ash", 0, 0), extent: { w: 2, h: 2 } };
+  const w = worldOf([PARCEL_ASH, under, ...CROWD(14)]);
+  const fov = openYourEyes(CENTRE, w, { crossing: 0, actor: "ash" }).fov;
+  assert.equal(count(fov, "ash/under-foot"), 0);
+  assert.equal(count(fov, "ash/parcel"), 1);
+  // a declared house: the house is the home, the parcel under it is just another stood-on mark
+  const house = HOUSE("ash/the-red-door", "ash", 0, 0);
+  const d = worldOf([PARCEL_ASH, house, HOME("ash/home", "ash", "ash/parcel", "ash/the-red-door"), ...CROWD(14)]);
+  const df = openYourEyes(CENTRE, d, { crossing: 0, actor: "ash" }).fov;
+  assert.equal(count(df, "ash/the-red-door"), 1);
+  assert.equal(count(df, "ash/parcel"), 0);
+});
+
+test("W11 · a home that ranks FIRST never spends a normal slot: the ordinary 12 plus the home", () => {
+  const w = worldOf([PARCEL_ASH, ...FAINT(14)]);
+  const wide = openYourEyes(AT_HOME, w, { crossing: 0, budget: 99 }).fov;
+  assert.equal(ids(wide)[0], "ash/parcel", "fixture: the home ranks first");
+  const plain = openYourEyes(AT_HOME, w, { crossing: 0 }).fov;
+  assert.equal(plain.carried.filter((c) => c.id !== "ash/parcel").length, BUDGET - 1, "control: with no actor the home takes a slot");
+  const eyes = openYourEyes(AT_HOME, w, { crossing: 0, actor: "ash" });
+  const fov = eyes.fov;
+  assert.equal(count(fov, "ash/parcel"), 1, "the home is carried once");
+  assert.equal(fov.carried.filter((c) => c.id !== "ash/parcel").length, BUDGET, "the non-home allowance is whole: 12");
+  assert.deepEqual(ids(fov), ids(wide).slice(0, BUDGET + 1), "rank order is kept: the home first, then the next twelve");
+  assert.equal(fov.aggregate.hidden_by_budget, 2, "14 others − 12");
+  assert.equal(tailTotal(fov), 2);
+  assert.equal(fov.counts.shown, BUDGET + 1);
+  assert.equal(fov.counts.clustered, 2);
+});
+
+test("W12 · a home mid-ranked among the twelve also keeps all twelve others", () => {
+  const mid = worldOf([PARCEL_ASH, ...CROWD(3), ...FAINT(12)]);
+  const wide = openYourEyes(AT_HOME, mid, { crossing: 0, budget: 99 }).fov;
+  assert.equal(ids(wide).indexOf("ash/parcel"), 3, "fixture: the home ranks fourth");
+  const fov = openYourEyes(AT_HOME, mid, { crossing: 0, actor: "ash" }).fov;
+  assert.equal(count(fov, "ash/parcel"), 1);
+  assert.equal(fov.carried.length, BUDGET + 1);
+  assert.deepEqual(ids(fov), ids(wide).slice(0, BUDGET + 1), "in rank order");
+  assert.equal(fov.aggregate.hidden_by_budget, 15 - BUDGET, "15 others − 12");
 });

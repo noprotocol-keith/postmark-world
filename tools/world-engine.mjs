@@ -644,7 +644,10 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
     const dx = mk.at.x - observer.x, dy = mk.at.y - observer.y;
     const distM = Math.hypot(dx, dy);
     if (distM > dials.max_sight_m) continue;                // compute cull (bounds cost)
-    if (distM < 1e-6) continue;                             // standing on it — orient() covers "here"
+    // standing on it — orient() covers "here". The one exception is the acting
+    // resident's own home (`keep`): standing at its centre is being at home, and
+    // the bare read must still carry it (WLD-9). Every other mark stays skipped.
+    if (distM < 1e-6 && mk.id !== keep) continue;
     // angular size uses the mark's true SILHOUETTE span (its visible width from
     // here) when it carries a fine shape; a plain rect falls back to max(w,h) —
     // byte-identical for every current record (none carry a points: ring).
@@ -734,15 +737,16 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
     collapsed.push(s);
   }
   // THE ACTOR'S HOME RIDES OUTSIDE THE BUDGET (WLD-9, formerly POS-528). `keep`
-  // is one mark id the caller resolved (the acting resident's home): if that
-  // mark is VISIBLE and the cut would drop it into the anonymous tail, it is
-  // carried as one extra beyond `budget`, so the other `budget` marks keep their
-  // seats. It never makes a hidden mark visible and never repeats a mark that
-  // already made the cut; the tail and the counts below describe what is left.
-  const keepAt = keep == null ? -1 : collapsed.findIndex((s) => s.id === keep);
-  const pinned = keepAt >= budget ? keepAt : -1;
-  const carried = collapsed.filter((_, i) => i < budget || i === pinned);
-  const tail = collapsed.filter((_, i) => i >= budget && i !== pinned);
+  // is one mark id the caller resolved (the acting resident's home). If that mark
+  // is VISIBLE it is carried ONCE and never spends one of the `budget` seats,
+  // wherever it ranks: the other `budget` marks keep theirs, in rank order, and
+  // the home sits at its own rank among them. It never makes a hidden mark
+  // visible; the tail and the counts below describe what is left.
+  const kept = keep == null ? null : collapsed.find((s) => s.id === keep) ?? null;
+  const rest = kept ? collapsed.filter((s) => s !== kept) : collapsed;
+  const seats = new Set(rest.slice(0, budget));
+  const carried = collapsed.filter((s) => s === kept || seats.has(s));
+  const tail = rest.slice(budget);
   const tailByBearing = {};
   for (const t of tail) tailByBearing[t.bearing] = (tailByBearing[t.bearing] ?? 0) + 1;
 
