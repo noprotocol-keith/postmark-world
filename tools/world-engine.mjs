@@ -581,10 +581,10 @@ export function lodScore({ extentM, distM, weight = 0, dials = DIALS, dimming = 
 // observer: { x, y, name? }
 // world:    { marks, terrain, heightfield, light, fogCeilingM } — marks are the
 //           FOLDED marks (id, kind, at, extent, weight, body, signal?, household).
-// opts:     { crossing, budget }
+// opts:     { crossing, budget, keep }   keep: a mark id carried beyond the budget when visible
 // Returns a structured telling: the observer's state, the ranked visible marks
 // grouped by bearing→band, far-features on the horizon, and the aggregate tail.
-export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS } = {}) {
+export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, keep = null } = {}) {
   const { marks, terrain, heightfield, light, fogCeilingM } = world;
   const fog = fogModel(crossing, dials);
   // the Mists (POS-466): null before the schedule's first crossing, and then
@@ -733,8 +733,16 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
     }
     collapsed.push(s);
   }
-  const carried = collapsed.slice(0, budget);
-  const tail = collapsed.slice(budget);
+  // THE ACTOR'S HOME RIDES OUTSIDE THE BUDGET (WLD-9, formerly POS-528). `keep`
+  // is one mark id the caller resolved (the acting resident's home): if that
+  // mark is VISIBLE and the cut would drop it into the anonymous tail, it is
+  // carried as one extra beyond `budget`, so the other `budget` marks keep their
+  // seats. It never makes a hidden mark visible and never repeats a mark that
+  // already made the cut; the tail and the counts below describe what is left.
+  const keepAt = keep == null ? -1 : collapsed.findIndex((s) => s.id === keep);
+  const pinned = keepAt >= budget ? keepAt : -1;
+  const carried = collapsed.filter((_, i) => i < budget || i === pinned);
+  const tail = collapsed.filter((_, i) => i >= budget && i !== pinned);
   const tailByBearing = {};
   for (const t of tail) tailByBearing[t.bearing] = (tailByBearing[t.bearing] ?? 0) + 1;
 
