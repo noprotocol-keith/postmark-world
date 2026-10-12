@@ -193,3 +193,59 @@ test("W12 · a home mid-ranked among the twelve also keeps all twelve others", (
   assert.deepEqual(ids(fov), ids(wide).slice(0, BUDGET + 1), "in rank order");
   assert.equal(fov.aggregate.hidden_by_budget, 15 - BUDGET, "15 others − 12");
 });
+
+// ── WLD-9 completion: the visible home when it is clustered, and the exact-centre prose ──
+
+const FAR_PARCEL = (ext) => ({ ...PARCEL("ash/parcel", "ash", 800), extent: { w: ext, h: ext } });
+const FAR_SITED = (id, x, y, ext, weight = 0) => ({ ...HOUSE(id, "ash", x, y), extent: { w: ext, h: ext }, weight });
+const AFAR = { x: 0, y: 0 };
+const more = (fov, id) => fov.carried.find((c) => c.id === id)?.clusteredCount ?? 0;
+
+test("W13 · a visible home folded into its household's cluster as a NON-representative is lifted out and carried alone", () => {
+  const w = worldOf([FAR_PARCEL(25), FAR_SITED("ash/hall", 810, 10, 60, 20), FAR_SITED("ash/barn", 790, -10, 10)]);
+  const plain = openYourEyes(AFAR, w, { crossing: 0 }).fov;
+  assert.deepEqual(ids(plain), ["ash/hall"], "control: with no actor the household is one line, the home folded inside it");
+  assert.equal(more(plain, "ash/hall"), 2);
+  const fov = openYourEyes(AFAR, w, { crossing: 0, actor: "ash" }).fov;
+  assert.equal(count(fov, "ash/parcel"), 1, "the home is carried once, alone");
+  assert.equal(more(fov, "ash/parcel"), 0, "and stands for no cluster");
+  assert.equal(more(fov, "ash/hall"), 1, "the remaining cluster is recounted WITHOUT the home: 2 -> 1");
+  assert.equal(fov.counts.shown, 2);
+  assert.equal(fov.counts.visible, 3);
+  assert.equal(fov.aggregate.hidden_by_budget, 0);
+});
+
+test("W14 · a visible home that would have been the REPRESENTATIVE hands the cluster to the next mark", () => {
+  const w = worldOf([FAR_PARCEL(80), FAR_SITED("ash/hall", 810, 10, 20), FAR_SITED("ash/barn", 790, -10, 10)]);
+  const plain = openYourEyes(AFAR, w, { crossing: 0 }).fov;
+  assert.equal(more(plain, "ash/parcel"), 2, "control: the home led the cluster of three");
+  const fov = openYourEyes(AFAR, w, { crossing: 0, actor: "ash" }).fov;
+  assert.deepEqual(ids(fov).sort(), ["ash/hall", "ash/parcel"]);
+  assert.equal(more(fov, "ash/parcel"), 0, "the home no longer carries the others");
+  assert.equal(more(fov, "ash/hall"), 1, "the next-most-prominent mark leads what is left (barn)");
+  assert.equal(fov.counts.shown, 2);
+  assert.equal(fov.counts.clustered, 0, "no other mark is lost or counted twice");
+});
+
+test("W15 · at the exact centre the telling says HERE, never a bearing and \"0 m\"", () => {
+  const noBody = { ...PARCEL_ASH, body: "" };      // a home with no body is not told by the spine, so it keeps a band line
+  const w = worldOf([noBody, ...CROWD(3)]);
+  const told = openYourEyes(CENTRE, w, { crossing: 0, actor: "ash" }).tell();
+  const line = told.split("\n").find((l) => l.includes("[ash/parcel,"));
+  assert.ok(line, `the home is told (${told})`);
+  assert.match(line, /^ {2}· here — ash\/parcel /, line);
+  assert.doesNotMatch(line, /\b0 m\b|\b(N|NE|E|SE|S|SW|W|NW|[NSEW]{2,3}) —/, "no distance, no bearing");
+  // a home that HAS a body is told by the spine ("You are within …"), as before, and never as 0 m
+  const told2 = openYourEyes(CENTRE, worldOf([PARCEL_ASH, ...CROWD(3)]), { crossing: 0, actor: "ash" }).tell();
+  assert.match(told2, /You are within b/);
+  assert.doesNotMatch(told2, /\b0 m\b/);
+});
+
+test("W16 · ordinary lines and the no-actor telling are unchanged: every other mark keeps `N m BEARING —`", () => {
+  const w = worldOf([{ ...PARCEL_ASH, body: "" }, ...CROWD(3)]);
+  const plain = openYourEyes(CENTRE, w, { crossing: 0 }).tell();
+  assert.ok(!/ here — /.test(plain), "no `here` without the acting home");
+  assert.match(plain, /· \d+ m [NSEW]{1,3} — b +\[crowd/);
+  const withActor = openYourEyes(CENTRE, w, { crossing: 0, actor: "ash" }).tell();
+  for (const l of plain.split("\n").filter((l) => /· \d+ m [NSEW]{1,3} — b +\[crowd/.test(l))) assert.ok(withActor.includes(l), `unchanged: ${l}`);
+});

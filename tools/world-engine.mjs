@@ -686,6 +686,9 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
       elevM: +targetH.toFixed(1), aboveFogTarget: targetH >= fogCeilingM,
       occluded: !los.visible, occludeAt: los.occludeAt, dim: +dimming.toFixed(2), score,
       visible,
+      // the resident is standing ON this mark (only the acting home can get this far): the
+      // telling says HERE, not a bearing and "0 m"
+      ...(distM < 1e-6 ? { here: true } : {}),
       ...(mists ? { mistHidden } : {}),
     });
   }
@@ -729,7 +732,9 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
   const collapsed = [];
   for (const s of ranked) {
     const far = s.distM > dials.cluster_beyond_m;
-    if (far && s.household && !s.signal) {
+    // the acting home is never folded into (or made the rep of) its household's cluster: it
+    // is carried alone below, and the rest of the household clusters without it (WLD-9)
+    if (far && s.household && !s.signal && s.id !== keep) {
       const rep = repByHh.get(s.household);
       if (rep) { rep.clusteredCount = (rep.clusteredCount ?? 0) + 1; continue; }
       repByHh.set(s.household, s);

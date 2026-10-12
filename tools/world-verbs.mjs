@@ -549,7 +549,7 @@ function renderTelling(state, radial, fov) {
       const occ = m.occluded && m.signal ? " — its footing is hidden, only the light shows" : "";
       const dim = m.dim < 0.5 ? " — dim, at the dark edge" : "";
       const more = m.clusteredCount ? ` (+${m.clusteredCount} more of ${m.household}'s — investigate)` : "";
-      parts.push(`  · ${m.distM} m ${m.bearing} — ${firstLine(m.body) || m.id}${lit}${occ}${dim}${more}  [${m.id}, ✦${m.weight}]`);
+      parts.push(`  · ${m.here ? "here" : `${m.distM} m ${m.bearing}`} — ${firstLine(m.body) || m.id}${lit}${occ}${dim}${more}  [${m.id}, ✦${m.weight}]`);
     }
     if (parts.length) { L.push(`${bandHeading(bandName)}:`); L.push(...parts); }
   }
