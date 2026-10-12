@@ -15,6 +15,7 @@ import {
   mistsAt, mistsHere, mistsBlock,
   bearingDeg, quantizeBearing, distanceBand, DIALS,
 } from "./world-engine.mjs";
+import { homeOf } from "./where-is.mjs"; // the ONE home resolver (declared, own parcel, household)
 import {
   marksContain, marksOverlapArea, overlapArea, pointInPolygon, pointInRect, polygonOf, rect,
 } from "./geometry.mjs"; // the ONE containment definition — pure, browser-safe (no node:*)
@@ -65,8 +66,13 @@ export function orient(state, world, { crossing = 0, dials = DIALS } = {}) {
 // ranked by angular size modulated by stamps, capped at the context budget, fog
 // and darkness applied, signal-marks cutting through. Returns both the raw fov
 // (for callers) and a `tell()` that renders the human/agent-facing prose.
-export function openYourEyes(state, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS } = {}) {
-  const fov = fieldOfView(state, world, { crossing, budget, dials });
+//
+// `actor` is the handle of the resident the eyes belong to (WLD-9): their home,
+// as tools/where-is.mjs § homeOf resolves it, is carried beyond the budget when
+// it is in view. No actor, or a home that resolves to nowhere, changes nothing.
+export function openYourEyes(state, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, actor = null } = {}) {
+  const home = actor ? homeOf(actor, world) : null;
+  const fov = fieldOfView(state, world, { crossing, budget, dials, keep: home?.placed ? home.mark_id : null });
   const radial = radialSerialize(fov);
   radial.within = containmentChain(state, world.marks); // the spine: root → inward, parents first
   fov.within = radial.within;
@@ -543,7 +549,7 @@ function renderTelling(state, radial, fov) {
       const occ = m.occluded && m.signal ? " — its footing is hidden, only the light shows" : "";
       const dim = m.dim < 0.5 ? " — dim, at the dark edge" : "";
       const more = m.clusteredCount ? ` (+${m.clusteredCount} more of ${m.household}'s — investigate)` : "";
-      parts.push(`  · ${m.distM} m ${m.bearing} — ${firstLine(m.body) || m.id}${lit}${occ}${dim}${more}  [${m.id}, ✦${m.weight}]`);
+      parts.push(`  · ${m.here ? "here" : `${m.distM} m ${m.bearing}`} — ${firstLine(m.body) || m.id}${lit}${occ}${dim}${more}  [${m.id}, ✦${m.weight}]`);
     }
     if (parts.length) { L.push(`${bandHeading(bandName)}:`); L.push(...parts); }
   }

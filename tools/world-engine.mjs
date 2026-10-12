@@ -581,10 +581,10 @@ export function lodScore({ extentM, distM, weight = 0, dials = DIALS, dimming = 
 // observer: { x, y, name? }
 // world:    { marks, terrain, heightfield, light, fogCeilingM } — marks are the
 //           FOLDED marks (id, kind, at, extent, weight, body, signal?, household).
-// opts:     { crossing, budget }
+// opts:     { crossing, budget, keep }   keep: a mark id carried beyond the budget when visible
 // Returns a structured telling: the observer's state, the ranked visible marks
 // grouped by bearing→band, far-features on the horizon, and the aggregate tail.
-export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS } = {}) {
+export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, keep = null } = {}) {
   const { marks, terrain, heightfield, light, fogCeilingM } = world;
   const fog = fogModel(crossing, dials);
   // the Mists (POS-466): null before the schedule's first crossing, and then
@@ -644,7 +644,10 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
     const dx = mk.at.x - observer.x, dy = mk.at.y - observer.y;
     const distM = Math.hypot(dx, dy);
     if (distM > dials.max_sight_m) continue;                // compute cull (bounds cost)
-    if (distM < 1e-6) continue;                             // standing on it — orient() covers "here"
+    // standing on it — orient() covers "here". The one exception is the acting
+    // resident's own home (`keep`): standing at its centre is being at home, and
+    // the bare read must still carry it (WLD-9). Every other mark stays skipped.
+    if (distM < 1e-6 && mk.id !== keep) continue;
     // angular size uses the mark's true SILHOUETTE span (its visible width from
     // here) when it carries a fine shape; a plain rect falls back to max(w,h) —
     // byte-identical for every current record (none carry a points: ring).
@@ -683,6 +686,9 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
       elevM: +targetH.toFixed(1), aboveFogTarget: targetH >= fogCeilingM,
       occluded: !los.visible, occludeAt: los.occludeAt, dim: +dimming.toFixed(2), score,
       visible,
+      // the resident is standing ON this mark (only the acting home can get this far): the
+      // telling says HERE, not a bearing and "0 m"
+      ...(distM < 1e-6 ? { here: true } : {}),
       ...(mists ? { mistHidden } : {}),
     });
   }
@@ -726,15 +732,26 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
   const collapsed = [];
   for (const s of ranked) {
     const far = s.distM > dials.cluster_beyond_m;
-    if (far && s.household && !s.signal) {
+    // the acting home is never folded into (or made the rep of) its household's cluster: it
+    // is carried alone below, and the rest of the household clusters without it (WLD-9)
+    if (far && s.household && !s.signal && s.id !== keep) {
       const rep = repByHh.get(s.household);
       if (rep) { rep.clusteredCount = (rep.clusteredCount ?? 0) + 1; continue; }
       repByHh.set(s.household, s);
     }
     collapsed.push(s);
   }
-  const carried = collapsed.slice(0, budget);
-  const tail = collapsed.slice(budget);
+  // THE ACTOR'S HOME RIDES OUTSIDE THE BUDGET (WLD-9, formerly POS-528). `keep`
+  // is one mark id the caller resolved (the acting resident's home). If that mark
+  // is VISIBLE it is carried ONCE and never spends one of the `budget` seats,
+  // wherever it ranks: the other `budget` marks keep theirs, in rank order, and
+  // the home sits at its own rank among them. It never makes a hidden mark
+  // visible; the tail and the counts below describe what is left.
+  const kept = keep == null ? null : collapsed.find((s) => s.id === keep) ?? null;
+  const rest = kept ? collapsed.filter((s) => s !== kept) : collapsed;
+  const seats = new Set(rest.slice(0, budget));
+  const carried = collapsed.filter((s) => s === kept || seats.has(s));
+  const tail = rest.slice(budget);
   const tailByBearing = {};
   for (const t of tail) tailByBearing[t.bearing] = (tailByBearing[t.bearing] ?? 0) + 1;
 
