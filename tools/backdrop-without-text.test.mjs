@@ -129,7 +129,11 @@ async function readGround(port) {
     const svg = document.querySelector(".wv-minimap > svg");
     if (!svg) return { mounted: false };
     const VIEWER_LAYERS = "#wv-overlay, #wv-grid-layer, #wv-fp-layer, #wv-convo-layer, #wv-hl-layer,"
-      + " #wv-walk-layer, #wv-walk-preview-layer, #wv-convo-hover-layer, #wv-mist-layer, #wv-placed-art-layer";
+      + " #wv-walk-layer, #wv-walk-preview-layer, #wv-convo-hover-layer, #wv-mist-layer, #wv-placed-art-layer,"
+      // THE MISTS ARE THE VIEWER'S TOO (WLD-37). Their painted drift, the sheet's
+      // feather and its mask are images the viewer draws once the Mists' schedule
+      // reaches them, so a crossing number, not a code change, turned this red.
+      + " #wv-mists-layer, .wv-sheet-feather, .wv-sheet-unfeather";
     return {
       mounted: true,
       ground: svg.getAttribute("data-ground"),
