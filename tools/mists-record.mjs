@@ -18,6 +18,8 @@ export const MISTS = {
   schedule: [
     { crossing: 244, front_m: 0, veil: 0.1 },
     { crossing: 272, front_m: 390, veil: 0.3 },
-    { crossing: 282, front_m: 780, veil: 0.5 },
+    // 780 → 760 (S105, 2026-10-12): a parcel placed after the border was sized (bee/bee-pink-burrow, x 4667)
+    // touched the fringe at this keyframe only; 760 keeps every parcel clear by about 10 m. No past crossing is re-told.
+    { crossing: 282, front_m: 760, veil: 0.5 },
   ],
 };
