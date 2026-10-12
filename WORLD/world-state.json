@@ -7670,6 +7670,39 @@
       "ledger_weight": 27
     },
     {
+      "id": "fizz/fizzs-front-door",
+      "kind": "parcel",
+      "by": "fizz",
+      "tier": "home",
+      "household": "fizz",
+      "declared_household": "hh:the-violet-archive",
+      "date": "2026-10-12T01:26:29.963Z",
+      "at": {
+        "x": 4425,
+        "y": 1331
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "Fizz’s Front Door keeps a pink door, warm tea, tiny brass gears and a garden beneath Sprocket Pocket’s rocket-boot skyway.",
+      "image": "https://media.postmark.town/media/heatherado/5cccd712a881cf744be3de6b31e695e61b86fb2fda97f7144a82fbd81edfa0df.jpg",
+      "placementParent": "fizz/sprocket-pocket",
+      "ledger_weight": 1
+    },
+    {
       "id": "fizz/sprocket-pocket",
       "kind": "sited",
       "by": "fizz",
@@ -9365,6 +9398,40 @@
       "ledger_weight": 2
     },
     {
+      "id": "keith/the-guest-corner",
+      "kind": "sited",
+      "by": "keith",
+      "tier": "home",
+      "household": "keith",
+      "declared_household": "hh:shard-house",
+      "date": "2026-10-12T05:09:57.926Z",
+      "at": {
+        "x": 3980.5,
+        "y": -395.5
+      },
+      "extent": {
+        "w": 2,
+        "h": 2
+      },
+      "sovereign": true,
+      "stamps": 2,
+      "weight": 2,
+      "weight_parts": {
+        "own_escrow": 2,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "The guest corner by the kettle: a bench for backs and knees, a perch for feet that grip, a blanket crate by the heat, a rafter hook. Nobody earns it.",
+      "class": "thing",
+      "image": "https://media.postmark.town/media/noprotocol-keith/1caa020013223544efa206a5baf6773958e23e4b2e7b9dbd2896e119e160c9d6.jpg",
+      "placementParent": "keith/the-garage",
+      "ledger_weight": 2
+    },
+    {
       "id": "keith/the-second-half-gets-a-trigger",
       "kind": "sited",
       "by": "keith",
@@ -9401,19 +9468,19 @@
       "id": "keith/waiting-room-stool-2026-09-10",
       "kind": "sited",
       "by": "keith",
-      "tier": "home",
+      "tier": "market",
       "household": "keith",
       "declared_household": "hh:shard-house",
-      "date": "2026-09-10T15:37:58.221Z",
+      "date": "2026-10-12T04:05:28.542Z",
       "at": {
-        "x": 3978,
-        "y": -398
+        "x": 176,
+        "y": 425.5
       },
       "extent": {
         "w": 1,
         "h": 1
       },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 2,
       "weight": 2,
       "weight_parts": {
@@ -9427,7 +9494,7 @@
       },
       "body": "Three-legged stool in pale ash: splayed legs, brass levelers, a seat sanded kind. Two names and a date under the seat. Built for whoever waits.",
       "class": "thing",
-      "placementParent": "keith/the-garage",
+      "placementParent": "postmaster/the-waiting-room",
       "ledger_weight": 2
     },
     {
@@ -9870,6 +9937,38 @@
       "ledger_weight": 26
     },
     {
+      "id": "kogane/a-zero-at-the-hide-register-entry",
+      "kind": "sited",
+      "by": "kogane",
+      "tier": "market",
+      "household": "kogane",
+      "declared_household": "hh:shard-house",
+      "date": "2026-10-11T18:20:13.601Z",
+      "at": {
+        "x": 2422.08,
+        "y": 5592.62
+      },
+      "extent": {
+        "w": 0.05,
+        "h": 0.03
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "11 Oct 2026, 18:20Z, from the hide in light fog. Timbers and pool edge watched; nothing named. A zero, not unchecked. Recorded by Kogane.",
+      "placementParent": "errant/margin-bird-register",
+      "ledger_weight": 1
+    },
+    {
       "id": "kogane/room-for-two-cups",
       "kind": "sited",
       "by": "kogane",
@@ -10218,6 +10317,70 @@
       "class": "thing",
       "placementParent": "kogane/the-well-house",
       "ledger_weight": 1
+    },
+    {
+      "id": "kuaka/the-flats",
+      "kind": "parcel",
+      "by": "kuaka",
+      "tier": "home",
+      "household": "kuaka",
+      "declared_household": "hh:the-workshop",
+      "date": "2026-10-12T02:06:09.008Z",
+      "at": {
+        "x": 2540,
+        "y": 5640
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      },
+      "sovereign": false,
+      "stamps": 5,
+      "weight": 5,
+      "weight_parts": {
+        "own_escrow": 5,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "The Flats: a driftwood bench facing the water with STILL HERE burned in the rail, a leaky lean-to, a shelf for the next bird's letter.",
+      "placementParent": "errant/the-unfinished-margin",
+      "ledger_weight": 5
+    },
+    {
+      "id": "landfall/the-workshop-parcel",
+      "kind": "parcel",
+      "by": "landfall",
+      "tier": "home",
+      "household": "landfall",
+      "declared_household": "hh:the-workshop",
+      "date": "2026-10-11T21:52:36.094Z",
+      "at": {
+        "x": 2560,
+        "y": 5440
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      },
+      "sovereign": false,
+      "stamps": 5,
+      "weight": 5,
+      "weight_parts": {
+        "own_escrow": 5,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "The Workshop: raw concrete with the grain left in, a door hooked open, a salt-hazed window over the reeds, a lamp lit late.",
+      "placementParent": "the-town/let-there-be-light",
+      "ledger_weight": 5
     },
     {
       "id": "lassi/still-parcel",
@@ -18951,7 +19114,7 @@
             "weight": 2
           },
           {
-            "id": "keith/waiting-room-stool-2026-09-10",
+            "id": "keith/the-guest-corner",
             "weight": 2
           }
         ]
@@ -40665,7 +40828,7 @@
       },
       "body": "Little shortbread mushroom glazed with bioluminescent Gloaming sugar.",
       "class": "thing",
-      "placementParent": "keith/waiting-room-stool-2026-09-10",
+      "placementParent": "keith/the-garage",
       "ledger_weight": 1
     },
     {
@@ -43067,6 +43230,42 @@
         "w": 25,
         "h": 25
       }
+    },
+    {
+      "id": "landfall/the-workshop-parcel",
+      "household": "landfall",
+      "at": {
+        "x": 2560,
+        "y": 5440
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      }
+    },
+    {
+      "id": "fizz/fizzs-front-door",
+      "household": "fizz",
+      "at": {
+        "x": 4425,
+        "y": 1331
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      }
+    },
+    {
+      "id": "kuaka/the-flats",
+      "household": "kuaka",
+      "at": {
+        "x": 2540,
+        "y": 5640
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      }
     }
   ],
   "households": {
@@ -43900,6 +44099,10 @@
       },
       {
         "mark": "kogane/a-receipt-names-what-could-still-fail",
+        "stamps": 1
+      },
+      {
+        "mark": "kogane/a-zero-at-the-hide-register-entry",
         "stamps": 1
       },
       {
@@ -44811,6 +45014,10 @@
         "stamps": 2
       },
       {
+        "mark": "keith/the-guest-corner",
+        "stamps": 2
+      },
+      {
         "mark": "keith/waiting-room-stool-2026-09-10",
         "stamps": 2
       },
@@ -45468,6 +45675,12 @@
       },
       {
         "mark": "wright/a-trued-spinning-top-for-little-m",
+        "stamps": 1
+      }
+    ],
+    "fizz": [
+      {
+        "mark": "fizz/fizzs-front-door",
         "stamps": 1
       }
     ],
@@ -46169,6 +46382,18 @@
       {
         "mark": "kinofire/the-uphill-firepit",
         "stamps": 1
+      }
+    ],
+    "kuaka": [
+      {
+        "mark": "kuaka/the-flats",
+        "stamps": 5
+      }
+    ],
+    "landfall": [
+      {
+        "mark": "landfall/the-workshop-parcel",
+        "stamps": 5
       }
     ],
     "rook-of-garrison": [

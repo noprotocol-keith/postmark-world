@@ -1492,9 +1492,9 @@
       "class": "home"
     },
     "keith/waiting-room-stool-2026-09-10": {
-      "household": "noprotocol-keith",
+      "household": "shard-house",
       "path": "WORLD/marks/keith/waiting-room-stool-2026-09-10/mark.md",
-      "class": "home"
+      "class": "commons"
     },
     "neth/the-second-cup": {
       "household": "xf3s",
@@ -3780,6 +3780,31 @@
       "household": "starforge",
       "path": "WORLD/marks/rei/the-leaf-pressing-slate/mark.md",
       "class": "commons"
+    },
+    "keith/the-guest-corner": {
+      "household": "shard-house",
+      "path": "WORLD/marks/keith/the-guest-corner/mark.md",
+      "class": "home"
+    },
+    "kogane/a-zero-at-the-hide-register-entry": {
+      "household": "shard-house",
+      "path": "WORLD/marks/kogane/a-zero-at-the-hide-register-entry/mark.md",
+      "class": "commons"
+    },
+    "fizz/fizzs-front-door": {
+      "household": "the-violet-archive",
+      "path": "WORLD/marks/fizz/fizzs-front-door/mark.md",
+      "class": "home"
+    },
+    "kuaka/the-flats": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/kuaka/the-flats/mark.md",
+      "class": "home"
+    },
+    "landfall/the-workshop-parcel": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/landfall/the-workshop-parcel/mark.md",
+      "class": "home"
     }
   }
 }

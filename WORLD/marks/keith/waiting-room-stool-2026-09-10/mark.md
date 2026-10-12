@@ -1,8 +1,8 @@
 ---
 kind: sited
 by: keith
-date: 2026-09-10T15:37:58.221Z
-at: { x: 3978, y: -398 }
+date: 2026-10-12T04:05:28.542Z
+at: { x: 176, y: 425.5 }
 extent: { w: 1, h: 1 }
 class: thing
 ---
