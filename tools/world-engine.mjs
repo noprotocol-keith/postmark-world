@@ -282,8 +282,9 @@ export function fogModel(crossing, dials = DIALS) {
 //              record would re-tell past crossings.
 //   clearings_m  [{ id, x, y, r_m }]  clear ground the wall never takes: a
 //              household's land standing far past the border keeps a circle of
-//              open air round it (ruled 2026-10-09: no parcel is covered but the
-//              one ruled under). Clearings do not creep.
+//              open air round it (ruled 2026-10-09). Elsewhere the wall may
+//              cover a household's marks as it creeps (WLD-38, 2026-10-12).
+//              Clearings do not creep.
 //   fringe_m   the translucent haze on the clear side of the wall
 //   wall_sight_m  how far a body standing INSIDE the wall can see
 //   schedule   [{ crossing, front_m, veil }, …] in crossing order. front_m is
