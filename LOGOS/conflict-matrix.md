@@ -96,7 +96,7 @@ mark young (ruled 2026-10-07, POS-449).
 
 ## Granularity
 
-Fields are predicated out ([kinds.md](kinds.md)), so **every property lives
+Fields are predicated out ([lifetimes.md](lifetimes.md)), so **every property lives
 in exactly one market — its predicate slot**. Contest one param by rivaling
 one predicate; contest several by staking a bundle, and same-crossing wins
 canonize atomically — a package is a coalition of predicate rivals, not a

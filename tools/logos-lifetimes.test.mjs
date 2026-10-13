@@ -1,0 +1,93 @@
+// logos-lifetimes.test.mjs — WLD-39: standing / living / fleeting are LIFETIMES,
+// not kinds (Darko, Sitting A, 2026-10-12; scope ruled by Wright
+// 2026-10-13T08:57:47.829Z). The doctrine lives at LOGOS/lifetimes.md; the old
+// path LOGOS/kinds.md stays for a season as a pointer, so historical mentions
+// resolve. A mark's `kind` still means only how it stands.
+//
+// Reads only the LOGOS documents, WORLD/marks/SCHEMA.md and tools/mark-lint.mjs —
+// never a mark record, a daily or a receipt. The records that cite the old path
+// are the lint's to check both ways (mark-lint.test.mjs § the channel is clean).
+
+import test from "node:test";
+import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const read = (rel) => readFileSync(join(ROOT, rel), "utf8");
+
+// The LIVE documents and code that cite the lifetime doctrine (the owner's
+// allowed set). Historical dailies, receipts and record bodies are not here,
+// by ruling: they may keep the old name, and the redirect resolves it.
+const LIVE = [
+  "LOGOS/DRAFT-REPORT.md", "LOGOS/INDEX.md", "LOGOS/RECONCILIATION.md", "LOGOS/STATUS.md",
+  "LOGOS/conflict-matrix.md", "LOGOS/graph/metamodel.json", "WRITE-REGISTRY.md", "tools/mark-lint.mjs",
+];
+const OLD = /(?<![\w/.-])(?:LOGOS\/)?kinds\.md/g;
+const RENDERED_IDS = ["the-town/the-standing-question", "the-town/the-fading", "the-town/the-human-lane"];
+const renderedLine = (text) => {
+  const lines = text.split(/\r?\n/);
+  const i = lines.findIndex((l) => /^Rendered in the world\b/.test(l));
+  if (i < 0) return null;
+  let span = lines[i];
+  for (let j = i + 1; !/\.\s*$/.test(span) && j < lines.length && lines[j].trim() !== ""; j++) span += " " + lines[j];
+  return span;
+};
+
+test("the doctrine is at LOGOS/lifetimes.md, titled for lifetimes — no canonical 'The kinds' heading", () => {
+  const doc = read("LOGOS/lifetimes.md");
+  const title = doc.split("\n")[0];
+  assert.match(title, /^# Lifetimes\b/);
+  assert.doesNotMatch(title, /kinds/i);
+  assert.match(doc, /standing, living and fleeting are \*\*lifetimes\*\*, not kinds/i);
+  assert.match(doc, /^## The node$/m, "the doctrine itself moved with it");
+});
+
+test("the old path is a pointer, not a second doctrine: it resolves to lifetimes.md and keeps only the rendering its records still cite", () => {
+  const stub = read("LOGOS/kinds.md");
+  const links = [...stub.matchAll(/\]\(([^)]+)\)/g)].map((m) => m[1]);
+  assert.ok(links.length && links.every((l) => l === "lifetimes.md"), `links: ${links}`);
+  assert.ok(existsSync(join(ROOT, "LOGOS", "lifetimes.md")));
+  assert.ok(stub.split("\n").length < 20, "a short pointer");
+  assert.doesNotMatch(stub, /^## /m, "no doctrine sections");
+  // the three marks that render the doctrine still cite this path (their records
+  // are not rewritten), and the lint holds source and Rendered line to each other
+  const here = renderedLine(stub);
+  assert.ok(here, "the Rendered line stays with the path its marks cite");
+  assert.deepEqual([...here.matchAll(/`([^`]+)`/g)].map((m) => m[1]), RENDERED_IDS);
+  assert.equal(renderedLine(read("LOGOS/lifetimes.md")), null,
+    "lifetimes.md declares no rendering of its own: the marks cite kinds.md, and the lint would hold a second declaration to marks that do not cite it back");
+});
+
+test("no LIVE document or code links the old path; every reference names lifetimes.md", () => {
+  for (const rel of LIVE) {
+    const hits = read(rel).match(OLD) ?? [];
+    assert.deepEqual(hits, [], `${rel} still names the old path`);
+    assert.match(read(rel), /lifetimes\.md/, `${rel} names the new one`);
+  }
+});
+
+test("the metamodel parses, and every prose pointer names a file that exists", () => {
+  const graph = JSON.parse(read("LOGOS/graph/metamodel.json"));
+  const prose = [];
+  (function walk(v) { if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) { if (k === "prose" && typeof x === "string") prose.push(x); else walk(x); } })(graph);
+  assert.ok(prose.includes("LOGOS/lifetimes.md"));
+  for (const p of prose) assert.ok(existsSync(join(ROOT, p.split("#")[0])), `prose → ${p}`);
+});
+
+test("the relative links into and out of the new document resolve", () => {
+  for (const rel of ["LOGOS/lifetimes.md", "LOGOS/kinds.md", "LOGOS/INDEX.md", "LOGOS/conflict-matrix.md", "WORLD/marks/SCHEMA.md"]) {
+    for (const [, target] of read(rel).matchAll(/\]\(([^)#:]+\.md)(?:#[^)]*)?\)/g))
+      assert.ok(existsSync(join(ROOT, dirname(rel), target)), `${rel} → ${target}`);
+  }
+});
+
+test("a mark's `kind` is unchanged: SCHEMA says it is how a mark stands, the field and its five values are what they were", () => {
+  const schema = read("WORLD/marks/SCHEMA.md");
+  assert.match(schema, /The field `kind` describes how a mark stands — sited, predicated, parcel,\nnaming, or `class`/);
+  assert.match(schema, /^\| `kind` \| required \| required \| required \| required \|$/m, "the frontmatter table row is untouched");
+  const lint = read("tools/mark-lint.mjs");
+  assert.match(lint, /^const KINDS = new Set\(\["sited", "predicated", "naming", "parcel", "class"\]\);$/m);
+  assert.match(lint, /cite\("the-town\/the-kinds"\)/, "historical mark ids keep their names");
+});

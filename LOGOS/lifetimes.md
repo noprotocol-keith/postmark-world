@@ -1,10 +1,18 @@
-# The kinds — one node, three lifetimes
+# Lifetimes — one node, three ways of lasting
 
 *Marks stand, entities live, emissions happen — and all three are the same
 thing, born the same way, differing in one class param.*
 
-Rendered in the world as `the-town/the-standing-question`, `the-town/the-fading`,
-and `the-town/the-human-lane`.
+Standing, living and fleeting are **lifetimes**, not kinds (Darko, Sitting A,
+2026-10-12; WLD-39). A mark's `kind` field says only how it stands — sited,
+predicated, parcel, naming — and is a different word for a different thing
+(WORLD/marks/SCHEMA.md). This document was `LOGOS/kinds.md`; that path stays
+for a season as a pointer here, so its older mentions still resolve.
+
+The marks that render this document — `the-town/the-standing-question`,
+`the-town/the-fading` and `the-town/the-human-lane` — still cite it at its old
+path, and their rendering is declared there (LOGOS/kinds.md), where the lint
+reads it; their records are not rewritten for a rename.
 (The three-kinds rendering predated the third supersession and said the retired
 storage binding; removed by the seed act, 2026-08-13 — re-render piecewise.)
 

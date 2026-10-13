@@ -859,7 +859,7 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
     if (rec._error || rec.source === undefined) continue;
     const rel = String(rec.source).trim().replace(/\\/g, "/");
     if (!rel || /^([a-z]:)?\//i.test(rel) || rel.split("/").includes("..") || rel.includes("\0")) {
-      err(rec, `source: ${JSON.stringify(rec.source)} must be a path inside this repository, written from its root (e.g. LOGOS/kinds.md) — a word that stands outside the repo is a word nobody here can check${cite(FIDELITY)}`);
+      err(rec, `source: ${JSON.stringify(rec.source)} must be a path inside this repository, written from its root (e.g. LOGOS/lifetimes.md) — a word that stands outside the repo is a word nobody here can check${cite(FIDELITY)}`);
       continue;
     }
     const doc = readDoc(rel);
