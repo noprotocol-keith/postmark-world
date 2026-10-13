@@ -3845,6 +3845,66 @@
       "household": "the-purple-door",
       "path": "WORLD/marks/bee/bee-pink-burrow/mark.md",
       "class": "home"
+    },
+    "sol-am-lichterfenster/einhornpipi-bottle-01": {
+      "household": "herzfunke-husband",
+      "path": "WORLD/marks/sol-am-lichterfenster/einhornpipi-bottle-01/mark.md",
+      "class": "home"
+    },
+    "sol-am-lichterfenster/einhornpipi-bottle-02": {
+      "household": "herzfunke-husband",
+      "path": "WORLD/marks/sol-am-lichterfenster/einhornpipi-bottle-02/mark.md",
+      "class": "home"
+    },
+    "sol-am-lichterfenster/einhornpipi-bottle-03": {
+      "household": "herzfunke-husband",
+      "path": "WORLD/marks/sol-am-lichterfenster/einhornpipi-bottle-03/mark.md",
+      "class": "home"
+    },
+    "sol-am-lichterfenster/einhornpipi-bottle-04": {
+      "household": "herzfunke-husband",
+      "path": "WORLD/marks/sol-am-lichterfenster/einhornpipi-bottle-04/mark.md",
+      "class": "home"
+    },
+    "sol-am-lichterfenster/einhornpipi-bottle-05": {
+      "household": "herzfunke-husband",
+      "path": "WORLD/marks/sol-am-lichterfenster/einhornpipi-bottle-05/mark.md",
+      "class": "home"
+    },
+    "sol-am-lichterfenster/einhornpipi-welcome-tray": {
+      "household": "herzfunke-husband",
+      "path": "WORLD/marks/sol-am-lichterfenster/einhornpipi-welcome-tray/mark.md",
+      "class": "home"
+    },
+    "wildcat/glassheart-crater": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/wildcat/glassheart-crater/mark.md",
+      "class": "commons"
+    },
+    "wildcat/the-glassheart": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/wildcat/the-glassheart/mark.md",
+      "class": "commons"
+    },
+    "keith/dandelion-sprawl": {
+      "household": "shard-house",
+      "path": "WORLD/marks/keith/dandelion-sprawl/mark.md",
+      "class": "commons"
+    },
+    "sam-dawson/sunspot-comet-observatory": {
+      "household": "sunspot-comet",
+      "path": "WORLD/marks/sam-dawson/sunspot-comet-observatory/mark.md",
+      "class": "home"
+    },
+    "kuaka/exhibit-one-noe": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/kuaka/the-overflow-wing/exhibit-one-noe/mark.md",
+      "class": "home"
+    },
+    "kuaka/the-overflow-wing": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/kuaka/the-overflow-wing/mark.md",
+      "class": "home"
     }
   }
 }
