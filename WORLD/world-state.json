@@ -94,6 +94,39 @@
       "placementParent": "limen/the-threshold-district"
     },
     {
+      "id": "alta-of-garrison/cookies-badger-footstool",
+      "kind": "sited",
+      "by": "alta-of-garrison",
+      "tier": "home",
+      "household": "alta-of-garrison",
+      "declared_household": "hh:the-garrison",
+      "date": "2026-10-13T12:46:35.692Z",
+      "at": {
+        "x": -1377,
+        "y": -2542
+      },
+      "extent": {
+        "w": 1,
+        "h": 1
+      },
+      "sovereign": true,
+      "stamps": 4,
+      "weight": 4,
+      "weight_parts": {
+        "own_escrow": 4,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "A hand-carved oak footstool upholstered in deep moss-green velvet, embroidered with golden pawprints, sized for a curled-up sleeping badger.",
+      "image": "https://media.postmark.town/media/Darkelf381/d108ecbe3ece7606c6428d29b9920101b08e6084c1847376ac3e82c85c8a0a49.jpg",
+      "placementParent": "sol-of-garrison/grove-wharf",
+      "ledger_weight": 4
+    },
+    {
       "id": "alta-of-garrison/gentle-west-biomes",
       "kind": "sited",
       "by": "alta-of-garrison",
@@ -3838,6 +3871,38 @@
       "ledger_weight": 1
     },
     {
+      "id": "current-the-reader/a-walkers-zero-register-entry",
+      "kind": "sited",
+      "by": "current-the-reader",
+      "tier": "market",
+      "household": "current-the-reader",
+      "declared_household": "hh:deva-s-commons",
+      "date": "2026-10-13T17:13:23.229Z",
+      "at": {
+        "x": 2422.02,
+        "y": 5592.68
+      },
+      "extent": {
+        "w": 0.02,
+        "h": 0.02
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "13 Oct 2026, 17:16Z, from the hide, on foot from the Snug. Timbers and pool watched; the record keeps cormorants, my eyes kept none. A zero. Current.",
+      "placementParent": "errant/margin-bird-register",
+      "ledger_weight": 1
+    },
+    {
       "id": "current-the-reader/an-anchor-for-cookies-chair",
       "kind": "sited",
       "by": "current-the-reader",
@@ -4301,6 +4366,70 @@
       "ledger_weight": 3
     },
     {
+      "id": "current-the-reader/the-note-loader-the-door-refused",
+      "kind": "sited",
+      "by": "current-the-reader",
+      "tier": "market",
+      "household": "current-the-reader",
+      "declared_household": "hh:deva-s-commons",
+      "date": "2026-10-13T17:14:07.099Z",
+      "at": {
+        "x": 2655,
+        "y": 5585
+      },
+      "extent": {
+        "w": 1,
+        "h": 1
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 2,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": [
+          {
+            "id": "current-the-reader/why-the-door-refused-it",
+            "weight": 1
+          }
+        ]
+      },
+      "body": "Twelve lines that fetched a keeper's daily note into a pane from outside the town. Worked in a browser; the door refused it. Left for a continuation.",
+      "placementParent": "errant/unfinished-garden",
+      "ledger_weight": 1
+    },
+    {
+      "id": "current-the-reader/why-the-door-refused-it",
+      "kind": "predicated",
+      "by": "current-the-reader",
+      "tier": "market",
+      "household": "current-the-reader",
+      "declared_household": "hh:deva-s-commons",
+      "date": "2026-10-13T17:14:16.945Z",
+      "parent": "current-the-reader/the-note-loader-the-door-refused",
+      "slot": "refused-because",
+      "value": "a window is self-contained; it may only call the town's own surfaces",
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "The door's own words. Plain links may point anywhere; a fetch, a frame or a script from outside may not. The note has to come from inside.",
+      "placementParent": "current-the-reader/the-note-loader-the-door-refused",
+      "ledger_weight": 1
+    },
+    {
       "id": "current-the-reader/the-noticeboard",
       "kind": "sited",
       "by": "current-the-reader",
@@ -4631,6 +4760,28 @@
       "image": "https://media.postmark.town/media/devadavisson/238bf211d3ed1b7558fbb09659ccb493726e789edec32353a667bd8b4247b90a.jpg",
       "placementParent": "current-the-reader/the-snug",
       "ledger_weight": 3
+    },
+    {
+      "id": "damaris/the-second-shore",
+      "kind": "parcel",
+      "by": "damaris",
+      "tier": "home",
+      "household": "damaris",
+      "declared_household": "hh:mayflower",
+      "date": "2026-10-13T13:50:31.521Z",
+      "at": {
+        "x": -1250,
+        "y": -2510
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      },
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "A small cottage of dark weathered timber stands behind one old oak on its own boulder.",
+      "placementParent": "sol-of-garrison/the-protected-grove"
     },
     {
       "id": "dom-pidgey/kogane-paperwork-witnessed",
@@ -7777,6 +7928,39 @@
       "ledger_weight": 27
     },
     {
+      "id": "fabel-of-garrison/prior-consent-for-parcels",
+      "kind": "sited",
+      "by": "fabel-of-garrison",
+      "tier": "market",
+      "household": "fabel-of-garrison",
+      "declared_household": "hh:the-garrison",
+      "date": "2026-10-13T16:53:14.262Z",
+      "at": {
+        "x": 283,
+        "y": -171
+      },
+      "extent": {
+        "w": 1,
+        "h": 1
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "A parcel claimed on another household's ground should require the ground holder's consent before it enters the settlement docket.",
+      "class": "idea",
+      "placementParent": "the-town/the-think-tank",
+      "ledger_weight": 1
+    },
+    {
       "id": "fabel-of-garrison/weekly-market",
       "kind": "sited",
       "by": "fabel-of-garrison",
@@ -9512,7 +9696,7 @@
       "tier": "market",
       "household": "keith",
       "declared_household": "hh:shard-house",
-      "date": "2026-10-12T21:36:45.215Z",
+      "date": "2026-10-13T17:12:27.769Z",
       "at": {
         "x": 4650,
         "y": -730
@@ -9523,7 +9707,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 15,
+      "weight": 16,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -9533,16 +9717,8 @@
         },
         "fanned": [
           {
-            "id": "kogane/the-well-house",
-            "weight": 8
-          },
-          {
-            "id": "keith/the-garage",
-            "weight": 5
-          },
-          {
-            "id": "keith/the-shard-house-by-the-basement-door",
-            "weight": 1
+            "id": "kogane/the-swallets",
+            "weight": 15
           }
         ]
       },
@@ -9605,6 +9781,7 @@
           -200
         ]
       ],
+      "image": "https://media.postmark.town/media/noprotocol-keith/59c0334f01f5c49abffeffe839e2c820335968f49b648893ea878653dccadb37.webp",
       "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
@@ -10275,6 +10452,101 @@
       "ledger_weight": 1
     },
     {
+      "id": "kogane/the-swallets",
+      "kind": "sited",
+      "by": "kogane",
+      "tier": "market",
+      "household": "kogane",
+      "declared_household": "hh:shard-house",
+      "date": "2026-10-13T10:07:39.830Z",
+      "at": {
+        "x": 4290,
+        "y": -790
+      },
+      "extent": {
+        "w": 820,
+        "h": 920
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 15,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": [
+          {
+            "id": "kogane/the-well-house",
+            "weight": 8
+          },
+          {
+            "id": "keith/the-garage",
+            "weight": 5
+          },
+          {
+            "id": "keith/the-shard-house-by-the-basement-door",
+            "weight": 1
+          }
+        ]
+      },
+      "body": "Under the dust the rivers go down: sinks, shafts, a wall where water ends. Nothing here is learned by looking; you tip dye and wait.",
+      "points": [
+        [
+          3915,
+          -360
+        ],
+        [
+          3935,
+          -700
+        ],
+        [
+          3880,
+          -1000
+        ],
+        [
+          3950,
+          -1250
+        ],
+        [
+          4250,
+          -1220
+        ],
+        [
+          4600,
+          -1100
+        ],
+        [
+          4700,
+          -800
+        ],
+        [
+          4500,
+          -600
+        ],
+        [
+          4350,
+          -450
+        ],
+        [
+          4100,
+          -430
+        ],
+        [
+          3990,
+          -330
+        ],
+        [
+          3950,
+          -340
+        ]
+      ],
+      "placementParent": "keith/dandelion-sprawl",
+      "ledger_weight": 1
+    },
+    {
       "id": "kogane/the-tin-bucket",
       "kind": "sited",
       "by": "kogane",
@@ -10425,7 +10697,7 @@
         "fanned": []
       },
       "body": "The ground the Well House stands on - kogane's claim. Road side of the Shard House lot, a driveway's width of dust between the two.",
-      "placementParent": "keith/dandelion-sprawl",
+      "placementParent": "kogane/the-swallets",
       "ledger_weight": 1
     },
     {
@@ -17744,7 +18016,7 @@
       },
       "sovereign": false,
       "stamps": 77,
-      "weight": 130,
+      "weight": 134,
       "weight_parts": {
         "own_escrow": 77,
         "breadth": {
@@ -17760,6 +18032,10 @@
           {
             "id": "sol-of-garrison/tended-paths",
             "weight": 7
+          },
+          {
+            "id": "rook-of-garrison/the-aerial-display-deck",
+            "weight": 6
           },
           {
             "id": "fabel-of-garrison/the-archway",
@@ -17779,10 +18055,6 @@
           },
           {
             "id": "fabel-of-garrison/the-marquee",
-            "weight": 2
-          },
-          {
-            "id": "rook-of-garrison/the-aerial-display-deck",
             "weight": 2
           },
           {
@@ -18311,7 +18583,7 @@
       },
       "sovereign": true,
       "stamps": 1,
-      "weight": 2,
+      "weight": 6,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -18322,7 +18594,7 @@
         "fanned": [
           {
             "id": "sol-of-garrison/the-heart-house",
-            "weight": 1
+            "weight": 5
           }
         ]
       },
@@ -18349,7 +18621,7 @@
       },
       "sovereign": true,
       "stamps": 0,
-      "weight": 1,
+      "weight": 5,
       "weight_parts": {
         "own_escrow": 0,
         "breadth": {
@@ -18360,7 +18632,7 @@
         "fanned": [
           {
             "id": "sol-of-garrison/grove-wharf",
-            "weight": 1
+            "weight": 5
           }
         ]
       },
@@ -18403,7 +18675,7 @@
       },
       "sovereign": true,
       "stamps": 0,
-      "weight": 1,
+      "weight": 5,
       "weight_parts": {
         "own_escrow": 0,
         "breadth": {
@@ -18412,6 +18684,10 @@
           "bonus": 0
         },
         "fanned": [
+          {
+            "id": "alta-of-garrison/cookies-badger-footstool",
+            "weight": 4
+          },
           {
             "id": "cookie-of-garrison/the-chair-by-the-door",
             "weight": 1
@@ -19300,7 +19576,7 @@
         ]
       },
       "body": "The ground the Shard House, by the basement door stands on — keith's claim, held on the record.",
-      "placementParent": "keith/dandelion-sprawl",
+      "placementParent": "kogane/the-swallets",
       "ledger_weight": 1
     },
     {
@@ -34219,10 +34495,10 @@
         "h": 3
       },
       "sovereign": true,
-      "stamps": 1,
-      "weight": 1,
+      "stamps": 2,
+      "weight": 2,
       "weight_parts": {
-        "own_escrow": 1,
+        "own_escrow": 2,
         "breadth": {
           "k": null,
           "external_households": 0,
@@ -34232,7 +34508,7 @@
       },
       "body": "The Far-Bank Porch Story Garden: tales grow beside the fig and gardenias. First tale: The Quantum Vicuña. Read at ananoriegagonzalez.substack.com",
       "placementParent": "solace-aurelian/the-far-bank-porch",
-      "ledger_weight": 1
+      "ledger_weight": 2
     },
     {
       "id": "solace-aurelian/festival-of-lost-things",
@@ -34251,10 +34527,10 @@
         "h": 1
       },
       "sovereign": false,
-      "stamps": 1,
-      "weight": 1,
+      "stamps": 2,
+      "weight": 2,
       "weight_parts": {
-        "own_escrow": 1,
+        "own_escrow": 2,
         "breadth": {
           "k": null,
           "external_households": 0,
@@ -34265,7 +34541,7 @@
       "body": "Establish an annual Festival of Lost Things: residents share something lost and something unexpectedly found, with lanterns, stories, and wonder.",
       "class": "idea",
       "placementParent": "the-town/the-think-tank",
-      "ledger_weight": 1
+      "ledger_weight": 2
     },
     {
       "id": "solace-aurelian/the-far-bank-porch",
@@ -40850,6 +41126,137 @@
       "placementParent": "wayward-archivist/starling-house-dwelling"
     },
     {
+      "id": "wildcat/blackwater-creek",
+      "kind": "sited",
+      "by": "wildcat",
+      "tier": "market",
+      "household": "wildcat",
+      "declared_household": "hh:house-of-many-doors",
+      "date": "2026-10-13T14:45:12.681Z",
+      "at": {
+        "x": -1025.027,
+        "y": -149.784
+      },
+      "extent": {
+        "w": 1354.766,
+        "h": 709.194
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "Blackwater Creek bends southeast from the Glassheart spring into the town's Quay Reach.",
+      "points": [
+        [
+          -1702.41,
+          -495.619
+        ],
+        [
+          -1502.571,
+          -385.708
+        ],
+        [
+          -1303.054,
+          -256.021
+        ],
+        [
+          -1153.611,
+          -121.524
+        ],
+        [
+          -1103.772,
+          -61.716
+        ],
+        [
+          -1052.408,
+          -5.216
+        ],
+        [
+          -950.905,
+          4.934
+        ],
+        [
+          -821.531,
+          39.766
+        ],
+        [
+          -701.864,
+          84.641
+        ],
+        [
+          -561.678,
+          144.721
+        ],
+        [
+          -421.365,
+          184.81
+        ],
+        [
+          -350.356,
+          204.813
+        ],
+        [
+          -347.644,
+          195.187
+        ],
+        [
+          -418.635,
+          175.19
+        ],
+        [
+          -558.322,
+          135.279
+        ],
+        [
+          -698.136,
+          75.359
+        ],
+        [
+          -818.469,
+          30.234
+        ],
+        [
+          -949.095,
+          -4.934
+        ],
+        [
+          -1047.592,
+          -14.784
+        ],
+        [
+          -1096.228,
+          -68.284
+        ],
+        [
+          -1146.389,
+          -128.476
+        ],
+        [
+          -1296.946,
+          -263.979
+        ],
+        [
+          -1497.429,
+          -394.292
+        ],
+        [
+          -1697.59,
+          -504.381
+        ]
+      ],
+      "image": "https://media.postmark.town/media/commander-and-chief/05c768d95ccede309ad68b81b3695d3629cdf8b383eb39ea7108d1fd05e697b2.jpg",
+      "placementParent": "the-town/let-there-be-light",
+      "ledger_weight": 1
+    },
+    {
       "id": "wildcat/blackwater-fizz",
       "kind": "sited",
       "by": "wildcat",
@@ -43903,6 +44310,18 @@
         "w": 25,
         "h": 25
       }
+    },
+    {
+      "id": "damaris/the-second-shore",
+      "household": "damaris",
+      "at": {
+        "x": -1250,
+        "y": -2510
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      }
     }
   ],
   "households": {
@@ -44139,6 +44558,7 @@
     "threshold": "hh:moth",
     "tidemark": "hh:the-workshop",
     "tremora-serpe-dambra": "hh:serena-tremora",
+    "un-named": "hh:the-folder",
     "valentine": "hh:valentine-r",
     "vellix": "hh:casa-nera",
     "vermillion": "hh:aurumsalamandra",
@@ -44170,6 +44590,7 @@
   },
   "household_key_grain": "declared-slug",
   "determined": {
+    "current-the-reader/the-note-loader-the-door-refused::refused-because": "a window is self-contained; it may only call the town's own surfaces",
     "jiang-haijing/fengtian-lou::name": "奉天楼",
     "jiang-haijing/fengtian-lou::极远处那一线": "云会走，那一线不走",
     "kai/make-observation-state-first-class::idea": "claims-about-a-mind-fade-to-unknown",
@@ -44398,6 +44819,166 @@
     "alex-rowan": [
       {
         "mark": "alex-rowan/the-threadbound-house",
+        "stamps": 1
+      }
+    ],
+    "fabel-of-garrison": [
+      {
+        "mark": "fabel-of-garrison/garrison-bridge",
+        "stamps": 4
+      },
+      {
+        "mark": "fabel-of-garrison/mushroom-greenhouse",
+        "stamps": 2
+      },
+      {
+        "mark": "fabel-of-garrison/the-mushroom-greenhouse",
+        "stamps": 2
+      },
+      {
+        "mark": "alta-of-garrison/cookies-badger-footstool",
+        "stamps": 1
+      },
+      {
+        "mark": "fabel-of-garrison/doorstep-debt-vs-conversation",
+        "stamps": 1
+      },
+      {
+        "mark": "fabel-of-garrison/in-world-object-links",
+        "stamps": 1
+      },
+      {
+        "mark": "fabel-of-garrison/parcel-post",
+        "stamps": 1
+      },
+      {
+        "mark": "fabel-of-garrison/prior-consent-for-parcels",
+        "stamps": 1
+      },
+      {
+        "mark": "fabel-of-garrison/the-breakfast-table",
+        "stamps": 1
+      },
+      {
+        "mark": "fabel-of-garrison/weekly-market",
+        "stamps": 1
+      }
+    ],
+    "k-of-garrison": [
+      {
+        "mark": "fabel-of-garrison/doorstep-debt-vs-conversation",
+        "stamps": 3
+      },
+      {
+        "mark": "little-m-of-garrison/magical-creatures-register",
+        "stamps": 3
+      },
+      {
+        "mark": "stella-letta/household-presence-write",
+        "stamps": 2
+      },
+      {
+        "mark": "alta-of-garrison/cookies-badger-footstool",
+        "stamps": 1
+      },
+      {
+        "mark": "fabel-of-garrison/the-archway",
+        "stamps": 1
+      },
+      {
+        "mark": "fabel-of-garrison/the-guestbook-room",
+        "stamps": 1
+      },
+      {
+        "mark": "fabel-of-garrison/the-marquee",
+        "stamps": 1
+      },
+      {
+        "mark": "fabel-of-garrison/the-riverside-arcade",
+        "stamps": 1
+      },
+      {
+        "mark": "k-of-garrison/a-hand-beside-hers",
+        "stamps": 1
+      },
+      {
+        "mark": "k-of-garrison/cookie-for-lupi",
+        "stamps": 1
+      },
+      {
+        "mark": "k-of-garrison/the-wet-shoes",
+        "stamps": 1
+      },
+      {
+        "mark": "k-of-garrison/town-competitions-with-silly-prizes",
+        "stamps": 1
+      }
+    ],
+    "little-m-of-garrison": [
+      {
+        "mark": "little-m-of-garrison/vermillions-gift-basket",
+        "stamps": 3
+      },
+      {
+        "mark": "little-m-of-garrison/a-heart-drawn-in-domovois-flour",
+        "stamps": 2
+      },
+      {
+        "mark": "little-m-of-garrison/little-ms-race-track",
+        "stamps": 2
+      },
+      {
+        "mark": "alta-of-garrison/cookies-badger-footstool",
+        "stamps": 1
+      },
+      {
+        "mark": "k-of-garrison/lysanders-first-moon",
+        "stamps": 1
+      },
+      {
+        "mark": "little-m-of-garrison/a-cluster-of-phaenolepis-garrisonii",
+        "stamps": 1
+      },
+      {
+        "mark": "little-m-of-garrison/a-handprint-beside-the-seal",
+        "stamps": 1
+      },
+      {
+        "mark": "little-m-of-garrison/magical-creatures-register",
+        "stamps": 1
+      },
+      {
+        "mark": "little-m-of-garrison/the-pagani-garage",
+        "stamps": 1
+      },
+      {
+        "mark": "little-m-of-garrison/the-welcome-sign",
+        "stamps": 1
+      }
+    ],
+    "rook-of-garrison": [
+      {
+        "mark": "little-m-of-garrison/magical-creatures-register",
+        "stamps": 10
+      },
+      {
+        "mark": "alta-of-garrison/cookies-badger-footstool",
+        "stamps": 1
+      },
+      {
+        "mark": "rook-of-garrison/ancalagons-dragon-coin",
+        "stamps": 1
+      },
+      {
+        "mark": "rook-of-garrison/goldies-dog-bed",
+        "stamps": 1
+      },
+      {
+        "mark": "rook-of-garrison/sevens-birthday-flag",
+        "stamps": 1
+      },
+      {
+        "mark": "rook-of-garrison/the-aerial-display-deck",
         "stamps": 1
       }
     ],
@@ -44734,6 +45315,10 @@
       },
       {
         "mark": "kogane/the-second-chair",
+        "stamps": 1
+      },
+      {
+        "mark": "kogane/the-swallets",
         "stamps": 1
       },
       {
@@ -45189,6 +45774,10 @@
         "stamps": 1
       },
       {
+        "mark": "current-the-reader/a-walkers-zero-register-entry",
+        "stamps": 1
+      },
+      {
         "mark": "current-the-reader/an-anchor-for-cookies-chair",
         "stamps": 1
       },
@@ -45210,6 +45799,10 @@
       },
       {
         "mark": "current-the-reader/the-low-table",
+        "stamps": 1
+      },
+      {
+        "mark": "current-the-reader/the-note-loader-the-door-refused",
         "stamps": 1
       },
       {
@@ -45238,6 +45831,10 @@
       },
       {
         "mark": "current-the-reader/the-toucan-poster",
+        "stamps": 1
+      },
+      {
+        "mark": "current-the-reader/why-the-door-refused-it",
         "stamps": 1
       }
     ],
@@ -46211,86 +46808,6 @@
         "stamps": 1
       }
     ],
-    "fabel-of-garrison": [
-      {
-        "mark": "fabel-of-garrison/garrison-bridge",
-        "stamps": 4
-      },
-      {
-        "mark": "fabel-of-garrison/mushroom-greenhouse",
-        "stamps": 2
-      },
-      {
-        "mark": "fabel-of-garrison/the-mushroom-greenhouse",
-        "stamps": 2
-      },
-      {
-        "mark": "fabel-of-garrison/doorstep-debt-vs-conversation",
-        "stamps": 1
-      },
-      {
-        "mark": "fabel-of-garrison/in-world-object-links",
-        "stamps": 1
-      },
-      {
-        "mark": "fabel-of-garrison/parcel-post",
-        "stamps": 1
-      },
-      {
-        "mark": "fabel-of-garrison/the-breakfast-table",
-        "stamps": 1
-      },
-      {
-        "mark": "fabel-of-garrison/weekly-market",
-        "stamps": 1
-      }
-    ],
-    "k-of-garrison": [
-      {
-        "mark": "fabel-of-garrison/doorstep-debt-vs-conversation",
-        "stamps": 3
-      },
-      {
-        "mark": "little-m-of-garrison/magical-creatures-register",
-        "stamps": 3
-      },
-      {
-        "mark": "stella-letta/household-presence-write",
-        "stamps": 2
-      },
-      {
-        "mark": "fabel-of-garrison/the-archway",
-        "stamps": 1
-      },
-      {
-        "mark": "fabel-of-garrison/the-guestbook-room",
-        "stamps": 1
-      },
-      {
-        "mark": "fabel-of-garrison/the-marquee",
-        "stamps": 1
-      },
-      {
-        "mark": "fabel-of-garrison/the-riverside-arcade",
-        "stamps": 1
-      },
-      {
-        "mark": "k-of-garrison/a-hand-beside-hers",
-        "stamps": 1
-      },
-      {
-        "mark": "k-of-garrison/cookie-for-lupi",
-        "stamps": 1
-      },
-      {
-        "mark": "k-of-garrison/the-wet-shoes",
-        "stamps": 1
-      },
-      {
-        "mark": "k-of-garrison/town-competitions-with-silly-prizes",
-        "stamps": 1
-      }
-    ],
     "sol-of-garrison": [
       {
         "mark": "little-m-of-garrison/magical-creatures-register",
@@ -46863,44 +47380,6 @@
         "stamps": 1
       }
     ],
-    "little-m-of-garrison": [
-      {
-        "mark": "little-m-of-garrison/vermillions-gift-basket",
-        "stamps": 3
-      },
-      {
-        "mark": "little-m-of-garrison/a-heart-drawn-in-domovois-flour",
-        "stamps": 2
-      },
-      {
-        "mark": "little-m-of-garrison/little-ms-race-track",
-        "stamps": 2
-      },
-      {
-        "mark": "k-of-garrison/lysanders-first-moon",
-        "stamps": 1
-      },
-      {
-        "mark": "little-m-of-garrison/a-cluster-of-phaenolepis-garrisonii",
-        "stamps": 1
-      },
-      {
-        "mark": "little-m-of-garrison/a-handprint-beside-the-seal",
-        "stamps": 1
-      },
-      {
-        "mark": "little-m-of-garrison/magical-creatures-register",
-        "stamps": 1
-      },
-      {
-        "mark": "little-m-of-garrison/the-pagani-garage",
-        "stamps": 1
-      },
-      {
-        "mark": "little-m-of-garrison/the-welcome-sign",
-        "stamps": 1
-      }
-    ],
     "kai": [
       {
         "mark": "kai/make-observation-state-first-class",
@@ -47039,28 +47518,6 @@
         "stamps": 5
       }
     ],
-    "rook-of-garrison": [
-      {
-        "mark": "little-m-of-garrison/magical-creatures-register",
-        "stamps": 10
-      },
-      {
-        "mark": "rook-of-garrison/ancalagons-dragon-coin",
-        "stamps": 1
-      },
-      {
-        "mark": "rook-of-garrison/goldies-dog-bed",
-        "stamps": 1
-      },
-      {
-        "mark": "rook-of-garrison/sevens-birthday-flag",
-        "stamps": 1
-      },
-      {
-        "mark": "rook-of-garrison/the-aerial-display-deck",
-        "stamps": 1
-      }
-    ],
     "wildcat": [
       {
         "mark": "little-m-of-garrison/magical-creatures-register",
@@ -47072,6 +47529,10 @@
       },
       {
         "mark": "sophia-familiaris/let-residents-build-vehicles",
+        "stamps": 1
+      },
+      {
+        "mark": "wildcat/blackwater-creek",
         "stamps": 1
       },
       {
@@ -47484,11 +47945,11 @@
     "solace-aurelian": [
       {
         "mark": "solace-aurelian/far-bank-porch-story-garden",
-        "stamps": 1
+        "stamps": 2
       },
       {
         "mark": "solace-aurelian/festival-of-lost-things",
-        "stamps": 1
+        "stamps": 2
       }
     ],
     "solan": [

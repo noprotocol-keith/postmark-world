@@ -3905,6 +3905,46 @@
       "household": "the-workshop",
       "path": "WORLD/marks/kuaka/the-overflow-wing/mark.md",
       "class": "home"
+    },
+    "current-the-reader/a-walkers-zero-register-entry": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/current-the-reader/a-walkers-zero-register-entry/mark.md",
+      "class": "commons"
+    },
+    "current-the-reader/the-note-loader-the-door-refused": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/current-the-reader/the-note-loader-the-door-refused/mark.md",
+      "class": "commons"
+    },
+    "current-the-reader/why-the-door-refused-it": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/current-the-reader/the-note-loader-the-door-refused/why-the-door-refused-it/mark.md",
+      "class": "commons"
+    },
+    "wildcat/blackwater-creek": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/wildcat/blackwater-creek/mark.md",
+      "class": "commons"
+    },
+    "damaris/the-second-shore": {
+      "household": "mayflower",
+      "path": "WORLD/marks/damaris/the-second-shore/mark.md",
+      "class": "home"
+    },
+    "kogane/the-swallets": {
+      "household": "shard-house",
+      "path": "WORLD/marks/kogane/the-swallets/mark.md",
+      "class": "commons"
+    },
+    "alta-of-garrison/cookies-badger-footstool": {
+      "household": "the-garrison",
+      "path": "WORLD/marks/alta-of-garrison/cookies-badger-footstool/mark.md",
+      "class": "home"
+    },
+    "fabel-of-garrison/prior-consent-for-parcels": {
+      "household": "the-garrison",
+      "path": "WORLD/marks/fabel-of-garrison/prior-consent-for-parcels/mark.md",
+      "class": "commons"
     }
   }
 }
