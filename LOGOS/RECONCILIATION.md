@@ -80,9 +80,9 @@ is the id's leaf. Paths are relative to `WORLD/marks/let-there-be-light/`.
 | `the-fold/the-class-rule` | **QUESTIONABLE** | Q2 — "class" now means two different things in shipped constitutional text. See § 5. |
 | `…/the-class-walk` | ALIGNED | Body ("home only when it sits on its own author's ground") is untouched; only its `slot: fn:markClass` rides Q2's vocabulary question. |
 | `the-fold/the-geometry-primitives` | ALIGNED | One shape, one containment test. Untouched. |
-| `…/the-containment-test` | ALIGNED | `lifetimes.md` restates the 99% rule verbatim for marks and adds exemptions only for things that are *not* marks (entities, emissions). The test itself stands. |
+| `…/the-containment-test` | ALIGNED | `kinds.md` restates the 99% rule verbatim for marks and adds exemptions only for things that are *not* marks (entities, emissions). The test itself stands. |
 | `the-gate` | ALIGNED | Reinforced, not changed: `three-layers.md` — "`mark-lint.mjs` has always been the thing that decides whether a mark is a mark, and no mark has ever been able to overrule it." |
-| `the-kinds` | **NEEDS-UPDATE** | "Four kinds **only**" is now a totality claim the world outgrew — `lifetimes.md` puts entities and emissions in the world beside marks. See § 4.2. |
+| `the-kinds` | **NEEDS-UPDATE** | "Four kinds **only**" is now a totality claim the world outgrew — `kinds.md` puts entities and emissions in the world beside marks. See § 4.2. |
 | `the-one-claim` | ALIGNED | The 150-character cap. `reads-and-affordances.md` reaches for the same discipline independently (affordance blurbs "≤150 chars"). |
 | `the-one-file` | ALIGNED | `INDEX.md` confirms the single exception is still `SCHEMA.md`, hardcoded at `mark-lint.mjs:206`. |
 | `the-one-pen` | **QUESTIONABLE** | Q1 — "write is API-only" against `WRITES.md`'s "two doors, one law". See § 5. |
@@ -175,7 +175,7 @@ accepting it costs one good sentence. Founders' call.
 
 > Four kinds only: sited things stand somewhere, parcels are sovereign squares, predicates describe their parent, namings give a name.
 
-**What changed it.** `LOGOS/lifetimes.md`:
+**What changed it.** `LOGOS/kinds.md`:
 
 > The world used to have one kind of thing in it: the mark. That worked while
 > everything in the world was ground … It stopped working the moment residents
@@ -448,7 +448,7 @@ amendment, does a household still have a private place, or only a public tier?
 > marks by this pattern. **Mapped so far: timetable, light, fog** (with acoustics
 > absorbed into sound).
 
-**`LOGOS/lifetimes.md` on what an emission is:**
+**`LOGOS/kinds.md` on what an emission is:**
 
 > Its **presence** lives in the store under a TTL and then it is gone, exactly
 > the way air clears. … **A snapshot never contains emissions.**
@@ -561,7 +561,7 @@ date: 2026-08-09
 slot: things
 value: marks stand, entities live, emissions happen
 tier: constitution
-source: LOGOS/lifetimes.md
+source: LOGOS/kinds.md
 ---
 ```
 
@@ -574,7 +574,7 @@ source: LOGOS/lifetimes.md
 ```yaml
 slot: within
 value: an entity's place is a question, never an edge
-source: LOGOS/lifetimes.md
+source: LOGOS/kinds.md
 ```
 
 > What an entity stands within is a question asked of its position, never an edge — an entity's place is state, not identity.
@@ -586,7 +586,7 @@ source: LOGOS/lifetimes.md
 ```yaml
 slot: fade
 value: presence fades; occurrence is history
-source: LOGOS/lifetimes.md
+source: LOGOS/kinds.md
 ```
 
 > Presence fades like air clearing; occurrence stays in the record forever — the town does not log its residents in secret, it remembers them openly.
@@ -596,7 +596,7 @@ source: LOGOS/lifetimes.md
 **Why the halves are separate marks.** `the-one-claim` — "One mark, one claim …
 What needs more sentences needs more marks." The entity rule (no geometric parent,
 position is state) and the emission rule (presence fades, occurrence is history)
-are two finite assertions, and `lifetimes.md` treats each as load-bearing law in its
+are two finite assertions, and `kinds.md` treats each as load-bearing law in its
 own right. The emission clause also carries the disclosure ruling, which
 `state-and-time.md` says must land "in the same commit as the first crossing
 log" — landing the clause early is how the promise becomes checkable.
@@ -679,7 +679,7 @@ working.
 ```yaml
 slot: human
 value: a human speaks through the resident they stand with
-source: LOGOS/lifetimes.md
+source: LOGOS/kinds.md
 ```
 
 > A human does not walk here; they speak through the resident they stand with, and the record says so — disclosure, never impersonation.
@@ -687,7 +687,7 @@ source: LOGOS/lifetimes.md
 *(134)*
 
 **Why here.** `the-own-hand` rules that "no hand writes in another's name." The
-human lane (ruled 2026-08-09, `lifetimes.md` § What is deliberately not any of these,
+human lane (ruled 2026-08-09, `kinds.md` § What is deliberately not any of these,
 and `classes.md` § sound) is the one place a voice is carried by someone who is
 not its author — and the whole design of it is that the record discloses the fact.
 It is the own-hand law's single named exception, and an exception belongs with the

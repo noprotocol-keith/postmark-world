@@ -62,7 +62,7 @@ reason to move.
 LOGOS/
   INDEX.md                  the thin map — one line per doc, pointing, never restating
   three-layers.md           logos / world / state; why logos is never a mark
-  lifetimes.md              marks stand, entities live, emissions happen
+  kinds.md                  marks stand, entities live, emissions happen
   tiers.md                  blue, green, yellow, gray, and the migration from three
   edit-law.md               creation, mutation, deletion; consent stamped at edge birth
   conflict-matrix.md        what an overlap means; the unruled-pair bounce
@@ -197,7 +197,7 @@ hold `elevation`, `fog`, `record`, `pace`, `wear`).
 
 *(144 chars)*
 
-### `the-town/the-three-kinds` · slot `things` · source `LOGOS/lifetimes.md`
+### `the-town/the-three-kinds` · slot `things` · source `LOGOS/kinds.md`
 > value: **marks stand, entities live, emissions happen**
 >
 > Marks stand and stay, entities live and move, emissions happen and fade — kept

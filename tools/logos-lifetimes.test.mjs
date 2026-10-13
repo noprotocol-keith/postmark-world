@@ -21,9 +21,14 @@ const read = (rel) => readFileSync(join(ROOT, rel), "utf8");
 // allowed set). Historical dailies, receipts and record bodies are not here,
 // by ruling: they may keep the old name, and the redirect resolves it.
 const LIVE = [
-  "LOGOS/DRAFT-REPORT.md", "LOGOS/INDEX.md", "LOGOS/RECONCILIATION.md", "LOGOS/STATUS.md",
+  "LOGOS/INDEX.md", "LOGOS/STATUS.md",
   "LOGOS/conflict-matrix.md", "LOGOS/graph/metamodel.json", "WRITE-REGISTRY.md", "tools/mark-lint.mjs",
 ];
+// HISTORICAL, kept whole (STATUS: "historical"; Wright, AUTHORITY
+// 2026-10-13T13:18:53.839Z): the 2026-08-09 working record and reconciliation
+// are not live doctrine, so they keep the old path as written — their quoted
+// `source:` history must agree with marks that still name kinds.md.
+const HISTORICAL = ["LOGOS/DRAFT-REPORT.md", "LOGOS/RECONCILIATION.md"];
 const OLD = /(?<![\w/.-])(?:LOGOS\/)?kinds\.md/g;
 const RENDERED_IDS = ["the-town/the-standing-question", "the-town/the-fading", "the-town/the-human-lane"];
 const renderedLine = (text) => {
@@ -61,8 +66,12 @@ test("the old path is a pointer, not a second doctrine: it resolves to lifetimes
 });
 
 test("no LIVE document or code links the old path; every reference names lifetimes.md", () => {
+  // STATUS's one row ABOUT the seasonal pointer names it by its file name; that
+  // row, and only that row, is set aside — every other line is held to the rule
+  const POINTER_ROW = /^\| `kinds\.md` \| \*\*seasonal pointer\*\* \|.*$/m;
   for (const rel of LIVE) {
-    const hits = read(rel).match(OLD) ?? [];
+    const text = rel === "LOGOS/STATUS.md" ? read(rel).replace(POINTER_ROW, "") : read(rel);
+    const hits = text.match(OLD) ?? [];
     assert.deepEqual(hits, [], `${rel} still names the old path`);
     assert.match(read(rel), /lifetimes\.md/, `${rel} names the new one`);
   }
@@ -99,4 +108,26 @@ test("a mark's `kind` is unchanged: SCHEMA says it is how a mark stands, the fie
   const lint = read("tools/mark-lint.mjs");
   assert.match(lint, /^const KINDS = new Set\(\["sited", "predicated", "naming", "parcel", "class"\]\);$/m);
   assert.match(lint, /cite\("the-town\/the-kinds"\)/, "historical mark ids keep their names");
+});
+
+test("THE TWO HISTORIES ARE KEPT WHOLE: STATUS labels them historical, the live census does not claim them, and they still name the old path as written", () => {
+  const status = read("LOGOS/STATUS.md");
+  for (const rel of HISTORICAL) {
+    const name = rel.split("/").pop();
+    assert.match(status, new RegExp(`^\\| \`${name.replace(".", "\\.")}\` \\| \\*\\*historical\\*\\*`, "m"), `${name} is labelled historical`);
+    assert.ok(!LIVE.includes(rel), `${rel} is not a live file`);
+    assert.ok((read(rel).match(OLD) ?? []).length > 0, `${rel} keeps its own words, the old path among them`);
+  }
+  assert.match(status, /^\| `kinds\.md` \| \*\*seasonal pointer\*\* \|/m, "the pointer is named as a pointer, not doctrine and not history");
+});
+
+test("INDEX'S BARE CITATIONS name real LOGOS documents, never the seasonal pointer: `*(kinds)*` was a citation a filename search could not see", () => {
+  const index = read("LOGOS/INDEX.md");
+  const cites = [...index.matchAll(/\*\(([^)]*)\)\*/g)].map((m) => m[1]);
+  assert.ok(cites.length >= 10, `only ${cites.length} citations found — the form changed and this check would be vacuous`);
+  const NOT_A_DOCUMENT = new Set(["this document's preamble"]);
+  const stems = cites.flatMap((c) => c.split(";")[0].split("·")).map((t) => t.replace(/§.*$/, "").trim()).filter((t) => t && !NOT_A_DOCUMENT.has(t));
+  for (const stem of stems) assert.ok(existsSync(join(ROOT, "LOGOS", `${stem}.md`)), `INDEX cites *(${stem})*, and LOGOS/${stem}.md does not exist`);
+  assert.ok(!stems.includes("kinds"), "INDEX cites the seasonal pointer as if it were doctrine: cite *(lifetimes)*");
+  assert.ok(stems.includes("lifetimes"), "the lifetime doctrine is cited where the node law is stated");
 });

@@ -78,7 +78,7 @@ in trust
 *its nodes:*
 9. **One node type: identity plus predicate children.** Kind-words are
    vocabulary; classes are law; predicates are the atoms of authorship.
-   *(kinds)*
+   *(lifetimes)*
 10. **A node's tier says whose claim it is; a predicate's tier says what is
    law.** Constitutional overrules wherever it speaks, whatever node carries
    it. *(classes; ruled 2026-08-13)*
