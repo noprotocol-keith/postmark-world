@@ -5,9 +5,10 @@ thing, born the same way, differing in one class param.*
 
 Standing, living and fleeting are **lifetimes**, not kinds (Darko, Sitting A,
 2026-10-12; WLD-39). A mark's `kind` field says only how it stands — sited,
-predicated, parcel, naming — and is a different word for a different thing
-(WORLD/marks/SCHEMA.md). This document was `LOGOS/kinds.md`; that path stays
-for a season as a pointer here, so its older mentions still resolve.
+predicated, parcel, naming or `class` — and is a different word for a
+different thing (WORLD/marks/SCHEMA.md). This document was `LOGOS/kinds.md`;
+that path stays for a season as a pointer here, so its older mentions still
+resolve.
 
 The marks that render this document — `the-town/the-standing-question`,
 `the-town/the-fading` and `the-town/the-human-lane` — still cite it at its old

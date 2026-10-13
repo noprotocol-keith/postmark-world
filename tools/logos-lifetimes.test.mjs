@@ -83,6 +83,15 @@ test("the relative links into and out of the new document resolve", () => {
   }
 });
 
+test("the doctrine's own explanation of `kind` names every value the unchanged lint accepts — class included", () => {
+  const kinds = JSON.parse(read("tools/mark-lint.mjs").match(/^const KINDS = new Set\((\[[^\n]+\])\);$/m)[1]);
+  assert.equal(kinds.length, 5);
+  // only the enumeration sentence: "class param" elsewhere in the document is not it
+  const explanation = read("LOGOS/lifetimes.md").match(/A mark's `kind` field[\s\S]*?(?=\(WORLD\/marks\/SCHEMA\.md\))/)?.[0];
+  assert.ok(explanation, "lifetimes.md explains the kind field");
+  for (const kind of kinds) assert.match(explanation, new RegExp(`\\b${kind}\\b`), `the explanation omits ${kind}`);
+});
+
 test("a mark's `kind` is unchanged: SCHEMA says it is how a mark stands, the field and its five values are what they were", () => {
   const schema = read("WORLD/marks/SCHEMA.md");
   assert.match(schema, /The field `kind` describes how a mark stands — sited, predicated, parcel,\nnaming, or `class`/);
