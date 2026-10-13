@@ -196,21 +196,26 @@ test("with the sheet's frame: the hard rule holds, the town stays clear, and the
 // THE BAKE'S OWN RULE (#186 review): every test below runs mistsBakeAt, the
 // rule the canvas bake applies pixel by pixel, the skip included, with the
 // painted sheet's frame. Three layers together, each at either end of its drift.
-const bakeWorst = (m, x, y, li) => { const L = MISTS_PAINT.layers[li];
-  return Math.max(...[0, 1, -1].map((sg) => mistsBakeAt(m, li, x - sg * L.driftM, y - sg * L.driftM * 0.45, KEEP).alpha)); };
-const bakeComposite = (m, x, y) => 1 - [0, 1, 2].reduce((a, li) => a * (1 - bakeWorst(m, x, y, li)), 1);
+const bakeWorst = (m, x, y, li, keep = KEEP) => { const L = MISTS_PAINT.layers[li];
+  return Math.max(...[0, 1, -1].map((sg) => mistsBakeAt(m, li, x - sg * L.driftM, y - sg * L.driftM * 0.45, keep).alpha)); };
+const bakeComposite = (m, x, y, keep = KEEP) => 1 - [0, 1, 2].reduce((a, li) => a * (1 - bakeWorst(m, x, y, li, keep)), 1);
 const footprint = (mk) => { const w = (mk.extent?.w ?? 0) / 2, h = (mk.extent?.h ?? 0) / 2;
   return [[0, 0], [-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1], [0, 1], [-1, 0], [1, 0]].map(([a, b]) => ({ x: mk.at.x + a * w, y: mk.at.y + b * h })); };
 
-test("the bake keeps the clearings clear: no paint above a haze on any mark inside them, whatever its size, at 244, 272 and 282", () => {
+// The far south-west's wetland is a household's (sol-am-lichterfenster): the
+// clearing was sized for it, but if it moves out the Mists may cover it
+// (WLD-38), so its absence is told, never failed; `checked` keeps the test whole.
+const WETLAND = "sol-am-lichterfenster/vesperfen-wetland";
+function bakeKeepsClearings(marks, keep = KEEP) {
   let checked = 0;
+  const notes = [];
   for (const n of CROSSINGS) {
     const m = { ...mistsAt(n, MISTS), frame: FRAME };
-    const inside = MARKS.filter((mk) => mk?.at && Number.isFinite(mk.at.x) && m.clearings.some((k) => Math.hypot(mk.at.x - k.x, mk.at.y - k.y) < k.r));
-    assert.ok(inside.some((mk) => mk.id === "sol-am-lichterfenster/vesperfen-wetland"), "the far south-west's wetland is among them");
+    const inside = marks.filter((mk) => mk?.at && Number.isFinite(mk.at.x) && m.clearings.some((k) => Math.hypot(mk.at.x - k.x, mk.at.y - k.y) < k.r));
+    if (!inside.some((mk) => mk.id === WETLAND)) notes.push(`${WETLAND} is not in a clearing at ${n}`);
     for (const mk of inside) for (const p of footprint(mk)) {
       if (mistsHere(p, m).inWall) continue;
-      const a = bakeComposite(m, p.x, p.y);
+      const a = bakeComposite(m, p.x, p.y, keep);
       assert.ok(a <= LIGHT_HAZE, `${mk.id} at ${n}, (${p.x.toFixed(0)}, ${p.y.toFixed(0)}): ${a.toFixed(2)} of fog`);
       checked += 1;
     }
@@ -221,6 +226,19 @@ test("the bake keeps the clearings clear: no paint above a haze on any mark insi
     }
   }
   assert.ok(checked > 100, `footprints read (${checked})`);
+  return notes;
+}
+
+test("the bake keeps the clearings clear: no paint above a haze on any mark inside them, whatever its size, at 244, 272 and 282", (t) => {
+  const notes = bakeKeepsClearings(MARKS);
+  t.diagnostic(notes.length ? notes.join("; ") : "the far south-west's wetland is in its clearing");
+});
+
+test("MAY COVER, in the paint: the far south-west's wetland moved out of its clearing is told, never failed, and the bake still keeps the clearings clear", (t) => {
+  const moved = MARKS.map((mk) => (mk?.id === WETLAND ? { ...mk, at: { x: mk.at.x + 6000, y: mk.at.y } } : mk));
+  const notes = bakeKeepsClearings(moved, mistsKeepAt(mistsKeepRects(moved, MISTS.clearings_m)));
+  t.diagnostic(notes.join("; "));
+  assert.deepEqual(notes, CROSSINGS.map((n) => `${WETLAND} is not in a clearing at ${n}`));
 });
 
 test("the bake's face off the sheet is ragged, never a straight line, on the west and south at 244", () => {
