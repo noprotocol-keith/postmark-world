@@ -104,39 +104,52 @@ const read = (page) => page.evaluate(() => {
   };
 });
 
-test("the page: ?light=1 holds the Mists still and skips the roll-in; the toggle beside the bell says so", async (t) => {
+// what the Mists look like on the page: the wall, the paint, the feather
+const mists = (page) => page.evaluate(() => ({
+  wall: !!document.querySelector("#wv-mists-layer .wv-mists-wall"),
+  paint: !!document.querySelector(".wv-mists-paint"),
+  feather: !!document.querySelector(".wv-sheet-feather"),
+}));
+
+test("the page: ?light=1 draws the wall alone (no bake, no feather, nothing moving); the toggle beside the bell says so", async (t) => {
   if (!chromium) { t.skip("Playwright is not installed: light mode went UNGUARDED"); return; }
   const { ctx, page, errors } = await open({ query: "?light=1" });
-  await page.waitForSelector(".wv-mists-paint img", { state: "attached", timeout: 120_000 });
-  await page.waitForTimeout(1500);
-  const r = await read(page);
+  await page.waitForSelector("#wv-mists-layer .wv-mists-wall", { state: "attached", timeout: 120_000 });
+  await page.waitForTimeout(4000);   // longer than this rig's whole bake at full speed
+  const r = await read(page), m = await mists(page);
   assert.equal(r.light, true, "html.wv-light");
-  assert.deepEqual(r.mistsMotion, [], "nothing on the Mists' stage moves: no drift, no creature, no roll-in");
+  assert.deepEqual(m, { wall: true, paint: false, feather: false }, "RULED (Darko 2026-10-13 21:11): the hard-edged wall stands alone, no bake and no feather");
+  assert.deepEqual(r.mistsMotion, [], "nothing on the Mists' stage moves");
   assert.ok(r.besideBell, "the toggle sits right after the bell");
   assert.equal(r.pressed, "true"); assert.equal(r.on, true, "lit while light mode is in effect");
   assert.equal(r.label, "light mode: auto, on");
   assert.match(r.title, /set by the link/);
-  assert.equal(await page.evaluate(() => document.querySelector(".wv-mists-paint").style.opacity), "", "the paint shows (no roll-in held it back)");
   assert.equal(r.stored, null, "a link is never stored");
   assert.deepEqual(errors, []);
   await ctx.close();
 });
 
-test("the page: the toggle goes auto → on → off → auto, kept on the device, and outranks the link it came by", async (t) => {
+test("the page: the toggle goes auto → on → off → auto, kept on the device, outranks the link, and the paint comes and goes with it", async (t) => {
   if (!chromium) { t.skip("Playwright is not installed: light mode went UNGUARDED"); return; }
   const { ctx, page, errors } = await open({ query: "?light=1" });
-  await page.waitForSelector(".wv-mists-paint img", { state: "attached", timeout: 120_000 });
+  await page.waitForSelector("#wv-mists-layer .wv-mists-wall", { state: "attached", timeout: 120_000 });
   const click = async () => { await page.click(".wv-light-toggle"); await page.waitForTimeout(400); return read(page); };
   let r = await click();
   assert.equal(r.stored, "on"); assert.equal(r.light, true); assert.equal(r.label, "light mode: on");
   r = await click();
   assert.equal(r.stored, "off"); assert.equal(r.light, false, "off outranks the ?light=1 the page was opened with");
-  assert.ok(r.mistsMotion.length >= 2, `the drift moves again (${r.mistsMotion.join(",")})`);
+  await page.waitForSelector(".wv-mists-paint img", { state: "attached", timeout: 120_000 });
+  await page.waitForTimeout(500);
+  r = await read(page);
+  assert.ok(r.mistsMotion.length >= 2, `out of light mode the Mists are baked and drift again (${r.mistsMotion.join(",")})`);
+  assert.equal((await mists(page)).feather, true, "and the sheet's feather is back");
   r = await click();
   assert.equal(r.stored, null, "back to auto: the choice is forgotten");
   assert.equal(r.light, false, "auto on an able machine (the link is spent once the visitor chose)");
   assert.equal(r.label, "light mode: auto, off");
-  await page.click(".wv-light-toggle");   // on, then a reload: the choice is kept
+  await page.click(".wv-light-toggle");   // on: the paint goes at once
+  await page.waitForTimeout(400);
+  assert.deepEqual(await mists(page), { wall: true, paint: false, feather: false }, "turned on, the paint and the feather go");
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.waitForSelector(".wv-light-toggle", { state: "attached", timeout: 180_000 });
   r = await read(page);
@@ -145,7 +158,7 @@ test("the page: the toggle goes auto → on → off → auto, kept on the device
   await ctx.close();
 });
 
-test("the page: auto turns light mode on for a small machine, and for a slow first bake (kept for the next visit)", async (t) => {
+test("the page: auto turns light mode on for a small machine, and for a slow first bake, which stops (kept for the next visit)", async (t) => {
   if (!chromium) { t.skip("Playwright is not installed: light mode went UNGUARDED"); return; }
   for (const [machine, why] of [[{ cores: 4, memory: 8 }, /few cores/], [{ cores: 16, memory: 4 }, /little memory/]]) {
     const { ctx, page } = await open(machine);
@@ -158,9 +171,47 @@ test("the page: auto turns light mode on for a small machine, and for a slow fir
   // (at full speed here it reads about 1.3 ms per 1,000 px; the line is 3)
   const { ctx, page, errors } = await open({ throttle: 6 });
   await page.waitForFunction(() => document.documentElement.classList.contains("wv-light"), null, { timeout: 180_000 });
+  await page.waitForTimeout(6000);   // what was left of the bake would have finished and painted by now
   const r = await read(page);
   assert.equal(r.slow, "1", "the verdict is kept on the device");
   assert.match(r.title, /painted slowly here/);
+  assert.equal((await mists(page)).paint, false, "the bake stopped at its verdict: no paint");
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
+test("the page on a phone: no seventh circle; the bell opens a menu holding the bell and light mode", async (t) => {
+  if (!chromium) { t.skip("Playwright is not installed: light mode went UNGUARDED"); return; }
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await ctx.addInitScript(() => {
+    const RealDate = Date, realNow = RealDate.now.bind(RealDate);
+    const off = (Date.UTC(2026, 5, 12) + 247 * 12 * 3600e3 + 5 * 3600e3) - realNow();
+    globalThis.Date = class extends RealDate { constructor(...a) { if (a.length === 0) super(realNow() + off); else super(...a); } static now() { return realNow() + off; } };
+    Object.defineProperty(Navigator.prototype, "hardwareConcurrency", { get: () => 16, configurable: true });
+    Object.defineProperty(Navigator.prototype, "deviceMemory", { get: () => 8, configurable: true });
+  });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e.message).slice(0, 160)));
+  await page.goto(`http://localhost:${port}/`, { waitUntil: "domcontentloaded", timeout: 90_000 });
+  await page.waitForSelector(".wv-bell", { state: "visible", timeout: 180_000 });
+  // the tour greets a first visit and its scrim takes the taps: skip it once it is up
+  await page.waitForSelector(".wv-tour-skip", { state: "visible", timeout: 15_000 }).then(() => page.click(".wv-tour-skip")).catch(() => {});
+  await page.waitForSelector(".wv-tour-scrim", { state: "hidden", timeout: 15_000 }).catch(() => {});
+  assert.equal(await page.isVisible(".wv-light-toggle"), false, "the light toggle's circle stands down on a phone");
+  const bellBefore = await page.evaluate(() => localStorage.getItem("pm_world_bell"));
+  await page.click(".wv-bell");
+  await page.waitForSelector(".wv-bell-menu", { state: "visible" });
+  const rows = () => page.evaluate(() => [...document.querySelectorAll(".wv-bell-menu-row")].map((b) => b.textContent));
+  assert.deepEqual(await rows(), ["🔔 the bell: on", "🍃 light mode: auto (off)"], "two rows: the bell and light mode");
+  assert.equal(await page.evaluate(() => localStorage.getItem("pm_world_bell")), bellBefore, "opening the menu is not ringing the change");
+  await page.click('.wv-bell-menu-row[data-act="light"]');
+  assert.deepEqual((await rows())[1], "🍃 light mode: on", "the light row goes round as the desktop toggle does");
+  assert.equal(await page.evaluate(() => document.documentElement.classList.contains("wv-light")), true);
+  await page.click('.wv-bell-menu-row[data-act="bell"]');
+  assert.deepEqual((await rows())[0], "🔕 the bell: off", "and the bell row is the bell's own act");
+  await page.keyboard.press("Escape");
+  assert.equal(await page.isVisible(".wv-bell-menu"), false, "Escape closes it");
   assert.deepEqual(errors, []);
   await ctx.close();
 });

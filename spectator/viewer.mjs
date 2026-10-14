@@ -5110,6 +5110,17 @@ const STYLE = `
 /* LIGHT MODE (WLD-43 part 2) holds them still the same way (the drift's own
    keyframes are written only where it is off: mistsPaintHTML) */
 html.wv-light .wv-mc-flit, html.wv-light .wv-mc-lift, html.wv-light .wv-mc-eyes { animation:none; }
+/* the light toggle and the bell's phone menu (WLD-43 part 2): on a phone the
+   toggle's circle stands down and the bell opens a menu holding both */
+.wv-mapctl-tools { position:relative; }
+@media (max-width:720px){ .wv-mapctl .ctl.wv-light-toggle { display:none; } }   /* beats .wv-mapctl .ctl, later in the sheet */
+.wv-bell-menu { position:absolute; top:calc(100% + 6px); z-index:8; display:flex; flex-direction:column; gap:2px; padding:5px;
+  background:rgba(13,15,19,.94); border:1px solid rgba(232,197,106,.34); border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.45); }
+.wv-bell-menu[hidden] { display:none; }
+.wv-bell-menu-row { all:unset; box-sizing:border-box; cursor:pointer; white-space:nowrap; padding:8px 12px; border-radius:8px;
+  font-family:var(--mono); font-size:.82rem; color:rgba(232,197,106,.9); }
+.wv-bell-menu-row:hover, .wv-bell-menu-row:focus-visible { background:rgba(232,197,106,.16); }
+.wv-bell-menu-row.on { color:var(--night); background:linear-gradient(180deg,#f0d68f,var(--amber)); }
 .wv-main.no-map { grid-template-columns:var(--rail) minmax(0,1fr); }
 @media (max-width:1160px){ .wv-main,.wv-main.no-map { grid-template-columns:var(--rail) minmax(0,1fr); }
   .wv-map { grid-column:1 / -1; border-top:1px solid var(--line); } .wv-map .wv-sticky { position:static; } }
@@ -7059,8 +7070,10 @@ export function mountViewer(appEl) {
   function applyLight() {
     light = lightModeFor({ query: lightLink, choice: lightChoice, slow: lightSlow,
       cores: typeof navigator === "object" ? navigator.hardwareConcurrency : 0, memory: typeof navigator === "object" ? navigator.deviceMemory : 0 });
+    const was = document.documentElement.classList.contains("wv-light");
     document.documentElement.classList.toggle("wv-light", light.on);
     paintLightButton();
+    if (was !== light.on && mapCtx) { mapCtx.mistsKey = null; drawMists(); }
   }
   applyLight();
   // ── THE TOWN'S HOUSES ON A RESIDENT'S MAP (2026-09-11) ────────────────────
@@ -10035,6 +10048,15 @@ export function mountViewer(appEl) {
       const lightBtn = root.querySelector(".wv-light-toggle"); if (lightBtn) lightBtn.hidden = true;
       mapCtx?.svg?.querySelector(".wv-sheet-feather")?.remove(); unmaskSheetWashes(); return;
     }
+    // LIGHT MODE SKIPS THE BAKE (WLD-43 part 2, RULED by Darko 2026-10-13 21:11): the wall the
+    // page draws before the paint stands alone, with no feather and no creatures.
+    // The bell still arms once a session, as the roll-in would have armed it.
+    if (light.on) {
+      mapCtx?.svg?.querySelector(".wv-sheet-feather")?.remove(); unmaskSheetWashes();
+      if (state.crossing <= liveCrossing() && sessionOnce("pm_world_mists_intro")) mistsBellArm(m);
+      mistsBellButton(m);
+      return;
+    }
     // the town the paint keeps clear: every sited mark the world holds (the
     // whole fold, not the resident path's ground set)
     const keepMarks = data?.worldState?.marks ?? allMarks();
@@ -10081,7 +10103,7 @@ export function mountViewer(appEl) {
     const step = () => {
       // the town has moved on to another crossing: stop, so a scrubbed dial never
       // queues one bake per crossing it passed
-      if (town?.mistsKey !== drawnKey) { quit(); return; }
+      if (town?.mistsKey !== drawnKey || light.on) { quit(); return; }
       try { stepOnce(); } catch { quit(); }   // e.g. a null 2d context: free the key, so a later draw retries
     };
     const stepOnce = () => {
@@ -10217,6 +10239,29 @@ export function mountViewer(appEl) {
     };
     for (const ev of GESTURES) document.addEventListener(ev, first, true);
   }
+  // the bell's own act and light mode's, one each: the buttons beside each other
+  // on a desktop and the bell's menu on a phone both call these
+  function toggleBell() {
+    const on = !bellOn();
+    try { localStorage.setItem("pm_world_bell", on ? "on" : "off"); } catch { /* the choice lasts this page */ }
+    if (!on && mistsBellState.out) { try { mistsBellState.out.gain.setTargetAtTime(0, mistsBellState.ctx.currentTime, 0.15); } catch { /* already quiet */ } }
+    const bell = root.querySelector(".wv-bell"); if (bell) paintBell(bell);
+    paintBellMenu();
+    const cur = sceneRoomId ? null : mistsAt(state.crossing, data?.skeleton?.mists);
+    if (on && cur) mistsBellRing(cur, true);
+  }
+  function cycleLight() {
+    lightChoice = { auto: "on", on: "off", off: null }[lightChoice ?? "auto"];
+    lightStore.set(LIGHT.choiceKey, lightChoice);
+    lightLink = "";   // the visitor's own word outranks the link they came by
+    applyLight();
+  }
+  // A PHONE HAS NO ROOM FOR A SEVENTH CIRCLE (WLD-43 part 2; Wright's
+  // recommendation, Darko reviews the shots): the map's control row already wraps
+  // over the site's nav at 390 px, so there the bell opens a small menu holding
+  // both, and the light toggle's own circle stands down (CSS, the same width).
+  const PHONE = "(max-width:720px)";
+  const onPhone = () => typeof matchMedia === "function" && matchMedia(PHONE).matches;
   function mistsBellButton(m) {
     let btn = root.querySelector(".wv-bell");
     if (!btn) {
@@ -10225,12 +10270,7 @@ export function mountViewer(appEl) {
       home.after(btn);
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const on = !bellOn();
-        try { localStorage.setItem("pm_world_bell", on ? "on" : "off"); } catch { /* the choice lasts this page */ }
-        if (!on && mistsBellState.out) { try { mistsBellState.out.gain.setTargetAtTime(0, mistsBellState.ctx.currentTime, 0.15); } catch { /* already quiet */ } }
-        paintBell(btn);
-        const cur = sceneRoomId ? null : mistsAt(state.crossing, data?.skeleton?.mists);
-        if (on && cur) mistsBellRing(cur, true);
+        if (onPhone()) toggleBellMenu(btn); else toggleBell();
       });
     }
     btn.hidden = false;
@@ -10245,16 +10285,50 @@ export function mountViewer(appEl) {
     if (!btn) {
       btn = document.createElement("button"); btn.type = "button"; btn.className = "ctl wv-light-toggle";
       bell.after(btn);
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        lightChoice = { auto: "on", on: "off", off: null }[lightChoice ?? "auto"];
-        lightStore.set(LIGHT.choiceKey, lightChoice);
-        lightLink = "";   // the visitor's own word outranks the link they came by
-        applyLight();
-      });
+      btn.addEventListener("click", (e) => { e.stopPropagation(); cycleLight(); });
     }
     btn.hidden = false;
     paintLightButton();
+  }
+  // the bell's menu, on a phone: two rows, each doing what its desktop button does
+  function toggleBellMenu(bell) {
+    let menu = root.querySelector(".wv-bell-menu");
+    if (menu && !menu.hidden) { closeBellMenu(); return; }
+    if (!menu) {
+      menu = document.createElement("div"); menu.className = "wv-bell-menu"; menu.setAttribute("role", "menu");
+      menu.innerHTML = '<button type="button" role="menuitem" class="wv-bell-menu-row" data-act="bell"></button>'
+        + '<button type="button" role="menuitem" class="wv-bell-menu-row" data-act="light"></button>';
+      bell.parentElement.appendChild(menu);
+      menu.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const act = e.target.closest("[data-act]")?.dataset.act;
+        if (act === "bell") toggleBell(); else if (act === "light") cycleLight();
+      });
+    }
+    // right-aligned under the bell, inside the row that holds it
+    const row = bell.parentElement;
+    menu.style.right = Math.max(0, row.clientWidth - bell.offsetLeft - bell.offsetWidth) + "px";
+    menu.hidden = false;
+    bell.setAttribute("aria-expanded", "true");
+    paintBellMenu();
+    document.addEventListener("pointerdown", bellMenuOutside, true);
+    document.addEventListener("keydown", bellMenuKey, true);
+  }
+  function bellMenuOutside(e) { const menu = root.querySelector(".wv-bell-menu"); if (menu && !menu.contains(e.target) && !e.target.closest?.(".wv-bell")) closeBellMenu(); }
+  function bellMenuKey(e) { if (e.key === "Escape") closeBellMenu(); }
+  function closeBellMenu() {
+    const menu = root.querySelector(".wv-bell-menu"); if (menu) menu.hidden = true;
+    root.querySelector(".wv-bell")?.setAttribute("aria-expanded", "false");
+    document.removeEventListener("pointerdown", bellMenuOutside, true);
+    document.removeEventListener("keydown", bellMenuKey, true);
+  }
+  function paintBellMenu() {
+    const menu = root.querySelector(".wv-bell-menu"); if (!menu || menu.hidden) return;
+    const mode = lightChoice ?? "auto";
+    menu.querySelector('[data-act="bell"]').textContent = bellOn() ? "🔔 the bell: on" : "🔕 the bell: off";
+    const row = menu.querySelector('[data-act="light"]');
+    row.textContent = "🍃 light mode: " + (mode === "auto" ? "auto (" + (light.on ? "on" : "off") + ")" : mode);
+    row.classList.toggle("on", light.on);
   }
   // the bake's reading of this machine, in ms per 1,000 px of its first layer:
   // slower than LIGHT.bakeMsPerKpx turns light on, under auto only (a link or
@@ -10267,14 +10341,15 @@ export function mountViewer(appEl) {
   }
   const LIGHT_WHY = { link: "set by the link", chosen: "your choice", slow: "the Mists painted slowly here", cores: "this computer has few cores", memory: "this computer has little memory", auto: "this computer looks able" };
   function paintLightButton() {
+    paintBellMenu();
     const btn = root.querySelector(".wv-light-toggle");
     if (!btn) return;
     const mode = lightChoice ?? "auto";
     btn.textContent = "🍃";
     btn.classList.toggle("on", light.on);
     btn.setAttribute("aria-pressed", light.on ? "true" : "false");
-    btn.setAttribute("aria-label", `light mode: ${mode === "auto" ? `auto, ${light.on ? "on" : "off"}` : mode}`);
-    btn.title = `light mode ${light.on ? "on" : "off"} (${mode === "auto" ? "auto: " : ""}${LIGHT_WHY[light.why]}): the Mists held still, for a slower computer. Click for ${LIGHT_NEXT[mode]}.`;
+    btn.setAttribute("aria-label", "light mode: " + (mode === "auto" ? "auto, " + (light.on ? "on" : "off") : mode));
+    btn.title = "light mode " + (light.on ? "on" : "off") + " (" + (mode === "auto" ? "auto: " : "") + LIGHT_WHY[light.why] + "): the Mists drawn plain and still, for a slower computer. Click for " + LIGHT_NEXT[mode] + ".";
   }
   function paintBell(btn) {
     const on = bellOn();
@@ -10282,6 +10357,7 @@ export function mountViewer(appEl) {
     btn.setAttribute("aria-pressed", on ? "true" : "false");
     btn.setAttribute("aria-label", on ? "the bell is on" : "the bell is off");
     btn.title = on ? "the bell: on (it rings once when the Mists come in)" : "the bell: off";
+    if (onPhone()) { btn.setAttribute("aria-haspopup", "menu"); btn.title += ". Tap for the bell and light mode."; }
   }
 
   function drawOverlay(radial) {
