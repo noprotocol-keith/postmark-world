@@ -33,9 +33,8 @@ test("the weasel door's shape: a predicated mark's declared parent stands in `pa
   assert.equal(p.kind, "sited");
 });
 
-test("a naming mark and a class mark show their declared parent the same way (they carry one for the same reason: no `at`)", () => {
+test("a naming mark shows its declared parent the same way: `predicates` lists naming children too", () => {
   assert.deepEqual(up(name.id), ["kino/manor"]);
-  assert.deepEqual(up(law.id), ["the-town/the-code"]);
 });
 
 test("a geometric child is unchanged: its parent is still its container, never a declared field", () => {
@@ -44,10 +43,12 @@ test("a geometric child is unchanged: its parent is still its container, never a
   assert.deepEqual(up(stray.id, { ...world, marks: [...world.marks, stray] }), ["kino/manor"]);
 });
 
-test("a parent the world does not hold as a mark is not invented: terrain, or a mark that is gone", () => {
+test("not invented: a terrain parent, a mark that is gone, and a class mark's declared parent", () => {
   assert.deepEqual(up(onTerrain.id), []);
   assert.deepEqual(up(orphan.id), []);
   assert.deepEqual(up(code.id), [], "a class mark with no parent sits inside nothing");
+  assert.deepEqual(up(law.id), [], "a class mark's declared parent is not read: `predicates` never lists a class mark, and the class tree is WLD-40's");
+  assert.ok(!investigate(code.id, world, { budget: 40 }).predicates.some((p) => p.id === law.id), "the inverse it would break: the code does not list the law");
 });
 
 test("ONE RELATION, BOTH DIRECTIONS: every mark a parent lists among its predicates names that parent in its own `parents`", () => {
