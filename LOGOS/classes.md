@@ -273,6 +273,23 @@ edge — impossible, not forbidden; clauses may expose child-fillable
 **options**), and its **payload schema** (the declarable params a caller
 fills).
 
+## The LOGOS ladder — label, predicate, subclass (Sitting A, 2026-10-12)
+
+A descriptor climbs one ladder, in increasing order of resolution and
+distributability: it starts as a **label**, may become a **predicate**, and
+may become a **subclass** (Darko, Sitting A, 2026-10-12).
+
+- **A label is a lazy class** (ruled in direction, Sitting A, 2026-10-12): the
+  same idea as a class, in shorthand that has not yet needed a class-node's
+  upkeep, and it may be promoted to one.
+- **Kind and subclass are one word** (ruled, Sitting A, 2026-10-12): "a kind
+  of candy" is a subclass of candy. A mark's `kind` field reads as a label —
+  `kind: predicated` labels a predicate — so the field keeps its one meaning,
+  how a mark stands ([lifetimes.md](lifetimes.md)), and nothing migrates.
+- **What promotes a descriptor is unruled** (POS-615): who may write a label,
+  what carries a label to a predicate or a predicate to a subclass, and how the
+  town lists the labels in use all wait for that sitting.
+
 ## The two constitutionalities
 
 A class carries two independent constitutionalities:
