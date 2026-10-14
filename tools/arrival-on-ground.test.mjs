@@ -136,3 +136,18 @@ test("NO ARRIVAL MOVES BY MORE THAN THE ROUNDING — against the old rule (the a
     assert.ok(worst <= 0.1 + 1e-9, `${mode}: an arrival moved ${worst} m on an axis`);
   }
 });
+
+test("THE RING BELT · a ring point that the tenth-metre rounding would carry off the ring is kept as it is (review of #206)", () => {
+  // A ring 0.03 m deep: every tenth-metre point of y lies off it, so a rounded
+  // stand-here point would put the walker outside the very ring they stand in.
+  const sliver = { id: "t/sliver", kind: "sited", at: { x: 5, y: 0.025 }, extent: { w: 10, h: 0.03 },
+    points: [[0, 0.01], [10, 0.01], [10, 0.04], [0, 0.04]] };
+  const from = { x: 5.03, y: 0.025 };
+  const t = walkTargetFor(sliver, from, "rim");
+  assert.ok(t?.ringed, "the ring answers");
+  assert.ok(pointWithinMark(t.toward, sliver), `the frozen point ${JSON.stringify(t.toward)} stands on the ring`);
+  assert.deepEqual(t.toward, from, "kept unrounded, because rounding would carry it out");
+  // and a point the rounding keeps on the ring is rounded as before
+  const wide = { ...sliver, id: "t/wide", extent: { w: 10, h: 4 }, at: { x: 5, y: 2 }, points: [[0, 0], [10, 0], [10, 4], [0, 4]] };
+  assert.deepEqual(walkTargetFor(wide, { x: 5.03, y: 2.04 }, "rim").toward, { x: 5, y: 2 });
+});
