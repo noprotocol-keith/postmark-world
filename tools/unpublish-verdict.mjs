@@ -34,6 +34,22 @@
 //               swept, and a market mark at zero escrow is swept from its
 //               current filing.
 //
+// ── THE SAFETY HALF OF THE RE-DERIVE (Darko, 2026-10-14) ──────────────────
+//
+// A row's `class` is written ONCE, when the sweep admits the mark, and the
+// loop used to trust it forever. Standing is not fixed: a parcel founded or
+// grown around a mark, or a mark moved onto its household's ground, makes it
+// home later, and the stored "commons" never heard. On 10-14 eleven home marks
+// stood under commons rows at their own paths (keith/the-garage,
+// alex-rowan/the-threadbound-house, nine more), seven of them at exactly ✦1:
+// one unstake, and the next sweep would have unpublished a home. So the
+// mark's standing is WALKED NOW, by the caller, with the one standing rule
+// (mark-standing.mjs, the fold's tier), for every commons row at zero escrow:
+// a mark that walks home or constitution is never unpublished, whatever its
+// row says. This half only ever KEEPS a mark, so it needs no ruling and no
+// notice. The other half, a row stored home whose mark now walks commons, is
+// untouched here: it is WLD-51's, with the stale rows.
+//
 // PURE. The caller hands in what it measured; this file reads no git, no store
 // and no clock. An input the caller could not measure is `null`, and `null` is
 // never "no": the verdict is then `unpublish: null` with the reason, because "I
@@ -46,7 +62,7 @@ export const rowClassOf = (cls) => (cls === "market" ? "commons" : cls);
 
 /** The rule in words, for any reader that quotes it. */
 export const UNPUBLISH_RULE =
-  'the settlement unpublishes a mark its registry holds as class "commons" when no open stamps stand behind it at the crossing and its registered path is on main ("commons needs escrow > 0"); home and constitution rows, and marks the registry does not hold, are never swept';
+  'the settlement unpublishes a mark its registry holds as class "commons" when no open stamps stand behind it at the crossing, its registered path is on main, and its standing, walked at the crossing, is still commons ("commons needs escrow > 0"); a mark that walks home or constitution, a home or constitution row, and a mark the registry does not hold are never swept';
 
 const ask = (x) => (typeof x === "function" ? x() : x);
 
@@ -60,7 +76,9 @@ const ask = (x) => (typeof x === "function" ? x() : x);
  *                    on it, so the sweep pays its git read where it always did.
  * @param standing    the mark's derived tier on main now (`home` | `market` |
  *                    `constitution` …), `null` when it does not stand, or a
- *                    function returning one. Read only under "rederive".
+ *                    function returning one. Asked of every commons row at zero
+ *                    escrow (the safety half); left undefined, it is UNREAD and
+ *                    the verdict is null: a mark is never taken on a walk not run.
  * @param currentPath where the mark is filed now, or a function returning it.
  *                    Read only under "rederive", for a stale row it sweeps.
  * @param staleRows   the dial; callers pass it only in tests.
@@ -71,6 +89,10 @@ export function unpublishVerdict(entry, { escrow = null, pathOnMain = null, stan
   if (entry?.class !== "commons") return { unpublish: false, why: "not-commons" };
   if (escrow === null || escrow === undefined) return { unpublish: null, why: "escrow-unread" };
   if (Number(escrow) > 0) return { unpublish: false, why: "backed" };
+  // the safety half: the standing walked now outranks the class stored once
+  const tier = ask(standing);
+  if (tier === undefined) return { unpublish: null, why: "standing-unread" };
+  if (tier !== null && rowClassOf(tier) !== "commons") return { unpublish: false, why: "walks-not-commons" };
   const onMain = ask(pathOnMain);
   if (onMain === null || onMain === undefined) return { unpublish: null, why: "path-unread" };
   if (onMain) return { unpublish: true, why: "commons-unbacked", path: entry.path };
@@ -78,10 +100,7 @@ export function unpublishVerdict(entry, { escrow = null, pathOnMain = null, stan
   // ── the stale row ──
   if (staleRows === "skip") return { unpublish: false, why: "stale-path" };
   if (staleRows !== "rederive") throw new Error(`unpublish-verdict: unknown STALE_ROWS "${staleRows}"`);
-  const tier = ask(standing);
-  if (tier === undefined) return { unpublish: null, why: "standing-unread" };
   if (tier === null) return { unpublish: false, why: "not-standing" };
-  if (rowClassOf(tier) !== "commons") return { unpublish: false, why: "rederived-not-commons" };
   const at = ask(currentPath);
   if (!at) return { unpublish: null, why: "filing-unread" };
   return { unpublish: true, why: "rederived-commons-unbacked", path: at };

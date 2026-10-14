@@ -1787,3 +1787,51 @@ test("THE STALE ROW (postmark#3757): a registry row whose path left main is skip
   assert.equal(existsSync(join(ruled.repo, "WORLD/marks/lupi")), false, "and its seat with it (the husk clause)");
   assert.deepEqual(Object.keys(ruled.registry()), ["kino/the-fireplace"], "the bookend's row leaves the registry");
 });
+
+test("THE SAFETY HALF (postmark#3757, Darko 2026-10-14): a commons row whose mark now WALKS home is never unpublished at ✦0; a commons mark that still walks market is", (t) => {
+  // keith/the-garage's shape: admitted as commons, its row written once; the
+  // household's parcel stands around it now, so the walk answers home. The
+  // loop used to read the stored class alone and would have taken it.
+  const repo = mkdtempSync(join(tmpdir(), "postmark-safety-half-"));
+  t.after(() => rmSync(repo, { recursive: true, force: true }));
+  const git = (...args) => execFileSync("git", ["-C", repo, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  const put = (path, text) => { const full = join(repo, path); mkdirSync(dirname(full), { recursive: true }); writeFileSync(full, text); };
+  mkdirSync(join(repo, "tools"), { recursive: true });
+  for (const file of withTool("mark-lint.mjs")) cpSync(join(HERE, file), join(repo, "tools", file));
+  put("WORLD/skeleton.json", JSON.stringify({ features: [], physics_registry: {} }, null, 2));
+  put("WORLD/marks/let-there-be-light/mark.md", record({
+    by: "the-town", tier: "constitution", at: { x: 0, y: 0 }, extent: { w: 320000, h: 320000 }, body: "the frame",
+  }));
+  put("WORLD/marks/keith/keith-parcel/mark.md", record({ kind: "parcel", by: "keith", at: { x: 100, y: 100 }, extent: { w: 25, h: 25 }, body: "keith's parcel, founded after the garage" }));
+  const garage = "WORLD/marks/keith/the-garage/mark.md";
+  put(garage, record({ by: "keith", at: { x: 100, y: 100 }, extent: { w: 4, h: 4 }, body: "the garage" }));
+  const bench = "WORLD/marks/bob/the-bench/mark.md";
+  put(bench, record({ by: "bob", at: { x: 1000, y: 1000 }, extent: { w: 1, h: 1 }, body: "a bench on open ground" }));
+  put("WORLD/settlement-publications.json", JSON.stringify({
+    version: 1,
+    published: {
+      "keith/the-garage": { household: "house-k", path: garage, class: "commons" },
+      "bob/the-bench": { household: "house-b", path: bench, class: "commons" },
+    },
+  }, null, 2) + "\n");
+  git("init", "-q", "-b", "main");
+  execFileSync(process.execPath, [join(repo, "tools", "marks-fold.mjs")], { cwd: repo });
+  git("add", "-A");
+  git("-c", "user.name=fixture", "-c", "user.email=fixture@test.invalid", "commit", "-q", "-m", "published main");
+  const remote = mkdtempSync(join(tmpdir(), "postmark-safety-half-remote-"));
+  t.after(() => rmSync(remote, { recursive: true, force: true }));
+  execFileSync("git", ["init", "--bare", "-q", remote]);
+  git("remote", "add", "origin", remote);
+  git("push", "-q", "origin", "main");
+  const stakesPath = `${repo}-stakes.json`;
+  t.after(() => rmSync(stakesPath, { force: true }));
+  writeFileSync(stakesPath, JSON.stringify([]));
+
+  const report = settlementSweep({ repo, stakesPath });
+  assert.deepEqual(report.unpublished.map((r) => r.id), ["bob/the-bench"], "the control leaves; the garage, walking home, does not");
+  assert.equal(existsSync(join(repo, garage)), true, "the garage stands");
+  assert.equal(existsSync(join(repo, bench)), false);
+  const registry = JSON.parse(readFileSync(join(repo, "WORLD/settlement-publications.json"), "utf8")).published;
+  assert.deepEqual(registry["keith/the-garage"], { household: "house-k", path: garage, class: "commons" },
+    "its row is not rewritten: the walk decides at every crossing, the stored class decides nothing for it");
+});
