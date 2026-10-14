@@ -21,7 +21,7 @@
 // One engine, imported the clone's way (relative into the package): the browser
 // runs the exact library anyone can `node`. If this page and a clone disagree,
 // the office has explaining to do.
-import { orient, openYourEyes, investigate, containmentChain, mistsSentence, veilSentence } from "../tools/world-verbs.mjs";
+import { orient, openYourEyes, investigate, containmentChain, mistsSentence, veilSentence, standpointSight } from "../tools/world-verbs.mjs";
 import { assembleWorld } from "../tools/world-build.mjs";
 import { DIALS, bearingDeg, quantizeBearing, mistsAt, mistsRoad } from "../tools/world-engine.mjs";
 import { marksContain, pointInPolygon, pointInRect, polygonBBox, polygonOf, rect } from "../tools/geometry.mjs"; // read-only: home color + point-destination labels
@@ -6965,14 +6965,14 @@ export function mountViewer(appEl) {
     if (townHouses || townHousesPending) return townHousesPending;
     townHousesPending = fetchWorldState(recordSources("/WORLD/world-state.json").map((source) => source.url), { credentials: "same-origin" })
       .then(({ json }) => {
-        townWorld = { marks: json?.marks ?? [], parcels: json?.parcels ?? [], households: json?.households ?? {} };
+        townWorld = sightOf({ marks: json?.marks ?? [], parcels: json?.parcels ?? [], households: json?.households ?? {} });
         townHouses = townHouseMarks(townWorld.marks, townWorld);
         // the same record townHouseMarks just read is kept whole: the resident
         // path's index is the read's nearby entries plus these houses, and homes
         // per resident need the record's predicates, parcels and registry
         // the containment chain of every mark, for the rule that hides what is
         // inside a parcel: the read's nearby entries carry no parents
-        townChain = new Map((json?.marks ?? []).map((m) => [m.id, { kind: m.kind ?? null, parent: m.parent ?? null, placementParent: m.placementParent ?? null }]));
+        townChain = new Map(townWorld.marks.map((m) => [m.id, { kind: m.kind ?? null, parent: m.parent ?? null, placementParent: m.placementParent ?? null }]));
         if (onResidentPath()) { withTownHouses(); if (lastRadial) drawOverlay(lastRadial); }
       })
       .catch((e) => { console.warn(`[world] the town's houses could not be read (${String(e?.message ?? e).slice(0, 120)}) — the map shows the read's own`); })
@@ -7109,6 +7109,16 @@ export function mountViewer(appEl) {
   // on the resident path, because nothing there computes a field of view any
   // more — the office does. Everything that used to walk `world.marks` goes
   // through `allMarks()` below, which is the drawn set here and the fold there.
+  // WHAT THE PAGE MAY DRAW INSIDE A DUNGEON (WLD-5, Darko 2026-10-13 20:31) is
+  // the world tools' one answer, never this page's: `standpointSight`, the same
+  // function the office's reads call, asked of the enter ledger at the page's
+  // clock. The Spectator has entered nothing, so every dungeon draws as its own
+  // mark alone. There is no second implementation here, on purpose.
+  const sightOf = (w) => standpointSight(w, {
+    occupancy: occupancyAt(enterExitLedger.acts, occupancyClock()),
+    handle: isSpectating() ? null : (state.handle || null),
+  });
+
   function applyWorldLayer() {
     if (!data?.trueWorld && !data?.myWorld) {
       // no fold in hand: the resident path. `byId` is filled by the read.
@@ -7119,7 +7129,7 @@ export function mountViewer(appEl) {
       return;
     }
     data.worldState = data?.myWorld || data.trueWorld;
-    world = assembleWorld({ worldState: data.worldState, skeleton: data.skeleton });
+    world = sightOf(assembleWorld({ worldState: data.worldState, skeleton: data.skeleton }));
     byId = new Map(allMarks().map((m) => [m.id, m]));
     homeSet = buildHomeSet(world.marks);
     pinnedBuiltId = null; // the record moved: an open bubble is now stale prose
