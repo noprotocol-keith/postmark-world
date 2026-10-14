@@ -99,6 +99,65 @@ export function parseRecord(text, file) {
   return { ...fm, body };
 }
 
+// ---------- what parseRecord would silently lose (WLD-41, Darko 2026-10-13) ----------
+// parseRecord never throws on a value it cannot read whole; it keeps what it can.
+// Two spellings lose words that way, and both read back as if nothing happened:
+//   - a `{…}` that is not strict JSON goes to the number scan, which keeps only
+//     `word: number` pairs: `dials: { stolen: true, clue: "…" }` reads as {}.
+//   - a `#` cuts the line as a comment, even inside a quoted value.
+// This names each one from the raw text, for the lint. It is a guard, not a
+// grammar change: parseRecord reads exactly as it did, and every caller of it
+// is untouched. The rule reads the raw file because the parsed record has
+// already lost the words.
+//
+// A `{…}` value is whole when it is strict JSON or when every comma piece is
+// one `word: number` the scan reads whole (so `{x: 1, y}` and `{x: 1.2.3}` are
+// lossy too). A `#` counts only inside a quoted span; a bare `#` mid-value is
+// the grammar's comment, unchanged. A quote opens a span only at the value's
+// start or after a space or `{[,:`, so an apostrophe in prose is not a quote.
+const PIECE_RE = /^(\w+)\s*:\s*(-?[\d.]+)$/;
+function quotedHashAt(val) {
+  let q = null;
+  for (let i = 0; i < val.length; i++) {
+    const c = val[i];
+    if (q) {
+      if (c === "\\") { i++; continue; }
+      if (c === q) q = null;
+      else if (c === "#") return i;
+    } else if ((c === '"' || c === "'") && (i === 0 || /[\s{[,:]/.test(val[i - 1]))) q = c;
+    else if (c === "#") return -1; // a comment outside any quote: the grammar's
+  }
+  return -1;
+}
+export function lossyValues(text) {
+  const m = String(text ?? "").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!m) return [];
+  const out = [];
+  for (const raw of m[1].split(/\r?\n/)) {
+    const kv = raw.match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
+    if (!kv) continue;
+    const [, key, valRaw] = kv;
+    const value = valRaw.trim();
+    const hashAt = quotedHashAt(value);
+    if (hashAt >= 0) { out.push({ key, value, why: "hash", kept: value.slice(0, hashAt).trimEnd() }); continue; }
+    const val = valRaw.replace(/#.*$/, "").trim(); // what parseRecord reads
+    if (!val.startsWith("{")) continue;
+    let json = null;
+    try { json = JSON.parse(val); } catch { /* not JSON: the scan reads it */ }
+    if (json !== null && typeof json === "object") continue;
+    const pieces = val.replace(/[{}]/g, "").split(",").map((p) => p.trim()).filter(Boolean);
+    const lost = pieces.filter((p) => { const n = p.match(PIECE_RE); return !n || !Number.isFinite(Number(n[2])); });
+    if (!lost.length) continue;
+    const readsAs = {};
+    for (const p of pieces) { const n = p.match(/([\w]+)\s*:\s*(-?[\d.]+)/); if (n) readsAs[n[1]] = Number(n[2]); }
+    let strict = null; // the same value with its bare keys quoted, when that is JSON
+    const quoted = val.replace(/([{,]\s*)([A-Za-z_][\w-]*)\s*:/g, '$1"$2":');
+    try { if (typeof JSON.parse(quoted) === "object") strict = quoted; } catch { /* no suggestion */ }
+    out.push({ key, value: val, why: "brace", dropped: lost.map((p) => p.split(":")[0].trim() || p), readsAs, strict });
+  }
+  return out;
+}
+
 // ---------- the frame (SCHEMA v3 § The frame, 2026-08-09) ----------
 // A mark's `at:` is written in ITS OWN FRAME — as an offset from the centre of
 // the mark it sits inside. The world root IS the frame and keeps world numbers;
