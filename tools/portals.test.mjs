@@ -18,7 +18,7 @@ import { fileURLToPath } from "node:url";
 import { entryLawOf, termsAt, occupancyAt, parseEnterExitLedger } from "./enter-exit.mjs";
 import {
   clampInto, landingOf, hiddenFrom, scopeWorld, portalFindings, applyPortalExceptions, portalsIn, portalsInto,
-  dungeonsOf, heldDungeon, LANDING_REACH_M,
+  dungeonsOf, heldDungeon, standpointSight, walkFence, LANDING_REACH_M,
 } from "./portals.mjs";
 import { enter, exit, enterPrompt, exitPrompt, containmentChain, investigate } from "./world-verbs.mjs";
 
@@ -267,6 +267,48 @@ test("a room whose only door is locked has no path out, though the rest do", () 
   const w = world();
   w.marks.find((m) => m.id === "spire/chapel-back").entry.word = "opposed";
   assert.deepEqual(portalFindings(w.marks).map((f) => `${f.rule} ${f.mark}`), ["path-to-an-exit spire/chapel"]);
+});
+
+test("G9 · siblings never overlap: two marks with one parent inside a dungeon", () => {
+  const w = world();
+  w.marks.push({ id: "spire/pantry", kind: "sited", by: "spire", at: { x: 1110, y: 950 }, extent: { w: 30, h: 30 }, body: "A pantry, half in the hall." });
+  assert.deepEqual(portalFindings(w.marks).map((f) => `${f.rule} ${f.mark}`), ["rooms-do-not-overlap spire/hall"]);
+  assert.match(portalFindings(w.marks)[0].msg, /spire\/hall overlaps spire\/pantry, and both stand directly in spire\/grounds inside spire\/grounds/);
+});
+
+test("G9 · a room's contents are its children, never its overlapping siblings", () => {
+  // the candle stands inside the hall: same dungeon, different parent
+  assert.deepEqual(portalFindings(world().marks), []);
+});
+
+test("G9 · two rooms drawn as rings that share a wall do not overlap; pushed into each other, they do", () => {
+  const ring = (id, x0) => ({ id, kind: "sited", by: "spire", at: { x: x0 + 10, y: 860 }, extent: { w: 20, h: 20 },
+    points: [[x0, 850], [x0 + 20, 850], [x0 + 20, 870], [x0, 870]], body: id });
+  const w = world();
+  w.marks.push(ring("spire/east-cell", 1200), ring("spire/west-cell", 1220));
+  assert.deepEqual(portalFindings(w.marks), [], "a shared wall is not shared ground");
+  w.marks[w.marks.length - 1] = ring("spire/west-cell", 1217);
+  assert.deepEqual(portalFindings(w.marks).map((f) => f.rule), ["rooms-do-not-overlap"]);
+});
+
+test("standpointSight: the one function, keyed off the enter ledger; no handle has entered nothing", () => {
+  const w = world();
+  const occupancy = new Map([["ann", ["spire/grounds", "spire/hall"]]]);
+  const ann = standpointSight(w, { occupancy, handle: "ann" });
+  assert.ok(ann.marks.some((m) => m.id === "spire/candle"));
+  assert.ok(!ann.marks.some((m) => m.id === "spire/chapel"));
+  const nobody = standpointSight(w, { occupancy, handle: null });
+  assert.ok(!nobody.marks.some((m) => m.id === "spire/candle"), "the spectator reads the dungeon alone");
+  assert.equal(standpointSight({ marks: [] }, { occupancy }).marks.length, 0);
+});
+
+test("G4 · the walk inside a dungeon is fenced to the room entered; outside one there is no fence", () => {
+  const w = world();
+  assert.equal(walkFence(["spire/grounds", "spire/hall"], w.marks).id, "spire/hall");
+  assert.equal(walkFence(["spire/grounds", "spire/vestibule"], w.marks).id, "spire/vestibule");
+  assert.equal(walkFence(["spire/grounds"], w.marks).id, "spire/grounds", "in the dungeon but no room: the dungeon itself");
+  assert.equal(walkFence(["spire/the-approach"], w.marks), null);
+  assert.equal(walkFence([], w.marks), null);
 });
 
 test("an into naming no mark is red", () => {

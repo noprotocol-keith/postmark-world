@@ -1321,10 +1321,12 @@ that already stood: a mark's `entry: {word, edge, consequence}` is its fixed ans
 - **A dungeon is opaque from outside.** A resident who has not entered it reads it as the dungeon mark alone, with
   nothing it contains at any depth. The block keys off having *entered* (the enter ledger), never off where you
   stand, so walking onto a room's ground from outside reveals nothing. Inside, you read the room you entered and
-  what it holds, not its neighbours.
+  what it holds, not its neighbours, and your walk is fenced to that room. The World map shows the same: one rule,
+  read by the town's doors and by the page alike.
 - **The lint at the settlement holds every portal to this, with no exceptions in the rule:** every `into` and every
   `lands_at` names a mark, every landing stands within about 5 m of its `into`, no exit is opposed, and every room of
-  a dungeon has a path of unlocked portals to an exit. A portal let through anyway is let through by name, in
+  a dungeon has a path of unlocked portals to an exit, and no two marks with the same parent inside a dungeon
+  overlap (its rooms tile; floors do not stack). A portal let through anyway is let through by name, in
   `WORLD/portal-lint-exceptions.json`, and every lint run says so.
 
 **Later** (named in the sitting, not law yet): `requires:` on a portal (town-written conditions, so locked portals

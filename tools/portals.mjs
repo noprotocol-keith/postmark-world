@@ -20,7 +20,7 @@
 // so what a portal does and what the lint holds it to are one definition. Pure:
 // no fs, no engine import, browser-safe like geometry.mjs.
 
-import { marksContain, pointInPolygon, pointInRect, polygonOf, rect } from "./geometry.mjs";
+import { marksContain, overlapArea, pointInPolygon, pointInRect, polygonOf, rect } from "./geometry.mjs";
 import { entryLawOf } from "./enter-exit.mjs";
 
 export const DUNGEON_CLASS = "dungeon";
@@ -117,6 +117,21 @@ export function heldDungeon(held, marks) {
   return null;
 }
 
+/** THE WALK INSIDE A DUNGEON IS FENCED TO THE ROOM YOU ENTERED (Darko, 2026-10-13
+ *  20:31, G4). The fence: the innermost mark you hold that the dungeon governs,
+ *  or null when you are inside no dungeon. A step whose destination leaves it is
+ *  refused at the door that writes walks; the way to another room is a portal. */
+export function walkFence(held, marks) {
+  const d = heldDungeon(held, marks);
+  if (!d) return null;
+  const byId = new Map(marks.map((m) => [m.id, m]));
+  for (let i = (held ?? []).length - 1; i >= 0; i--) {
+    const m = byId.get(held[i]);
+    if (m && dungeonsOf(m, marks).includes(d)) return m;
+  }
+  return byId.get(d) ?? null;
+}
+
 // ── opacity: what a walker cannot see ────────────────────────────────────────
 //
 // From outside, a dungeon is its own mark and nothing it contains, at any depth.
@@ -162,6 +177,21 @@ export function scopeWorld(world, { held = [], keep = null } = {}) {
   if (keep) for (const m of marks) if (hidden.has(m.id) && keep(m)) hidden.delete(m.id);
   if (!hidden.size) return world;
   return { ...world, marks: marks.filter((m) => !hidden.has(m.id)) };
+}
+
+/**
+ * WHAT THIS STANDPOINT SEES INSIDE A DUNGEON, BY THE ENTER LEDGER.
+ *
+ * The ONE implementation (Darko, 2026-10-13 20:31, on WLD-5): the office's
+ * reads and the spectator viewer's World page both call this, and neither keeps
+ * a second copy. `occupancy` is the enter ledger folded at the clock
+ * (enter-exit.mjs § occupancyAt); `handle` is whose standpoint it is, and no
+ * handle (the spectator, a keyless read) has entered nothing, so every dungeon
+ * reads as its own mark alone.
+ */
+export function standpointSight(world, { occupancy = null, handle = null, keep = null } = {}) {
+  const held = handle && occupancy ? [...(occupancy.get(handle) ?? [])] : [];
+  return scopeWorld(world, { held, keep });
 }
 
 // ── the landing ──────────────────────────────────────────────────────────────
@@ -308,13 +338,66 @@ export function portalsInto(dungeonId, marks) {
 //                          locked from the outside, never from the inside
 //   path-to-an-exit        from every room of a dungeon, a path of portals that
 //                          are not opposed reaches an exit
+//   rooms-do-not-overlap   inside a dungeon, two marks with the same parent
+//                          never overlap (Darko, 2026-10-13 20:31: siblings
+//                          only; a room's contents sit inside it, and floors
+//                          tile rather than stack)
 //
 // NO EXCEPTIONS LIVE HERE. A named one lives in WORLD/portal-lint-exceptions.json,
 // appended by whoever must answer for it, and mark-lint prints every exception it
 // honoured so the record shows the portal was let through, and by whom.
 export const PORTAL_RULES = Object.freeze([
   "into-names-a-mark", "lands-at-names-a-mark", "lands-at-reaches-into", "exit-never-opposed", "path-to-an-exit",
+  "rooms-do-not-overlap",
 ]);
+
+/** A mark's parent, by true containment: the smallest sited mark with an
+ *  extent, larger than it, that wholly holds it. Two rooms that overlap are
+ *  therefore siblings, never parent and child, which is what lets the overlap
+ *  rule see them. */
+function parentOf(m, marks) {
+  let best = null;
+  for (const c of marks) {
+    if (c === m || c.id === m.id || c.kind !== "sited" || !c.at || !c.extent || !(area(c) > area(m))) continue;
+    if (!markInside(c, m)) continue;
+    if (!best || area(c) < area(best)) best = c;
+  }
+  return best;
+}
+
+/** How far a point inside a mark stands from its edge. */
+function insetOf(pt, mark) {
+  const ring = polygonOf(mark);
+  if (ring) {
+    let best = Infinity;
+    for (let i = 0; i < ring.length; i++) {
+      const q = nearestOnSegment(pt, ring[i], ring[(i + 1) % ring.length]);
+      best = Math.min(best, Math.hypot(q.x - pt.x, q.y - pt.y));
+    }
+    return best;
+  }
+  const r = rect(mark);
+  return Math.min(pt.x - (r.x - r.w / 2), r.x + r.w / 2 - pt.x, pt.y - (r.y - r.h / 2), r.y + r.h / 2 - pt.y);
+}
+
+/** Whether two marks share any ground. Two rooms that only share a wall do
+ *  not: rectangles are asked analytically (touching edges overlap by zero), and
+ *  a ring is sampled on a metre grid where a point counts only when it stands a
+ *  quarter metre inside BOTH, so a wall drawn on a grid line is not an overlap. */
+export function roomsOverlap(a, b) {
+  const ra = rect(a), rb = rect(b);
+  if (overlapArea(ra, rb) <= 0) return false;
+  if (!polygonOf(a) && !polygonOf(b)) return true;
+  const x0 = Math.max(ra.x - ra.w / 2, rb.x - rb.w / 2), x1 = Math.min(ra.x + ra.w / 2, rb.x + rb.w / 2);
+  const y0 = Math.max(ra.y - ra.h / 2, rb.y - rb.h / 2), y1 = Math.min(ra.y + ra.h / 2, rb.y + rb.h / 2);
+  const step = Math.max(1, Math.sqrt(((x1 - x0) * (y1 - y0)) / 200000));
+  for (let x = x0 + step / 2; x < x1; x += step)
+    for (let y = y0 + step / 2; y < y1; y += step) {
+      const pt = { x, y };
+      if (pointInMark(pt, a) && pointInMark(pt, b) && insetOf(pt, a) > 0.25 && insetOf(pt, b) > 0.25) return true;
+    }
+  return false;
+}
 
 export function portalFindings(marks) {
   const list = (marks ?? []).filter((m) => m && !m._error);
@@ -392,6 +475,23 @@ export function portalFindings(marks) {
     for (const r of [...rooms].sort())
       if (!reaches.has(r))
         say(r, "path-to-an-exit", `no path of unlocked portals leads from ${r} out of ${d} — every room of a dungeon has a way out that cannot be locked`);
+
+    // siblings never overlap. Portals are left out: a portal is set in a wall
+    // and straddles it by design.
+    const groups = new Map();
+    for (const m of list) {
+      if (m.kind !== "sited" || !m.at || !m.extent || m.id === d || !inD(m.id) || entryLawOf(m)?.into) continue;
+      const parent = parentOf(m, list)?.id ?? null;
+      if (!groups.has(parent)) groups.set(parent, []);
+      groups.get(parent).push(m);
+    }
+    for (const [parent, sibs] of groups) {
+      sibs.sort((a, b) => a.id.localeCompare(b.id));
+      for (let i = 0; i < sibs.length; i++)
+        for (let j = i + 1; j < sibs.length; j++)
+          if (roomsOverlap(sibs[i], sibs[j]))
+            say(sibs[i].id, "rooms-do-not-overlap", `${sibs[i].id} overlaps ${sibs[j].id}, and both stand directly in ${parent} inside ${d} — the rooms of a dungeon tile, they never stack`);
+    }
   }
   return found;
 }

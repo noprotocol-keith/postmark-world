@@ -24,12 +24,12 @@ import {
   isMark, occupantsOf, termsAt, withinOf,
 } from "./enter-exit.mjs"; // DEMO SLICE — the enter-exit acts (step 5, jetto/enter-exit-demo)
 import {
-  pointInMark, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld,
+  pointInMark, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence,
   landingOf, enterTargetOf, portalsIn, portalsInto,
 } from "./portals.mjs"; // WLD-5: portals and the dungeon class, one home for the verbs and the lint
 // The office loads this file and enter-exit.mjs from the clone, and nothing else,
 // so the portal reads it needs ride out through here.
-export { dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, portalsIn, portalsInto, isDungeon };
+export { dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence, portalsIn, portalsInto, isDungeon, pointInMark };
 
 // ───────────────────────── orient — charter + your state ────────────────────
 // The establishing line of every telling: the let-there-be-light root (light

@@ -906,7 +906,8 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
 // rules are portals.mjs § the lint, one definition beside the passage's: every
 // `into` names a mark; every string `lands_at` names a mark; every landing
 // stands within LANDING_REACH_M of its `into`; an exit out of a dungeon is never
-// opposed; every room of a dungeon has a path of unlocked portals out.
+// opposed; every room of a dungeon has a path of unlocked portals out; no two
+// marks with the same parent inside a dungeon overlap (Darko, 20:31: siblings only).
 //
 // AN ERROR, AND IT REFUSES THE CROSSING. The settlement's harm gate runs this
 // lint as its first check (tools/harm-gate.mjs § 1), and Darko ruled the rules
