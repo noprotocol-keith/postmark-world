@@ -38,7 +38,7 @@ import { parseEnterExitLedger, occupancyAt, occupantsOf, withinOf, isMark, isEnt
 // is not allowed to hold one, and `tools/record-sources.test.mjs` reads these
 // bytes to prove it.
 import { recordSources, recordAbsenceMessage } from "../tools/record-sources.mjs";
-import { MISTS_PAINT, bakeSheetFeather, mistsBakePlan, mistsBaker, mistsKeepRasterBuilder, mistsCoreHex, mistsKeepRects, mistsKeepAt, mistsCreatures, mistsCreatureSVG, bellFor, ringBell } from "./mists-render.mjs";
+import { MISTS_PAINT, bakeSheetFeather, mistsBakePlan, mistsBaker, mistsKeepRasterBuilder, mistsCoreHex, mistsKeepRects, mistsKeepAt, mistsCreatures, mistsCreatureHTML, bellFor, ringBell } from "./mists-render.mjs";
 // THE PARCEL'S COLUMN — the atlas's right-hand panel, back (Keemin 2026-09-11).
 // It owns its own markdown reader, its own builder and its own dress, and it
 // takes no viewer internals: the door read, the shelf gate and the handle rule
@@ -3990,6 +3990,63 @@ export function mistsWallSVG(m, { originPx, mPerPx, id = "wv-mists", painted = f
   return `<g class="wv-mists" aria-hidden="true">${defs}${fringe}${rings}${wall}</g>`;
 }
 
+// THE MISTS' MOTION ON A STAGE OF ITS OWN (WLD-43, Darko 2026-10-13: "yes to the
+// fix for everyone"). The drift and the creatures used to move as CSS transforms
+// on <g>s inside the map's svg. An svg child's transform is laid out and painted
+// with its whole svg, so every frame of the drift re-laid and re-painted the
+// ~4,000-node map: measured at 4× CPU, the page sat at 99% main thread with
+// nobody touching it (17% with the motion held still). Moved by a transform on
+// an HTML element, the same layers ride the compositor: a frame costs a style
+// tick, no layout, and no repaint of the map.
+//
+// So the moving paint stands on a stage: an HTML box laid exactly over the svg,
+// its camera a transform that does to painting units what the svg's viewBox
+// does. The wall, the veil and the sheet's feather hold still and stay in the
+// svg, and the wall still takes the pointer. The two svg layers that drew above
+// the Mists (a conversation's name-box and the housemate edge chevrons) move to
+// an svg at the top of the stage, so the order on screen is the order it was.
+
+// What the svg's viewBox and preserveAspectRatio do to painting units, as one
+// CSS transform for a box the svg's own size: `par` is the svg's
+// preserveAspectRatio.baseVal ({ align, meetOrSlice }, the SVG DOM's numbers).
+const PAR_ALIGN = { 2: [0, 0], 3: [0.5, 0], 4: [1, 0], 5: [0, 0.5], 6: [0.5, 0.5], 7: [1, 0.5], 8: [0, 1], 9: [0.5, 1], 10: [1, 1] };
+export function viewBoxTransform(vb, W, H, par = null) {
+  if (!(vb?.w > 0) || !(vb?.h > 0) || !(W > 0) || !(H > 0)) return "scale(0)";
+  const align = par?.align ?? 6, slice = par?.meetOrSlice === 2;
+  let sx = W / vb.w, sy = H / vb.h, ox = 0, oy = 0;
+  if (align !== 1) {
+    const s = slice ? Math.max(sx, sy) : Math.min(sx, sy), [fx, fy] = PAR_ALIGN[align] ?? PAR_ALIGN[6];
+    sx = sy = s; ox = (W - vb.w * s) * fx; oy = (H - vb.h * s) * fy;
+  }
+  return `matrix(${sx},0,0,${sy},${ox - vb.x * sx},${oy - vb.y * sy})`;
+}
+
+// The moving paint as the stage's markup, in painting units (the stage's camera
+// scales them): one box per layer, its baked images where the svg's <image>s
+// stood, the creatures in the back layer's banks. A layer that holds still
+// (driftM 0, the opaque back layer) carries no animation at all.
+//
+// Each drifting layer gets keyframes of its own with the distance written in,
+// not one set reading it from a custom property: var() in keyframes costs
+// Chromium a fuller style recalc on every frame (measured: about 1.6× the
+// style time of the same motion written literally). They exist only under
+// `prefers-reduced-motion: no-preference`, so a reader who asked for stillness
+// gets the layers at rest, as before.
+export function mistsPaintHTML(baked, { originPx, mPerPx, layers, creatures = "" }) {
+  const n = (v) => v.toFixed(1);
+  let motion = "";
+  const banks = layers.map((L, li) => {
+    const d = L.driftM / mPerPx;
+    if (d > 0) motion += `@keyframes wv-mists-drift-${li} { from { transform:translate(-${n(d)}px,-${n(d * 0.45)}px); } to { transform:translate(${n(d)}px,${n(d * 0.45)}px); } }`
+      + ` .wv-mists-cam .wv-mists-drift.wv-mists-l${li} { animation:wv-mists-drift-${li} ${L.driftS}s ease-in-out infinite alternate; }`;
+    return `<div class="wv-mists-bank${d > 0 ? ` wv-mists-drift wv-mists-l${li}` : ""}">`
+      + baked.filter((b) => b.li === li).map((b) => `<img class="wv-mists-img" alt="" draggable="false" src="${b.url}"`
+        + ` style="left:${n(originPx.x + b.box.minX / mPerPx)}px;top:${n(originPx.y + b.box.minY / mPerPx)}px;width:${n(b.w / mPerPx)}px;height:${n(b.h / mPerPx)}px">`).join("")
+      + (li === 0 && creatures ? `<div class="wv-mists-creatures">${creatures}</div>` : "") + `</div>`;
+  });
+  return (motion ? `<style>@media (prefers-reduced-motion:no-preference){ ${motion} }</style>` : "") + banks.join("");
+}
+
 // Place a bubble beside an anchor without letting it leave the painting.
 //
 // Sized and positioned in the PANEL's own pixels, not the painting's units: a
@@ -4998,8 +5055,21 @@ const STYLE = `
 .wv-main { --rail:212px; display:grid; grid-template-columns:var(--rail) 33rem minmax(0,1fr);
   gap:0; align-items:start; transition:grid-template-columns .3s cubic-bezier(.4,0,.2,1); }
 @media (prefers-reduced-motion:reduce){ .wv-main { transition:none; } }
-.wv-mists-drift { animation:wv-mists-drift 60s ease-in-out infinite alternate; }
-@keyframes wv-mists-drift { from { transform:translate(calc(var(--wv-dx) * -1), calc(var(--wv-dy) * -1)); } to { transform:translate(var(--wv-dx), var(--wv-dy)); } }
+/* THE MISTS' STAGE (WLD-43): an HTML box laid over the map's svg, the svg's own
+   size, slid with it while a drag is under way, and clipped as it is. The
+   moving paint stands on it so its motion is the compositor's, not a repaint of
+   the map (viewBoxTransform). Never a target: the wall in the svg takes the
+   pointer, and z-index auto keeps it under the map's own controls (6 and up). */
+.wv-minimap > .wv-mists-stage { position:absolute; left:0; top:0; overflow:hidden; pointer-events:none; will-change:transform; }
+.wv-minimap > .wv-mists-stage.wv-pan-live, .wv-mists-stage.wv-pan-live > svg { overflow:visible; }
+.wv-mists-stage > svg { position:absolute; left:0; top:0; width:100%; height:100%; }
+.wv-mists-cam { position:absolute; left:0; top:0; transform-origin:0 0; }
+.wv-mists-cam .wv-mists-paint, .wv-mists-cam .wv-mists-bank, .wv-mists-cam .wv-mists-creatures, .wv-mists-cam .wv-mc-at, .wv-mists-cam .wv-mc
+  { position:absolute; left:0; top:0; width:0; height:0; transform-origin:0 0; }
+.wv-mists-cam .wv-mists-img { position:absolute; display:block; max-width:none; max-height:none; margin:0; padding:0; border:0; }
+.wv-mists-cam .wv-mc-eyes, .wv-mists-cam .wv-mc-art { position:absolute; left:0; top:0; overflow:visible; }
+.wv-mists-cam .wv-mc-eyes { width:0; height:0; }
+/* the drift's keyframes are written per layer with the paint (mistsPaintHTML) */
 .wv-mc-flit { animation:wv-mc-flit 4.2s ease-in-out infinite alternate; }
 @keyframes wv-mc-flit { 0% { transform:translate(-14px,4px) rotate(-6deg); } 50% { transform:translate(6px,-8px) rotate(5deg); } 100% { transform:translate(16px,3px) rotate(-3deg); } }
 .wv-mc-lift { animation:wv-mc-lift 9s ease-in-out infinite alternate; }
@@ -7811,6 +7881,7 @@ export function mountViewer(appEl) {
     if (!townKeep) { loadMinimap(); return; }  // entered before the town ever loaded
     boxEl.innerHTML = "";
     boxEl.appendChild(townKeep.svg);
+    if (townKeep.ctx.stage) boxEl.appendChild(townKeep.ctx.stage);
     reattach();
     mapCtx = townKeep.ctx;
     // the Mists drawn afresh on the way out, from the baked cache (a bake that
@@ -8896,6 +8967,18 @@ export function mountViewer(appEl) {
     const mistsLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
     mistsLayer.setAttribute("id", "wv-mists-layer");
     svg.appendChild(mistsLayer);
+    // THE MISTS' STAGE (WLD-43): the moving paint over the wall, on an HTML box
+    // of its own (viewBoxTransform); every layer below this line used to follow
+    // the wall in the svg, and now follows the paint, on the stage's own svg
+    const stage = document.createElement("div");
+    stage.className = "wv-mists-stage";
+    stage.setAttribute("aria-hidden", "true");
+    const mistsCam = document.createElement("div");
+    mistsCam.className = "wv-mists-cam";
+    const stageTop = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    stageTop.setAttribute("class", "wv-stage-top");
+    stageTop.setAttribute("preserveAspectRatio", svg.getAttribute("preserveAspectRatio") ?? "xMidYMid meet");
+    stage.append(mistsCam, stageTop);
     // The wash's name-box rides above the walkers while the washes stay under
     // everything. A wash says nothing until pointed at — the always-on labels
     // died at zoom (their halo strokes shattered into starbursts; Keemin's
@@ -8905,14 +8988,14 @@ export function mountViewer(appEl) {
     convoHoverLayer.setAttribute("id", "wv-convo-hover-layer");
     convoHoverLayer.style.pointerEvents = "none";
     convoHoverLayer.style.display = "none"; // rides the same toggle as its washes
-    svg.appendChild(convoHoverLayer);
+    stageTop.appendChild(convoHoverLayer);
     // YOUR HOUSEMATES OFF THE SCREEN (POS-373): an edge chevron toward each,
     // on top of everything, because it sits on the frame's edge and says where
     // to look. A reading, never a target.
     const housemateEdgeLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
     housemateEdgeLayer.setAttribute("id", "wv-housemate-edge-layer");
     housemateEdgeLayer.style.pointerEvents = "none";
-    svg.appendChild(housemateEdgeLayer);
+    stageTop.appendChild(housemateEdgeLayer);
     function renderConvoHover(hit) {
       if (!hit) { convoHoverLayer.innerHTML = ""; return; }
       const bounds = svg.getBoundingClientRect();
@@ -8925,6 +9008,7 @@ export function mountViewer(appEl) {
     }
     boxEl.innerHTML = "";
     boxEl.appendChild(svg);
+    boxEl.appendChild(stage);
     reattachOverlays();
     boxEl.classList.add("pannable");
 
@@ -8982,7 +9066,25 @@ export function mountViewer(appEl) {
       svg.insertBefore(base, mistLayer);
     }
     const view = { ...full };
-    mapCtx = { svg, overlay, hlLayer, walkPreviewLayer, walkLayer, gridLayer, mistLayer, placedArtLayer, veilLayer, mistsLayer, convoLayer, convoHoverLayer, housemateEdgeLayer, originPx, mPerPx, full, view, zoomK: 1, follow: false, glyphIds: new Set(), _tweening: false, zoomOutLimit, includeMine, placeholderExtents, groundMarkIds };
+    mapCtx = { svg, overlay, hlLayer, walkPreviewLayer, walkLayer, gridLayer, mistLayer, placedArtLayer, veilLayer, mistsLayer, convoLayer, convoHoverLayer, housemateEdgeLayer, stage, mistsCam, originPx, mPerPx, full, view, zoomK: 1, follow: false, glyphIds: new Set(), _tweening: false, zoomOutLimit, includeMine, placeholderExtents, groundMarkIds };
+    // THE STAGE FOLLOWS THE SVG (WLD-43): its box is the svg's box, its camera
+    // is the viewBox the svg shows (not `view`, which leads it during a drag),
+    // and while a drag slides the svg it slides the same way (applyView). The
+    // box comes from the observer below, so a camera write measures nothing.
+    const sceneCtx = mapCtx;
+    // (a ground with no viewBox of its own shows painting units as CSS px, until
+    // the first camera write gives it one)
+    let shownVB = svg.hasAttribute("viewBox") ? { ...full } : null;
+    function syncStage() {
+      let W = sceneCtx.paneW, H = sceneCtx.paneH;
+      if (!(W > 0) || !(H > 0)) { const r = svg.getBoundingClientRect(); W = r.width; H = r.height; }
+      if (!(W > 0) || !(H > 0)) return;   // off the page (a room is in): synced again when it returns
+      stage.style.width = `${W}px`; stage.style.height = `${H}px`;
+      mistsCam.style.transform = shownVB ? viewBoxTransform(shownVB, W, H, svg.preserveAspectRatio?.baseVal) : "none";
+      if (shownVB) stageTop.setAttribute("viewBox", `${shownVB.x} ${shownVB.y} ${shownVB.w} ${shownVB.h}`);
+      else stageTop.removeAttribute("viewBox");
+    }
+    sceneCtx.syncStage = syncStage;
     // THE PANE'S WIDTH IS KEPT, NOT MEASURED (POS-228). panePx is read four
     // times a frame by the settle pass (thumbClassKey), right after
     // applyCameraScale has written styles, so every read forced a layout: 13%
@@ -8993,16 +9095,20 @@ export function mountViewer(appEl) {
     // keeps measuring, as before.
     if (typeof ResizeObserver === "function") {
       const ctx = mapCtx;
-      ctx.paneW = svg.getBoundingClientRect().width;
+      const r0 = svg.getBoundingClientRect();
+      ctx.paneW = r0.width; ctx.paneH = r0.height;
       const ro = new ResizeObserver((entries) => {
         const e = entries[entries.length - 1];
         ctx.paneW = e.borderBoxSize?.[0]?.inlineSize ?? e.contentRect.width;
+        ctx.paneH = e.borderBoxSize?.[0]?.blockSize ?? e.contentRect.height;
+        syncStage();
         // a room's svg that has left the page for good stops being watched;
         // the town's is kept (townKeep) and comes back, so it stays observed
         if (!svg.isConnected && townKeep?.ctx !== ctx) ro.disconnect();
       });
       ro.observe(svg);
     }
+    syncStage();
     // a face or a card whose small copy is not there falls back to the
     // original it carries, once (#2940) — the cards live on the overlay, the
     // faces on the walk layer
@@ -9146,7 +9252,9 @@ export function mountViewer(appEl) {
     let gesture = null;   // { at: the view the viewBox shows, sx, sy: px per painting unit }
     function writeViewBox() {
       svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
-      svg.style.transform = "";
+      svg.style.transform = stage.style.transform = "";
+      shownVB = { ...view };
+      syncStage();
       if (gesture) gesture.at = { ...view };
     }
     function beginGesture() {
@@ -9155,12 +9263,12 @@ export function mountViewer(appEl) {
       // how far the svg may slide before it runs off the painted margin: most of
       // one pane, which is what the clip-path grows the layer by
       gesture = { at: { ...view }, sx: m.a, sy: m.d, reachX: box.width * 0.8, reachY: box.height * 0.8 };
-      svg.classList.add("wv-pan-live");
+      svg.classList.add("wv-pan-live"); stage.classList.add("wv-pan-live");
     }
     function endGesture() {
       if (!gesture) return;
       gesture = null;
-      svg.classList.remove("wv-pan-live");
+      svg.classList.remove("wv-pan-live"); stage.classList.remove("wv-pan-live");
       applyView();
     }
     // a reader of screen geometry that must see the viewBox and the screen agree
@@ -9173,7 +9281,7 @@ export function mountViewer(appEl) {
       const tx = gesture ? (gesture.at.x - view.x) * gesture.sx : 0, ty = gesture ? (gesture.at.y - view.y) * gesture.sy : 0;
       if (gesture && view.w === gesture.at.w && view.h === gesture.at.h
           && Math.abs(tx) < gesture.reachX && Math.abs(ty) < gesture.reachY) {
-        svg.style.transform = `translate(${tx}px, ${ty}px)`;
+        svg.style.transform = stage.style.transform = `translate(${tx}px, ${ty}px)`;
       } else {
         writeViewBox();
       }
@@ -9858,6 +9966,7 @@ export function mountViewer(appEl) {
     mapCtx.mistsKey = key;
     mapCtx.veilLayer.innerHTML = mistsVeilSVG(m, mapCtx);
     mapCtx.mistsLayer.innerHTML = mistsWallSVG(m, { ...mapCtx, painted: true });
+    mapCtx.mistsCam?.replaceChildren();   // the moving paint, on the stage (WLD-43)
     paintMists(m);
   }
 
@@ -9885,24 +9994,17 @@ export function mountViewer(appEl) {
     // not baked yet: bake it a piece at a time between frames (the vector wall
     // already stands), then paint, if this crossing is still the one on screen
     if (!baked) { bakeMists(m, key, mistsKeepRects(keepMarks, drawn.clearings), JSON.stringify(drawn)); mistsBellButton(drawn); return; }
-    const { originPx, mPerPx } = mapCtx, n = (v) => v.toFixed(1);
-    let html = "";
+    const { originPx, mPerPx } = mapCtx;
     // the creatures, in the back layer's banks (so the front layers veil them)
     const firstMists = data?.skeleton?.mists?.schedule?.[0]?.crossing;
     const ink = mistsCoreHex(m);
     const creatures = mistsCreatures(m, { first: firstMists, keep: mistsKeepAt(mistsKeepRects(keepMarks, drawn.clearings)) })
-      .map((cr) => mistsCreatureSVG(cr, { originPx, mPerPx, ink })).join("");
-    MISTS_PAINT.layers.forEach((L, li) => {
-      const d = L.driftM / mPerPx;
-      html += `<g class="wv-mists-drift" style="--wv-dx:${n(d)}px;--wv-dy:${n(d * 0.45)}px;animation-duration:${L.driftS}s">`
-        + baked.filter((b) => b.li === li).map((b) => `<image href="${b.url}" x="${n(originPx.x + b.box.minX / mPerPx)}" y="${n(originPx.y + b.box.minY / mPerPx)}"`
-          + ` width="${n(b.w / mPerPx)}" height="${n(b.h / mPerPx)}" preserveAspectRatio="none"/>`).join("")
-        + (li === 0 ? `<g class="wv-mists-creatures">${creatures}</g>` : "") + `</g>`;
-    });
-    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    g.setAttribute("class", "wv-mists-paint"); g.setAttribute("pointer-events", "none"); g.setAttribute("aria-hidden", "true");
-    g.innerHTML = html;
-    mapCtx.mistsLayer.appendChild(g);
+      .map((cr) => mistsCreatureHTML(cr, { originPx, mPerPx, ink })).join("");
+    // on the stage, over the wall (WLD-43): the same paint, moved by the compositor
+    const g = document.createElement("div");
+    g.className = "wv-mists-paint";
+    g.innerHTML = mistsPaintHTML(baked, { originPx, mPerPx, layers: MISTS_PAINT.layers, creatures });
+    mapCtx.mistsCam.replaceChildren(g);
     // the roll-in and the bell belong to the live crossing: dialling ahead shows
     // the paint (as it shows the wall) but neither spends the session's roll-in
     // nor rings the bell
