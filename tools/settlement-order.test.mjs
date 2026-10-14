@@ -20,6 +20,7 @@ import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { settlementSweep } from "./settlement-sweep.mjs";
+import { admitDelta } from "./marks-fold.mjs";
 import { withTool } from "./engine-files.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -193,4 +194,132 @@ test("THE CONTROL: with nothing laid on main, a ✦0 market mark is still taken,
   const report = settlementSweep({ repo: w.repo, stakesPath: w.stakesPath });
   assert.deepEqual(ids(report.unpublished), ["bob/the-bench"]);
   assert.equal(report.fold_stats.whole, 1, "on ONE whole-world fold (§4)");
+});
+
+// ── review-214 (FIX), ported from its probes (docs/2026-10-13/rail/WLD-51/probes/review-214/) ──
+
+const KIM_HOUSE = "WORLD/marks/kim/kims-house/mark.md";
+const KIM_PARCEL = "WORLD/marks/kim/kim-parcel/mark.md";
+const BOB_BENCH = "WORLD/marks/bob/the-bench/mark.md";
+const kimHouse = (consent = `"bob/the-bench": "welcomed"`) =>
+  record({ by: "kim", at: { x: 100, y: 100 }, extent: { w: 6, h: 6 }, body: "kim's house", ...(consent ? { consent } : {}) });
+const kimParcel = (over = {}) => record({ kind: "parcel", by: "kim", at: { x: 100, y: 100 }, extent: { w: 25, h: 25 }, body: "kim's parcel", date: "2026-10-14", ...over });
+const bobBench = () => record({ by: "bob", at: { x: 100, y: 100 }, extent: { w: 1, h: 1 }, body: "a bench in kim's house" });
+const bobBenchRow = { "bob/the-bench": { household: "house-b", path: BOB_BENCH, class: "commons" } };
+// A row laid ELSEWHERE, so the sweep reads the result path rather than main's fold.
+const ELSEWHERE = { "draft/sable": { "WORLD/marks/sable/sable-parcel/mark.md": record({ kind: "parcel", by: "sable", at: { x: 20000, y: 20000 }, extent: { w: 25, h: 25 }, body: "sable's parcel, far away" }) } };
+
+test("C1, beside THE CONTROL: with a row laid elsewhere, a ✦0 bench on open ground is still taken, through the result", (t) => {
+  const BENCH = "WORLD/marks/bob/the-open-bench/mark.md";
+  const w = town(t, {
+    main: { [BENCH]: record({ by: "bob", at: { x: 9000, y: 9000 }, extent: { w: 1, h: 1 }, body: "open ground" }) },
+    rows: { "bob/the-open-bench": { household: "house-b", path: BENCH, class: "commons" } },
+    drafts: ELSEWHERE,
+  });
+  const report = settlementSweep({ repo: w.repo, stakesPath: w.stakesPath });
+  assert.deepEqual(ids(report.unpublished), ["bob/the-open-bench"]);
+  assert.ok(report.result.laid >= 1 && report.result.admitted >= 2, JSON.stringify(report.result));
+});
+
+test("W1: a welcome already on MAIN keeps its ✦0 guest when rows are laid elsewhere (the consent word rides main's views)", (t) => {
+  const AP = "WORLD/marks/alice/alice-parcel/mark.md";
+  const STOOL = "WORLD/marks/bob/the-stool/mark.md";
+  const w = town(t, {
+    main: {
+      [AP]: record({ kind: "parcel", by: "alice", at: { x: 300, y: 300 }, extent: { w: 40, h: 40 }, body: "alice's parcel", date: "2026-07-01", consent: `"bob/the-stool": "welcomed"` }),
+      [STOOL]: record({ by: "bob", at: { x: 300, y: 300 }, extent: { w: 2, h: 2 }, body: "a stool, welcomed" }),
+    },
+    rows: { "bob/the-stool": { household: "house-b", path: STOOL, class: "commons" } },
+    drafts: ELSEWHERE,
+  });
+  const report = settlementSweep({ repo: w.repo, stakesPath: w.stakesPath });
+  assert.deepEqual(ids(report.unpublished), [], "welcomed on main: home, laid or not");
+});
+
+test("Q2: a consent word that welcomes ANOTHER mark changes nothing: the unwelcomed ✦0 guest is taken", (t) => {
+  const AP = "WORLD/marks/alice/alice-parcel/mark.md";
+  const STOOL = "WORLD/marks/bob/the-stool/mark.md";
+  const w = town(t, {
+    main: {
+      [AP]: record({ kind: "parcel", by: "alice", at: { x: 300, y: 300 }, extent: { w: 40, h: 40 }, body: "alice's parcel", date: "2026-07-01", consent: `"bob/another-thing": "welcomed"` }),
+      [STOOL]: record({ by: "bob", at: { x: 300, y: 300 }, extent: { w: 2, h: 2 }, body: "a stool, not welcomed" }),
+    },
+    rows: { "bob/the-stool": { household: "house-b", path: STOOL, class: "commons" } },
+    drafts: ELSEWHERE,
+  });
+  const report = settlementSweep({ repo: w.repo, stakesPath: w.stakesPath });
+  assert.deepEqual(ids(report.unpublished), ["bob/the-stool"]);
+});
+
+test("THE CHAIN RE-ASK: a main house that welcomes a ✦0 bench comes to stand on a parcel arriving this crossing (claimed before the house) — the bench is kept", (t) => {
+  // The house is re-admitted only because the bench's walk stands on it; left
+  // as main had it, its containment never sees the new parcel.
+  const w = town(t, {
+    main: { [KIM_HOUSE]: kimHouse(), [BOB_BENCH]: bobBench() },
+    rows: bobBenchRow,
+    drafts: { "draft/kim": { [KIM_PARCEL]: kimParcel({ date: "2026-07-01" }) } },
+  });
+  const report = settlementSweep({ repo: w.repo, stakesPath: w.stakesPath });
+  assert.deepEqual(ids(report.published), ["kim/kim-parcel"]);
+  assert.deepEqual(ids(report.unpublished), [], "the fold: the house is sovereign on kim's parcel and welcomes the bench");
+});
+
+test("D1: the same, with the parcel claimed AFTER the house — sovereignty is the result's, not claim order's, so the bench is kept as the fold keeps it", (t) => {
+  const laid = town(t, { main: { [KIM_HOUSE]: kimHouse(), [BOB_BENCH]: bobBench() }, rows: bobBenchRow, drafts: { "draft/kim": { [KIM_PARCEL]: kimParcel() } } });
+  assert.deepEqual(ids(settlementSweep({ repo: laid.repo, stakesPath: laid.stakesPath }).unpublished), []);
+  // the control: the same final world with the parcel already on main, so the fold's own tier decides
+  const folded = town(t, { main: { [KIM_HOUSE]: kimHouse(), [KIM_PARCEL]: kimParcel(), [BOB_BENCH]: bobBench() }, rows: bobBenchRow });
+  assert.deepEqual(ids(settlementSweep({ repo: folded.repo, stakesPath: folded.stakesPath }).unpublished), []);
+});
+
+test("D1, THE REVERSE: the parcel arriving welcomes the bench and the house does not — the house is the bench's ground, so it is taken, as the fold takes it", (t) => {
+  const parcelWelcomes = { consent: `"bob/the-bench": "welcomed"` };
+  const laid = town(t, { main: { [KIM_HOUSE]: kimHouse(null), [BOB_BENCH]: bobBench() }, rows: bobBenchRow, drafts: { "draft/kim": { [KIM_PARCEL]: kimParcel(parcelWelcomes) } } });
+  assert.deepEqual(ids(settlementSweep({ repo: laid.repo, stakesPath: laid.stakesPath }).unpublished), ["bob/the-bench"]);
+  const folded = town(t, { main: { [KIM_HOUSE]: kimHouse(null), [KIM_PARCEL]: kimParcel(parcelWelcomes), [BOB_BENCH]: bobBench() }, rows: bobBenchRow });
+  assert.deepEqual(ids(settlementSweep({ repo: folded.repo, stakesPath: folded.stakesPath }).unpublished), ["bob/the-bench"], "the fold agrees");
+});
+
+test("B1 ON THE FALLBACK: when the result cannot be admitted, a suite-held parcel still lends no ground to a ✦0 sibling", (t) => {
+  const SHED = "WORLD/marks/keith/the-shed/mark.md";
+  const w = town(t, {
+    drafts: { "draft/keith": { [PARCEL]: parcel(), [SHED]: record({ by: "keith", at: { x: 100, y: 100 }, extent: { w: 4, h: 4 }, body: "a shed" }) } },
+  });
+  const report = settlementSweep({ repo: w.repo, stakesPath: w.stakesPath, suiteQuarantine: new Set(["keith/keith-parcel"]),
+    resultAdmitter: () => { throw new Error("planted"); } });
+  assert.match(report.result.error ?? "", /planted/);
+  assert.deepEqual(ids(report.published), [], "the sketchbook's own reading leaves the held parcel out of the world it judges in");
+  assert.equal(why(report, "keith/the-shed"), "commons needs escrow > 0");
+});
+
+test("THE TOWN'S OWN MARK is never judged off a re-admitted view: a constitution mark under a commons row at ✦0 stays, rows laid or not", (t) => {
+  const NODE = "WORLD/marks/the-town/the-quay-post/mark.md";
+  const w = town(t, {
+    main: { [NODE]: record({ by: "the-town", tier: "constitution", at: { x: 700, y: 700 }, extent: { w: 2, h: 2 }, body: "the quay's post" }) },
+    rows: { "the-town/the-quay-post": { household: "the-town", path: NODE, class: "commons" } },
+    drafts: ELSEWHERE,
+  });
+  const report = settlementSweep({ repo: w.repo, stakesPath: w.stakesPath });
+  assert.deepEqual(ids(report.unpublished), []);
+  assert.ok(w.file(NODE));
+});
+
+test("A JUDGED MARK THE RESULT CANNOT ADMIT is kept, and named on the report", (t) => {
+  // An admission error on a re-asked mark (its parent left this crossing, a
+  // home word outside its household, …) leaves it out of the views; planted
+  // here by dropping its view, since each real cause also reddens the gate.
+  const BENCH = "WORLD/marks/bob/the-open-bench/mark.md";
+  const w = town(t, {
+    main: { [BENCH]: record({ by: "bob", at: { x: 9000, y: 9000 }, extent: { w: 1, h: 1 }, body: "open ground" }) },
+    rows: { "bob/the-open-bench": { household: "house-b", path: BENCH, class: "commons" } },
+    drafts: ELSEWHERE,
+  });
+  const resultAdmitter = (candidates, base) => {
+    const admitted = admitDelta(candidates, base);
+    admitted.views.delete("bob/the-open-bench");
+    return admitted;
+  };
+  const report = settlementSweep({ repo: w.repo, stakesPath: w.stakesPath, resultAdmitter });
+  assert.deepEqual(ids(report.unpublished), [], "a mark is never taken on a walk not run");
+  assert.deepEqual(report.result.judged_unread, ["bob/the-open-bench"]);
 });

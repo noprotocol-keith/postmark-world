@@ -29,6 +29,7 @@ import {
   // left with the re-home pass on 2026-08-25: re-framing a mark's numbers was
   // something only a MOVE ever needed, and the settlement no longer moves one.
   admissionBase, admitDelta,   // §4: the delta admission, in place of a fold per sketchbook
+  sovereignInResult,           // the fold's own sovereignty, over a crossing's whole result (WLD-51)
   refuseStaleHouseholds,       // the registry-freshness construction (2026-09-09)
   // The loader's own framing walk, for a candidate read one file at a time: it
   // is in its FILE's frame, and admission judges it in the world's (POS-446,
@@ -1285,7 +1286,12 @@ export function settlementSweep({
     // are simply many crossings stale. Only the candidates are judged now. A
     // household whose PUBLISHED delta is bad still refuses, by name and in the
     // fold's own error grammar.
-    const admitted = admitDelta(candidates, admitBase);
+    // A row the gate's isolation holds back never crosses, so it lends no ground
+    // to its siblings either (WLD-51, B1): it is not admitted with them, so no
+    // sibling's view counts it (a view's `sovereign` is read against the parcels
+    // admitted beside it). The isolation pass holds back only rows that published
+    // in its previous run, so leaving one out hides no inadmissible row.
+    const admitted = admitDelta(candidates.filter((c) => !suiteQuarantine.has(c.id)), admitBase);
     if (admitted.errors.length) {
       // LOUD. The ref, the reason, and the row that poisoned it, so the
       // crossing's journal says whose sketchbook was set aside and what to fix.
@@ -1304,10 +1310,7 @@ export function settlementSweep({
     // candidates laid over. Cross-household composition is NOT decided here and
     // never was — it surfaces at the merged fold below, exactly as §4 says.
     const folded = new Map(mainFolded);
-    // A row the gate's isolation holds back never crosses, so it lends no ground
-    // to its siblings either (WLD-51, B1): it is left out of the world they are
-    // judged in, not only out of what publishes.
-    for (const [id, view] of admitted.views) if (!suiteQuarantine.has(id)) folded.set(id, view);
+    for (const [id, view] of admitted.views) folded.set(id, view);
 
     for (const delta of deltas) {
       // SUPERSESSION. The sketchbook has not touched this path since it was cut,
@@ -1484,9 +1487,13 @@ export function settlementSweep({
   holdOrphans(pending);
 
   const gone = new Set(withdrawn.map((item) => item.id));
-  // The marks the unpublish loop will ask standing of: commons rows at ✦0.
+  // The marks the unpublish loop will ask standing of: commons rows at ✦0. Never
+  // a mark the town signs: a view drops the `tier` line the constitution
+  // shortcut reads (mark-standing.mjs), so re-admitted it would read market;
+  // the fold's own tier answers for it (review-214, finding 3).
   const judged = Object.entries(registry.published)
-    .filter(([id, entry]) => entry?.class === "commons" && (escrow.get(id) ?? 0) === 0 && !gone.has(id))
+    .filter(([id, entry]) => entry?.class === "commons" && (escrow.get(id) ?? 0) === 0 && !gone.has(id)
+      && !(mainFolded.has(id) && townOwned(mainFolded.get(id))))
     .map(([id]) => id);
   const candidateOf = new Map(pending.filter((row) => row.candidate).map((row) => [row.id, row.candidate]));
 
@@ -1495,6 +1502,9 @@ export function settlementSweep({
   // when it could not be admitted. `viewed`: the ids whose containment was asked
   // again, which are the only ones the market reads a verdict off. `laid`: the
   // rows it was asked with, so a later hold knows when to ask again.
+  // every admission that failed this crossing, kept for the report: the hold
+  // loop may ask again and get an answer, and the first failure is still news
+  const resultErrors = [];
   function admitResult(rows) {
     const out = { byId: null, viewed: new Set(), laid: new Set(rows.map((row) => row.id)), rounds: 0, error: null };
     if (!rows.length && !gone.size) {
@@ -1518,6 +1528,7 @@ export function settlementSweep({
         const { views } = resultAdmitter([...asked.values()], base);
         const byId = new Map(baseMarks.map((mark) => [mark.id, mark]));
         for (const [id, view] of views) byId.set(id, view);
+        sovereignInResult(views, byId);
         let grew = false;
         for (const id of targets) {
           if (!views.has(id)) continue;
@@ -1542,6 +1553,7 @@ export function settlementSweep({
       out.byId = null;
       out.viewed = new Set();
       out.error = String(error?.message ?? error).slice(0, 400);
+      resultErrors.push(out.error);
       console.error(`[the-result] this crossing's result could not be admitted, so the order could not be asked: publishes are judged by their own sketchbooks, and nothing is unpublished. ${out.error}`);
       return out;
     }
@@ -2004,7 +2016,17 @@ export function settlementSweep({
     fold_stats: { ...foldMeter },
     // § the order (WLD-51): how many marks this crossing judged against its
     // result, and why not when it could not (then nothing was unpublished).
-    result: { laid: result.laid.size, admitted: result.viewed.size, rounds: result.rounds, ...(result.error ? { error: result.error } : {}) },
+    result: {
+      laid: result.laid.size, admitted: result.viewed.size, rounds: result.rounds,
+      ...(resultErrors.length ? { error: resultErrors.join(" | ") } : {}),
+      // a judged mark the result could not admit (its parent left this crossing,
+      // its stake row is negative, …): kept, because a mark is never taken on a
+      // walk not run, and named, because a keep with no receipt reads as a verdict
+      ...(() => {
+        const unread = judged.filter((id) => mainFolded.has(id) && !result.viewed.has(id));
+        return unread.length ? { judged_unread: unread } : {};
+      })(),
+    },
   };
 }
 
