@@ -918,32 +918,53 @@ export function occupancyHorizon(acts = [], now = 0, skew = OCCUPANCY_SKEW) {
 // again for every drawn body — the acts folded 73 times per draw, on every
 // wheel tick. The acts are a RECORD: they change when the ledger is fetched
 // (a new array) and the fold at a clock changes only when the clock passes an
-// act. So the fold is kept per acts array, tagged with how many leading acts
-// the clock admits — the ledger is chronological (each act stamps the crossing
-// it was written at), so the admitted acts are a prefix and the prefix's
-// length names the fold. A ledger that is NOT chronological is folded on every
-// call, as before: the assumption is checked once per array, never trusted.
-// Same answer as folding afresh, by construction; a fresh array (every test,
-// every fetch) folds afresh.
-const occupancyFolds = new WeakMap();   // acts → { chronological, n, occupancy, manifest }
-const chronological = (acts) => { for (let i = 1; i < acts.length; i++) if (acts[i]?.at < acts[i - 1]?.at) return false; return true; };
+// act. So the fold is kept per acts array, tagged with how many acts the clock
+// admits.
+//
+// THE COUNT NAMES THE FOLD, IN ANY ORDER (WLD-45, 2026-10-14). The tag used to
+// be the length of an admitted PREFIX, which assumed the ledger is in `ferry`
+// order — and prod's is not: it is in the order the acts were written, and the
+// office's ferry stamp steps backwards 52 times in 2,236 acts (by 4 s to 82
+// min). So every poll folded once per drawn body, 0.5–0.9 s a redraw. The fix
+// is not to sort: occupancyAt folds in the ledger's own order, and so does
+// every office reader, and a ferry-sorted fold answers differently at 65 of
+// 1,502 past clocks. What the clock admits is `{ a : a.at <= at }` — a
+// threshold over the stamps — so the NUMBER of admitted acts names the set
+// whatever the order. The stamps are sorted once per array and counted by
+// binary search; the fold itself is occupancyAt on the array, unchanged. A
+// ledger with a stamp that is not a number (NaN does not sort) is folded on
+// every call: checked once per array, never assumed. Same answer as folding
+// afresh, by construction; a fresh array (every test, every fetch) folds afresh.
+const occupancyFolds = new WeakMap();   // acts → { times, n, occupancy, manifest }
+const sortedStamps = (acts) => {
+  const times = [];
+  for (let i = 0; i < acts.length; i++) {
+    const at = acts[i]?.at;
+    if (typeof at !== "number" || Number.isNaN(at)) return null;
+    times.push(at);
+  }
+  return times.sort((a, b) => a - b);
+};
+// how many stamps the clock admits: the first sorted index past it
+const admittedCount = (times, at) => {
+  let lo = 0, hi = times.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (times[mid] <= at) lo = mid + 1; else hi = mid; }
+  return lo;
+};
 function foldedOccupancy(acts, at) {
   const list = Array.isArray(acts) ? acts : [...(acts ?? [])];
   let fold = occupancyFolds.get(list);
-  const inOrder = fold ? fold.chronological : chronological(list);
-  if (inOrder) {
-    let n = fold ? fold.n : 0;
-    while (n < list.length && list[n]?.at <= at) n += 1;
-    while (n > 0 && !(list[n - 1]?.at <= at)) n -= 1;
-    if (fold && fold.n === n) return fold;
+  if (!fold) occupancyFolds.set(list, fold = { times: sortedStamps(list), n: -1 });
+  if (!fold.times) {
     const occupancy = occupancyAt(list, at);
-    fold = { chronological: true, n, occupancy, manifest: occupantsOf(occupancy) };
-    occupancyFolds.set(list, fold);
-    return fold;
+    return { occupancy, manifest: occupantsOf(occupancy) };
   }
-  if (!fold) occupancyFolds.set(list, { chronological: false });
+  const n = admittedCount(fold.times, at);
+  if (fold.n === n) return fold;
   const occupancy = occupancyAt(list, at);
-  return { occupancy, manifest: occupantsOf(occupancy) };
+  fold = { times: fold.times, n, occupancy, manifest: occupantsOf(occupancy) };
+  occupancyFolds.set(list, fold);
+  return fold;
 }
 export function standpointOccupancy({ acts = [], at = Infinity, handle = null } = {}) {
   const who = handle && handle !== SPECTATOR_ACTOR ? handle : null;
