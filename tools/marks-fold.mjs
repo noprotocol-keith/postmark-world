@@ -545,7 +545,7 @@ export { rect, overlapArea, contains, marksContain, polygonOf, ringMatchesClaim 
 import { rect, overlapArea, contains, marksContain, polygonOf, rectInsideRing } from "./geometry.mjs";
 import { deriveOutsiders, outsidersJson, outsidersMarkdown } from "./region-outsiders.mjs";
 import { carve } from "./determination.mjs";
-import { resolveConsent } from "./consent.mjs";
+import { resolveConsent, consentMap, CONSENT_FIELD } from "./consent.mjs";
 
 // placementParent(claim, marks) — the geometry-decides-the-parent primitive the
 // world-write path (world_leave_mark) calls to DECIDE the directory a new mark
@@ -1994,6 +1994,10 @@ function deltaView(mk, cred, rectsByCred, world = null) {
     sovereign: mk.kind === "sited" ? held.some((pr) => contains(pr, rect(mk))) : false,
     body: mk.body,
     ...(contained ? { placementParent: contained } : {}),
+    // a ground's consent word, which the standing walk reads (mark-standing.mjs
+    // § groundVerdict): a ground admitted without it would not welcome what
+    // its author welcomed (WLD-51)
+    ...(consentMap(mk) ? { [CONSENT_FIELD]: consentMap(mk) } : {}),
   };
 }
 
