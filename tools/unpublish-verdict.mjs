@@ -60,9 +60,16 @@ export const STALE_ROWS = "skip";
 /** The registry's spelling of the verdict: the fold's `market` is the registry's `commons` (settlement-sweep.mjs § publish). */
 export const rowClassOf = (cls) => (cls === "market" ? "commons" : cls);
 
-/** The rule in words, for any reader that quotes it. */
+/**
+ * The rule in words, for any reader that quotes it: Darko's own sentence
+ * (WLD-51, 2026-10-14 14:31 EDT), verbatim. It is the plain version on
+ * purpose. Two conditions the verdict below still asks are left out of the
+ * words, and stay in the code: the registered path must be on main, and only
+ * a mark the registry holds is ever a candidate. The words explain; the
+ * function decides.
+ */
 export const UNPUBLISH_RULE =
-  'the settlement unpublishes a mark its registry holds as class "commons" when no open stamps stand behind it at the crossing, its registered path is on main, and its standing, walked at the crossing, is still commons ("commons needs escrow > 0"); a mark that walks home or constitution, a home or constitution row, and a mark the registry does not hold are never swept';
+  "At each settlement, a commons mark with no stamps behind it leaves the world. A mark standing on your household's ground or the town's never does, whatever it was first filed as.";
 
 const ask = (x) => (typeof x === "function" ? x() : x);
 

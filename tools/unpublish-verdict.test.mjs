@@ -12,8 +12,12 @@ const market = { standing: "market" };
 
 test("the dial stands at today's rule until WLD-51 is ruled", () => {
   assert.equal(STALE_ROWS, "skip");
-  assert.match(UNPUBLISH_RULE, /registered path is on main/, "the rule's words name every condition");
-  assert.match(UNPUBLISH_RULE, /walked at the crossing, is still commons/);
+  assert.equal(UNPUBLISH_RULE,
+    "At each settlement, a commons mark with no stamps behind it leaves the world. A mark standing on your household's ground or the town's never does, whatever it was first filed as.",
+    "Darko's sentence, verbatim (WLD-51, 2026-10-14 14:31 EDT)");
+  // the words leave two conditions out; the verdict still asks both
+  assert.deepEqual(unpublishVerdict(commons, { escrow: 0, pathOnMain: false, standing: "market" }).unpublish, false, "a path not on main is still never swept");
+  assert.equal(unpublishVerdict(undefined, { escrow: 0, pathOnMain: true, standing: "market" }).unpublish, false, "a mark the registry does not hold is still never a candidate");
   assert.equal(rowClassOf("market"), "commons");
   assert.equal(rowClassOf("home"), "home");
 });
