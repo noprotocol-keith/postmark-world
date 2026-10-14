@@ -323,3 +323,25 @@ test("A JUDGED MARK THE RESULT CANNOT ADMIT is kept, and named on the report", (
   assert.deepEqual(ids(report.unpublished), [], "a mark is never taken on a walk not run");
   assert.deepEqual(report.result.judged_unread, ["bob/the-open-bench"]);
 });
+
+test("H1: a suite-held parcel's naming mark does not quarantine its household — the held parcel is still admitted, and the staked sibling publishes", (t) => {
+  // review-214's re-check: leaving the held row out of the sketchbook's
+  // admission made its child's `parent:` unfindable, and the whole sketchbook
+  // was set aside. The isolation pass's ordinary shape.
+  const NAME = "WORLD/marks/keith/the-parcel-name/mark.md";
+  const LANTERN = "WORLD/marks/keith/the-lantern/mark.md";
+  const w = town(t, {
+    drafts: { "draft/keith": {
+      [PARCEL]: parcel(),
+      [NAME]: "---\nkind: predicated\nby: keith\ndate: 2026-07-28\nparent: keith/keith-parcel\nslot: name\nvalue: Keith's Acre\n---\n\nIts name.\n",
+      [LANTERN]: record({ by: "keith", at: { x: 9000, y: 9000 }, extent: { w: 1, h: 1 }, body: "a lantern on open ground, staked" }),
+    } },
+    stakes: [{ holder: "s1", mark: "keith/the-lantern", n: 2, weight: 4 }],
+  });
+  const report = settlementSweep({ repo: w.repo, stakesPath: w.stakesPath, suiteQuarantine: new Set(["keith/keith-parcel"]) });
+  assert.deepEqual(report.quarantined, [], "the household is not set aside");
+  assert.deepEqual(ids(report.suite_quarantined), ["keith/keith-parcel"]);
+  assert.deepEqual(ids(report.published), ["keith/the-lantern"], "the staked lantern, which nothing held, publishes");
+  assert.ok(w.file(LANTERN));
+  assert.equal(w.file(NAME), null, "the name waits with its parcel");
+});

@@ -1286,12 +1286,7 @@ export function settlementSweep({
     // are simply many crossings stale. Only the candidates are judged now. A
     // household whose PUBLISHED delta is bad still refuses, by name and in the
     // fold's own error grammar.
-    // A row the gate's isolation holds back never crosses, so it lends no ground
-    // to its siblings either (WLD-51, B1): it is not admitted with them, so no
-    // sibling's view counts it (a view's `sovereign` is read against the parcels
-    // admitted beside it). The isolation pass holds back only rows that published
-    // in its previous run, so leaving one out hides no inadmissible row.
-    const admitted = admitDelta(candidates.filter((c) => !suiteQuarantine.has(c.id)), admitBase);
+    const admitted = admitDelta(candidates, admitBase);
     if (admitted.errors.length) {
       // LOUD. The ref, the reason, and the row that poisoned it, so the
       // crossing's journal says whose sketchbook was set aside and what to fix.
@@ -1310,7 +1305,17 @@ export function settlementSweep({
     // candidates laid over. Cross-household composition is NOT decided here and
     // never was — it surfaces at the merged fold below, exactly as §4 says.
     const folded = new Map(mainFolded);
-    for (const [id, view] of admitted.views) folded.set(id, view);
+    // A row the gate's isolation holds back never crosses, so it lends no ground
+    // to its siblings either (WLD-51, B1). It is still ADMITTED with them, so the
+    // sketchbook's errors and parent checks are what they always were (a naming
+    // mark whose parent is the held parcel must not quarantine the household:
+    // review-214, H1). Its view is kept out of the world its siblings are judged
+    // in, and, only in a sketchbook that holds such a row, every sibling's
+    // `sovereign` is read again against the ground that is left (a view's flag
+    // was read against every parcel admitted beside it, the held one included).
+    const held = candidates.filter((c) => suiteQuarantine.has(c.id)).map((c) => c.id);
+    for (const [id, view] of admitted.views) if (!held.includes(id)) folded.set(id, view);
+    if (held.length) sovereignInResult(new Map([...admitted.views].filter(([id]) => !held.includes(id))), folded);
 
     for (const delta of deltas) {
       // SUPERSESSION. The sketchbook has not touched this path since it was cut,
