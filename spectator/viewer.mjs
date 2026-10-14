@@ -4668,6 +4668,46 @@ export function enterSheetHTML(answer = {}, markId = "") {
   return "";
 }
 
+/** THE WALK'S ANSWER CARRIES THE DOOR UNDER `entry` (WLD-48, 2026-10-14).
+ *
+ *  The walk door composes the entry and nests the door's answer in the walk's
+ *  own receipt (office world.mjs § walkEntryReceipt): `{ …the walk, entry: {
+ *  awaiting, terms, refused, note, queued_for_arrival, … } }`. This page read
+ *  `awaiting` and `terms` off the walk's top level, where they never are, so a
+ *  terms door reached by a walk showed "on the way" and its accept button could
+ *  never fire. And the top level's `note` is the WALK's sentence ("position
+ *  derives from this record and the clock…"), not the door's, so every other
+ *  answer the door gave (a refusal, "nothing is queued: …") was silent too.
+ *
+ *  So the entry is read where the office puts it. A bare answer with no
+ *  `entry` is read as itself, which is the shape this file assumed before. */
+export const walkEntryOf = (answer = {}) =>
+  answer?.entry && typeof answer.entry === "object" ? answer.entry : (answer ?? {});
+
+/** The sheet a walk-there-and-enter answer gets. Pure.
+ *
+ *  A TERMS door asks with the same sheet the enter button gets, and its accept
+ *  resends the WALK with the walker's word (`data-walk-enter-accept`). Anything
+ *  else is "on the way": the walk stands, whatever the door said, and the body
+ *  is the door's own words — the mark's refusal when it gave one, then the
+ *  office's note on the entry, which says whether anything was queued and what
+ *  to pass if not (Darko's WLD-5 G2, 2026-10-14: "the answer gives the door's
+ *  words plus what to pass"; the viewer's half closed under it on WLD-48 G1).
+ *  NO SILENT CLICK: a refusal never reads as an entry on its way. */
+export function walkEnterSheetHTML(answer = {}, markId = "") {
+  const entry = walkEntryOf(answer);
+  if (isTermsAsk(entry)) return enterSheetHTML(entry, markId).replace("data-enter-accept=", "data-walk-enter-accept=");
+  const refused = typeof entry.refused === "string" ? entry.refused
+    : String(entry.refused?.because ?? entry.refused?.word ?? "");
+  const words = answer?.entry && typeof answer.entry === "object"
+    ? [refused, answer.arrived_note ?? entry.note]
+    : [answer?.note ?? answer?.narration ?? "the office recorded the departure — you cross the threshold when you arrive"];
+  const said = words.map((w) => String(w ?? "").trim()).filter(Boolean);
+  return `<div class="wv-cross-sheet is-terms" data-for="${esc(markId)}"><div class="wv-cross-head">on the way</div>`
+    + (said.length ? said : ["the office recorded the departure"]).map((w) => `<p class="wv-cross-body">${esc(w)}</p>`).join("")
+    + `</div>`;
+}
+
 // ───────── the Actions rail (R16, 2026-08-18) ─────────
 //
 // DERIVED, NEVER LISTED. There is no vocabulary of verbs anywhere in this file,
@@ -8070,12 +8110,10 @@ export function mountViewer(appEl) {
       const answer = response?.body ?? {};
       if (answer.error === "bounce") throw new Error([answer.defect, answer.hint].filter(Boolean).join(" — "));
       sheet?.remove();
-      const terms = enterSheetHTML(answer, markId);
-      if (terms && isTermsAsk(answer)) { placeCrossingSheet(liveCard(), terms.replace("data-enter-accept=", "data-walk-enter-accept="), { button }); positionBubbles(); return; }
-      placeCrossingSheet(liveCard(),
-        `<div class="wv-cross-sheet is-terms"><div class="wv-cross-head">on the way</div>`
-        + `<p class="wv-cross-body">${esc(String(answer.note ?? answer.narration ?? "the office recorded the departure — you cross the threshold when you arrive"))}</p></div>`, { button });
+      // the door's answer is the walk's `entry` (WLD-48), so the sheet reads it there
+      placeCrossingSheet(liveCard(), walkEnterSheetHTML(answer, markId), { button });
       positionBubbles();
+      if (isTermsAsk(walkEntryOf(answer))) return;
       await loadEnterExitLedger();
       renderCurrent();
     } catch (err) {
