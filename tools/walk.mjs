@@ -268,46 +268,11 @@ export function walkTargetFor(mark, from, arrival = WALK_ARRIVAL_DEFAULT) {
   if (hit) return point(hit.x, hit.y);
   // The road never met the ring at all (a degenerate ring, or an anchor the
   // road cannot reach). The anchor is still the mark's own ground if it is
-  // inside.
-  if (anchorInside) return point(ax, ay);
-  // AN ANCHOR OFF ITS OWN GROUND (WLD-5, 2026-10-14). A long, bent ring (the
-  // Main Channel, the Pando River) has its anchor at the middle of its box, which
-  // is not on the water, so a road toward the anchor can miss the ring
-  // entirely. The box's rim is then not the mark's ground either: measured on
-  // world 17b64ef1, every one of 41 simulated walks to those two ended outside
-  // the ring. So the walk goes to the nearest point of the ring's own ground
-  // instead: the nearest point on the ring, stepped `inset` metres in.
-  const near = nearestGroundOf(ring, { x: fx, y: fy }, RING_ARRIVAL_INSET_M);
-  return near ? point(near.x, near.y) : null;
-}
-
-/**
- * The point of a ring's ground nearest to `from`: the nearest point on the ring,
- * stepped `inset` metres on along the road from `from` (the far side of the
- * bank), or else across the edge it lies on. CHECKED, never assumed: null when
- * no step lands inside.
- */
-function nearestGroundOf(ring, from, inset) {
-  let best = null;
-  for (let i = 0; i < ring.length; i++) {
-    const a = ring[i], b = ring[(i + 1) % ring.length];
-    const ex = b.x - a.x, ey = b.y - a.y, len2 = ex * ex + ey * ey;
-    const t = len2 ? Math.max(0, Math.min(1, ((from.x - a.x) * ex + (from.y - a.y) * ey) / len2)) : 0;
-    const p = { x: a.x + ex * t, y: a.y + ey * t };
-    const d = Math.hypot(p.x - from.x, p.y - from.y);
-    if (!best || d < best.d) best = { p, d, ex, ey };
-  }
-  if (!best) return null;
-  const { p, d, ex, ey } = best;
-  const steps = [];
-  if (d > 0) steps.push({ x: (p.x - from.x) / d, y: (p.y - from.y) / d });
-  const el = Math.hypot(ex, ey);
-  if (el) steps.push({ x: -ey / el, y: ex / el }, { x: ey / el, y: -ex / el });
-  for (const s of steps) {
-    const q = { x: p.x + s.x * inset, y: p.y + s.y * inset };
-    if (pointInPolygon(q.x, q.y, ring)) return q;
-  }
-  return null;
+  // inside; otherwise this mark has no answer and the caller keeps the box.
+  // (A ring whose anchor is off its own ground, a long bent river, therefore
+  // still arrives off the water: where such a walk should end is a design
+  // call of its own, filed for Darko with the measurement, 2026-10-14.)
+  return anchorInside ? point(ax, ay) : null;
 }
 
 /**
