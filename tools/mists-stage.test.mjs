@@ -146,6 +146,16 @@ test("the page: an idle second of drift lays the map out zero times, and the sta
   await page.waitForSelector(".wv-mists-paint :is(img, image)", { state: "attached", timeout: 120_000 });
   await page.waitForTimeout(4500);   // the roll-in done
 
+  // THE CLAIM, first: an idle stretch with the drift running and a frame loop
+  // asking for frames costs the map no layout (before WLD-43: one per frame)
+  const cdp = await ctx.newCDPSession(page);
+  await cdp.send("Performance.enable");
+  const layouts = async () => (await cdp.send("Performance.getMetrics")).metrics.find((m) => m.name === "LayoutCount").value;
+  const frames = () => page.evaluate(() => new Promise((res) => { let n = 0; const t0 = performance.now(); const f = (t) => { n++; if (t - t0 < 1500) requestAnimationFrame(f); else res(n); }; requestAnimationFrame(f); }));
+  const l0 = await layouts(); const n = await frames(); const l1 = await layouts();
+  assert.ok(n > 30, `frames ran (${n} in 1.5 s)`);
+  assert.equal(l1 - l0, 0, `an idle 1.5 s of drift laid the page out ${l1 - l0} times over ${n} frames`);
+
   const where = await page.evaluate(() => {
     const svg = document.querySelector(".wv-minimap > svg"), stage = document.querySelector(".wv-minimap > .wv-mists-stage");
     const running = document.getAnimations().filter((a) => a.playState === "running");
@@ -168,16 +178,6 @@ test("the page: an idle second of drift lays the map out zero times, and the sta
   assert.equal(where.paintInSvg, false, "the moving paint is not in the svg");
   assert.equal(where.wallInSvg, true, "the wall stays in the svg, where it takes the pointer");
   assert.deepEqual(where.topOrder, ["wv-convo-hover-layer", "wv-housemate-edge-layer"], "what drew above the Mists draws above them still");
-
-  // THE CLAIM: an idle stretch with the drift running and a frame loop asking for
-  // frames costs the map no layout (before WLD-43: one per frame)
-  const cdp = await ctx.newCDPSession(page);
-  await cdp.send("Performance.enable");
-  const layouts = async () => (await cdp.send("Performance.getMetrics")).metrics.find((m) => m.name === "LayoutCount").value;
-  const frames = () => page.evaluate(() => new Promise((res) => { let n = 0; const t0 = performance.now(); const f = (t) => { n++; if (t - t0 < 1500) requestAnimationFrame(f); else res(n); }; requestAnimationFrame(f); }));
-  const l0 = await layouts(); const n = await frames(); const l1 = await layouts();
-  assert.ok(n > 30, `frames ran (${n} in 1.5 s)`);
-  assert.equal(l1 - l0, 0, `an idle 1.5 s of drift laid the page out ${l1 - l0} times over ${n} frames`);
 
   // the stage's camera is the svg's: each bake's corner lands where the svg puts the same painting point
   const agree = (label) => page.evaluate((label) => {
