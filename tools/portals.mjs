@@ -365,25 +365,10 @@ function parentOf(m, marks) {
   return best;
 }
 
-/** How far a point inside a mark stands from its edge. */
-function insetOf(pt, mark) {
-  const ring = polygonOf(mark);
-  if (ring) {
-    let best = Infinity;
-    for (let i = 0; i < ring.length; i++) {
-      const q = nearestOnSegment(pt, ring[i], ring[(i + 1) % ring.length]);
-      best = Math.min(best, Math.hypot(q.x - pt.x, q.y - pt.y));
-    }
-    return best;
-  }
-  const r = rect(mark);
-  return Math.min(pt.x - (r.x - r.w / 2), r.x + r.w / 2 - pt.x, pt.y - (r.y - r.h / 2), r.y + r.h / 2 - pt.y);
-}
-
 /** Whether two marks share any ground. Two rooms that only share a wall do
  *  not: rectangles are asked analytically (touching edges overlap by zero), and
- *  a ring is sampled on a metre grid where a point counts only when it stands a
- *  quarter metre inside BOTH, so a wall drawn on a grid line is not an overlap. */
+ *  a ring is sampled on a metre grid, where the ring test is half-open, so a
+ *  point on a shared edge falls in one room, never both. */
 export function roomsOverlap(a, b) {
   const ra = rect(a), rb = rect(b);
   if (overlapArea(ra, rb) <= 0) return false;
@@ -394,7 +379,7 @@ export function roomsOverlap(a, b) {
   for (let x = x0 + step / 2; x < x1; x += step)
     for (let y = y0 + step / 2; y < y1; y += step) {
       const pt = { x, y };
-      if (pointInMark(pt, a) && pointInMark(pt, b) && insetOf(pt, a) > 0.25 && insetOf(pt, b) > 0.25) return true;
+      if (pointInMark(pt, a) && pointInMark(pt, b)) return true;
     }
   return false;
 }

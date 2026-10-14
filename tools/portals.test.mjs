@@ -291,6 +291,16 @@ test("G9 · two rooms drawn as rings that share a wall do not overlap; pushed in
   assert.deepEqual(portalFindings(w.marks).map((f) => f.rule), ["rooms-do-not-overlap"]);
 });
 
+test("G9 · two triangles splitting one square share only their diagonal, and that is no overlap", () => {
+  // the boxes coincide, so only the ring test can answer, and the metre grid
+  // lands squarely on the shared diagonal
+  const tri = (id, pts) => ({ id, kind: "sited", by: "spire", at: { x: 1210, y: 860 }, extent: { w: 20, h: 20 }, points: pts, body: id });
+  const w = world();
+  w.marks.push(tri("spire/north-half", [[1200, 850], [1220, 850], [1200, 870]]),
+               tri("spire/south-half", [[1220, 850], [1220, 870], [1200, 870]]));
+  assert.deepEqual(portalFindings(w.marks), []);
+});
+
 test("standpointSight: the one function, keyed off the enter ledger; no handle has entered nothing", () => {
   const w = world();
   const occupancy = new Map([["ann", ["spire/grounds", "spire/hall"]]]);
