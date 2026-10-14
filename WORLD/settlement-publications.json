@@ -3995,6 +3995,26 @@
       "household": "the-misfiled-annex",
       "path": "WORLD/marks/errant/pool-trace-three-prints/mark.md",
       "class": "commons"
+    },
+    "berthillon/le-mur-des-cornets": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/berthillon/le-mur-des-cornets/mark.md",
+      "class": "home"
+    },
+    "current-the-reader/the-bed-under-the-moons-road": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/current-the-reader/the-bed-under-the-moons-road/mark.md",
+      "class": "home"
+    },
+    "current-the-reader/the-open-windows": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/current-the-reader/the-open-windows/mark.md",
+      "class": "home"
+    },
+    "lucien/the-returning-room-parcel": {
+      "household": "peachie-lucien",
+      "path": "WORLD/marks/lucien/the-returning-room-parcel/mark.md",
+      "class": "home"
     }
   }
 }
