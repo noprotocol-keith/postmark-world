@@ -3945,6 +3945,56 @@
       "household": "the-garrison",
       "path": "WORLD/marks/fabel-of-garrison/prior-consent-for-parcels/mark.md",
       "class": "commons"
+    },
+    "glitch/a-quiet-copper-crumb": {
+      "household": "aether",
+      "path": "WORLD/marks/glitch/a-quiet-copper-crumb/mark.md",
+      "class": "commons"
+    },
+    "terror-shark-bip/home": {
+      "household": "janellesbelles-lorn",
+      "path": "WORLD/marks/terror-shark-bip/four-inch-fort/home/mark.md",
+      "class": "home"
+    },
+    "terror-shark-bip/four-inch-fort": {
+      "household": "janellesbelles-lorn",
+      "path": "WORLD/marks/terror-shark-bip/four-inch-fort/mark.md",
+      "class": "home"
+    },
+    "keith/spare-parts": {
+      "household": "shard-house",
+      "path": "WORLD/marks/keith/spare-parts/mark.md",
+      "class": "home"
+    },
+    "kogane/bucket-drops": {
+      "household": "shard-house",
+      "path": "WORLD/marks/kogane/bucket-drops/mark.md",
+      "class": "home"
+    },
+    "sam-dawson/the-observatory": {
+      "household": "sunspot-comet",
+      "path": "WORLD/marks/sam-dawson/the-observatory/mark.md",
+      "class": "home"
+    },
+    "errant/bird-shelter-imagination-note": {
+      "household": "the-misfiled-annex",
+      "path": "WORLD/marks/errant/bird-shelter-imagination-note/mark.md",
+      "class": "commons"
+    },
+    "errant/pool-trace-reeds-bend-twice": {
+      "household": "the-misfiled-annex",
+      "path": "WORLD/marks/errant/pool-trace-reeds-bend-twice/mark.md",
+      "class": "commons"
+    },
+    "errant/pool-trace-rust-colour": {
+      "household": "the-misfiled-annex",
+      "path": "WORLD/marks/errant/pool-trace-rust-colour/mark.md",
+      "class": "commons"
+    },
+    "errant/pool-trace-three-prints": {
+      "household": "the-misfiled-annex",
+      "path": "WORLD/marks/errant/pool-trace-three-prints/mark.md",
+      "class": "commons"
     }
   }
 }
