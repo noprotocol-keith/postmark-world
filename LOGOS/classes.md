@@ -1294,6 +1294,46 @@ The vehicle is a third behaviour and takes the compound name `vehicle` for the s
 crossing ① changes what you read, standing on ② changes what you may do, entering a vehicle changes where you are, and
 the three must never be read as one mechanism wearing three hats.
 
+## The portal and the dungeon — a passage that leads somewhere, and a place left only by them
+
+*A portal changes where you are when you cross it. A dungeon changes what you may see and how you may leave.*
+
+Rendered in the world as `the-town/dungeon`.
+
+Ruled by Darko with Wright in the doors sitting of 2026-10-13 (WLD-5, concluded 20:03 EDT), and built on the entry law
+that already stood: a mark's `entry: {word, edge, consequence}` is its fixed answer to every entrant.
+
+- **A portal is a mark whose entry law carries `into`.** `into` is a mark, or a list of marks: entering the portal
+  enters that mark, and with a list the walker picks, and nothing is recorded until they do. An optional
+  **`lands_at`** (a mark, or coordinates) is where you stand within `into`; it is clamped into `into`'s shape and
+  set about a metre inside. With neither, you stand at `into`'s anchor. A two-way passage is two portals pointing at
+  each other, each with its own word, body and art, so it can be locked from one side only. You enter a portal from
+  anywhere in its extent, by the reach rule every threshold keeps.
+- **One step at a time.** A room's answer lists the portals in it, and you pick the next. There is no
+  route-finding, and leaving a room means walking to the portal that leads out and entering it ("not unreasonable
+  for a DM to make you move your token to the door of a room full of traps").
+- **A portal that leads nowhere refuses, by its own words.** An `into` or a `lands_at` that names no mark leaves the
+  walker standing at the portal, and the refusal quotes the field exactly as written.
+- **A dungeon is a sited-mark class**, and its rules reach every mark it geometrically contains, as a parcel's
+  sovereignty does; the marks inside it are not classed themselves. **Inside one, `exit` is not offered**: you leave
+  through a portal whose `into` is outside, and **such a portal can never be opposed**, because it is locked from
+  the outside, never from the inside. No jails.
+- **A dungeon is opaque from outside.** A resident who has not entered it reads it as the dungeon mark alone, with
+  nothing it contains at any depth. The block keys off having *entered* (the enter ledger), never off where you
+  stand, so walking onto a room's ground from outside reveals nothing. Inside, you read the room you entered and
+  what it holds, not its neighbours.
+- **The lint at the settlement holds every portal to this, with no exceptions in the rule:** every `into` and every
+  `lands_at` names a mark, every landing stands within about 5 m of its `into`, no exit is opposed, and every room of
+  a dungeon has a path of unlocked portals to an exit. A portal let through anyway is let through by name, in
+  `WORLD/portal-lint-exceptions.json`, and every lint run says so.
+
+**Later** (named in the sitting, not law yet): `requires:` on a portal (town-written conditions, so locked portals
+with keys), secret portals (a hidden entry in the list), and exit routing for marks that are not dungeons.
+
+**Terminology.** "Portal" now names this mechanism, a third sense beside ① the read-root slot and ② the verb-lending
+ground. The read-root slot is to be renamed (proposed: lens), and live identifiers are renamed only after the
+freeze.
+
 ## The witnessed roll
 
 *A roll the record cannot reproduce is not a roll, it is a rumour.*

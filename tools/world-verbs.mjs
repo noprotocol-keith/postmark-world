@@ -17,12 +17,19 @@ import {
 } from "./world-engine.mjs";
 import { homeOf } from "./where-is.mjs"; // the ONE home resolver (declared, own parcel, household)
 import {
-  marksContain, marksOverlapArea, overlapArea, pointInPolygon, pointInRect, polygonOf, rect,
+  marksContain, marksOverlapArea, overlapArea, rect,
 } from "./geometry.mjs"; // the ONE containment definition — pure, browser-safe (no node:*)
 import {
-  adjudicate, containsEdges as containsEdgesOf, entityChild, formatEnterExit,
+  adjudicate, containsEdges as containsEdgesOf, entityChild, entryLawOf, formatEnterExit,
   isMark, occupantsOf, termsAt, withinOf,
 } from "./enter-exit.mjs"; // DEMO SLICE — the enter-exit acts (step 5, jetto/enter-exit-demo)
+import {
+  pointInMark, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld,
+  landingOf, enterTargetOf, portalsIn, portalsInto,
+} from "./portals.mjs"; // WLD-5: portals and the dungeon class, one home for the verbs and the lint
+// The office loads this file and enter-exit.mjs from the clone, and nothing else,
+// so the portal reads it needs ride out through here.
+export { dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, portalsIn, portalsInto, isDungeon };
 
 // ───────────────────────── orient — charter + your state ────────────────────
 // The establishing line of every telling: the let-there-be-light root (light
@@ -100,12 +107,8 @@ export function containmentChain(pos, marks) {
   return nest.reverse().map((m) => ({ id: m.id, by: m.by, tier: m.tier, body: m.body, extentM: Math.max(m.extent?.w ?? 0, m.extent?.h ?? 0) }));
 }
 function extentArea(m) { return (m.extent?.w ?? 1) * (m.extent?.h ?? 1); }
-export function pointWithinMark(pos, mark) {
-  const ring = polygonOf(mark);
-  return ring
-    ? pointInPolygon(Number(pos?.x), Number(pos?.y), ring)
-    : pointInRect(Number(pos?.x), Number(pos?.y), rect(mark));
-}
+// One definition, now in portals.mjs, so the passage and the lint measure "inside" alike.
+export const pointWithinMark = pointInMark;
 
 // ───────────────────────── investigate — descend the tree, capped ────────────
 // Zoom one mark: its body (full prose), the predicated properties attached to
@@ -308,8 +311,32 @@ export function enterExitPlan(state, targetId, world, { occupancy = new Map(), h
  *  a resident should not be asked to affirm a hallway).
  */
 export function enter(state, targetId, world, {
-  occupancy = new Map(), handle = null, at = 0, iso = null, accepted = false,
+  occupancy = new Map(), handle = null, at = 0, iso = null, accepted = false, into = null,
 } = {}) {
+  // ── WLD-5: what a dungeon hides, a portal, and the dungeon's one way in ──
+  const marks = world.marks ?? [];
+  const held = occupancy.get(handle) ?? [];
+  const named = marks.find((m) => m.id === targetId) ?? null;
+  // A mark a dungeon hides from you is no mark at all to you: the same answer
+  // as an id that does not exist, so naming one from outside learns nothing.
+  if (named && hiddenFrom(marks, held).has(targetId)) return { error: `no mark '${targetId}' to enter` };
+  if (named && entryLawOf(named)?.into) return enterThroughPortal(state, named, world, { held, handle, at, iso, accepted, into });
+  // Inside a dungeon, or into one, the only enter is through a portal: the cure
+  // for the Swiss-cheese exit must not leak on the way in.
+  if (named && dungeonIndex(marks).dungeons.length) {
+    const inside = heldDungeon(held, marks);
+    const governs = dungeonsOf(named, marks);
+    if ((inside || governs.length) && !held.includes(targetId)) {
+      const d = inside ?? governs[0];
+      const ways = inside ? portalsIn(held[held.length - 1], marks) : portalsInto(d, marks);
+      return {
+        error: inside
+          ? `you are inside ${d}, a dungeon — inside one, the only way to enter anything is a portal. The portals where you stand: ${ways.map((p) => p.id).join(", ") || "(none)"}`
+          : `${d} is a dungeon — it is entered through its portals, never directly. Its ways in: ${ways.map((p) => p.id).join(", ") || "(none)"}`,
+        refused: "dungeon", dungeon: d, portals: ways,
+      };
+    }
+  }
   const plan = enterExitPlan(state, targetId, world, { occupancy, handle });
   if (plan.error) return plan;
   const byId = new Map(world.marks.map((m) => [m.id, m]));
@@ -352,11 +379,113 @@ export function enter(state, targetId, world, {
   return { ...plan, crossings, rows, entered, within, stranded, refused, awaiting };
 }
 
+/** A PORTAL PASSAGE (WLD-5, ruled 2026-10-13). One step, through one portal:
+ *
+ *  1. the portal's own word decides. Only its law is asked, never the
+ *     law of the room behind it ("each side its own word" lives on the two
+ *     portal marks of a two-way passage);
+ *  2. a list of ways (`into`) is picked from, and nothing is recorded until
+ *     the walker picks;
+ *  3. a portal that leads nowhere (an `into` or a `lands_at` that names no mark)
+ *     is refused by its own field, quoted exactly as written, and the walker
+ *     stays standing at it. Nothing is written: it is the portal's fault, not
+ *     its word;
+ *  4. terms wait for the walker's word, as at any threshold;
+ *  5. the passage writes only grammar that already exists: `exits` the rooms
+ *     he is in that do not hold `into`, then `enters` down to it, from the
+ *     outermost dungeon governing `into` when there is one (so "has entered
+ *     the dungeon" is just "the dungeon is in his stack"), otherwise `into`
+ *     alone, as the Post Office's stops always did. Every row carries the
+ *     portal's word; nothing above a dungeon is written.
+ *
+ *  `landing` is where he now stands (portals.mjs § landingOf, clamped into
+ *  `into`); the office's pen writes it as the walk ledger's zero-length stop,
+ *  the same write the Post Office's deposit makes. `portals` are the portals of
+ *  the room he lands in: the next step is his to pick. */
+function enterThroughPortal(state, portal, world, { held, handle, at, iso, accepted, into: pick }) {
+  const marks = world.marks ?? [];
+  const byId = new Map(marks.map((m) => [m.id, m]));
+  const law = entryLawOf(portal);
+  const said = accepted === true ? null : new Set(Array.isArray(accepted) ? accepted : accepted ? [accepted] : []);
+  const standing = portal.at ? pointWithinMark(state, portal) : false;
+  const base = {
+    target: portal.id, via: portal.id, held: [...held],
+    walk: standing || !portal.at ? null : { to: { x: portal.at.x, y: portal.at.y }, mark: portal.id },
+    chain: [], links: [], crossings: [], rows: [], entered: [], exited: [], within: [...held],
+    stranded: null, refused: null, awaiting: null,
+  };
+  const verdict = adjudicate(portal, { accepted: said === null || said.has(portal.id) });
+  if (verdict.effect === "refused")
+    return { ...base, crossings: [verdict], stranded: portal.id, refused: verdict,
+             rows: [formatEnterExit({ handle, act: "enters", mark: portal.id, at, word: verdict.word, iso })] };
+
+  const ways = law.into;
+  let chosen = null;
+  if (pick !== null && pick !== undefined && pick !== "") {
+    if (!ways.includes(String(pick)))
+      return { error: `into: ${JSON.stringify(String(pick))} is not one of ${portal.id}'s ways; pick one of: ${ways.join(", ") || "(none)"}`,
+               choose: ways.map((id) => ({ id, body: byId.get(id)?.body ?? null })) };
+    chosen = String(pick);
+  } else if (ways.length === 1) {
+    chosen = ways[0];
+  } else if (ways.length > 1) {
+    return { ...base, stranded: portal.id, choose: ways.map((id) => ({ id, body: byId.get(id)?.body ?? null })),
+             note: `${portal.id} leads more than one way. Enter again with into: one of ${ways.join(", ")}. Nothing was recorded.` };
+  }
+
+  const broken = (field, value, because) => ({ ...base, crossings: [verdict], stranded: portal.id,
+    broken: { field, value, because: `${because}. You are standing at ${portal.id}, and nothing was recorded.` } });
+  if (!chosen) return broken("into", law.into, "entry.into names no mark at all, so this portal leads nowhere");
+  const intoMark = byId.get(chosen);
+  if (!intoMark) return broken("into", chosen, `into: ${JSON.stringify(chosen)} names no mark, so this portal leads nowhere`);
+  if (!intoMark.at) return broken("into", chosen, `into: ${JSON.stringify(chosen)} names a mark with no place in the world`);
+  const landing = landingOf(law, intoMark, byId);
+  if (!landing.ok) return broken(landing.field, landing.value, landing.because);
+
+  if (verdict.effect === "terms") return { ...base, crossings: [verdict], stranded: portal.id, awaiting: verdict };
+
+  const target = enterTargetOf(intoMark, marks);
+  const chain = target
+    ? [...ancestorsByGeometry(target, world, { kinds: THRESHOLD_KINDS }).slice().reverse().map((m) => m.id), target.id]
+    : [];
+  const governing = target ? dungeonsOf(target, marks) : [];
+  let links = target ? [target.id] : [];
+  if (governing.length) {
+    const i = chain.indexOf(governing[0]);
+    links = i >= 0 ? chain.slice(i) : [...new Set([governing[0], target.id])];
+  }
+  const keep = new Set(chain);
+  const out = held.findIndex((id) => !keep.has(id));
+  const within = out >= 0 ? held.slice(0, out) : [...held];
+  const rows = [];
+  if (out >= 0) rows.push(formatEnterExit({ handle, act: "exits", mark: held[out], at, iso }));
+  const entering = links.filter((id) => !within.includes(id));
+  for (const id of entering) rows.push(formatEnterExit({ handle, act: "enters", mark: id, at, word: verdict.word, iso }));
+  return {
+    ...base, chain: links, links: entering, crossings: [verdict], rows, entered: entering,
+    exited: out >= 0 ? held.slice(out) : [], within: [...within, ...entering],
+    into: chosen,
+    landing: { x: landing.x, y: landing.y, mark: landing.lands_mark, clamped: landing.clamped },
+    portals: target ? portalsIn(target.id, marks) : [],
+    ...(rows.length ? {} : { already: true, note: `${handle ?? "you"} is already within ${target?.id ?? chosen}; the portal sets you down at its landing.` }),
+  };
+}
+
 /** exit(mark) — the walker nullifying his own side of the edge he authored.
  *  Leaving a ship leaves her cabins; leaving somewhere you are not within is a
  *  refusal with a reason, never a silent success. */
 export function exit(targetId, world, { occupancy = new Map(), handle = null, at = 0, iso = null } = {}) {
   const held = occupancy.get(handle) ?? [];
+  // A DUNGEON OFFERS NO EXIT (WLD-5): you leave through a portal that leads
+  // outside, and such a portal can never be opposed. Any exit at all is refused
+  // while you are inside one — stepping out of a mark that holds the dungeon
+  // would truncate the dungeon with it, which is the same hole by another name.
+  const inside = heldDungeon(held, world.marks ?? []);
+  if (inside) {
+    const ways = portalsIn(held[held.length - 1], world.marks ?? []);
+    return { error: `you are inside ${inside}, a dungeon, and a dungeon offers no exit — you leave by walking to a portal that leads out and entering it. The portals where you stand: ${ways.map((p) => p.id).join(", ") || "(none)"}`,
+             refused: "dungeon", dungeon: inside, portals: ways, within: [...held] };
+  }
   const i = held.indexOf(targetId);
   if (i < 0) return { error: `${handle ?? "you"} is not within '${targetId}' — there is nothing to step out of`,
                       within: [...held] };
@@ -381,14 +510,19 @@ export function exit(targetId, world, { occupancy = new Map(), handle = null, at
  *  mark he has not crossed into. Null when the two axes already agree. */
 export function enterPrompt(state, world, { occupancy = new Map(), handle = null } = {}) {
   const held = occupancy.get(handle) ?? [];
+  // Inside a dungeon the next step is a portal, and the room's answer lists
+  // them; walking onto a hidden mark from outside offers nothing (WLD-5).
+  if (heldDungeon(held, world.marks ?? [])) return null;
+  const hidden = hiddenFrom(world.marks ?? [], held);
   const chain = containmentChain(state, world.marks);
   const byId = new Map(world.marks.map((m) => [m.id, m]));
   for (let i = chain.length - 1; i >= 0; i--) {
     const id = chain[i].id;
-    if (held.includes(id)) continue;
+    if (held.includes(id) || hidden.has(id)) continue;
     const mark = byId.get(id);
     if (!mark?.extent) continue;
     if (Math.max(mark.extent.w ?? 0, mark.extent.h ?? 0) >= DIALS.world_scale_extent_m) continue; // the frame is not a room
+    if (dungeonsOf(mark, world.marks).length && !entryLawOf(mark)?.into) continue; // a dungeon is entered by its portals
     return { mark: id, body: mark.body ?? null, terms: termsAt(mark),
              ask: `You are standing inside ${id} but not within it. Enter?` };
   }
@@ -398,6 +532,7 @@ export function enterPrompt(state, world, { occupancy = new Map(), handle = null
 /** The mark a walker is within but has walked out of the extent of. */
 export function exitPrompt(state, world, { occupancy = new Map(), handle = null } = {}) {
   const held = occupancy.get(handle) ?? [];
+  if (heldDungeon(held, world.marks ?? [])) return null; // a dungeon offers no exit to prompt (WLD-5)
   const byId = new Map(world.marks.map((m) => [m.id, m]));
   for (let i = held.length - 1; i >= 0; i--) {
     const mark = byId.get(held[i]);
