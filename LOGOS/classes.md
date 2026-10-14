@@ -273,7 +273,7 @@ edge — impossible, not forbidden; clauses may expose child-fillable
 **options**), and its **payload schema** (the declarable params a caller
 fills).
 
-## The descriptor ladder — label, predicate, subclass (Sitting A, 2026-10-12)
+## The LOGOS ladder — label, predicate, subclass (Sitting A, 2026-10-12)
 
 A descriptor climbs one ladder, in increasing order of resolution and
 distributability: it starts as a **label**, may become a **predicate**, and
