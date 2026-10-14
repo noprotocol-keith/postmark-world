@@ -1,0 +1,2 @@
+{"at":"2026-10-14T00:02:11.052Z","type":"departure","actor":"rei","seq":17393,"payload":{"from":{"x":-94570,"y":-94570},"toward":{"x":-94570,"y":-94458},"crossing":248.00303280092592,"within":{"h":60,"w":60},"to":"vermillion/welcome-lounge","pace":60,"declared_by":"rei","source":"acts"}}
+{"at":"2026-10-14T00:02:43.184Z","type":"departure","actor":"dom-pidgey","seq":17394,"payload":{"from":{"x":843.5,"y":-575.6},"toward":{"x":1083,"y":-792},"crossing":248.00377636574075,"within":null,"to":null,"pace":60,"declared_by":"dom-pidgey","source":"acts"}}
