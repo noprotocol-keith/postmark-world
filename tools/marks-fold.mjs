@@ -545,7 +545,7 @@ export { rect, overlapArea, contains, marksContain, polygonOf, ringMatchesClaim 
 import { rect, overlapArea, contains, marksContain, polygonOf, rectInsideRing } from "./geometry.mjs";
 import { deriveOutsiders, outsidersJson, outsidersMarkdown } from "./region-outsiders.mjs";
 import { carve } from "./determination.mjs";
-import { resolveConsent } from "./consent.mjs";
+import { resolveConsent, consentMap, CONSENT_FIELD } from "./consent.mjs";
 
 // placementParent(claim, marks) — the geometry-decides-the-parent primitive the
 // world-write path (world_leave_mark) calls to DECIDE the directory a new mark
@@ -1994,6 +1994,10 @@ function deltaView(mk, cred, rectsByCred, world = null) {
     sovereign: mk.kind === "sited" ? held.some((pr) => contains(pr, rect(mk))) : false,
     body: mk.body,
     ...(contained ? { placementParent: contained } : {}),
+    // a ground's consent word, which the standing walk reads (mark-standing.mjs
+    // § groundVerdict): a ground admitted without it would not welcome what
+    // its author welcomed (WLD-51)
+    ...(consentMap(mk) ? { [CONSENT_FIELD]: consentMap(mk) } : {}),
   };
 }
 
@@ -2010,6 +2014,37 @@ function deltaView(mk, cred, rectsByCred, world = null) {
  * the fold's own error grammar so the crossing's journal reads the same either
  * way.
  */
+/**
+ * SOVEREIGNTY AGAINST A WHOLE RESULT (WLD-51; review-214, D1). `admitDelta`
+ * judges each view's `sovereign` against the parcels admitted before it in
+ * claim order, which is right while one sketchbook is admitted. A sweep judging
+ * a crossing's whole result needs the fold's own answer (§ sovereignty in
+ * `fold`): a sited mark is sovereign inside ANY parcel its credential
+ * household holds in that result, whenever either was claimed. Without it, a
+ * house standing on main reads not-sovereign under a parcel arriving this
+ * crossing, so the walk passes it and reads the PARCEL's consent word instead of
+ * the house's.
+ *
+ * Sets `sovereign` on every sited view in `views`, in place. `world` is the
+ * result by id, its parcels included (main's and the admitted ones).
+ */
+export function sovereignInResult(views, world, { dials = DIALS } = {}) {
+  const rectsByCred = new Map();
+  for (const mk of world.values()) {
+    if (mk.kind !== "parcel") continue;
+    const r = rect(mk);
+    r.w = r.w || dials.parcel_w;
+    r.h = r.h || dials.parcel_h;
+    const cred = mk.declared_household ?? mk.household;
+    if (!rectsByCred.has(cred)) rectsByCred.set(cred, []);
+    rectsByCred.get(cred).push(r);
+  }
+  for (const view of views.values()) {
+    if (view.kind !== "sited") continue;
+    view.sovereign = (rectsByCred.get(view.declared_household ?? view.household) ?? []).some((pr) => contains(pr, rect(view)));
+  }
+}
+
 export function admitDelta(candidates, base, { dials = DIALS } = {}) {
   const errors = [];
   const views = new Map();
