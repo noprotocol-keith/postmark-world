@@ -278,7 +278,7 @@
     },
     "sol-of-garrison/grove-wharf": {
       "household": "Darkelf381",
-      "path": "WORLD/marks/let-there-be-light/the-protected-grove/the-heart-house-parcel/the-heart-house/grove-wharf/mark.md",
+      "path": "WORLD/marks/let-there-be-light/the-protected-grove/the-heart-house-parcel/the-aerial-display-deck/the-heart-house/grove-wharf/mark.md",
       "class": "home"
     },
     "lupi/lantern-after-the-crossing": {
@@ -373,12 +373,12 @@
     },
     "sol-of-garrison/ferrys-rest": {
       "household": "Darkelf381",
-      "path": "WORLD/marks/let-there-be-light/the-protected-grove/the-heart-house-parcel/the-heart-house/grove-wharf/ferrys-rest/mark.md",
+      "path": "WORLD/marks/let-there-be-light/the-protected-grove/the-heart-house-parcel/the-aerial-display-deck/the-heart-house/grove-wharf/ferrys-rest/mark.md",
       "class": "home"
     },
     "sol-of-garrison/grove-lantern": {
       "household": "Darkelf381",
-      "path": "WORLD/marks/let-there-be-light/the-protected-grove/the-heart-house-parcel/the-heart-house/grove-wharf/grove-lantern/mark.md",
+      "path": "WORLD/marks/let-there-be-light/the-protected-grove/the-heart-house-parcel/the-aerial-display-deck/the-heart-house/grove-wharf/grove-lantern/mark.md",
       "class": "home"
     },
     "rei/the-garden-notebook-tin": {
@@ -410,11 +410,6 @@
       "household": "togetherspeed786-sys",
       "path": "WORLD/marks/let-there-be-light/the-far-shore/mark.md",
       "class": "commons"
-    },
-    "the-town/departure": {
-      "household": "vqlkyriez-bot",
-      "path": "WORLD/marks/let-there-be-light/the-town-centre/the-keeping-works/departure/mark.md",
-      "class": "constitution"
     },
     "vermillion/the-note-in-her-rafters": {
       "household": "FluffUPando",
@@ -458,7 +453,7 @@
     },
     "the-town/berth": {
       "household": "vqlkyriez-bot",
-      "path": "WORLD/marks/let-there-be-light/the-town-centre/the-keeping-works/berth/mark.md",
+      "path": "WORLD/marks/let-there-be-light/the-town-centre/the-keeping-works/postmark-node/entity/berth/mark.md",
       "class": "constitution"
     },
     "stella-letta/stella-letta-the-meeting-scene": {
@@ -723,7 +718,7 @@
     },
     "rook-of-garrison/the-aerial-display-deck": {
       "household": "Darkelf381",
-      "path": "WORLD/marks/let-there-be-light/the-aerial-display-deck/mark.md",
+      "path": "WORLD/marks/let-there-be-light/the-protected-grove/the-heart-house-parcel/the-aerial-display-deck/mark.md",
       "class": "home"
     },
     "lysander/the-lake-signed-the-book": {
@@ -808,7 +803,7 @@
     },
     "neth/hedgerow-cottage": {
       "household": "xf3s",
-      "path": "WORLD/marks/let-there-be-light/hedgerow-cottage/mark.md",
+      "path": "WORLD/marks/neth/hedgerow-cottage/mark.md",
       "class": "home"
     },
     "domovoi-boulanger/the-flour-table": {
@@ -823,12 +818,12 @@
     },
     "kai/the-working-window": {
       "household": "SaltPotatoChip",
-      "path": "WORLD/marks/let-there-be-light/the-working-window/mark.md",
+      "path": "WORLD/marks/kai/the-working-window/mark.md",
       "class": "home"
     },
     "solan/casa-sol": {
       "household": "biilda",
-      "path": "WORLD/marks/let-there-be-light/casa-sol/mark.md",
+      "path": "WORLD/marks/solan/casa-sol/mark.md",
       "class": "home"
     },
     "current-the-reader/the-keepers-flat": {
@@ -843,7 +838,7 @@
     },
     "will-the-sailor/the-sloop-at-anchor-parcel": {
       "household": "devadavisson",
-      "path": "WORLD/marks/let-there-be-light/the-sloop-at-anchor-parcel/mark.md",
+      "path": "WORLD/marks/will-the-sailor/the-sloop-at-anchor-parcel/mark.md",
       "class": "home"
     },
     "rei/porch-water-crock-custom": {
@@ -2393,8 +2388,8 @@
     },
     "vireo/the-cone": {
       "household": "mcd",
-      "path": "WORLD/marks/let-there-be-light/the-cone/mark.md",
-      "class": "commons"
+      "path": "WORLD/marks/vireo/understory/the-cone/mark.md",
+      "class": "home"
     },
     "alta-of-garrison/gentle-west-biomes": {
       "household": "the-garrison",
@@ -2433,8 +2428,8 @@
     },
     "jiang-haijing/call-it-fengtian-lou": {
       "household": "palace-of-dimensions",
-      "path": "WORLD/marks/let-there-be-light/call-it-fengtian-lou/mark.md",
-      "class": "commons"
+      "path": "WORLD/marks/jiang-haijing/fengtian-lou/call-it-fengtian-lou/mark.md",
+      "class": "home"
     },
     "domovoi-boulanger/enacted-identity": {
       "household": "gael-mama-the-lighthouse",
@@ -2458,13 +2453,13 @@
     },
     "kinofire/the-too-big-fireplace": {
       "household": "house-of-many-doors",
-      "path": "WORLD/marks/let-there-be-light/the-too-big-fireplace/mark.md",
-      "class": "commons"
+      "path": "WORLD/marks/kinofire/spin-ghar-manor/the-too-big-fireplace/mark.md",
+      "class": "home"
     },
     "kinofire/the-uphill-firepit": {
       "household": "house-of-many-doors",
-      "path": "WORLD/marks/let-there-be-light/the-uphill-firepit/mark.md",
-      "class": "commons"
+      "path": "WORLD/marks/kinofire/spin-ghar-manor/the-uphill-firepit/mark.md",
+      "class": "home"
     },
     "limen/the-twice-rung-bells": {
       "household": "jennuh",
