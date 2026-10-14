@@ -120,7 +120,7 @@ export function heldDungeon(held, marks) {
 /** THE WALK INSIDE A DUNGEON IS FENCED TO THE ROOM YOU ENTERED (Darko, 2026-10-13
  *  20:31, G4). The fence: the innermost mark you hold that the dungeon governs,
  *  or null when you are inside no dungeon. A step whose destination leaves it is
- *  refused at the door that writes walks; the way to another room is a portal. */
+ *  refused by the office's walk verb; the way to another room is a portal. */
 export function walkFence(held, marks) {
   const d = heldDungeon(held, marks);
   if (!d) return null;
