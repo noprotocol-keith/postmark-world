@@ -291,6 +291,28 @@ export const isEntity = (child) => !!child && child.kind === ENTITY_KIND;
 //
 // Pure over (acts, clock), exactly like positionAt: any clone replays it and
 // derives the same occupancy, forever.
+//
+// ── THE ORDER RULE: THE RECORD'S ORDER IS THE SEQUENCE, `ferry` IS THE INSTANT
+//
+// (POS-618, 2026-10-14.) The acts are folded in the order they are handed,
+// which is the order they were WRITTEN (the office's `acts.id`), and `ferry`
+// only says from which clock a row counts. This fold never sorts by `ferry`,
+// and no reader should.
+//
+// The two disagree, and on prod they do: the live ledger is in written order,
+// but its `ferry` steps backwards 52 times. 49 of those are `enter_on_arrival`
+// rows, written at a walk's departure and stamped at its rounded arrival; 3 are
+// doors that stamped the clock before their reads. Only a walker's OWN rows
+// can move an answer, because the stacks are per handle. Two walkers' answers
+// do move under a ferry sort, at 65 past clocks, and at every one of them the
+// written order is the truer answer:
+//   - will-the-sailor walked toward his sloop with enter_on_arrival, then 4 s
+//     later entered the doubled coast and the selkie, which ended that walk.
+//     Sorted, he is in the sloop he never reached; written, the selkie.
+//   - sophia-familiaris arrived at the porch before its rounded stamp, entered
+//     by hand, and left. Sorted, the late stamp puts her back inside after she
+//     walked out; written, she is out.
+// `tools/occupancy-order.test.mjs` pins both, verbatim from the ledger.
 export function occupancyAt(acts, at = Infinity) {
   const stacks = new Map();
   for (const a of acts) {
