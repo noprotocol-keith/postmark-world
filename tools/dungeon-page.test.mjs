@@ -7,9 +7,8 @@
 //
 // So this file asks the PAGE, not the function: the function's own behaviour is
 // tools/portals.test.mjs's. It serves the real record twice, once as it stands
-// and once with a dungeon drawn around a mark the Spectator's opening view
-// draws, and asserts the mark is gone from the map the second time, while the
-// map still draws. Taking `sightOf` out of applyWorldLayer reds it.
+// and once with a drawn mark re-classed as a dungeon, and asserts that nothing
+// inside it draws the second time. Taking `sightOf` out of applyWorldLayer reds it.
 
 import { test, after, before } from "node:test";
 import assert from "node:assert/strict";
@@ -18,6 +17,7 @@ import { createServer } from "node:net";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { markInside } from "./portals.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SERVED = JSON.parse(readFileSync(join(ROOT, "WORLD/world-state.json"), "utf8"));
@@ -87,20 +87,27 @@ test("[pin] the page asks the world tools' one function, and keeps no dungeon ru
   assert.doesNotMatch(SOURCE, /["']dungeon["']/, "no second implementation: the class name appears nowhere in the page");
 });
 
-test("THE MAP HIDES WHAT A DUNGEON HOLDS — a mark the Spectator draws vanishes once a dungeon stands around it", async (t) => {
+test("THE MAP HIDES WHAT A DUNGEON HOLDS — a drawn mark made a dungeon draws alone, and nothing inside it draws", async (t) => {
   if (!chromium) return t.skip("playwright is absent: whether the World page hides a dungeon's contents is unguarded on this machine (the [pin] above still holds the wiring as text)");
+  // A mark the Spectator already draws, holding another it draws, is RE-CLASSED
+  // rather than a new mark added: the FOV's budget is unchanged, so a child that
+  // vanishes vanished because the page asked standpointSight, not because a new
+  // mark took its seat (the first draft of this test added a wall and passed on
+  // a page that hid nothing; the flip caught it).
   const before = await drawnIds();
   const byId = new Map(SERVED.marks.map((m) => [m.id, m]));
-  const target = before.map((id) => byId.get(id))
-    .find((m) => m && m.kind === "sited" && m.at && m.extent && !m.class && Math.max(m.extent.w, m.extent.h) < 200);
-  assert.ok(target, `the opening view draws at least one small classless sited mark to wrap (drew ${before.length})`);
+  const drawn = before.map((id) => byId.get(id)).filter((m) => m && m.kind === "sited" && m.at && m.extent);
+  let walled = null, held = null;
+  for (const p of drawn) {
+    if (p.class) continue;
+    const c = drawn.find((x) => x !== p && markInside(p, x));
+    if (c) { walled = p; held = c; break; }
+  }
+  assert.ok(walled && held, `the opening view draws a mark inside another it draws (drew ${before.length})`);
 
-  const dungeon = {
-    id: "wld5-test/the-walled-grounds", kind: "sited", by: "wld5-test", household: "wld5-test", class: "dungeon",
-    at: { x: target.at.x, y: target.at.y }, extent: { w: target.extent.w + 40, h: target.extent.h + 40 },
-    body: "A walled ground, for the test.", stamps: 0, weight: 0,
-  };
-  const after = await drawnIds({ ...SERVED, marks: [...SERVED.marks, dungeon] });
-  assert.ok(after.length > 0, "the map still draws");
-  assert.ok(!after.includes(target.id), `${target.id} stands inside a dungeon the Spectator has not entered, and the map does not draw it`);
+  const after = await drawnIds({ ...SERVED, marks: SERVED.marks.map((m) => (m.id === walled.id ? { ...m, class: "dungeon" } : m)) });
+  assert.ok(after.includes(walled.id), `${walled.id}, now a dungeon, still draws as its own mark`);
+  assert.ok(!after.includes(held.id), `${held.id} stands inside a dungeon the Spectator has not entered, and the map does not draw it`);
+  const inside = after.map((id) => byId.get(id)).filter((m) => m && m.at && markInside(walled, m)).map((m) => m.id);
+  assert.deepEqual(inside, [], "nothing inside the dungeon draws, at any depth");
 });
