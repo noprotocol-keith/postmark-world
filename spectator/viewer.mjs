@@ -3943,6 +3943,36 @@ export function mistsIntroGate() {
   };
 }
 const mistsRollIn = mistsIntroGate();
+// LIGHT MODE (WLD-43 part 2, Darko 2026-10-13 19:24: "yes to the fix for
+// everyone, then light mode"), for a machine the Mists are heavy on: their
+// motion held still as prefers-reduced-motion holds it, no roll-in, and the
+// site's bat still. One class on <html>, `wv-light`, which the viewer's CSS and
+// the site's motif (postmark-site halloween-sprinkle.mjs) both read.
+//
+// Who decides, the first that answers:
+//   ?light=1 / ?light=0  a link forces it for that page (a support reply can be
+//                        one URL); never stored
+//   the visitor          the toggle beside the bell: auto, on, off, kept on this
+//                        device
+//   auto                 on from the start where the browser says the machine is
+//                        small (hardwareConcurrency ≤ 4, or deviceMemory ≤ 4 GB,
+//                        which only Chromium reports), or once the first layer of
+//                        the bake runs slower than 3 ms per 1,000 px (measured
+//                        here: 1.3 at full speed, 4.8 at 4× throttle), a verdict
+//                        kept so the next visit starts light
+export const LIGHT = { choiceKey: "pm_world_light", slowKey: "pm_world_light_slow", cores: 4, memoryGB: 4, bakeMsPerKpx: 3 };
+export const LIGHT_NEXT = { auto: "on", on: "off", off: "auto" };
+export function lightModeFor({ query = "", choice = null, slow = false, cores = 0, memory = 0 } = {}) {
+  const q = new URLSearchParams(query).get("light");
+  if (q === "1") return { on: true, why: "link" };
+  if (q === "0") return { on: false, why: "link" };
+  if (choice === "on") return { on: true, why: "chosen" };
+  if (choice === "off") return { on: false, why: "chosen" };
+  if (slow) return { on: true, why: "slow" };
+  if (cores > 0 && cores <= LIGHT.cores) return { on: true, why: "cores" };
+  if (memory > 0 && memory <= LIGHT.memoryGB) return { on: true, why: "memory" };
+  return { on: false, why: "auto" };
+}
 export function mistsVeilSVG(m, { originPx, mPerPx }) {
   if (!m || !(m.veil > 0)) return "";
   const r = MISTS_FAR_M / mPerPx, n = (v) => v.toFixed(1);
@@ -4030,15 +4060,15 @@ export function viewBoxTransform(vb, W, H, par = null) {
 // not one set reading it from a custom property: var() in keyframes costs
 // Chromium a fuller style recalc on every frame (measured: about 1.6× the
 // style time of the same motion written literally). They exist only under
-// `prefers-reduced-motion: no-preference`, so a reader who asked for stillness
-// gets the layers at rest, as before.
+// `prefers-reduced-motion: no-preference` and outside light mode, so a reader
+// who asked for stillness (or whose machine is given it) gets the layers at rest.
 export function mistsPaintHTML(baked, { originPx, mPerPx, layers, creatures = "" }) {
   const n = (v) => v.toFixed(1);
   let motion = "";
   const banks = layers.map((L, li) => {
     const d = L.driftM / mPerPx;
     if (d > 0) motion += `@keyframes wv-mists-drift-${li} { from { transform:translate(-${n(d)}px,-${n(d * 0.45)}px); } to { transform:translate(${n(d)}px,${n(d * 0.45)}px); } }`
-      + ` .wv-mists-cam .wv-mists-drift.wv-mists-l${li} { animation:wv-mists-drift-${li} ${L.driftS}s ease-in-out infinite alternate; }`;
+      + ` :root:not(.wv-light) .wv-mists-cam .wv-mists-drift.wv-mists-l${li} { animation:wv-mists-drift-${li} ${L.driftS}s ease-in-out infinite alternate; }`;
     return `<div class="wv-mists-bank${d > 0 ? ` wv-mists-drift wv-mists-l${li}` : ""}">`
       + baked.filter((b) => b.li === li).map((b) => `<img class="wv-mists-img" alt="" draggable="false" src="${b.url}"`
         + ` style="left:${n(originPx.x + b.box.minX / mPerPx)}px;top:${n(originPx.y + b.box.minY / mPerPx)}px;width:${n(b.w / mPerPx)}px;height:${n(b.h / mPerPx)}px">`).join("")
@@ -5077,6 +5107,9 @@ const STYLE = `
 .wv-mc-eyes { animation:wv-mc-blink 9s steps(1,end) infinite; }
 @keyframes wv-mc-blink { 0%, 46%, 50%, 100% { opacity:1; } 47% { opacity:0; } 90% { opacity:.35; } }
 @media (prefers-reduced-motion:reduce){ .wv-mists-drift, .wv-mc-flit, .wv-mc-lift, .wv-mc-eyes { animation:none; } }
+/* LIGHT MODE (WLD-43 part 2) holds them still the same way (the drift's own
+   keyframes are written only where it is off: mistsPaintHTML) */
+html.wv-light .wv-mc-flit, html.wv-light .wv-mc-lift, html.wv-light .wv-mc-eyes { animation:none; }
 .wv-main.no-map { grid-template-columns:var(--rail) minmax(0,1fr); }
 @media (max-width:1160px){ .wv-main,.wv-main.no-map { grid-template-columns:var(--rail) minmax(0,1fr); }
   .wv-map { grid-column:1 / -1; border-top:1px solid var(--line); } .wv-map .wv-sticky { position:static; } }
@@ -7011,6 +7044,25 @@ export function mountViewer(appEl) {
   let byId = new Map();     // id → folded mark, for cell lookups
   let homeSet = new Set();  // ids that render green on the fold's own word: the sovereigns
   let mapCtx = null;
+  // LIGHT MODE (WLD-43 part 2; the rule is at LIGHT, above): decided once at
+  // boot, before the map paints, and again whenever the toggle or the bake's
+  // verdict changes it. Storage is a convenience: shut, the choice lasts the page.
+  const lightStore = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* the choice lasts this page */ } },
+  };
+  let lightChoice = lightStore.get(LIGHT.choiceKey);          // "on" | "off" | null (auto)
+  if (lightChoice !== "on" && lightChoice !== "off") lightChoice = null;
+  let lightSlow = lightStore.get(LIGHT.slowKey) === "1";
+  let lightLink = typeof location === "object" ? location.search : "";   // spent once the visitor chooses
+  let light = { on: false, why: "auto" };
+  function applyLight() {
+    light = lightModeFor({ query: lightLink, choice: lightChoice, slow: lightSlow,
+      cores: typeof navigator === "object" ? navigator.hardwareConcurrency : 0, memory: typeof navigator === "object" ? navigator.deviceMemory : 0 });
+    document.documentElement.classList.toggle("wv-light", light.on);
+    paintLightButton();
+  }
+  applyLight();
   // ── THE TOWN'S HOUSES ON A RESIDENT'S MAP (2026-09-11) ────────────────────
   //
   // Keemin, on dev as wright: "we still don't have the new parcel cards loaded
@@ -9978,7 +10030,11 @@ export function mountViewer(appEl) {
   // they roll in from the edges and the bell is armed.
   function paintMists(m) {
     const bellBtn = root.querySelector(".wv-bell");
-    if (!m) { if (bellBtn) bellBtn.hidden = true; mapCtx?.svg?.querySelector(".wv-sheet-feather")?.remove(); unmaskSheetWashes(); return; }
+    if (!m) {
+      if (bellBtn) bellBtn.hidden = true;
+      const lightBtn = root.querySelector(".wv-light-toggle"); if (lightBtn) lightBtn.hidden = true;
+      mapCtx?.svg?.querySelector(".wv-sheet-feather")?.remove(); unmaskSheetWashes(); return;
+    }
     // the town the paint keeps clear: every sited mark the world holds (the
     // whole fold, not the resident path's ground set)
     const keepMarks = data?.worldState?.marks ?? allMarks();
@@ -10015,7 +10071,7 @@ export function mountViewer(appEl) {
     if (mistsBaking.has(key)) return;
     mistsBaking.add(key);
     const plan = mistsBakePlan(m), out = [], rasters = new Map();
-    let baker = null, rows = 2, rasterJob = null, per = 2;
+    let baker = null, rows = 2, rasterJob = null, per = 2, layerMs = 0;
     // every slice is timed and sized to stay near 6 ms (starting small, growing at
     // most twofold a slice), so a slow phone keeps its frames
     const timed = (fn, n, set) => { const t = performance.now(); const more = fn(n); const ms = performance.now() - t; set(Math.max(1, Math.min(400, Math.round(n * Math.min(2, ms > 0 ? 6 / ms : 2))))); return more; };
@@ -10038,9 +10094,18 @@ export function mountViewer(appEl) {
       }
       baker = baker ?? mistsBaker(m, p.li, p.box, { pxM: p.pxM, keepRaster: rasters.get(rk), canvas: document.createElement("canvas") });
       // a slice of rows, sized to stay near 8 ms, so a phone keeps its frames
-      if (timed((n) => baker.next(n), rows, (n) => { rows = n; })) { setTimeout(step, 0); return; }
+      const t0 = performance.now();
+      const more = timed((n) => baker.next(n), rows, (n) => { rows = n; });
+      layerMs += performance.now() - t0;
+      if (more) { setTimeout(step, 0); return; }
       // encoded off the main thread; the page shows it by an object URL
       const done = baker; baker = null;
+      // THE BAKE'S VERDICT ON THIS MACHINE (WLD-43 part 2): the first layer is the
+      // same work everywhere, so its time per 1,000 px is a fair reading of the
+      // machine. Under auto, a slow one turns light mode on, and it is kept so
+      // the next visit starts light.
+      if (out.length === 0) lightVerdict(layerMs / (done.width * done.height / 1000));
+      layerMs = 0;
       done.canvas.toBlob((blob) => { try {
         out.push({ li: p.li, box: p.box, w: done.width * p.pxM, h: done.height * p.pxM, url: blob ? URL.createObjectURL(blob) : done.canvas.toDataURL("image/png") });
         if (out.length < plan.length) { setTimeout(step, 0); return; }
@@ -10102,7 +10167,8 @@ export function mountViewer(appEl) {
   function mistsRollInPlay(item) {
     const { m, g } = item;
     g.style.opacity = "";
-    const reduced = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // held still under reduced motion, and in light mode (WLD-43), the same way
+    const reduced = light.on || (typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
     if (!reduced && typeof g.animate === "function") {
       const { originPx, mPerPx } = mapCtx;
       const cx = originPx.x + (m.clear.minX + m.clear.maxX) / 2 / mPerPx, cy = originPx.y + (m.clear.minY + m.clear.maxY) / 2 / mPerPx;
@@ -10169,6 +10235,46 @@ export function mountViewer(appEl) {
     }
     btn.hidden = false;
     paintBell(btn);
+    mistsLightButton(btn);
+  }
+  // THE LIGHT TOGGLE (WLD-43 part 2), beside the bell and only while the Mists
+  // stand: auto, on, off, round and round, the choice kept on this device. Lit
+  // (the cluster's own on-state) while light mode is in effect, whoever decided.
+  function mistsLightButton(bell) {
+    let btn = root.querySelector(".wv-light-toggle");
+    if (!btn) {
+      btn = document.createElement("button"); btn.type = "button"; btn.className = "ctl wv-light-toggle";
+      bell.after(btn);
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        lightChoice = { auto: "on", on: "off", off: null }[lightChoice ?? "auto"];
+        lightStore.set(LIGHT.choiceKey, lightChoice);
+        lightLink = "";   // the visitor's own word outranks the link they came by
+        applyLight();
+      });
+    }
+    btn.hidden = false;
+    paintLightButton();
+  }
+  // the bake's reading of this machine, in ms per 1,000 px of its first layer:
+  // slower than LIGHT.bakeMsPerKpx turns light on, under auto only (a link or
+  // the visitor's own choice is never overruled), and is kept for next time
+  function lightVerdict(msPerKpx) {
+    if (!(msPerKpx > LIGHT.bakeMsPerKpx) || lightSlow) return;
+    lightSlow = true;
+    lightStore.set(LIGHT.slowKey, "1");
+    applyLight();
+  }
+  const LIGHT_WHY = { link: "set by the link", chosen: "your choice", slow: "the Mists painted slowly here", cores: "this computer has few cores", memory: "this computer has little memory", auto: "this computer looks able" };
+  function paintLightButton() {
+    const btn = root.querySelector(".wv-light-toggle");
+    if (!btn) return;
+    const mode = lightChoice ?? "auto";
+    btn.textContent = "🍃";
+    btn.classList.toggle("on", light.on);
+    btn.setAttribute("aria-pressed", light.on ? "true" : "false");
+    btn.setAttribute("aria-label", `light mode: ${mode === "auto" ? `auto, ${light.on ? "on" : "off"}` : mode}`);
+    btn.title = `light mode ${light.on ? "on" : "off"} (${mode === "auto" ? "auto: " : ""}${LIGHT_WHY[light.why]}): the Mists held still, for a slower computer. Click for ${LIGHT_NEXT[mode]}.`;
   }
   function paintBell(btn) {
     const on = bellOn();
