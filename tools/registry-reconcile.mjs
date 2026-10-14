@@ -1,35 +1,33 @@
 #!/usr/bin/env node
-// registry-reconcile.mjs — the publication registry's rows follow the marks
-// they name, in the SAFE DIRECTION ONLY (postmark#3757).
+// registry-reconcile.mjs — a stale publication-registry row follows its mark's
+// FILE, and nothing else (postmark#3757).
 //
 // `WORLD/settlement-publications.json` is the sweep's record of what it
 // published: per mark, the household, the path it filed and the class it
-// judged. Only the sweep writes a row, when it publishes or unpublishes. Any
-// other act that moves a published file leaves the row behind: the hand
-// filings of 10-03/10-04 (8260eaaf, 49e9a92f, world #140) re-filed four
-// predicates and naming marks under their declared parents, and kinofire's
-// fireplace and firepit went on reading `class: commons` at a root path that
-// no longer existed. Their households were warned of a sweep that the sweep's
-// own rule (unpublish-verdict.mjs) could never carry out. A mark's standing
-// can also change under a row that did not move (a parcel arrives, a ground
-// welcomes it), so a row's stored class can lag the mark's derived one; that
-// is NOT this verb's to rewrite. The sweep walks standing at every crossing
-// (unpublish-verdict.mjs, the safety half: a mark that walks home is never
-// taken), so a stored class at a present path decides nothing that matters,
-// and relabelling it would patch the data and leave the cause (Darko, 10-14).
+// judged at admission. Only the sweep writes a row, when it publishes or
+// unpublishes. Any other act that moves a published file leaves the row
+// behind: the hand filings of 10-03/10-04 (8260eaaf, 49e9a92f, world #140)
+// re-filed four predicates and naming marks under their declared parents, and
+// kinofire's fireplace and firepit went on naming a root path that no longer
+// existed, so the sweep's rule could not reach them while the doorstep warned
+// of a sweep.
 //
-// This verb rewrites each STALE row (its path not in the tree) to the mark's
-// CURRENT filing, and, since that row is being rewritten anyway, its CURRENT
-// derived class (world-state.json's `tier`, the fold's markStanding, in the
-// registry's spelling). A row at a present path is left exactly as it is. One
-// bound: a stale row is repaired only when the repair
-// makes the sweep take NOTHING it would not take today. Under today's rule the
-// sweep takes a row at zero escrow when its class is commons and its path is on
-// main; so a repair whose new class is commons, from a row that was not already
-// a commons row at a path on main, would make a mark newly sweepable. That is
-// the founder's call (WLD-51), and such a row is HELD: listed by name, never
-// written. Everything else is safe to write: a home or constitution row is
-// never swept, whatever its path.
+// PATHS ONLY. This verb never writes `class`. The stored class is the
+// admission's verdict, and it is no longer what keeps a mark: the sweep walks
+// each mark's standing at the crossing (unpublish-verdict.mjs, the safety
+// half, postmark-world#208), and a mark that walks home or constitution is
+// never unpublished whatever its row says. A second copy of standing written
+// into the data would be two sources of truth, which is the bug (Darko,
+// 10-14). The one place the stored class still decides is a row stored home
+// whose mark now walks commons (never swept today); that is WLD-51's.
+//
+// One bound: a stale row is repaired only when the repair makes the sweep take
+// NOTHING it would not take today. A stale row is never swept today (its path
+// is not on main). Repointed, a row stored commons whose mark walks commons
+// would become sweepable at zero escrow: that is the founder's call (WLD-51),
+// and such a row is HELD, listed by name, never written. Every other stale row
+// is safe to repoint: a stored home or constitution row is never swept, and a
+// mark that walks home is kept by the walk.
 //
 // A row whose mark no longer stands and has no filing is removed. A row whose
 // mark stands but whose filing cannot be found (or is found twice) is left as
@@ -70,13 +68,13 @@ export function reconcilePlan(published, { filingOf, tierOf, pathExists }) {
       continue;
     }
     if (!filed) { unresolved.push({ id, from, why: "the mark stands but no single filing answers to its id; left as it is" }); continue; }
-    const to = { path: filed, class: rowClassOf(tier) };
-    if (to.path === from.path && to.class === from.class) continue;
-    if (to.class === "commons") {   // a stale row is never swept today, so a commons repair would be new
-      held.push({ id, from, to, why: "WLD-51: this repair would make a zero-escrow commons mark sweepable; the founder rules first" });
+    const to = { path: filed, class: from.class };   // the class is never written: see the header
+    const walks = rowClassOf(tier);
+    if (from.class === "commons" && walks === "commons") {   // repointed, it would be sweepable at zero escrow
+      held.push({ id, from, to, walks: tier, why: "WLD-51: repointing it would make a zero-escrow commons mark sweepable; the founder rules first" });
       continue;
     }
-    repairs.push({ id, from, to, why: to.class === from.class ? "path" : to.path === from.path ? "class" : "path and class" });
+    repairs.push({ id, from, to, walks: tier, why: "path" });
   }
   return { repairs, removed, held, unresolved };
 }
@@ -84,7 +82,7 @@ export function reconcilePlan(published, { filingOf, tierOf, pathExists }) {
 /** Apply a plan to the registry document; returns a new document. Held and unresolved rows are untouched. */
 export function applyPlan(doc, plan) {
   const published = { ...doc.published };
-  for (const r of plan.repairs) published[r.id] = { ...published[r.id], path: r.to.path, class: r.to.class };
+  for (const r of plan.repairs) published[r.id] = { ...published[r.id], path: r.to.path };
   for (const r of plan.removed) delete published[r.id];
   return { ...doc, published };
 }
@@ -113,7 +111,7 @@ if (resolve(process.argv[1] ?? "") === resolve(fileURLToPath(import.meta.url))) 
   const repo = resolve(opt("--repo", join(dirname(fileURLToPath(import.meta.url)), "..")));
   const write = args.includes("--write");
   const { doc, plan } = reconcileRepo(repo);
-  const line = (r) => `  ${r.id}  ${r.from.class} ${r.from.path}${r.to ? `  ->  ${r.to.class} ${r.to.path}` : ""}  (${r.why})`;
+  const line = (r) => `  ${r.id}  [${r.from.class}${r.walks ? `, walks ${r.walks}` : ""}] ${r.from.path}${r.to ? `  ->  ${r.to.path}` : ""}  (${r.why})`;
   console.log(`${write ? "" : "DRY RUN · "}${Object.keys(doc.published).length} registry rows`);
   console.log(`repaired: ${plan.repairs.length}`); plan.repairs.forEach((r) => console.log(line(r)));
   console.log(`removed: ${plan.removed.length}`); plan.removed.forEach((r) => console.log(line(r)));

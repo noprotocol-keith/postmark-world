@@ -20,7 +20,10 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-// 13 stale paths held at 9988b669 (2026-10-14); each mark derives market.
+/// 13 stale paths held at 978a1d34 (2026-10-14); each row is stored commons and
+// its mark walks market. (berthillon/cone-peche-de-vigne-2026-08-27, the other
+// WLD-51 row, stands at a present path, stored home and walking market, so it
+// has no place in a path test; tools/unpublish-standing.test.mjs pins it.)
 const HELD_FOR_WLD_51 = new Set([
   "vermillion/pando-peak-library-shelf",
   "lysander/the-lake-signed-the-book",
