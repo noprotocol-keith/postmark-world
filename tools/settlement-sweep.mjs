@@ -19,6 +19,7 @@ import {
 } from "node:fs";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import { markStanding as classifyMark, townOwned } from "./mark-standing.mjs"; // the ONE standing rule
+import { unpublishVerdict } from "./unpublish-verdict.mjs"; // the ONE unpublish rule (postmark#3757)
 import { tmpdir } from "node:os";
 import { execFileSync, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -228,6 +229,36 @@ function seatStandsOnMain(repo, ref, dir) {
 
 function readAt(repo, ref, path) {
   return git(repo, ["show", `${ref}:${path.replace(/\\/g, "/")}`]);
+}
+
+// WHERE A MARK IS FILED NOW, by its id (postmark#3757, read only under
+// unpublish-verdict's "rederive"). An id is `<by>/<leaf>` (marks-fold.mjs § the
+// id rule): the record's frontmatter `by` plus its directory's name, wherever
+// the directory sits. One tree listing at the first ask, then the few records
+// whose directory carries the leaf are read for their `by`. `null` when no
+// record answers to the id, or when two do (the lint's error, not ours to pick).
+export function filingIndexAt(repo, ref) {
+  let byLeaf = null;
+  return (id) => {
+    const [by, ...rest] = String(id).split("/");
+    const leaf = rest.join("/");
+    if (!by || !leaf || leaf.includes("/")) return null;
+    if (!byLeaf) {
+      byLeaf = new Map();
+      let listing = "";
+      try { listing = git(repo, ["ls-tree", "-r", "--name-only", ref, "--", "WORLD/marks"]); } catch { return null; }
+      for (const path of listing.split("\n")) {
+        if (!path.endsWith("/mark.md")) continue;
+        const name = basename(dirname(path));
+        if (!byLeaf.has(name)) byLeaf.set(name, []);
+        byLeaf.get(name).push(path);
+      }
+    }
+    const found = (byLeaf.get(leaf) ?? []).filter((path) => {
+      try { return /^by:\s*(\S+)\s*$/m.exec(readAt(repo, ref, path))?.[1] === by; } catch { return false; }
+    });
+    return found.length === 1 ? found[0] : null;
+  };
 }
 
 function archiveRef(repo, ref) {
@@ -983,6 +1014,9 @@ export function settlementSweep({
   repo = ROOT,
   stakesPath,
   mainBranch = "main",
+  // unpublish-verdict.mjs § STALE_ROWS, handed in by tests only: the dial is
+  // the module constant, and a crossing never names it (WLD-51).
+  staleRows = undefined,
   // WHETHER THE REGISTRY WAS VERIFIED THIS CROSSING, stated by the caller that
   // holds the town clone. `{ verifiedAt }`, `{ unverified }`, or null for no
   // crossing context — see refuseStaleHouseholds. It is stored in a
@@ -1379,17 +1413,27 @@ export function settlementSweep({
 
   // Only marks previously admitted by this sweep are candidates for unpublish.
   // Anything absent from the registry is founding estate and stays published.
+  // THE RULE IS unpublish-verdict.mjs's (postmark#3757), the one the office's
+  // stakes warning reads too; this loop measures and acts. A verdict of `null`
+  // (an input not measured) unpublishes nothing, as a skipped row always did.
+  const filingOnMain = filingIndexAt(repo, mainBranch);
   const unpublished = [];
   for (const [id, entry] of Object.entries(registry.published)) {
-    if (entry.class !== "commons" || (escrow.get(id) ?? 0) > 0) continue;
-    if (!hasObject(repo, `${mainBranch}:${entry.path}`)) continue;
+    const verdict = unpublishVerdict(entry, {
+      escrow: escrow.get(id) ?? 0,
+      pathOnMain: () => hasObject(repo, `${mainBranch}:${entry.path}`),
+      standing: () => mainFolded.get(id)?.tier ?? null,
+      currentPath: () => filingOnMain(id),
+      ...(staleRows ? { staleRows } : {}),
+    });
+    if (verdict.unpublish !== true) continue;
     unpublished.push({
       household: entry.household,
       id,
-      path: entry.path,
+      path: verdict.path,
       class: "commons",
       escrow: escrow.get(id) ?? 0,
-      content: readAt(repo, mainBranch, entry.path),
+      content: readAt(repo, mainBranch, verdict.path),
     });
   }
 
