@@ -167,7 +167,10 @@ async function openAtTheDoor(office) {
     card.className = "wv-card";
     card.dataset.id = mark;
     card.style.cssText = "position:fixed;left:40px;top:120px;z-index:99999;background:#111;padding:8px";
-    card.innerHTML = `<div class="wv-cell-byline-row"><button type="button" class="ctl wv-walk-enter" data-walk-enter="${mark}">walk there and enter</button></div>`;
+    // the refusal sheet crossInto places, holding the offer (walkThereSheetHTML's shape)
+    card.innerHTML = `<div class="wv-cell-byline-row">${mark}</div>`
+      + `<div class="wv-cross-sheet is-refused is-far" data-for="${mark}"><div class="wv-cross-head">you are not at that door</div>`
+      + `<div class="wv-cross-row"><button type="button" class="ctl wv-walk-enter" data-walk-enter="${mark}">walk there and enter</button></div></div>`;
     document.querySelector(".wv").appendChild(card);
   }, MARK);
   return { page, errors };
@@ -175,11 +178,12 @@ async function openAtTheDoor(office) {
 
 const sheetOf = (page) => page.evaluate((mark) => {
   const card = document.querySelector(`.wv-card[data-id="${mark}"]`);
-  const sheet = card?.querySelector(".wv-cross-sheet");
+  const sheet = card?.querySelector(".wv-cross-sheet:not(.is-far)");
   return sheet ? {
     head: sheet.querySelector(".wv-cross-head")?.textContent ?? null,
     text: sheet.textContent,
     accept: sheet.querySelector("[data-walk-enter-accept]")?.textContent ?? null,
+    offerGone: !card.querySelector(".is-far"),
   } : null;
 }, MARK);
 
@@ -191,11 +195,12 @@ test("1. a walk to a terms door shows the terms and its accept, and the accept r
   const office = await bootStubOffice("terms");
   const { page, errors } = await openAtTheDoor(office);
   await page.click(".wv-walk-enter");
-  await page.waitForFunction((mark) => document.querySelector(`.wv-card[data-id="${mark}"] .wv-cross-sheet`), MARK, { timeout: 15_000 });
+  await page.waitForFunction((mark) => document.querySelector(`.wv-card[data-id="${mark}"] .wv-cross-sheet:not(.is-far)`), MARK, { timeout: 15_000 });
   const asked = await sheetOf(page);
   assert.equal(asked.head, "this door has terms", "the door's ask, not a departure: " + JSON.stringify(asked));
   assert.match(asked.text, /aboard: her timetable binds/, "in the door's own words");
   assert.equal(asked.accept, "accept and cross", "and the walker can give their word");
+  assert.equal(asked.offerGone, true, "the offer it answered is gone");
   assert.deepEqual(office.walks, [{ mark_id: MARK, enter_on_arrival: true }], "one walk so far, without the word");
 
   await page.click("[data-walk-enter-accept]");
@@ -214,7 +219,7 @@ test("2. a walk whose entry queued nothing says the door's refusal and the offic
   const office = await bootStubOffice("refused");
   const { page, errors } = await openAtTheDoor(office);
   await page.click(".wv-walk-enter");
-  await page.waitForFunction((mark) => document.querySelector(`.wv-card[data-id="${mark}"] .wv-cross-sheet`), MARK, { timeout: 15_000 });
+  await page.waitForFunction((mark) => document.querySelector(`.wv-card[data-id="${mark}"] .wv-cross-sheet:not(.is-far)`), MARK, { timeout: 15_000 });
   const said = await sheetOf(page);
   await page.close();
   assert.equal(said.head, "on the way", "the walk stands");
