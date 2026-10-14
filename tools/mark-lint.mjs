@@ -31,7 +31,7 @@ import { fileURLToPath } from "node:url";
 import {
   loadMarks, polygonOf, ringMatchesClaim, isValidMarkDate, rect, overlapArea,
   standingRank, fileToWorld, declaredCoords, COORDS_RELATIVE, WORLD_ROOT_SLUG,
-  containmentParents,
+  containmentParents, lossyValues,
 } from "./marks-fold.mjs";
 import { markStanding } from "./mark-standing.mjs";
 import { consentMap, CONSENT_WORDS, CONSENT_FIELD, townOwnedMark, cameAfter, inContact, seniorAtContact } from "./consent.mjs";
@@ -81,6 +81,13 @@ const findings = [];
 const at = (rec) => (rec._dir ? rec._dir.replace(/\\/g, "/").replace(/^.*\/WORLD\//, "WORLD/") : rec.id ?? "?");
 const err = (rec, msg) => findings.push({ sev: "ERROR", file: at(rec), msg });
 const warn = (rec, msg) => findings.push({ sev: "WARN", file: at(rec), msg });
+// The words for a value the parser would silently lose (marks-fold.mjs § lossyValues).
+const lossyMessage = (l) => {
+  if (l.why === "hash") return `${l.key}: a '#' inside a quoted value starts a comment, so the record keeps only what comes before it (${l.key}: ${l.kept}) — rephrase without '#'`;
+  const pairs = Object.entries(l.readsAs);
+  const readsAs = pairs.length ? `{ ${pairs.map(([k, n]) => `${k}: ${n}`).join(", ")} }` : "{}";
+  return `${l.key}: ${l.value} is not strict JSON, so the record keeps only its number pairs and silently drops ${l.dropped.join(", ")} (it reads as ${readsAs}) — write it as strict JSON, every key quoted${l.strict ? `: ${l.key}: ${l.strict}` : ""}`;
+};
 // THE THIRD SEVERITY IS GONE. `REHOME` named work for the MACHINERY rather than
 // for the writer — a directory edge that had stopped naming its tightest
 // geometric container, which the settlement sweep re-pointed on the author's
@@ -183,13 +190,15 @@ for (const rec of marks) {
   // constitution), and `draft` stays (branch-state, not standing — the one
   // field standingRank still reads).
   if (rec._dir) {
-    let rawTier = null;
-    try {
-      const raw = readFileSync(join(rec._dir, "mark.md"), "utf8");
-      rawTier = ((raw.match(/^---\r?\n[\s\S]*?\r?\n---/) || [""])[0].match(/^tier:\s*(\S+)/m) || [])[1] ?? null;
-    } catch { /* unreadable file already erred above */ }
+    let raw = null;
+    try { raw = readFileSync(join(rec._dir, "mark.md"), "utf8"); } catch { /* unreadable file already erred above */ }
+    const rawTier = raw == null ? null : ((raw.match(/^---\r?\n[\s\S]*?\r?\n---/) || [""])[0].match(/^tier:\s*(\S+)/m) || [])[1] ?? null;
     if (rawTier && rawTier !== "draft" && !(rec.by === TOWN && rawTier === "constitution"))
       err(rec, `tier: is not a field — standing is derived by the one walk, never asserted (drop the line; the ground decides)${cite("the-town/the-tiers")}`);
+    // 1.5 a value the parser would silently lose (WLD-41): the record above was
+    // read already diminished, so this reads the file. A snapshot's records
+    // carry no file, so the rule speaks where a tree is linted (the PR lane).
+    if (raw != null) for (const l of lossyValues(raw)) err(rec, lossyMessage(l));
   }
   if (!rec.date || !isValidMarkDate(rec.date)) warn(rec, `date should be YYYY-MM-DD or a full ISO 8601 datetime (got ${JSON.stringify(rec.date)})`);
 
