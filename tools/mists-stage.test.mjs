@@ -142,7 +142,8 @@ test("the page: an idle second of drift lays the map out zero times, and the sta
   await page.goto(`http://localhost:${port}/`, { waitUntil: "domcontentloaded", timeout: 90_000 });
   await page.waitForSelector(".wv-telling-pane", { state: "attached", timeout: 90_000 });
   await page.evaluate(() => { const el = document.querySelector(".wv-tour-skip"); if (el && el.offsetParent) el.click(); });
-  await page.waitForSelector(".wv-mists-paint img", { state: "attached", timeout: 120_000 });
+  // painted: wherever the paint stands (an <img> on the stage, an <image> in an svg), so a regression fails on its claim, not on a wait
+  await page.waitForSelector(".wv-mists-paint :is(img, image)", { state: "attached", timeout: 120_000 });
   await page.waitForTimeout(4500);   // the roll-in done
 
   const where = await page.evaluate(() => {
