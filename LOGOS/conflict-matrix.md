@@ -27,7 +27,9 @@ ledger keeping who was first.
 
 Every declaration is a **claim**. Claims live in their authors' sovereign
 spaces immediately; **canon** is what the fold publishes at each crossing —
-the epoch's mediated state, HEAD. **One pair, declared (2026-08-19, the
+the epoch's mediated state, HEAD — for a class whose `canon` is `settled`; a
+`live` class's acts cannot conflict and are canon as they land
+([lifetimes.md](lifetimes.md)). **One pair, declared (2026-08-19, the
 homonym ruling): the fold is the ACT — the law's name for canonization —
 and the settlement sweep (`tools/settlement-sweep.mjs`) is the TOOL that
 performs it.** Any surface saying "sweep" and any surface saying "fold"

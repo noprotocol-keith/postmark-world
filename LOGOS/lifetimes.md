@@ -63,9 +63,15 @@ edges with whatever arrives (the late walker is burned by their *own* step —
 see [edit-law.md](edit-law.md) § every edge cites its action), and stops
 standing on schedule. Its **lifetime is physics** — a class dial, contestable
 like any other — while recall windows over it are read policy
-([reads-and-affordances.md](reads-and-affordances.md)). Storage is likewise a
-class param (`substrate: git | store`) — the two lawful substrates of
-[state-and-time.md](state-and-time.md), chosen per class, never per instance.
+([reads-and-affordances.md](reads-and-affordances.md)). When a class's acts
+become canon is likewise a class param (`canon: live | settled`), chosen per
+class, never per instance: **live** is canon the moment the act lands;
+**settled** is canon at the next settlement's fold, where conflicts are
+decided (Darko, Sitting A, 2026-10-12). A live class is one whose claims
+cannot conflict, and so canonize trivially
+([state-and-time.md](state-and-time.md) § Crossings are epochs). The param
+replaces the retired `substrate: git | store`: git and the store say where
+bytes sit, and canon says the timing, which is what governs.
 
 ## The serialization
 
