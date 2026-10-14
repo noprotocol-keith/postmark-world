@@ -173,7 +173,19 @@ export function investigate(markId, world, { depth = 1, budget = DIALS.context_b
   // answer with the house, not the house and the district and the world. The full
   // nest is still WALKED, because every ancestor must stay out of `alongside` —
   // a grandparent is not a neighbour just because it is not the direct container.
-  const ancestry = ancestorsByGeometry(target, world);
+  //
+  // A DECLARED PARENT IS A PARENT (WLD-50, ruled by Darko 2026-10-14 14:55;
+  // postmark#3772, kinofire's seq 15539). A predicated, naming or class mark has
+  // no `at`, so geometry finds it no container, and `parents` read [] for
+  // kinofire/lafayettes-weasel-door while Spin Ghar Manor's own `predicates`
+  // listed the door: one relation, two directions, opposite answers. When
+  // geometry has none, the mark's declared `parent` (the fold sets it for those
+  // three kinds only; sited and parcel marks never carry one) stands in
+  // `parents`, the exact inverse of `predicates`. A parent the world does not
+  // hold as a mark (a terrain feature, a mark gone) is not invented.
+  const geometric = ancestorsByGeometry(target, world);
+  const declared = geometric.length === 0 && target.parent ? byId.get(target.parent) ?? null : null;
+  const ancestry = declared ? [declared] : geometric;
   const parents = ancestry.slice(0, 1)
     .map((m) => ({ id: m.id, kind: m.kind, household: m.household, at: m.at, weight: m.weight ?? 0, stamps: m.stamps ?? 0, body: firstLine(m.body) }));
   // alongside: the rest of this household's cluster near the target — the marks
