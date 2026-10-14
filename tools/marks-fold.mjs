@@ -498,7 +498,7 @@ function loadStakes() {
   //
   // This used to read `WHITE_PAGES/stamp-ledger.md` under the WORLD root for a
   // `stake:mark:<id>` grammar — two things wrong with that, both now closed:
-  //   1. The stamp ledger is in the TOWN repo (keeminlee/postmark), not this one, so
+  //   1. The stamp ledger is in the TOWN repo (postmark-town/postmark), not this one, so
   //      the path never existed here and every mark's ✦weight was silently 0.
   //   2. `stake:mark:<id>` was never a line the mint could produce — a read-side
   //      orphan (flagged 2026-07-23). The real class, ruled 2026-07-27 and built in
