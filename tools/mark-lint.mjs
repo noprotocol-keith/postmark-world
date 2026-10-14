@@ -906,7 +906,8 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
 // rules are portals.mjs § the lint, one definition beside the passage's: every
 // `into` names a mark; every string `lands_at` names a mark; every landing
 // stands within LANDING_REACH_M of its `into`; an exit out of a dungeon is never
-// opposed; every room of a dungeon has a path of unlocked portals out; no two
+// opposed; every room of a dungeon has a path of unlocked portals out (ADVISORY
+// since Darko's 21:13 change: a whole-dungeon exit is always offered); no two
 // marks with the same parent inside a dungeon overlap (Darko, 20:31: siblings only).
 //
 // AN ERROR, AND IT REFUSES THE CROSSING. The settlement's harm gate runs this
@@ -944,6 +945,7 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
   for (const f of portal) {
     const rec = standingIndex.get(f.mark) ?? { id: f.mark };
     if (f.excepted) warn(rec, `[${f.rule}] EXCEPTED by ${PORTAL_EXC_REL} (${f.excepted.by}: ${f.excepted.why}) — ${f.msg}`);
+    else if (f.sev === "WARN") warn(rec, `[${f.rule}] ${f.msg}`);
     else err(rec, `[${f.rule}] ${f.msg}`);
   }
   for (const e of stale)

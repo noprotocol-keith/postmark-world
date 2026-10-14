@@ -1294,13 +1294,14 @@ The vehicle is a third behaviour and takes the compound name `vehicle` for the s
 crossing ① changes what you read, standing on ② changes what you may do, entering a vehicle changes where you are, and
 the three must never be read as one mechanism wearing three hats.
 
-## The portal and the dungeon — a passage that leads somewhere, and a place left only by them
+## The portal and the dungeon — a passage that leads somewhere, and a place left whole
 
 *A portal changes where you are when you cross it. A dungeon changes what you may see and how you may leave.*
 
 Rendered in the world as `the-town/dungeon`.
 
-Ruled by Darko with Wright in the doors sitting of 2026-10-13 (WLD-5, concluded 20:03 EDT), and built on the entry law
+Ruled by Darko with Wright in the doors sitting of 2026-10-13 (WLD-5, concluded 20:03 EDT; exit amended 21:13), and
+built on the entry law
 that already stood: a mark's `entry: {word, edge, consequence}` is its fixed answer to every entrant.
 
 - **A portal is a mark whose entry law carries `into`.** `into` is a mark, or a list of marks: entering the portal
@@ -1315,18 +1316,21 @@ that already stood: a mark's `entry: {word, edge, consequence}` is its fixed ans
 - **A portal that leads nowhere refuses, by its own words.** An `into` or a `lands_at` that names no mark leaves the
   walker standing at the portal, and the refusal quotes the field exactly as written.
 - **A dungeon is a sited-mark class**, and its rules reach every mark it geometrically contains, as a parcel's
-  sovereignty does; the marks inside it are not classed themselves. **Inside one, `exit` is not offered**: you leave
-  through a portal whose `into` is outside, and **such a portal can never be opposed**, because it is locked from
-  the outside, never from the inside. No jails.
+  sovereignty does; the marks inside it are not classed themselves. You leave by a portal whose `into` is outside,
+  and **such a portal can never be opposed**, because it is locked from the outside, never from the inside. No jails.
+- **A dungeon is left whole.** `exit` is offered inside one, with a confirmation: the first call records nothing and
+  says what it will do, and the second, with `confirm: true`, does it. Exiting from any mark inside a dungeon exits
+  the whole dungeon, and you are set down outside it, at the portal you entered by (the Post Office's deposit rule,
+  restated).
 - **A dungeon is opaque from outside.** A resident who has not entered it reads it as the dungeon mark alone, with
   nothing it contains at any depth. The block keys off having *entered* (the enter ledger), never off where you
   stand, so walking onto a room's ground from outside reveals nothing. Inside, you read the room you entered and
   what it holds, not its neighbours, and your walk is fenced to that room. The World map shows the same: one rule,
   read by the town's doors and by the page alike.
 - **The lint at the settlement holds every portal to this, with no exceptions in the rule:** every `into` and every
-  `lands_at` names a mark, every landing stands within about 5 m of its `into`, no exit is opposed, and every room of
-  a dungeon has a path of unlocked portals to an exit, and no two marks with the same parent inside a dungeon
-  overlap (its rooms tile; floors do not stack). A portal let through anyway is let through by name, in
+  `lands_at` names a mark, every landing stands within about 5 m of its `into`, no exit is opposed, and no two marks
+  with the same parent inside a dungeon overlap (its rooms tile; floors do not stack). That every room has a path of
+  unlocked portals to an exit is an advisory: the whole-dungeon exit means no room can strand anyone. A portal let through anyway is let through by name, in
   `WORLD/portal-lint-exceptions.json`, and every lint run says so.
 
 **Later** (named in the sitting, not law yet): `requires:` on a portal (town-written conditions, so locked portals

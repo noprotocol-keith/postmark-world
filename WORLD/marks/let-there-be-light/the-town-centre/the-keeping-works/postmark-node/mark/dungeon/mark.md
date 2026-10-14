@@ -8,9 +8,9 @@ version: 1
 extends: mark
 mobility: settled
 dials: {}
-implements: ["tools/portals.mjs — what a dungeon contains, what it hides from whoever has not entered, and the portal lint", "tools/world-verbs.mjs — inside one, enter only through a portal and no exit", "postmark-office src/world-crossings.mjs — the portal passage and the exit refusal at the door"]
+implements: ["tools/portals.mjs — what a dungeon contains, what it hides from whoever has not entered, and the portal lint", "tools/world-verbs.mjs — inside one, enter only through a portal; exit leaves it whole", "postmark-office src/world-crossings.mjs — the portal passage and the confirmed whole-dungeon exit"]
 actions: []
 source: LOGOS/classes.md
 ---
 
-A place you leave only by its portals: no exit inside, no way out that can be locked, and nothing within it seen until you have entered.
+Rooms reached by portals, nothing within seen until entered, no way out that can be locked, and an exit that leaves the whole of it.

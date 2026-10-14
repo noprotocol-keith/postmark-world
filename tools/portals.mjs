@@ -326,6 +326,25 @@ export function portalsInto(dungeonId, marks) {
   return out.sort((a, b) => a.id.localeCompare(b.id));
 }
 
+/** WHERE A WHOLE-DUNGEON EXIT SETS YOU DOWN (Darko, 2026-10-13 21:13): outside,
+ *  at the portal you entered the dungeon through, `enteredVia` (the enter row's
+ *  `via`, which only the office's journal holds). The Post Office's deposit rule,
+ *  restated: "you exit to the stop you were at when you boarded". With no `via`
+ *  on record (an entry from before portals), the nearest way in to `state`, and
+ *  the answer says it was chosen (`chosen: true`). Null when the dungeon has no
+ *  way in at all. */
+export function dungeonLanding(dungeonId, marks, { enteredVia = null, state = null } = {}) {
+  const ways = portalsInto(dungeonId, marks);
+  const named = enteredVia ? ways.find((p) => p.id === enteredVia) : null;
+  if (named) return { x: named.at.x, y: named.at.y, via: named.id, chosen: false };
+  if (!ways.length) return null;
+  const sx = Number(state?.x), sy = Number(state?.y);
+  const near = Number.isFinite(sx) && Number.isFinite(sy)
+    ? [...ways].sort((a, b) => Math.hypot(a.at.x - sx, a.at.y - sy) - Math.hypot(b.at.x - sx, b.at.y - sy))[0]
+    : ways[0];
+  return { x: near.at.x, y: near.at.y, via: near.id, chosen: true };
+}
+
 // ── the lint (mark-lint.mjs § portals reads this) ────────────────────────────
 //
 // The rules, each with a name an exception can cite:
@@ -337,7 +356,10 @@ export function portalsInto(dungeonId, marks) {
 //   exit-never-opposed     a portal out of a dungeon never answers `opposed`:
 //                          locked from the outside, never from the inside
 //   path-to-an-exit        from every room of a dungeon, a path of portals that
-//                          are not opposed reaches an exit
+//                          are not opposed reaches an exit. ADVISORY since
+//                          Darko's 21:13 change: a whole-dungeon exit is always
+//                          offered, so a room without a portal out strands
+//                          nobody; the finding comes back with sev "WARN"
 //   rooms-do-not-overlap   inside a dungeon, two marks with the same parent
 //                          never overlap (Darko, 2026-10-13 20:31: siblings
 //                          only; a room's contents sit inside it, and floors
@@ -388,7 +410,7 @@ export function portalFindings(marks) {
   const list = (marks ?? []).filter((m) => m && !m._error);
   const byId = new Map(list.map((m) => [m.id, m]));
   const found = [];
-  const say = (mark, rule, msg) => found.push({ mark, rule, msg });
+  const say = (mark, rule, msg, sev = "ERROR") => found.push({ mark, rule, msg, sev });
 
   // node of a passage target: the room actually entered
   const nodeOf = (id) => {
@@ -459,7 +481,7 @@ export function portalFindings(marks) {
     }
     for (const r of [...rooms].sort())
       if (!reaches.has(r))
-        say(r, "path-to-an-exit", `no path of unlocked portals leads from ${r} out of ${d} — every room of a dungeon has a way out that cannot be locked`);
+        say(r, "path-to-an-exit", `no path of unlocked portals leads from ${r} out of ${d} — every room of a dungeon should have a way out that cannot be locked (advisory: exit is always offered)`, "WARN");
 
     // siblings never overlap. Portals are left out: a portal is set in a wall
     // and straddles it by design.

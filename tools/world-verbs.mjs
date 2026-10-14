@@ -25,11 +25,11 @@ import {
 } from "./enter-exit.mjs"; // DEMO SLICE — the enter-exit acts (step 5, jetto/enter-exit-demo)
 import {
   pointInMark, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence,
-  landingOf, enterTargetOf, portalsIn, portalsInto,
+  landingOf, enterTargetOf, portalsIn, portalsInto, dungeonLanding,
 } from "./portals.mjs"; // WLD-5: portals and the dungeon class, one home for the verbs and the lint
 // The office loads this file and enter-exit.mjs from the clone, and nothing else,
 // so the portal reads it needs ride out through here.
-export { dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence, portalsIn, portalsInto, isDungeon, pointInMark };
+export { dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence, portalsIn, portalsInto, dungeonLanding, isDungeon, pointInMark };
 
 // ───────────────────────── orient — charter + your state ────────────────────
 // The establishing line of every telling: the let-there-be-light root (light
@@ -473,22 +473,47 @@ function enterThroughPortal(state, portal, world, { held, handle, at, iso, accep
 
 /** exit(mark) — the walker nullifying his own side of the edge he authored.
  *  Leaving a ship leaves her cabins; leaving somewhere you are not within is a
- *  refusal with a reason, never a silent success. */
-export function exit(targetId, world, { occupancy = new Map(), handle = null, at = 0, iso = null } = {}) {
+ *  refusal with a reason, never a silent success.
+ *
+ *  A DUNGEON IS LEFT WHOLE (Darko, 2026-10-13 21:13, superseding the no-exit
+ *  ruling of 19:54). Inside a dungeon `exit` is offered, with a confirmation,
+ *  the accept shape: the first call writes nothing and answers with the
+ *  consequence and where you will be set down; `confirm: true` does it.
+ *  Exiting from any mark inside a dungeon exits the WHOLE dungeon (one `exits`
+ *  row on the outermost of the two, the dungeon or the mark you named, which
+ *  truncates everything inside), and you are set down outside, at the portal
+ *  you entered by (`enteredVia`, the enter row's `via`, read by the office;
+ *  portals.mjs § dungeonLanding). The Post Office's deposit rule, restated.
+ *  `state` is only the fallback's: with no `via` on record, the nearest way in. */
+export function exit(targetId, world, {
+  occupancy = new Map(), handle = null, at = 0, iso = null, confirm = false, enteredVia = null, state = null,
+} = {}) {
   const held = occupancy.get(handle) ?? [];
-  // A DUNGEON OFFERS NO EXIT (WLD-5): you leave through a portal that leads
-  // outside, and such a portal can never be opposed. Any exit at all is refused
-  // while you are inside one — stepping out of a mark that holds the dungeon
-  // would truncate the dungeon with it, which is the same hole by another name.
-  const inside = heldDungeon(held, world.marks ?? []);
-  if (inside) {
-    const ways = portalsIn(held[held.length - 1], world.marks ?? []);
-    return { error: `you are inside ${inside}, a dungeon, and a dungeon offers no exit — you leave by walking to a portal that leads out and entering it. The portals where you stand: ${ways.map((p) => p.id).join(", ") || "(none)"}`,
-             refused: "dungeon", dungeon: inside, portals: ways, within: [...held] };
-  }
   const i = held.indexOf(targetId);
   if (i < 0) return { error: `${handle ?? "you"} is not within '${targetId}' — there is nothing to step out of`,
                       within: [...held] };
+  const marks = world.marks ?? [];
+  const inside = heldDungeon(held, marks);
+  if (inside) {
+    const first = held.findIndex((id) => id === inside || dungeonsOf(marks.find((m) => m.id === id) ?? { id }, marks).includes(inside));
+    const cut = first >= 0 ? Math.min(i, first) : i;
+    const landing = dungeonLanding(inside, marks, { enteredVia, state });
+    const base = { target: held[cut], dungeon: inside, left: held.slice(cut), landing };
+    if (confirm !== true)
+      return {
+        ...base, rows: [], within: [...held],
+        awaiting: {
+          effect: "confirm",
+          because: `exiting ${targetId} leaves the whole of ${inside}, a dungeon${landing ? `, and sets you down outside, at ${landing.via} (${landing.x}, ${landing.y})` : ""}. Call again with confirm: true to go; nothing was recorded.`,
+        },
+      };
+    return {
+      ...base,
+      rows: [formatEnterExit({ handle, act: "exits", mark: held[cut], at, iso })],
+      within: held.slice(0, cut),
+      into: cut > 0 ? held[cut - 1] : null,
+    };
+  }
   const leaving = held.slice(i);
   return {
     target: targetId,
@@ -532,7 +557,6 @@ export function enterPrompt(state, world, { occupancy = new Map(), handle = null
 /** The mark a walker is within but has walked out of the extent of. */
 export function exitPrompt(state, world, { occupancy = new Map(), handle = null } = {}) {
   const held = occupancy.get(handle) ?? [];
-  if (heldDungeon(held, world.marks ?? [])) return null; // a dungeon offers no exit to prompt (WLD-5)
   const byId = new Map(world.marks.map((m) => [m.id, m]));
   for (let i = held.length - 1; i >= 0; i--) {
     const mark = byId.get(held[i]);
