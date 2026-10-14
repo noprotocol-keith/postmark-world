@@ -77,3 +77,23 @@ test("applyPlan writes repairs and removals only; held and unresolved rows are b
   assert.equal(out.version, 1);
   assert.equal(doc.published["k/f"].path, "old", "the input is not mutated");
 });
+
+test("the data: the four rows stored commons whose marks walk home were repointed and NOT relabelled (postmark#3757)", async (t) => {
+  const { readFileSync, existsSync } = await import("node:fs");
+  const { join, dirname } = await import("node:path");
+  const { fileURLToPath } = await import("node:url");
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const { published } = JSON.parse(readFileSync(join(root, "WORLD", "settlement-publications.json"), "utf8"));
+  const FOUR = {
+    "kinofire/the-too-big-fireplace": "WORLD/marks/kinofire/spin-ghar-manor/the-too-big-fireplace/mark.md",
+    "kinofire/the-uphill-firepit": "WORLD/marks/kinofire/spin-ghar-manor/the-uphill-firepit/mark.md",
+    "vireo/the-cone": "WORLD/marks/vireo/understory/the-cone/mark.md",
+    "jiang-haijing/call-it-fengtian-lou": "WORLD/marks/jiang-haijing/fengtian-lou/call-it-fengtian-lou/mark.md",
+  };
+  for (const [id, path] of Object.entries(FOUR)) {
+    const row = published[id];
+    if (!row || row.path !== path) { t.diagnostic(`${id}: its row moved since 10-14; re-measure`); continue; }
+    assert.equal(existsSync(join(root, path)), true, `${id}: repointed to its file`);
+    assert.equal(row.class, "commons", `${id}: the stored class is never relabelled; the sweep's walk keeps the mark`);
+  }
+});
