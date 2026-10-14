@@ -181,6 +181,8 @@ test("POS-619 · a [ value that isn't strict JSON is lossy, with the one sentenc
   for (const whole of ['implements: ["candy", "chest"]', "points: [[0, 0], [4, 0], [4, 4]]", "labels: []", 'actions: [{"verb": "take"}]'])
     assert.deepEqual(lossyValues(fm(whole)), [], `${whole} is strict JSON`);
   assert.equal(lossyValues(fm("points: [{x: 1, y: 2}, {x: 3, y: 4}]"))[0]?.why, "bracket", "a bare-key points ring is a string too");
+  assert.equal(parseRecord(fm("title: [draft] my house"), "t").title, "[draft] my house", "the premise: a [-led prose value is kept whole");
+  assert.deepEqual(lossyValues(fm("title: [draft] my house")), [], "a value that starts with [ but doesn't end with ] is prose and loses nothing");
 });
 
 test("POS-619 · lossyMessage keeps the WLD-41 words for { and #", () => {

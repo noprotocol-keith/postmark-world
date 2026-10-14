@@ -116,9 +116,10 @@ export function parseRecord(text, file) {
 // the grammar's comment, unchanged. A quote opens a span only at the value's
 // start or after a space or `{[,:`, so an apostrophe in prose is not a quote.
 //
-// A `[…]` value is whole only when it is strict JSON (POS-619, Wright
-// 2026-10-14 G6). parseRecord keeps any other `[`-led value as the string it
-// was, so a list written with a bare key or word reads as no list at all.
+// A `[…]` value, one that starts with `[` and ends with `]`, is whole only when
+// it is strict JSON (POS-619, Wright 2026-10-14 G6, tightened 00:4x).
+// parseRecord keeps any other `[`-led value as the string it was, so a list
+// written with a bare key or word reads as no list at all.
 const PIECE_RE = /^(\w+)\s*:\s*(-?[\d.]+)$/;
 function quotedHashAt(val) {
   let q = null;
@@ -146,7 +147,9 @@ export function lossyValues(text) {
     if (hashAt >= 0) { out.push({ key, value, why: "hash", kept: value.slice(0, hashAt).trimEnd() }); continue; }
     const val = valRaw.replace(/#.*$/, "").trim(); // what parseRecord reads
     if (val.startsWith("[")) {
-      try { JSON.parse(val); } catch { out.push({ key, value: val, why: "bracket" }); }
+      // Only a value that is a list in shape (`[` … `]`): `title: [draft] my
+      // house` is a plain string, kept whole, and loses nothing (Wright 00:4x).
+      if (val.endsWith("]")) try { JSON.parse(val); } catch { out.push({ key, value: val, why: "bracket" }); }
       continue;
     }
     if (!val.startsWith("{")) continue;

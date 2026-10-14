@@ -408,6 +408,6 @@ test("POS-619 · a [ value that isn't JSON reds with marks-fold's sentence; JSON
   const red = runLint(lossyTree(["implements: [candy, chest]"]));
   assert.match(red, /\[ERROR\] [^\n]*the-chest-0: implements: \[candy, chest\] is not strict JSON, so the record keeps it as the string \[candy, chest\], not a list — write it as strict JSON/,
     `a bare-word list must red, got:\n${red}`);
-  const green = runLint(lossyTree(['implements: ["candy", "chest"]', "labels: []"]));
+  const green = runLint(lossyTree(['implements: ["candy", "chest"]', "labels: []", "title: [draft] my house"]));
   assert.doesNotMatch(green, /not strict JSON/, `JSON lists lose nothing, got:\n${green}`);
 });
