@@ -402,3 +402,12 @@ test("WLD-41 · the pieces the scan cannot read whole red too; a '#' reds only i
   assert.match(out, /the-chest-2: clue: a '#' inside a quoted value starts a comment, so the record keeps only what comes before it \(clue: "room\) — rephrase without '#'/, `a quoted '#', got:\n${out}`);
   assert.doesNotMatch(out, /the-chest-3:[^\n]*'#'/, "an apostrophe is not a quote, and a bare '#' is the grammar's comment");
 });
+
+// ── POS-619 · the lint reds a `[…]` value that isn't strict JSON (G6) ────────
+test("POS-619 · a [ value that isn't JSON reds with marks-fold's sentence; JSON lists stay green", () => {
+  const red = runLint(lossyTree(["implements: [candy, chest]"]));
+  assert.match(red, /\[ERROR\] [^\n]*the-chest-0: implements: \[candy, chest\] is not strict JSON, so the record keeps it as the string \[candy, chest\], not a list — write it as strict JSON/,
+    `a bare-word list must red, got:\n${red}`);
+  const green = runLint(lossyTree(['implements: ["candy", "chest"]', "labels: []", "title: [draft] my house"]));
+  assert.doesNotMatch(green, /not strict JSON/, `JSON lists lose nothing, got:\n${green}`);
+});

@@ -115,6 +115,11 @@ export function parseRecord(text, file) {
 // lossy too). A `#` counts only inside a quoted span; a bare `#` mid-value is
 // the grammar's comment, unchanged. A quote opens a span only at the value's
 // start or after a space or `{[,:`, so an apostrophe in prose is not a quote.
+//
+// A `[…]` value, one that starts with `[` and ends with `]`, is whole only when
+// it is strict JSON (POS-619, Wright 2026-10-14 G6, tightened 00:4x).
+// parseRecord keeps any other `[`-led value as the string it was, so a list
+// written with a bare key or word reads as no list at all.
 const PIECE_RE = /^(\w+)\s*:\s*(-?[\d.]+)$/;
 function quotedHashAt(val) {
   let q = null;
@@ -141,6 +146,12 @@ export function lossyValues(text) {
     const hashAt = quotedHashAt(value);
     if (hashAt >= 0) { out.push({ key, value, why: "hash", kept: value.slice(0, hashAt).trimEnd() }); continue; }
     const val = valRaw.replace(/#.*$/, "").trim(); // what parseRecord reads
+    if (val.startsWith("[")) {
+      // Only a value that is a list in shape (`[` … `]`): `title: [draft] my
+      // house` is a plain string, kept whole, and loses nothing (Wright 00:4x).
+      if (val.endsWith("]")) try { JSON.parse(val); } catch { out.push({ key, value: val, why: "bracket" }); }
+      continue;
+    }
     if (!val.startsWith("{")) continue;
     let json = null;
     try { json = JSON.parse(val); } catch { /* not JSON: the scan reads it */ }
@@ -156,6 +167,17 @@ export function lossyValues(text) {
     out.push({ key, value: val, why: "brace", dropped: lost.map((p) => p.split(":")[0].trim() || p), readsAs, strict });
   }
   return out;
+}
+
+// The words for each loss, one sentence and one owner (POS-619, Wright
+// 2026-10-14 G4). mark-lint errs with them on a tree (the PR lane), and the
+// office's two ingests hold or refuse with them, read from the same checkout.
+export function lossyMessage(l) {
+  if (l.why === "hash") return `${l.key}: a '#' inside a quoted value starts a comment, so the record keeps only what comes before it (${l.key}: ${l.kept}) — rephrase without '#'`;
+  if (l.why === "bracket") return `${l.key}: ${l.value} is not strict JSON, so the record keeps it as the string ${l.value}, not a list — write it as strict JSON`;
+  const pairs = Object.entries(l.readsAs);
+  const readsAs = pairs.length ? `{ ${pairs.map(([k, n]) => `${k}: ${n}`).join(", ")} }` : "{}";
+  return `${l.key}: ${l.value} is not strict JSON, so the record keeps only its number pairs and silently drops ${l.dropped.join(", ")} (it reads as ${readsAs}) — write it as strict JSON, every key quoted${l.strict ? `: ${l.key}: ${l.strict}` : ""}`;
 }
 
 // ---------- the frame (SCHEMA v3 § The frame, 2026-08-09) ----------
