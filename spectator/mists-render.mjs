@@ -444,6 +444,21 @@ export function mistsCreatureSVG(cr, { originPx, mPerPx, ink, eye = MISTS_EYE })
     + `<g class="wv-mc wv-mc-${cr.kind}${cr.pose ? " wv-mc-" + cr.pose : ""}" style="animation-delay:-${n(cr.phase * 12)}s">`
     + `<g transform="translate(${P.at[0]} ${P.at[1]})"><path d="${P.d}" fill="${ink}"/>${eyes}</g></g></g>`;
 }
+/** The same creature as HTML for the Mists' stage (WLD-43), where a moving part
+ *  is an HTML box and so rides the compositor: the same place, scale and flip,
+ *  the same path, the same motion about the same point (the feet, or a flier's
+ *  middle), and the eyes as a box of their own so their blink is composited too.
+ *  Painting units: the stage's camera scales them. */
+export function mistsCreatureHTML(cr, { originPx, mPerPx, ink, eye = MISTS_EYE }) {
+  const n = (v) => v.toFixed(1), s = cr.sizeM / 100 / mPerPx;
+  const x = originPx.x + cr.x / mPerPx, y = originPx.y + cr.y / mPerPx;
+  const P = cr.kind === "wolf" ? CREATURE_PATHS.wolf : cr.kind === "bat" ? CREATURE_PATHS.bat : cr.pose === "lift" ? CREATURE_PATHS.crowlift : CREATURE_PATHS.crowperch;
+  const box = `style="left:${P.at[0]}px;top:${P.at[1]}px" width="100" height="100" viewBox="0 0 100 100" aria-hidden="true"`;
+  const eyes = cr.eyes ? `<div class="wv-mc-eyes" style="animation-delay:-${n(cr.phase * 9)}s"><svg class="wv-mc-art" ${box}><circle cx="64" cy="25" r="1.6" fill="${eye}"/><circle cx="64" cy="25" r="4.5" fill="${eye}" opacity="0.3"/></svg></div>` : "";
+  return `<div class="wv-mc-at" style="transform:translate(${n(x)}px,${n(y)}px) scale(${cr.flip ? "-" : ""}${s.toFixed(4)},${s.toFixed(4)})">`
+    + `<div class="wv-mc wv-mc-${cr.kind}${cr.pose ? " wv-mc-" + cr.pose : ""}" style="animation-delay:-${n(cr.phase * 12)}s">`
+    + `<svg class="wv-mc-art" ${box}><path d="${P.d}" fill="${ink}"/></svg>${eyes}</div></div>`;
+}
 
 /** Paint one layer into a canvas over `box` (metres), all at once. */
 export function bakeMistsLayer(m, layer, box, opts = {}) {
