@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildHeightfield, fieldOfView, mistsAt, mistsHere, mistsRoad, DIALS } from "./world-engine.mjs";
-import { openYourEyes, shelterOf } from "./world-verbs.mjs";
+import { airLine, openYourEyes, orient, shelterOf } from "./world-verbs.mjs";
 
 const flatAt = (h) => buildHeightfield({ controlPoints: [{ x: 0, y: 0, h }, { x: 10000, y: 0, h }, { x: 0, y: 10000, h }, { x: -10000, y: 0, h }] });
 const light = { dawn_pole_m: { x: 5000, y: -5000 }, dark_pole_m: { x: -5000, y: 5000 } };
@@ -71,4 +71,15 @@ test("no shelter, no change: every road reads exactly as before", () => {
     assert.deepEqual(mistsRoad(a, b, 10, MISTS, { shelter: null }), mistsRoad(a, b, 10, MISTS));
     assert.deepEqual(mistsRoad(a, b, 10, MISTS, { shelter: shelterOf(worldOf(marks), []) }), mistsRoad(a, b, 10, MISTS));
   }
+});
+
+test("the air line says so: entered, the wall is around you but hides nothing; unentered, arm's reach as ever", () => {
+  const w = worldOf(marks);
+  const inside = orient(STAND, w, { crossing: 10, dials: CLEAR, entered: ["beyond/grounds"] });
+  const bare = orient(STAND, w, { crossing: 10, dials: CLEAR });
+  assert.equal(inside.you.sheltered, true);
+  assert.match(airLine(inside.you, 10), /hides nothing from you/);
+  assert.equal("sheltered" in bare.you, false);
+  assert.match(airLine(bare.you, 10), /nothing past arm's reach/);
+  assert.deepEqual(orient(STAND, w, { crossing: 10, dials: CLEAR, entered: ["beyond/cairn"] }), bare, "an entered mark you are not standing in shelters nothing here");
 });

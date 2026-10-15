@@ -35,7 +35,7 @@ export { dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkF
 // The establishing line of every telling: the let-there-be-light root (light
 // from the NE, dying to the SW), the world's extent, and WHERE/HOW you stand —
 // region, elevation, and the fog/light status effects on you right now.
-export function orient(state, world, { crossing = 0, dials = DIALS } = {}) {
+export function orient(state, world, { crossing = 0, dials = DIALS, entered = null } = {}) {
   const { heightfield, light, fogCeilingM, terrain } = world;
   const fog = fogModel(crossing, dials);
   const mists = mistsAt(crossing, terrain?.mists); // POS-466: null before the schedule starts
@@ -60,6 +60,8 @@ export function orient(state, world, { crossing = 0, dials = DIALS } = {}) {
       // the Mists at your standpoint; absent (not null) before they arrive, so
       // the answer before the schedule's first crossing is the old one, bit for bit
       ...(mists ? { mists: mistsBlock(mists, mistsHere(state, mists), state) } : {}),
+      // AN ENTERED MARK IS SHELTER: standing within one, the Mists hide nothing it holds (airLine says so)
+      ...(mists && shelterOf(world, entered)?.(state) ? { sheltered: true } : {}),
     },
     // enter/exit are DEMO-SLICE verbs (step 5) — listed so a reader of the
     // demo sees the pair, and pointedly listed apart from walk, which reaches
@@ -865,7 +867,8 @@ export function airLine(you, crossing) {
   const m = you?.mists;
   if (!m) return null;
   const when = hourOf(crossing);
-  const weather = m.in_wall ? "You stand inside the mist, and can see nothing past arm's reach."
+  const weather = m.in_wall && you.sheltered ? "You stand inside the mist, but within the mark you have entered it hides nothing from you."
+    : m.in_wall ? "You stand inside the mist, and can see nothing past arm's reach."
     : m.thickness > 0 ? `The mist's edge is ${m.wall_m} m off and its haze is on you (thickness ${m.thickness}).`
     : (you.fog?.aboveFog ? "You are above the fog."
       : you.fog?.inFog ? `Fog is in this ${when} (thickness ${you.fog.thickness}).`
