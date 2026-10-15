@@ -21,7 +21,7 @@
 // no fs, no engine import, browser-safe like geometry.mjs.
 
 import { marksContain, overlapArea, pointInPolygon, pointInRect, polygonOf, rect } from "./geometry.mjs";
-import { entryLawOf } from "./enter-exit.mjs";
+import { entryLawOf, isStairs } from "./enter-exit.mjs";
 
 export const DUNGEON_CLASS = "dungeon";
 /** How far inside `into` a clamped landing is nudged (Wright, 2026-10-13 20:14). */
@@ -458,9 +458,11 @@ export function portalFindings(marks) {
         say(m.id, "exit-never-opposed", `this portal leads out of ${d} and answers "opposed" — an exit is locked from the outside, never from the inside. No jails`);
 
     // rooms: every place inside the dungeon a passage can put you, and every
-    // room a portal inside it stands in
+    // room a portal inside it stands in. An OPPOSED portal into itself (a stair whose
+    // floor does not exist yet: the stairs class's default) puts nobody anywhere, so
+    // it makes no room; a welcomed or neutral one is a place you stand in.
     const rooms = new Set();
-    for (const { m, law } of portals) for (const id of law.into) { const n = nodeOf(id); if (n && inD(n)) rooms.add(n); }
+    for (const { m, law } of portals) for (const id of law.into) { if (id === m.id && law.word === "opposed") continue; const n = nodeOf(id); if (n && inD(n)) rooms.add(n); }
     for (const { m } of inner) { const c = containerOf(m, list)?.id; if (c && inD(c)) rooms.add(c); }
     const out = new Map([...rooms].map((r) => [r, { exit: false, to: new Set() }]));
     for (const { m, law } of inner) {
@@ -484,10 +486,11 @@ export function portalFindings(marks) {
         say(r, "path-to-an-exit", `no path of unlocked portals leads from ${r} out of ${d} — every room of a dungeon should have a way out that cannot be locked (advisory: exit is always offered)`, "WARN");
 
     // siblings never overlap. Portals are left out: a portal is set in a wall
-    // and straddles it by design.
+    // and straddles it by design. A stair is not (it is a box inside a room), so
+    // a stair stays in, portal or not.
     const groups = new Map();
     for (const m of list) {
-      if (m.kind !== "sited" || !m.at || !m.extent || m.id === d || !inD(m.id) || entryLawOf(m)?.into) continue;
+      if (m.kind !== "sited" || !m.at || !m.extent || m.id === d || !inD(m.id) || (entryLawOf(m)?.into && !isStairs(m))) continue;
       const parent = parentOf(m, list)?.id ?? null;
       if (!groups.has(parent)) groups.set(parent, []);
       groups.get(parent).push(m);

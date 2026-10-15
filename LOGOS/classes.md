@@ -1415,6 +1415,30 @@ with keys), secret portals (a hidden entry in the list), and exit routing for ma
 ground. The read-root slot is to be renamed (proposed: lens), and live identifiers are renamed only after the
 freeze.
 
+## The stairs — a way between floors, before the floor exists
+
+*A stair is a portal by its class: it says where it would take you, and until there is a floor there, it says so.*
+
+Rendered in the world as `the-town/stairs`.
+
+Ruled by Darko 2026-10-15 13:31 (WLD-21): a generic class for interiors with more than one floor, whose passage
+answers **"Moving to higher/lower floors has not been implemented yet. Coming Soon!"** by default.
+
+- **A stairs is a sited mark carrying `class: stairs`.** It extends mark, as the dungeon does: there is no portal
+  class-node to extend, because a portal is a mechanism (an entry law with `into`), and `the-town/portal` is the
+  read-root homonym above.
+- **It is a portal by its class.** A stair that writes no `entry:` at all reads the class's law: `into` itself,
+  word `opposed`, the line as its consequence. So inside a dungeon, where only a portal is entered, a stair is
+  entered and answers, and the portal lint holds (its `into` names a mark: itself).
+- **Its refusal is the line.** The refusal's `because`, which is what every reader prints, is the line, not the
+  town's standing "opposes entry" sentence. That is for a stair on the class's default only; every other opposed
+  mark keeps the standing sentence.
+- **A stair that writes its own `entry:` is read by that entry alone, as any mark is** (a portal when it writes
+  `into`), and keeps the class. Nothing of the default carries over, its refusal included: a stair that writes its
+  own opposed entry says the standing sentence. A later floor is reached by writing `into`, `lands_at` and a word.
+- **A stair is a box inside a room, not a door in a wall**, so it is held to the rule that siblings inside a
+  dungeon do not overlap, as a room is; portals set in walls stay exempt.
+
 ## The witnessed roll
 
 *A roll the record cannot reproduce is not a roll, it is a rumour.*
