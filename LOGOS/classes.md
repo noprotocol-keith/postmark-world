@@ -1431,10 +1431,13 @@ answers **"Moving to higher/lower floors has not been implemented yet. Coming So
   word `opposed`, the line as its consequence. So inside a dungeon, where only a portal is entered, a stair is
   entered and answers, and the portal lint holds (its `into` names a mark: itself).
 - **Its refusal is the line.** The refusal's `because`, which is what every reader prints, is the line, not the
-  town's standing "opposes entry" sentence. That is for stairs only; every other opposed mark keeps the standing
-  sentence.
-- **A stair that writes its own `entry:` is an ordinary portal** and keeps the class. Nothing of the default
-  carries over, so a later floor is reached by writing `into`, `lands_at` and a word on the stair.
+  town's standing "opposes entry" sentence. That is for a stair on the class's default only; every other opposed
+  mark keeps the standing sentence.
+- **A stair that writes its own `entry:` is read by that entry alone, as any mark is** (a portal when it writes
+  `into`), and keeps the class. Nothing of the default carries over, its refusal included: a stair that writes its
+  own opposed entry says the standing sentence. A later floor is reached by writing `into`, `lands_at` and a word.
+- **A stair is a box inside a room, not a door in a wall**, so it is held to the rule that siblings inside a
+  dungeon do not overlap, as a room is; portals set in walls stay exempt.
 
 ## The witnessed roll
 

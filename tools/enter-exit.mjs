@@ -395,12 +395,13 @@ export function adjudicate(mark, { accepted = false } = {}) {
   const word = law?.word ?? DEFAULT_ENTRY_WORD;
   // A stair's refusal IS its line (WLD-21, Darko 2026-10-15): `because` is what
   // every reader prints (the World page prints nothing else), so the class's
-  // answer goes there, not only into the terms. Stairs only: other opposed marks
-  // keep the town's standing sentence.
+  // answer goes there, not only into the terms. Only a stair that reads the class's
+  // default says it: a stair that writes its own entry is read by it alone, and
+  // every other opposed mark keeps the town's standing sentence.
   if (word === "opposed")
     return { mark: mark.id, word, effect: "refused", terms: termsAt(mark),
-             because: isStairs(mark)
-               ? (law?.consequence || STAIRS_LINE)
+             because: isStairs(mark) && mark.entry == null
+               ? STAIRS_LINE
                : `${mark.id} opposes entry — an entity child opposed is a refusal at the threshold, and you are left standing at the door.` };
   if (law?.edge && !accepted)
     return { mark: mark.id, word, effect: "terms", terms: termsAt(mark),

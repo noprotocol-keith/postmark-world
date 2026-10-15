@@ -110,6 +110,38 @@ test("the portal lint holds a stair with no entry law clean", () => {
   assert.deepEqual(portalFindings(world().marks), []);
 });
 
+// ── review-223: the default is the default, and nothing wider ───────────────
+
+test("a stair that writes its own OPPOSED entry is read by it alone: the standing sentence, never the class's line", () => {
+  const STANDING = /^home\/the-stair opposes entry — an entity child opposed is a refusal at the threshold/;
+  const own = (entry) => ({ ...world().marks.find((m) => m.id === "home/the-stair"), entry });
+  const locked = adjudicate(own({ word: "opposed", into: "home/landing" }));
+  assert.equal(locked.effect, "refused");
+  assert.match(locked.because, STANDING, "a floor that exists but is locked never says 'Coming Soon!'");
+  assert.match(adjudicate(own({ word: "opposed", into: "home/landing", consequence: "Rotten." })).because, STANDING,
+    "its own consequence rides the terms, as any opposed mark's does");
+});
+
+test("the lint: a WELCOMED portal into itself is a place you stand in, so a room built that way with no way out still warns", () => {
+  const w = world();
+  w.marks.push({ id: "home/closet", kind: "sited", by: "home", at: { x: 520, y: 520 }, extent: { w: 6, h: 6 },
+    body: "A closet.", entry: { word: "welcomed", into: "home/closet" } });
+  const f = portalFindings(w.marks);
+  assert.ok(f.some((x) => x.mark === "home/closet" && x.rule === "path-to-an-exit"), JSON.stringify(f));
+  assert.ok(!f.some((x) => x.mark === "home/the-stair"), "the default stair (opposed, into itself) is still no room");
+});
+
+test("the lint: a stair is a box inside a room, not a door in a wall, so it still counts for rooms-do-not-overlap", () => {
+  const w = world();
+  // a 12 × 8 m stair straddling the hall's east wall, so the hall does not hold
+  // it and it stands in the house beside the hall, over the hall's floor
+  w.marks.push({ id: "home/wide-stair", kind: "sited", by: "home", class: STAIRS_CLASS,
+    at: { x: 498, y: 500 }, extent: { w: 12, h: 8 }, body: "A wide stair." });
+  const f = portalFindings(w.marks).filter((x) => x.rule === "rooms-do-not-overlap");
+  assert.ok(f.length > 0, "the overlap is named");
+  assert.ok(f.every((x) => x.sev === "ERROR"), JSON.stringify(f));
+});
+
 // ── the gate, as the settlement runs it: the class is lawful because the works declare it ──
 
 const HERE = dirname(fileURLToPath(import.meta.url));
