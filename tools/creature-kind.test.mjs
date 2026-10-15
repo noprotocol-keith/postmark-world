@@ -101,6 +101,21 @@ test("a mood may be named anything a slug allows, even an Object.prototype name,
   assert.throws(() => applyEffects(k, startState(k), [{ do: "add", mood: "toString", by: 1 }]), /no mood toString/);
 });
 
+test("a flag may carry an Object.prototype name, and it holds only once set", () => {
+  for (const flag of ["constructor", "toString", "valueOf", "hasOwnProperty"]) {
+    const k = parseKind(FIXTURE.replace("flags: startled", `flags: ${flag}`)
+      .replace(/reaction start .*\n/, `reaction start "it starts": when self.${flag} says It starts at {actor}.\n`)
+      .replace(/reaction flee .*\n/, ""));
+    const menu = (state) => allowedReactions(k, scopeOf(state, { verb: "walk", distance_m: 40, approaching: true })).map((r) => r.name);
+    assert.deepEqual(menu(startState(k)), ["watch"], `self.${flag} does not hold while it is unset`);
+    assert.deepEqual(menu({ ...startState(k), flags: [flag] }), ["watch", "start"], `self.${flag} holds once set`);
+  }
+});
+
+test("the span is not the kind's: a kind file with span_h is refused", () => {
+  assert.throws(() => parseKind(FIXTURE.replace("ring_m: 50\n", "ring_m: 50\nspan_h: 12\n")), /line 10: cannot read "span_h: 12"/);
+});
+
 test("a line names the actor and nothing more: a name with $ patterns stays a name", () => {
   const k = parseKind(FIXTURE);
   assert.equal(voiceLine(k.reactions[0], { actor: "a$&b$'c" }), "It watches a$&b$'c.");

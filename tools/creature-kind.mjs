@@ -116,7 +116,8 @@ export function parseCondition(src) {
   return tree;
 }
 
-const lookup = (scope, path) => path.split(".").reduce((o, k) => (o == null ? undefined : o[k]), scope);
+// own properties only: a flag named `constructor` or `toString` is unset until it is set
+const lookup = (scope, path) => path.split(".").reduce((o, k) => (o == null || !Object.hasOwn(o, k) ? undefined : o[k]), scope);
 
 export function evaluate(tree, scope) {
   if ("lit" in tree) return tree.lit;
