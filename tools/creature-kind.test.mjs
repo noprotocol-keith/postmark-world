@@ -17,7 +17,6 @@ what: >
   A fixture for the reader's tests.
   Two lines of it.
 ring_m: 50
-span_h: 12
 moods:
   fear: 0..3 = 1 | calm | uneasy | frightened | terrified
   curiosity: 0..3 = 2
@@ -33,7 +32,7 @@ test("a kind file reads whole: its fields, moods with their levels, flags and re
   const k = parseKind(FIXTURE);
   assert.equal(k.kind, "test-beast");
   assert.equal(k.ring_m, 50);
-  assert.equal(k.span_h, 12);
+  assert.equal(k.span_h, undefined, "the span is the class's dial, not the kind's");
   assert.equal(k.what, "A fixture for the reader's tests. Two lines of it.");
   assert.deepEqual(k.moods.fear, { lo: 0, hi: 3, start: 1, levels: ["calm", "uneasy", "frightened", "terrified"] });
   assert.deepEqual(k.moods.curiosity, { lo: 0, hi: 3, start: 2 });
@@ -86,8 +85,25 @@ test("the Mists' law is held at parse: no harm, no holds, no spring, no verbs of
     [`reaction lunge "it lunges": when true does self.vigor -1 says It lunges.`, /a mood the kind does not have/],
     [`law fallen "no more blows": act.verb != "strike"`, /no laws/],
     [`rule froth "it froths": self.fear > 2 then set startled`, /no rules/],
+    [`reaction sly "it is sly": when true does self.constructor +1 says It is sly.`, /a mood the kind does not have/],
+    [`reaction sly "it is sly": when true does self.toString -1 says It is sly.`, /a mood the kind does not have/],
+    [`reaction count "it counts": when true says It counts to #3 for {actor}.`, /may not carry " #"/],
+    [`reaction long "it rambles": when true says ${"la ".repeat(700)}`, /at most 2000 characters/],
   ];
   for (const [line, why] of refused) assert.throws(() => parseKind(withLine(line)), why, line);
+});
+
+test("a mood may be named anything a slug allows, even an Object.prototype name, and it is the kind's own", () => {
+  const k = parseKind(FIXTURE.replace("  curiosity: 0..3 = 2\n", "  constructor: 0..3 = 1\n").replaceAll("self.curiosity", "self.constructor"));
+  assert.deepEqual(Object.keys(k.moods), ["fear", "constructor"]);
+  const { state } = applyEffects(k, startState(k), k.reactions.find((r) => r.name === "nearer").effects);
+  assert.equal(state.moods.constructor, 3);
+  assert.throws(() => applyEffects(k, startState(k), [{ do: "add", mood: "toString", by: 1 }]), /no mood toString/);
+});
+
+test("a line names the actor and nothing more: a name with $ patterns stays a name", () => {
+  const k = parseKind(FIXTURE);
+  assert.equal(voiceLine(k.reactions[0], { actor: "a$&b$'c" }), "It watches a$&b$'c.");
 });
 
 test("a kind with a missing or malformed field is refused, naming it", () => {
@@ -95,7 +111,7 @@ test("a kind with a missing or malformed field is refused, naming it", () => {
   assert.throws(() => parseKind(FIXTURE.replace("ring_m: 50", "ring_m: wide")), /ring_m: must be a number above 0/);
   assert.throws(() => parseKind(FIXTURE.replace("  curiosity: 0..3 = 2\n", "  curiosity: 0..3 = 5\n")), /start inside them/);
   assert.throws(() => parseKind(FIXTURE.replace("| calm | uneasy | frightened | terrified", "| calm | uneasy")), /one label per level/);
-  assert.throws(() => parseKind(FIXTURE.replace("flags: startled\n", "flags: startled\nwings: two\n")), /line 15: cannot read "wings: two"/);
+  assert.throws(() => parseKind(FIXTURE.replace("flags: startled\n", "flags: startled\nwings: two\n")), /line 14: cannot read "wings: two"/);
   assert.throws(() => parseKind(FIXTURE.replace(/reaction [\s\S]*$/, "")), /at least one reaction/);
 });
 

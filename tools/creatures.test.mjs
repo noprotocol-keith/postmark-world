@@ -12,23 +12,27 @@ import { mistsAt, mistsHere } from "./world-engine.mjs";
 import { mistsKeepRects, keptByTheTown } from "./mists-keep.mjs";
 import {
   CREATURE_DIALS_PENDING, TOWN, secretFor, commitmentOf, windowOf, creatureId, isCreatureId, creaturesOn,
-  scheduleFor, dueSpawns, auditWindow, creaturesAt, dueFades, creaturesSnapshot,
+  scheduleFor, dueSpawns, auditWindow, creaturesAt, creaturesWritten, dueFades, creaturesSnapshot,
 } from "./creatures.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const MISTS = JSON.parse(readFileSync(join(ROOT, "WORLD/skeleton.json"), "utf8")).mists;
 const MARKS = JSON.parse(readFileSync(join(ROOT, "WORLD/world-state.json"), "utf8")).marks;
-const INPUTS = { mists: MISTS, marks: MARKS, fromCrossing: 244 };
+const SHA = "e5bb5aa561d9b134523ce057fdf5e961876963f6";   // the world sha these inputs stand for
+const INPUTS = { mists: MISTS, marks: MARKS, fromCrossing: 244, world_sha: SHA };
 const MASTER = "a test master key, never the box's";
+const t = (ms) => new Date(ms).toISOString();
 
-test("the seed: a secret per crossing, and a commitment that names it without telling it", () => {
+test("the seed: a secret per crossing, and a commitment that binds it and the world sha without telling either", () => {
   const s270 = secretFor(MASTER, 270), s271 = secretFor(MASTER, 271);
   assert.match(s270, /^[0-9a-f]{64}$/);
   assert.equal(secretFor(MASTER, 270), s270, "the same crossing, the same secret");
   assert.notEqual(s270, s271, "each crossing its own: one reveal never tells the next window");
   assert.notEqual(secretFor("another key", 270), s270, "the master key decides it");
-  assert.equal(commitmentOf(s270), commitmentOf(s270));
-  assert.notEqual(commitmentOf(s270), s270);
+  assert.equal(commitmentOf(s270, SHA), commitmentOf(s270, SHA));
+  assert.notEqual(commitmentOf(s270, SHA), s270);
+  assert.notEqual(commitmentOf(s270, SHA), commitmentOf(s270, "0".repeat(40)), "the commitment binds the world sha too");
+  assert.throws(() => commitmentOf(s270), /no world sha/);
   assert.throws(() => secretFor("", 270), /no master key/);
 });
 
@@ -72,11 +76,17 @@ test("the dial and the season: no schedule when the dial is off, before it, or b
   const secret = secretFor(MASTER, 270);
   assert.deepEqual(scheduleFor(270, secret, { ...INPUTS, fromCrossing: null }).spawns, [], "null is off");
   assert.deepEqual(scheduleFor(270, secret, { ...INPUTS, fromCrossing: undefined }).spawns, [], "absent is off");
+  assert.deepEqual(scheduleFor(270, secret, { ...INPUTS, fromCrossing: false }).spawns, [], "false is off");
   assert.deepEqual(scheduleFor(270, secret, { ...INPUTS, fromCrossing: 271 }).spawns, [], "before the launch crossing");
   assert.equal(scheduleFor(271, secretFor(MASTER, 271), { ...INPUTS, fromCrossing: 271 }).spawns.length, 9, "from it on");
   assert.deepEqual(scheduleFor(240, secretFor(MASTER, 240), { ...INPUTS, fromCrossing: 0 }).spawns, [], "no Mists before 244, no creatures");
-  assert.equal(creaturesOn(270, "268"), true);
-  assert.equal(creaturesOn(270, null), false);
+});
+
+test("the launch dial fails closed: nothing but a whole crossing number turns it on", () => {
+  for (const on of [268, 0, "268", "0"]) assert.equal(creaturesOn(270, on), true, `${JSON.stringify(on)} is on`);
+  assert.equal(creaturesOn(270, 271), false, "not before its crossing");
+  for (const off of [null, undefined, false, true, "", " ", [], [268], {}, NaN, Infinity, -1, 268.5, "268.5", "x", "0x10", "1e2", " 268"])
+    assert.equal(creaturesOn(270, off), false, `${String(JSON.stringify(off))} is off`);
 });
 
 test("hidden until each spawn: the tick is told only what is due", () => {
@@ -88,33 +98,55 @@ test("hidden until each spawn: the tick is told only what is due", () => {
   assert.equal(dueSpawns(sched, endMs).length, sched.spawns.length);
 });
 
-// the window's log as the tick would write it
-function windowLog(N, { tamper = null } = {}) {
+// The window's log as the tick writes it: every row dated when it is written,
+// `lateMs` after the instant it stands for, with the schedule in its payload.
+function windowLog(N, { lateMs = 0, tamper = null } = {}) {
   const secret = secretFor(MASTER, N), sched = scheduleFor(N, secret, INPUTS), { startMs, endMs } = windowOf(N);
-  const acts = [{ at: new Date(startMs).toISOString(), actor: TOWN, action: "seed", object: null, payload: { crossing: N, commitment: commitmentOf(secret) } }];
-  for (const s of sched.spawns) acts.push({ at: s.at, actor: TOWN, action: "spawn", object: s.id,
-    payload: { crossing: N, kind: s.kind, x: s.x, y: s.y, fades_at: s.fades_at, moods: { fear: 1, curiosity: 1 }, flags: [] } });
-  acts.push({ at: new Date(endMs).toISOString(), actor: TOWN, action: "reveal", object: null, payload: { crossing: N, secret } });
+  const w = (ms) => t(ms + lateMs);
+  const acts = [{ at: w(startMs), actor: TOWN, action: "seed", object: null, payload: { crossing: N, world_sha: SHA, commitment: commitmentOf(secret, SHA) } }];
+  for (const s of sched.spawns) acts.push({ at: w(s.at_ms), actor: TOWN, action: "spawn", object: s.id,
+    payload: { crossing: N, kind: s.kind, at: s.at, x: s.x, y: s.y, fades_at: s.fades_at, moods: { fear: 1, curiosity: 1 }, flags: [] } });
+  acts.push({ at: w(endMs), actor: TOWN, action: "reveal", object: null, payload: { crossing: N, secret } });
   if (tamper) tamper(acts);
   return { acts, sched, secret };
 }
 
-test("the reveal re-derives the window: the audit passes on the tick's log and names any tampering", () => {
+test("the reveal re-derives the window: the audit passes on the tick's log, late rows included, and names any tampering", () => {
   assert.deepEqual(auditWindow(270, windowLog(270).acts, INPUTS), { ok: true, problems: [] });
+  assert.deepEqual(auditWindow(270, windowLog(270, { lateMs: 20000 }).acts, INPUTS), { ok: true, problems: [] }, "a tick 20 s late is not a tampered log");
+  const early = auditWindow(270, windowLog(270, { tamper: (a) => { const r = a.find((x) => x.action === "spawn"); r.at = t(Date.parse(r.payload.at) - 1000); } }).acts, INPUTS);
+  assert.ok(early.problems.some((p) => /before its minute/.test(p)), early.problems.join("; "));
   const moved = auditWindow(270, windowLog(270, { tamper: (a) => { a.find((x) => x.action === "spawn").payload.x += 1; } }).acts, INPUTS);
   assert.equal(moved.ok, false);
   assert.ok(moved.problems.some((p) => /not in the log/.test(p)) && moved.problems.some((p) => /not the schedule's/.test(p)), moved.problems.join("; "));
   const swapped = auditWindow(270, windowLog(270, { tamper: (a) => { a.at(-1).payload.secret = secretFor(MASTER, 271); } }).acts, INPUTS);
-  assert.deepEqual(swapped.problems, ["crossing 270: the revealed secret does not hash to the seed's commitment"]);
+  assert.deepEqual(swapped.problems, ["crossing 270: the revealed secret and the seed's world sha do not hash to the seed's commitment"]);
   const extra = auditWindow(270, windowLog(270, { tamper: (a) => { a.push({ ...a[1], object: creatureId("wolf", 270, 9) }); } }).acts, INPUTS);
   assert.equal(extra.ok, false);
   assert.deepEqual(auditWindow(270, [], INPUTS).problems, ["crossing 270: no seed act", "crossing 270: no reveal act"]);
 });
 
+test("the audit counts: one seed, one reveal, each spawn once", () => {
+  const first = windowLog(270).acts[1].object;
+  const doubled = auditWindow(270, windowLog(270, { tamper: (a) => { a.push({ ...a[1] }); } }).acts, INPUTS);
+  assert.deepEqual(doubled.problems, [`crossing 270: ${first} is spawned 2 times (each spawn is written once)`]);
+  const twoSeeds = auditWindow(270, windowLog(270, { tamper: (a) => { a.push({ ...a[0], payload: { ...a[0].payload, commitment: "f".repeat(64) } }); } }).acts, INPUTS);
+  assert.deepEqual(twoSeeds.problems, ["crossing 270: 2 seed acts (one window, one seed)"]);
+  const twoReveals = auditWindow(270, windowLog(270, { tamper: (a) => { a.push({ ...a.at(-1) }); } }).acts, INPUTS);
+  assert.deepEqual(twoReveals.problems, ["crossing 270: 2 reveal acts (one window, one reveal)"]);
+});
+
+test("the seed pins the window to a world sha, and the audit refuses inputs read at another", () => {
+  const other = auditWindow(270, windowLog(270).acts, { ...INPUTS, world_sha: "0".repeat(40) });
+  assert.equal(other.ok, false);
+  assert.match(other.problems[0], /the seed pins world e5bb5aa5\w+, and these inputs were read at 0{40}: read them at the seed's sha/);
+  const unpinned = auditWindow(270, windowLog(270, { tamper: (a) => { delete a[0].payload.world_sha; } }).acts, INPUTS);
+  assert.deepEqual(unpinned.problems, ["crossing 270: the seed names no world sha"]);
+});
+
 test("the fold: spawned, revised by its own acts, gone by `fled` at once or `faded` at 12 h, written or not", () => {
-  const { acts, sched } = windowLog(270);
+  const { acts, sched } = windowLog(270, { lateMs: 15000 });
   const [a, b, c] = sched.spawns;
-  const t = (ms) => new Date(ms).toISOString();
   const later = [
     { at: t(b.at_ms + 60000), actor: b.id, action: "snarl", object: "kogane", payload: { after: { moods: { fear: 2, curiosity: 1 }, flags: ["startled"] } } },
     { at: t(c.at_ms + 120000), actor: c.id, action: "flee", object: "kogane", payload: { after: { moods: { fear: 3, curiosity: 1 }, flags: [] } } },
@@ -123,8 +155,9 @@ test("the fold: spawned, revised by its own acts, gone by `fled` at once or `fad
   ];
   const all = [...acts, ...later];
   const at = (ms) => creaturesAt(null, all, ms);
-  assert.equal(at(a.at_ms - 1).has(a.id), false, "not before its spawn");
-  assert.deepEqual(at(a.at_ms).get(a.id), { id: a.id, kind: a.kind, crossing: 270, x: a.x, y: a.y, spawned_at: a.at, fades_at: a.fades_at, moods: { fear: 1, curiosity: 1 }, flags: [] });
+  assert.equal(at(a.at_ms + 14999).has(a.id), false, "not before its row is written");
+  assert.deepEqual(at(a.at_ms + 15000).get(a.id), { id: a.id, kind: a.kind, crossing: 270, x: a.x, y: a.y, spawned_at: a.at, fades_at: a.fades_at, moods: { fear: 1, curiosity: 1 }, flags: [] },
+    "spawned_at is the scheduled minute, not the write");
   const bLive = at(b.at_ms + 120000).get(b.id);
   assert.deepEqual([bLive.moods, bLive.flags], [{ fear: 2, curiosity: 1 }, ["startled"]], "its own act revises it");
   assert.equal(at(c.at_ms + 119999).has(c.id), true);
@@ -132,31 +165,62 @@ test("the fold: spawned, revised by its own acts, gone by `fled` at once or `fad
   assert.equal(at(Date.parse(a.fades_at) - 1).has(a.id), true);
   assert.equal(at(Date.parse(a.fades_at)).has(a.id), false, "faded at 12 h, before the tick writes it");
   const due = dueFades(null, all, Date.parse(a.fades_at));
-  assert.ok(due.some((f) => f.id === a.id && f.reason === "faded" && f.at === a.fades_at), "the tick is told to write the fade");
+  assert.ok(due.some((f) => f.id === a.id && f.reason === "faded" && f.fades_at === a.fades_at), "the tick is told to write the fade, with the span's end for its payload");
   assert.ok(!due.some((f) => f.id === c.id), "a fled creature never fades");
-  const written = [...all, { at: a.fades_at, actor: TOWN, action: "withdraw", object: a.id, payload: { reason: "faded" } }];
-  assert.ok(!dueFades(null, written, Date.parse(a.fades_at)).some((f) => f.id === a.id), "a written fade is not due again");
+  const written = [...all, { at: t(Date.parse(a.fades_at) + 25000), actor: TOWN, action: "withdraw", object: a.id, payload: { reason: "faded", fades_at: a.fades_at } }];
+  assert.ok(dueFades(null, written, Date.parse(a.fades_at) + 24999).some((f) => f.id === a.id), "due until its row is written");
+  assert.ok(!dueFades(null, written, Date.parse(a.fades_at) + 25000).some((f) => f.id === a.id), "a written fade is not due again");
 });
 
-test("the save: a snapshot plus the acts since it folds to the same creatures as the whole log (snapshot parity)", () => {
+test("only the-town or the creature itself withdraws it, and only for a lawful reason", () => {
   const { acts, sched } = windowLog(270);
+  const a = sched.spawns[0], now = a.at_ms + 3600e3;
+  const rows = (w) => [...acts, { at: t(a.at_ms + 60000), object: a.id, action: "withdraw", ...w }];
+  assert.equal(creaturesAt(null, rows({ actor: "some-resident", payload: { reason: "fled" } }), now).has(a.id), true, "a resident's withdraw is not the record's");
+  assert.equal(creaturesAt(null, rows({ actor: TOWN, payload: { reason: "because" } }), now).has(a.id), true, "a reason outside DESPAWN_REASONS is not the record's");
+  assert.equal(creaturesAt(null, rows({ actor: TOWN, payload: {} }), now).has(a.id), true, "no reason is not a reason");
+  assert.equal(creaturesAt(null, rows({ actor: sched.spawns[1].id, payload: { reason: "fled" } }), now).has(a.id), true, "another creature cannot withdraw it");
+  assert.equal(creaturesAt(null, rows({ actor: a.id, payload: { reason: "fled" } }), now).has(a.id), false, "it may flee by its own act");
+  assert.equal(creaturesAt(null, rows({ actor: TOWN, payload: { reason: "faded" } }), now).has(a.id), false);
+});
+
+test("the save photographs the written fold: a fade not yet written stays in it, stays due, and folds once written", () => {
+  // the review's probe: a fade 10 s before a save, with the tick not yet run
+  const N = 270, { acts, sched } = windowLog(N);
+  const first = sched.spawns[0];
+  const saveMs = Date.parse(first.fades_at) + 10000;
+  const snap = JSON.parse(JSON.stringify(creaturesSnapshot(N + 1, saveMs, null, acts)));
+  assert.ok(snap.creatures.some((c) => c.id === first.id), "in the photograph: spawned and not yet withdrawn");
+  assert.equal(creaturesAt(snap, [], saveMs).has(first.id), false, "but no read sees it: its span is over");
+  assert.ok(dueFades(snap, [], saveMs + 20000).some((f) => f.id === first.id), "and its fade is still due after the save");
+  const fade = { at: t(saveMs + 20000), actor: TOWN, action: "withdraw", object: first.id, payload: { reason: "faded", fades_at: first.fades_at } };
+  assert.ok(!dueFades(snap, [fade], saveMs + 20000).some((f) => f.id === first.id), "the fade written after the save folds");
+  assert.equal(creaturesWritten(snap, [fade], saveMs + 20000).has(first.id), false);
+});
+
+test("snapshot parity: a chain of saves plus the rows since folds to the same creatures as the whole log", () => {
+  const { acts: a270, sched } = windowLog(270, { lateMs: 12000 });
   const b = sched.spawns[1];
-  const revise = { at: new Date(b.at_ms + 60000).toISOString(), actor: b.id, action: "snarl", object: "kogane", payload: { after: { moods: { fear: 3, curiosity: 0 }, flags: [] } } };
-  const all = [...acts, revise];
-  const boundary = windowOf(271).startMs;   // the crossing save at 271's boundary
-  const snap = creaturesSnapshot(271, boundary, creaturesAt(null, all, boundary));
-  assert.equal(snap.creature_count, snap.creatures.length);
-  assert.ok(snap.creatures.every((c) => !("memory" in c)), "no memory is saved");
-  assert.deepEqual(snap.creatures.map((c) => c.id), [...snap.creatures.map((c) => c.id)].sort(), "by id");
-  // a round trip through JSON, as STATE/ holds it, and on into the next window
-  const saved = JSON.parse(JSON.stringify(snap));
-  const next = windowLog(271).acts;
-  for (const ms of [boundary + 1, boundary + 6 * 3600e3, windowOf(272).startMs]) {
-    const fromSnap = creaturesSnapshot(0, ms, creaturesAt(saved, next, ms));
-    const fromAll = creaturesSnapshot(0, ms, creaturesAt(null, [...all, ...next], ms));
-    assert.deepEqual(fromSnap, fromAll, `the same creatures at ${new Date(ms).toISOString()}`);
+  const revise = { at: t(b.at_ms + 60000), actor: b.id, action: "snarl", object: "kogane", payload: { after: { moods: { fear: 3, curiosity: 0 }, flags: [] } } };
+  const base = [...a270, revise, ...windowLog(271, { lateMs: 12000 }).acts, ...windowLog(272, { lateMs: 12000 }).acts];
+  // the tick writes each fade 25 s after it falls
+  const fades = [...creaturesWritten(null, base, Infinity).values()]
+    .map((c) => ({ at: t(Date.parse(c.fades_at) + 25000), actor: TOWN, action: "withdraw", object: c.id, payload: { reason: "faded", fades_at: c.fades_at } }));
+  const all = [...base, ...fades];
+  let saved = null;
+  for (const N of [271, 272, 273]) {
+    const boundary = windowOf(N).startMs;
+    const since = (snap) => all.filter((r) => Date.parse(r.at) > (snap ? Date.parse(snap.evaluated_at) : -Infinity));
+    const snap = JSON.parse(JSON.stringify(creaturesSnapshot(N, boundary, saved, since(saved))));
+    assert.equal(snap.creature_count, snap.creatures.length);
+    assert.ok(snap.creatures.every((c) => !("memory" in c)), "no memory is saved");
+    assert.deepEqual(snap, JSON.parse(JSON.stringify(creaturesSnapshot(N, boundary, null, all))), `the chained save at ${N} equals the whole-log save`);
+    for (const ms of [boundary + 1, boundary + 6 * 3600e3]) {
+      assert.deepEqual([...creaturesAt(snap, since(snap), ms).keys()].sort(), [...creaturesAt(null, all, ms).keys()].sort(), `the same creatures at ${t(ms)}`);
+    }
+    saved = snap;
   }
-  assert.ok(creaturesSnapshot(272, windowOf(272).startMs, creaturesAt(saved, next, windowOf(272).startMs)).creatures.every((c) => c.crossing === 271), "270's have all faded by 272");
+  assert.ok(saved.creatures.every((c) => c.crossing === 272), "270's and 271's have all faded and been written by 273");
 });
 
 test("ids: the creature: prefix keeps them out of the handle namespace", () => {

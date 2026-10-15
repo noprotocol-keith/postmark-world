@@ -27,7 +27,6 @@
 //   about: …                       one line on what it does
 //   what: >                        a paragraph (the indented lines that follow)
 //   ring_m: 80                     its awareness ring, in metres (no line of sight, like earshot)
-//   span_h: 12                     how long it lives from its spawn, in hours
 //   moods:                         each mood a range and its start, and optionally
 //     fear: 0..3 = 1 | calm | uneasy | frightened | terrified
 //                                  one label per level (what Jev's Score reads)
@@ -45,6 +44,11 @@
 // at once: a withdraw with reason `fled`). Several are joined by " ; ".
 //
 // A line may name `{actor}`, the acting resident, and nothing else.
+//
+// A `#` after a space ends a line's comment, except on a reaction line, which may
+// not carry one (it would cut what the reaction says); no line is longer than
+// MAX_LINE. How long a creature lives is not here: it is the creature class's
+// `span_h` dial, its one home (ruled: twelve hours for every kind, § 7).
 
 import { readFileSync } from "node:fs";
 
@@ -168,7 +172,7 @@ export function parseEffects(src, { moods, flags }) {
       return { do: m[1], flag: m[2] };
     }
     if ((m = /^self\.(\w+)\s+([+-]\d+)$/.exec(s))) {
-      if (!moods[m[1]]) throw new Error(`the effect "${s}" names a mood the kind does not have (moods: ${Object.keys(moods).join(", ")})`);
+      if (!Object.hasOwn(moods, m[1])) throw new Error(`the effect "${s}" names a mood the kind does not have (moods: ${Object.keys(moods).join(", ")})`);
       return { do: "add", mood: m[1], by: Number(m[2]) };
     }
     throw new Error(`cannot read the effect "${s}"`);
@@ -178,7 +182,10 @@ export function parseEffects(src, { moods, flags }) {
 // ── the kind file ───────────────────────────────────────────────────────────────
 const MOOD = /^([a-z][\w-]*):\s*(-?\d+)\.\.(-?\d+)\s*=\s*(-?\d+)\s*(?:\|(.*))?$/;
 const REACTION = /^reaction\s+([a-z][\w-]*)\s+"([^"]*)":\s*when\s+(.*?)(?:\s+does\s+(.*?))?\s+says\s+(.*)$/;
-const SINGLE = new Set(["kind", "name", "voice", "about", "ring_m", "span_h", "flags"]);
+const SINGLE = new Set(["kind", "name", "voice", "about", "ring_m", "flags"]);
+/** The longest line a kind file may hold (the reaction pattern is not linear in a
+ *  hostile line's length; kind files are reviewed law, and this closes it anyway). */
+export const MAX_LINE = 2000;
 
 /** Parse a kind file's text. Throws, naming the line, on anything it cannot read or
  *  that the Mists' law refuses. */
@@ -190,7 +197,10 @@ export function parseKind(text, { source = "kind file" } = {}) {
   const fail = (n, why) => { throw new Error(`${source} line ${n + 1}: ${why}`); };
   for (let n = 0; n < lines.length; n += 1) {
     const raw = lines[n];
+    if (raw.length > MAX_LINE) fail(n, `a line is at most ${MAX_LINE} characters (this one is ${raw.length})`);
     if (/^\s*(#|$)/.test(raw)) continue;
+    // a reaction line may not carry a comment: " #" would silently cut what it says
+    if (/^reaction\b/.test(raw) && /\s#/.test(raw)) fail(n, `a reaction line may not carry " #": it would cut what the reaction says (put the comment on its own line)`);
     const line = raw.replace(/\s+#.*$/, "");
     if (/^\s/.test(raw)) {
       if (block === "what") { kind.what = kind.what ? `${kind.what} ${line.trim()}` : line.trim(); continue; }
@@ -204,7 +214,7 @@ export function parseKind(text, { source = "kind file" } = {}) {
           mood.levels = labels.split("|").map((s) => s.trim());
           if (mood.levels.length !== mood.hi - mood.lo + 1 || mood.levels.some((s) => !s)) fail(n, `the mood ${name} needs one label per level (${mood.hi - mood.lo + 1})`);
         }
-        if (kind.moods[name]) fail(n, `the mood ${name} is declared twice`);
+        if (Object.hasOwn(kind.moods, name)) fail(n, `the mood ${name} is declared twice`);
         kind.moods[name] = mood;
         continue;
       }
@@ -228,13 +238,11 @@ export function parseKind(text, { source = "kind file" } = {}) {
 
   if (!/^[a-z][a-z0-9-]*$/.test(kind.kind ?? "")) throw new Error(`${source}: kind: must be a lowercase slug (got ${JSON.stringify(kind.kind)})`);
   if (!kind.name) throw new Error(`${source}: name: is required`);
-  for (const k of ["ring_m", "span_h"]) {
-    const v = Number(kind[k]);
-    if (!(Number.isFinite(v) && v > 0)) throw new Error(`${source}: ${k}: must be a number above 0 (got ${JSON.stringify(kind[k])})`);
-    kind[k] = v;
-  }
+  const ring = Number(kind.ring_m);
+  if (!(Number.isFinite(ring) && ring > 0)) throw new Error(`${source}: ring_m: must be a number above 0 (got ${JSON.stringify(kind.ring_m)})`);
+  kind.ring_m = ring;
   if (!Object.keys(kind.moods).length) throw new Error(`${source}: a kind needs at least one mood`);
-  for (const f of kind.flags) if (!/^[a-z][\w-]*$/.test(f) || kind.moods[f]) throw new Error(`${source}: the flag "${f}" must be a slug and not a mood's name`);
+  for (const f of kind.flags) if (!/^[a-z][\w-]*$/.test(f) || Object.hasOwn(kind.moods, f)) throw new Error(`${source}: the flag "${f}" must be a slug and not a mood's name`);
 
   const known = new Set([...ACT_FIELDS, ...Object.keys(kind.moods).map((k) => `self.${k}`), ...kind.flags.map((f) => `self.${f}`)]);
   for (const { n, m } of pending) {
@@ -294,6 +302,7 @@ export function applyEffects(kind, state, effects) {
     else if (e.do === "set" && !next.flags.includes(e.flag)) next.flags.push(e.flag);
     else if (e.do === "clear") next.flags = next.flags.filter((f) => f !== e.flag);
     else if (e.do === "add") {
+      if (!Object.hasOwn(kind.moods, e.mood) || !Object.hasOwn(next.moods, e.mood)) throw new Error(`this kind has no mood ${e.mood}`);
       const m = kind.moods[e.mood];
       next.moods[e.mood] = Math.max(m.lo, Math.min(m.hi, next.moods[e.mood] + e.by));
     }
@@ -304,5 +313,5 @@ export function applyEffects(kind, state, effects) {
 
 /** The line a reaction leaves: its template, with the acting resident named. */
 export function voiceLine(reaction, { actor }) {
-  return reaction.says.replaceAll("{actor}", String(actor));
+  return reaction.says.replaceAll("{actor}", () => String(actor));   // a function, so "$&" in a name is only a name
 }

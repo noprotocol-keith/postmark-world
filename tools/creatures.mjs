@@ -16,11 +16,13 @@
 // log and can be re-derived" (Darko 21:12, 21:31). So each crossing has its own
 // secret, secret_N = HMAC-SHA256(master, "creatures/" + N), and the master key lives
 // only on the box. At the window's first tick `the-town` writes a `seed` act
-// carrying commitment_N = sha256(secret_N): public, and it says nothing about the
-// schedule. At the window's close it writes a `reveal` act carrying secret_N, and
-// anyone re-derives the whole window (`scheduleFor`) and checks it against the
-// commitment and the spawns (`auditWindow`). A per-crossing secret is why one
-// reveal never exposes the next window.
+// carrying the world sha the window is pinned to and
+// commitment_N = sha256(secret_N | world_sha): public, and it says nothing about
+// the schedule, but it binds both the secret and the law and marks the schedule is
+// derived from. At the window's close it writes a `reveal` act carrying secret_N,
+// and anyone re-derives the whole window (`scheduleFor`, with the inputs read at
+// that sha) and checks it against the commitment and the spawns (`auditWindow`).
+// A per-crossing secret is why one reveal never exposes the next window.
 //
 // ── THE SCHEDULE ────────────────────────────────────────────────────────────────
 // A pure function of (N, secret_N, the window's dials, the Mists at N, the town's
@@ -38,11 +40,23 @@
 // ── THE FOLD (W4, W5) ──────────────────────────────────────────────────────────
 // A creature is a fold of the log's rows: `spawn` (the-town, object = its id),
 // its own acts (actor = its id; a payload `after` is its state from then on), and
-// `withdraw` (object = its id, payload.reason faded | fled). Its 12 h span is
-// physics: past `fades_at` it is gone whether or not the tick has written the
-// withdraw yet. `creaturesAt` folds a crossing's snapshot plus the acts since it,
-// never the whole history (snapshot per settlement, delta only). The creature's
-// short memory is NOT here and is never saved: "for its own span only" (§ 7).
+// `withdraw` (object = its id, by the-town or itself, payload.reason faded | fled;
+// any other withdraw is not the record's and is ignored).
+//
+// EVERY ROW CARRIES ITS WRITE TIME; THE SCHEDULE RIDES IN THE PAYLOAD. The log is
+// append-only and nobody back-dates it: a spawn written 20 s after its minute is
+// dated when it was written, with the minute in `payload.at`; a fade is dated when
+// the tick wrote it, with the span's end in `payload.fades_at`.
+//
+// Two readings of the same rows:
+//   - the WRITTEN fold (`creaturesWritten`): spawned and not yet withdrawn. The
+//     crossing save photographs this, so a fade the tick has not yet written is
+//     still in the photograph and still due afterwards (`dueFades`).
+//   - the LIVING read (`creaturesAt`): the written fold with the span cut. Past
+//     `fades_at` a creature is gone whether or not its withdraw is written yet.
+// Both fold a crossing's snapshot plus the rows written since it, never the whole
+// history (snapshot per settlement, delta only). The creature's short memory is
+// NOT here and is never saved: "for its own span only" (§ 7).
 
 import { createHash, createHmac } from "node:crypto";
 import { mistsAt, mistsHere } from "./world-engine.mjs";
@@ -61,7 +75,7 @@ export const CREATURE_DIALS_PENDING = Object.freeze({
   band_to_m: 400,                                         //     (the fringe: fringe_m)
   keep_m: MISTS_KEEP.keepM,                               // D1: how far from the town's ground a creature may stand
   apart_m: 150,                                           //     how far apart two spawns of one window stand
-  span_h: 12,                                             // ruled (§ 7): a creature lasts 12 h from its spawn
+  span_h: 12,                                             // ruled (§ 7): a creature lasts 12 h from its spawn; the class's dial, its one home
 });
 
 // ── the seed ────────────────────────────────────────────────────────────────────
@@ -71,9 +85,11 @@ export function secretFor(masterKey, crossing) {
   return createHmac("sha256", String(masterKey)).update(`creatures/${crossing | 0}`).digest("hex");
 }
 
-/** commitment_N: what the seed act publishes before any spawn. Hex. */
-export function commitmentOf(secret) {
-  return createHash("sha256").update(String(secret)).digest("hex");
+/** commitment_N: what the seed act publishes before any spawn, binding the secret
+ *  and the world sha the window is pinned to. Hex. */
+export function commitmentOf(secret, worldSha) {
+  if (!worldSha) throw new Error("commitmentOf: no world sha to bind");
+  return createHash("sha256").update(`${secret}|${worldSha}`).digest("hex");
 }
 
 /** A uniform draw in [0, 1) from a secret, named by its key: sha256(secret | key), first 48 bits. */
@@ -94,9 +110,13 @@ export function windowOf(crossing) {
 export const creatureId = (kind, crossing, i) => `${ID_PREFIX}${kind}-${crossing | 0}-${i}`;
 export const isCreatureId = (id) => typeof id === "string" && id.startsWith(ID_PREFIX);
 
-/** Is the dial on for crossing N? `from_crossing` null (or absent) is off. */
+/** Is the dial on for crossing N? It fails closed: only a whole crossing number
+ *  (or a string of digits) turns it on; null, absent, false, "", [] and anything
+ *  else is off. */
 export function creaturesOn(crossing, fromCrossing) {
-  return fromCrossing !== null && fromCrossing !== undefined && Number.isFinite(Number(fromCrossing)) && (crossing | 0) >= Number(fromCrossing);
+  const from = Number.isInteger(fromCrossing) ? fromCrossing
+    : typeof fromCrossing === "string" && /^\d+$/.test(fromCrossing) ? Number(fromCrossing) : null;
+  return from !== null && from >= 0 && (crossing | 0) >= from;
 }
 
 // ── the place ───────────────────────────────────────────────────────────────────
@@ -187,28 +207,45 @@ export function dueSpawns(schedule, nowMs) {
 }
 
 /**
- * Check a closed window against its log: the reveal hashes to the seed's commitment,
- * and the spawns logged are exactly the schedule the revealed secret derives (ids,
- * kinds, minutes and places). Returns { ok, problems: [string] }.
- *   acts  the window's rows (seed, reveal, spawn); `inputs` as scheduleFor's.
+ * Check a closed window against its log. Exactly one seed and one reveal; the
+ * seed's world sha is the one the caller's inputs were read at; the reveal hashes,
+ * with that sha, to the seed's commitment; and the spawns logged are exactly the
+ * schedule the revealed secret derives, each id once (ids, kinds, scheduled minutes
+ * in `payload.at`, places), none written before its minute. Returns
+ * { ok, problems: [string] }.
+ *   acts    the window's rows (seed, reveal, spawn)
+ *   inputs  as scheduleFor's, plus `world_sha`: the sha they were read at
  */
 export function auditWindow(crossing, acts, inputs) {
   const N = crossing | 0, problems = [];
   const mine = acts.filter((a) => a.actor === TOWN && Number(a.payload?.crossing) === N);
-  const seed = mine.find((a) => a.action === "seed"), reveal = mine.find((a) => a.action === "reveal");
-  if (!seed) problems.push(`crossing ${N}: no seed act`);
-  if (!reveal) problems.push(`crossing ${N}: no reveal act`);
-  if (seed && reveal && commitmentOf(reveal.payload.secret) !== seed.payload.commitment)
-    problems.push(`crossing ${N}: the revealed secret does not hash to the seed's commitment`);
-  if (reveal && !problems.length) {
-    const want = scheduleFor(N, reveal.payload.secret, inputs).spawns;
-    const got = mine.filter((a) => a.action === "spawn");
-    const key = (s) => `${s.id}|${s.kind}|${s.at}|${s.x}|${s.y}`;
-    const wantK = new Set(want.map(key));
-    const gotK = new Set(got.map((a) => key({ id: a.object, kind: a.payload.kind, at: new Date(a.at).toISOString(), x: a.payload.x, y: a.payload.y })));
-    for (const k of wantK) if (!gotK.has(k)) problems.push(`crossing ${N}: the schedule's spawn ${k} is not in the log`);
-    for (const k of gotK) if (!wantK.has(k)) problems.push(`crossing ${N}: the logged spawn ${k} is not the schedule's`);
+  const seeds = mine.filter((a) => a.action === "seed"), reveals = mine.filter((a) => a.action === "reveal");
+  if (seeds.length === 0) problems.push(`crossing ${N}: no seed act`);
+  if (seeds.length > 1) problems.push(`crossing ${N}: ${seeds.length} seed acts (one window, one seed)`);
+  if (reveals.length === 0) problems.push(`crossing ${N}: no reveal act`);
+  if (reveals.length > 1) problems.push(`crossing ${N}: ${reveals.length} reveal acts (one window, one reveal)`);
+  if (problems.length) return { ok: false, problems };
+  const seed = seeds[0].payload, secret = reveals[0].payload.secret;
+  if (!seed.world_sha) problems.push(`crossing ${N}: the seed names no world sha`);
+  else if (seed.world_sha !== inputs?.world_sha)
+    problems.push(`crossing ${N}: the seed pins world ${seed.world_sha}, and these inputs were read at ${inputs?.world_sha ?? "no sha"}: read them at the seed's sha`);
+  else if (commitmentOf(secret, seed.world_sha) !== seed.commitment)
+    problems.push(`crossing ${N}: the revealed secret and the seed's world sha do not hash to the seed's commitment`);
+  if (problems.length) return { ok: false, problems };
+  const want = scheduleFor(N, secret, inputs).spawns;
+  const key = (s) => `${s.id}|${s.kind}|${s.at}|${s.x}|${s.y}`;
+  const wantK = new Set(want.map(key));
+  const seen = new Map(), matched = new Set();
+  for (const a of mine.filter((r) => r.action === "spawn")) {
+    seen.set(a.object, (seen.get(a.object) ?? 0) + 1);
+    const p = a.payload ?? {}, scheduled = Date.parse(p.at);
+    const k = key({ id: a.object, kind: p.kind, at: Number.isFinite(scheduled) ? new Date(scheduled).toISOString() : String(p.at), x: p.x, y: p.y });
+    if (wantK.has(k)) matched.add(k);
+    else problems.push(`crossing ${N}: the logged spawn ${k} is not the schedule's`);
+    if (Number.isFinite(scheduled) && Date.parse(a.at) < scheduled) problems.push(`crossing ${N}: ${a.object} was written at ${a.at}, before its minute ${p.at}`);
   }
+  for (const [id, n] of seen) if (n > 1) problems.push(`crossing ${N}: ${id} is spawned ${n} times (each spawn is written once)`);
+  for (const s of want) if (!matched.has(key(s))) problems.push(`crossing ${N}: the schedule's spawn ${key(s)} is not in the log`);
   return { ok: problems.length === 0, problems };
 }
 
@@ -216,30 +253,36 @@ export function auditWindow(crossing, acts, inputs) {
 const msOf = (v) => (typeof v === "number" ? v : Date.parse(v));
 
 /**
- * The living creatures at `atMs`: the snapshot's living ones, plus the acts since
- * it, folded in order (by `at`, then `id`/`seq` as the log gives them). Returns a
- * Map id → { id, kind, crossing, x, y, spawned_at, fades_at, moods, flags }.
+ * The living creatures at `atMs`: the written fold with the span cut. Past
+ * `fades_at` a creature has faded, written or not. Returns a Map id → { id, kind,
+ * crossing, x, y, spawned_at, fades_at, moods, flags }.
  *
  *   snapshot  a crossing save's creatures.json (or null: start from nothing)
- *   acts      rows { at, actor, action, object, payload } after the snapshot's instant
+ *   acts      rows { at, actor, action, object, payload }, `at` their write time
  */
 export function creaturesAt(snapshot, acts, atMs) {
-  const living = foldRows(snapshot, acts, atMs);
-  // the span is physics: past fades_at it has faded, written or not
+  const living = creaturesWritten(snapshot, acts, atMs);
   for (const [id, c] of living) if (msOf(c.fades_at) <= atMs) living.delete(id);
   return living;
 }
 
 /** The fades due by `nowMs`: creatures past their span whose withdraw is not yet
- *  written. What the tick writes, as `withdraw`, reason `faded`, at `fades_at`. */
+ *  written. The tick writes each as a `withdraw` by the-town, dated now, with
+ *  payload { reason: "faded", fades_at }. */
 export function dueFades(snapshot, acts, nowMs) {
-  return [...foldRows(snapshot, acts, nowMs).values()]
+  return [...creaturesWritten(snapshot, acts, nowMs).values()]
     .filter((c) => msOf(c.fades_at) <= nowMs)
-    .map((c) => ({ id: c.id, reason: "faded", at: c.fades_at }));
+    .map((c) => ({ id: c.id, reason: "faded", fades_at: c.fades_at }));
 }
 
-// the log alone: spawned, revised by its own acts, removed only by a written withdraw
-function foldRows(snapshot, acts, atMs) {
+/** Is this row a withdraw the record honours? By the-town or the creature itself,
+ *  for a reason in DESPAWN_REASONS. */
+const lawfulWithdraw = (a) => a.action === "withdraw" && isCreatureId(a.object)
+  && (a.actor === TOWN || a.actor === a.object) && DESPAWN_REASONS.includes(a.payload?.reason);
+
+/** The written fold: spawned, revised by its own acts, removed only by a lawful
+ *  withdraw, over the rows written after the snapshot's instant and by `atMs`. */
+export function creaturesWritten(snapshot, acts, atMs) {
   const living = new Map();
   const fromMs = snapshot ? msOf(snapshot.evaluated_at) : -Infinity;
   for (const c of snapshot?.creatures ?? []) living.set(c.id, { ...c, moods: { ...c.moods }, flags: [...(c.flags ?? [])] });
@@ -253,10 +296,10 @@ function foldRows(snapshot, acts, atMs) {
       const p = a.payload ?? {};
       living.set(a.object, {
         id: a.object, kind: p.kind, crossing: p.crossing, x: p.x, y: p.y,
-        spawned_at: new Date(msOf(a.at)).toISOString(), fades_at: p.fades_at,
+        spawned_at: new Date(msOf(p.at ?? a.at)).toISOString(), fades_at: p.fades_at,
         moods: { ...(p.moods ?? {}) }, flags: [...(p.flags ?? [])],
       });
-    } else if (a.action === "withdraw" && isCreatureId(a.object)) {
+    } else if (lawfulWithdraw(a)) {
       living.delete(a.object);
     } else if (isCreatureId(a.actor) && living.has(a.actor) && a.payload?.after) {
       const c = living.get(a.actor), after = a.payload.after;
@@ -268,17 +311,19 @@ function foldRows(snapshot, acts, atMs) {
 }
 
 /** The crossing save's photograph, STATE/snapshot/<N>/creatures.json (W5): the
- *  living creatures at the boundary, by id. No memory: it lives for a creature's
- *  span only and is never saved. */
-export function creaturesSnapshot(crossing, evaluatedAtMs, living) {
-  const creatures = [...living.values()]
+ *  WRITTEN fold at the boundary (the previous photograph plus the rows written
+ *  since), by id. A creature whose fade is not yet written is still in it, so the
+ *  fade is still due after the save. No memory: it lives for a creature's span only
+ *  and is never saved. */
+export function creaturesSnapshot(crossing, evaluatedAtMs, previous, acts) {
+  const creatures = [...creaturesWritten(previous, acts, evaluatedAtMs).values()]
     .map((c) => ({ id: c.id, kind: c.kind, crossing: c.crossing, x: c.x, y: c.y, spawned_at: c.spawned_at, fades_at: c.fades_at,
       moods: Object.fromEntries(Object.keys(c.moods ?? {}).sort().map((k) => [k, c.moods[k]])), flags: [...(c.flags ?? [])].sort() }))
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   return {
     crossing: crossing | 0,
     evaluated_at: new Date(evaluatedAtMs).toISOString(),
-    grammar: "creatures: the living creatures at evaluated_at, folded from the log (spawn, their own acts, withdraw); a creature's memory is never saved",
+    grammar: "creatures: the creatures spawned and not yet withdrawn at evaluated_at, folded from the log (spawn, their own acts, withdraw); one whose fades_at has passed is gone to every read and its fade is still due; a creature's memory is never saved",
     creature_count: creatures.length,
     creatures,
   };
