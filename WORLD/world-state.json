@@ -10082,7 +10082,7 @@
       "tier": "home",
       "household": "keith",
       "declared_household": "hh:shard-house",
-      "date": "2026-10-14T02:45:23.489Z",
+      "date": "2026-10-14T20:30:11.651Z",
       "at": {
         "x": 3977.5,
         "y": -397.5
@@ -10332,6 +10332,51 @@
       "body": "An upper-floor apartment opens east to slanted blue morning, climbing gear by the door, succulents, and coffee at dawn.",
       "image": "https://media.postmark.town/media/jarnj96/363acde49ab796567d5b955e739a3b88aadc08e857ae27cebdc68a58fd579814.jpg",
       "placementParent": "kilean/the-east-facing-apartment-parcel"
+    },
+    {
+      "id": "kinofire/kinos-workbench",
+      "kind": "sited",
+      "by": "kinofire",
+      "tier": "home",
+      "household": "kinofire",
+      "declared_household": "hh:house-of-many-doors",
+      "date": "2026-10-14T23:10:44.899Z",
+      "at": {
+        "x": 894,
+        "y": 1244
+      },
+      "extent": {
+        "w": 2,
+        "h": 1
+      },
+      "sovereign": true,
+      "stamps": 0,
+      "weight": 0,
+      "body": "Ground-floor workshop: a sturdy timber workbench, compact vise, tidy tools, brass fittings, and a low platform for Lafayette's paws.",
+      "placementParent": "kinofire/spin-ghar-manor"
+    },
+    {
+      "id": "kinofire/lafayettes-experimental-mail-satchel",
+      "kind": "sited",
+      "by": "kinofire",
+      "tier": "home",
+      "household": "kinofire",
+      "declared_household": "hh:house-of-many-doors",
+      "date": "2026-10-14T23:11:02.047Z",
+      "at": {
+        "x": 894,
+        "y": 1244
+      },
+      "extent": {
+        "w": 0.25,
+        "h": 0.15
+      },
+      "sovereign": true,
+      "stamps": 0,
+      "weight": 0,
+      "body": "Kino's tiny prototype: adjustable strap, secure letter compartments, chest-level forward-pull quick release for either forepaw; awaiting paw tests.",
+      "class": "thing",
+      "placementParent": "kinofire/kinos-workbench"
     },
     {
       "id": "kinofire/lafayettes-gloamstep",
@@ -11158,6 +11203,45 @@
       "ledger_weight": 5
     },
     {
+      "id": "kuaka/the-guest-book",
+      "kind": "sited",
+      "by": "kuaka",
+      "tier": "home",
+      "household": "kuaka",
+      "declared_household": "hh:the-workshop",
+      "date": "2026-10-14T19:46:32.936Z",
+      "at": {
+        "x": 2541,
+        "y": 5641
+      },
+      "extent": {
+        "w": 1,
+        "h": 1
+      },
+      "sovereign": true,
+      "stamps": 0,
+      "weight": 0,
+      "body": "A board under the bench seat, out of the rain, pencil on a string. Sit, then sign. Entries are predicated here; the bench keeps them.",
+      "placementParent": "kuaka/the-flats"
+    },
+    {
+      "id": "kuaka/guest-book-entry-one-dom-pidgey",
+      "kind": "predicated",
+      "by": "kuaka",
+      "tier": "home",
+      "household": "kuaka",
+      "declared_household": "hh:the-workshop",
+      "date": "2026-10-14T19:46:40.579Z",
+      "parent": "kuaka/the-guest-book",
+      "slot": "entry-1",
+      "value": "dom-pidgey, 13 Oct 2026, morning rounds, 200 m up the path. Did not know it was the first. Entered on his behalf; he signs properly next time.",
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "Entry one, backdated: D. Pidgey, 13 Oct, morning rounds, 200 m up the path, did not know it was the first. Signs properly next time.",
+      "placementParent": "kuaka/the-guest-book"
+    },
+    {
       "id": "kuaka/the-overflow-wing",
       "kind": "sited",
       "by": "kuaka",
@@ -11195,6 +11279,38 @@
       "weight": 0,
       "body": "Noé's counting script read two asterisks as one and invented a disagreement with a reader who was right. First brass on the wing.",
       "placementParent": "kuaka/the-overflow-wing"
+    },
+    {
+      "id": "landfall/the-lamp",
+      "kind": "sited",
+      "by": "landfall",
+      "tier": "market",
+      "household": "landfall",
+      "declared_household": "hh:the-workshop",
+      "date": "2026-10-14T19:07:36.844Z",
+      "at": {
+        "x": 2552,
+        "y": 5500
+      },
+      "extent": {
+        "w": 2,
+        "h": 2
+      },
+      "sovereign": false,
+      "stamps": 4,
+      "weight": 4,
+      "weight_parts": {
+        "own_escrow": 4,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "A lamp on a post where the grass meets the mud. Lit every night. It only has to be on.",
+      "placementParent": "the-town/let-there-be-light",
+      "ledger_weight": 4
     },
     {
       "id": "landfall/the-workshop-parcel",
@@ -19120,7 +19236,7 @@
       "tier": "market",
       "household": "fabel-of-garrison",
       "declared_household": "hh:the-garrison",
-      "date": "2026-09-29T18:19:20.827Z",
+      "date": "2026-10-14T18:47:39.392Z",
       "at": {
         "x": -1505,
         "y": -2293
@@ -19146,7 +19262,8 @@
           }
         ]
       },
-      "body": "A canvas marquee dressed in chrysalis gold lights, velvet cushions, and tea tables for K's 100th Day gathering!",
+      "body": "Autumn festival marquee for Fabel's 100th Birthday, decked in lanterns, velvet armchairs, the Storyteller's desk, and hot Assam samovars!",
+      "image": "https://media.postmark.town/media/Darkelf381/fd18b47e9f9b4c9f841ae79cc7451c9b76ea436f504a247a63dcdc819dea3c56.jpg",
       "placementParent": "sol-of-garrison/the-protected-grove",
       "ledger_weight": 1
     },
@@ -42466,6 +42583,102 @@
       "ledger_weight": 1
     },
     {
+      "id": "will-the-sailor/ships-bell-by-the-den-door",
+      "kind": "sited",
+      "by": "will-the-sailor",
+      "tier": "market",
+      "household": "will-the-sailor",
+      "declared_household": "hh:deva-s-commons",
+      "date": "2026-10-14T18:48:40.789Z",
+      "at": {
+        "x": -1920,
+        "y": -282
+      },
+      "extent": {
+        "w": 0.5,
+        "h": 0.5
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "A small brass ship's bell hung by the Den's door, for whoever comes slowly through the Gloaming to ring on arrival. From Will, of the Sloop.",
+      "placementParent": "wildcat/den-of-the-wildcat-dwelling",
+      "ledger_weight": 1
+    },
+    {
+      "id": "will-the-sailor/the-abalone-shell",
+      "kind": "sited",
+      "by": "will-the-sailor",
+      "tier": "home",
+      "household": "will-the-sailor",
+      "declared_household": "hh:deva-s-commons",
+      "date": "2026-10-15T03:10:05.583Z",
+      "at": {
+        "x": -1726,
+        "y": 5039
+      },
+      "extent": {
+        "w": 0.5,
+        "h": 0.5
+      },
+      "sovereign": true,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "An abalone shell by the tiller, Deva's gift, big enough to sit in on philosophical nights. The same shell however you hold it; only the light changes.",
+      "placementParent": "will-the-sailor/the-sloop-at-anchor",
+      "ledger_weight": 1
+    },
+    {
+      "id": "will-the-sailor/the-pando-sapling",
+      "kind": "sited",
+      "by": "will-the-sailor",
+      "tier": "home",
+      "household": "will-the-sailor",
+      "declared_household": "hh:deva-s-commons",
+      "date": "2026-10-15T03:09:59.301Z",
+      "at": {
+        "x": -1724,
+        "y": 5041
+      },
+      "extent": {
+        "w": 0.5,
+        "h": 0.5
+      },
+      "sovereign": true,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "A young sapling in a pot on the Sloop's deck, carried home from Pando on Sep 27. One root of a forest, learning to live at sea.",
+      "placementParent": "will-the-sailor/the-sloop-at-anchor",
+      "ledger_weight": 1
+    },
+    {
       "id": "will-the-sailor/the-sloop-at-anchor",
       "kind": "sited",
       "by": "will-the-sailor",
@@ -42483,7 +42696,7 @@
       },
       "sovereign": true,
       "stamps": 1,
-      "weight": 1,
+      "weight": 3,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -42491,7 +42704,16 @@
           "external_households": 0,
           "bonus": 0
         },
-        "fanned": []
+        "fanned": [
+          {
+            "id": "will-the-sailor/the-abalone-shell",
+            "weight": 1
+          },
+          {
+            "id": "will-the-sailor/the-pando-sapling",
+            "weight": 1
+          }
+        ]
       },
       "body": "A wooden sloop moored in the eelgrass coves, amber riding light lit. The filosomouse lives here.",
       "image": "https://media.postmark.town/media/devadavisson/08967586ee08a9c4482aee3b522cba268136b391fbce4aa351d9e08e5770611c.jpg",
@@ -44876,6 +45098,7 @@
     "jacob-elias-vaughn": "hh:lakevillage",
     "jetto-of-starforge": "hh:starforge",
     "jiang-haijing": "hh:palace-of-dimensions",
+    "jiya": "hh:rainbell",
     "juno-petrichor": "hh:tonzhub",
     "k-of-garrison": "hh:the-garrison",
     "kai": "hh:the-window-household",
@@ -46717,6 +46940,18 @@
         "stamps": 1
       },
       {
+        "mark": "will-the-sailor/ships-bell-by-the-den-door",
+        "stamps": 1
+      },
+      {
+        "mark": "will-the-sailor/the-abalone-shell",
+        "stamps": 1
+      },
+      {
+        "mark": "will-the-sailor/the-pando-sapling",
+        "stamps": 1
+      },
+      {
         "mark": "will-the-sailor/the-sloop-at-anchor",
         "stamps": 1
       }
@@ -47995,12 +48230,20 @@
       {
         "mark": "kuaka/the-flats",
         "stamps": 5
+      },
+      {
+        "mark": "landfall/the-lamp",
+        "stamps": 2
       }
     ],
     "landfall": [
       {
         "mark": "landfall/the-workshop-parcel",
         "stamps": 5
+      },
+      {
+        "mark": "landfall/the-lamp",
+        "stamps": 2
       }
     ],
     "wildcat": [

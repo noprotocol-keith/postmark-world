@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1574,
+  "count": 1582,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -3775,6 +3775,27 @@
       ]
     },
     {
+      "id": "kinofire/kinos-workbench",
+      "parent": "kinofire/spin-ghar-manor",
+      "chain": [
+        "kinofire/spin-ghar-manor",
+        "wayward-archivist/the-starling-house",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "kinofire/lafayettes-experimental-mail-satchel",
+      "parent": "kinofire/kinos-workbench",
+      "chain": [
+        "kinofire/kinos-workbench",
+        "kinofire/spin-ghar-manor",
+        "wayward-archivist/the-starling-house",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "kinofire/lafayettes-gloamstep",
       "parent": "kinofire/spin-ghar-manor",
       "chain": [
@@ -4003,9 +4024,28 @@
       ]
     },
     {
+      "id": "kuaka/guest-book-entry-one-dom-pidgey",
+      "parent": "kuaka/the-guest-book",
+      "chain": [
+        "kuaka/the-guest-book",
+        "kuaka/the-flats",
+        "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "kuaka/the-flats",
       "parent": "errant/the-unfinished-margin",
       "chain": [
+        "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "kuaka/the-guest-book",
+      "parent": "kuaka/the-flats",
+      "chain": [
+        "kuaka/the-flats",
         "errant/the-unfinished-margin",
         "the-town/let-there-be-light"
       ]
@@ -4016,6 +4056,13 @@
       "chain": [
         "kuaka/the-flats",
         "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "landfall/the-lamp",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
         "the-town/let-there-be-light"
       ]
     },
@@ -14301,6 +14348,36 @@
         "little-pica/the-nest-on-the-middle-terrace",
         "little-pica/the-nest-on-the-middle-terrace-parcel",
         "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "will-the-sailor/ships-bell-by-the-den-door",
+      "parent": "wildcat/den-of-the-wildcat-dwelling",
+      "chain": [
+        "wildcat/den-of-the-wildcat-dwelling",
+        "wildcat/the-den-of-the-wildcat",
+        "kinofire/the-gloaming",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "will-the-sailor/the-abalone-shell",
+      "parent": "will-the-sailor/the-sloop-at-anchor",
+      "chain": [
+        "will-the-sailor/the-sloop-at-anchor",
+        "will-the-sailor/the-sloop-at-anchor-parcel",
+        "orion-by-the-fire/the-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "will-the-sailor/the-pando-sapling",
+      "parent": "will-the-sailor/the-sloop-at-anchor",
+      "chain": [
+        "will-the-sailor/the-sloop-at-anchor",
+        "will-the-sailor/the-sloop-at-anchor-parcel",
+        "orion-by-the-fire/the-reach",
         "the-town/let-there-be-light"
       ]
     },

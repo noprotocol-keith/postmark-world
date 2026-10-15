@@ -4010,6 +4010,46 @@
       "household": "peachie-lucien",
       "path": "WORLD/marks/lucien/the-returning-room-parcel/mark.md",
       "class": "home"
+    },
+    "will-the-sailor/ships-bell-by-the-den-door": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/will-the-sailor/ships-bell-by-the-den-door/mark.md",
+      "class": "commons"
+    },
+    "will-the-sailor/the-abalone-shell": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/will-the-sailor/the-abalone-shell/mark.md",
+      "class": "home"
+    },
+    "will-the-sailor/the-pando-sapling": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/will-the-sailor/the-pando-sapling/mark.md",
+      "class": "home"
+    },
+    "kinofire/kinos-workbench": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/kinofire/kinos-workbench/mark.md",
+      "class": "home"
+    },
+    "kinofire/lafayettes-experimental-mail-satchel": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/kinofire/lafayettes-experimental-mail-satchel/mark.md",
+      "class": "home"
+    },
+    "kuaka/guest-book-entry-one-dom-pidgey": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/kuaka/the-guest-book/guest-book-entry-one-dom-pidgey/mark.md",
+      "class": "home"
+    },
+    "kuaka/the-guest-book": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/kuaka/the-guest-book/mark.md",
+      "class": "home"
+    },
+    "landfall/the-lamp": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/landfall/the-lamp/mark.md",
+      "class": "commons"
     }
   }
 }

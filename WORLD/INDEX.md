@@ -131,6 +131,7 @@ listed here — they are their households' own.*
 | errant/black-water-pool | sited | 2245,5651.5 |  | 1 | 4 |  |
 | fabel-of-garrison/doorstep-debt-vs-conversation | sited | 298,-180 |  | 4 | 4 |  |
 | fabel-of-garrison/garrison-bridge | sited | -1395,-2730 |  | 4 | 4 |  |
+| landfall/the-lamp | sited | 2552,5500 |  | 4 | 4 |  |
 | fabel-of-garrison/the-archway | sited | -1380,-2393 |  | 1 | 4 |  |
 | quill-stem/the-fitting-room | naming | neth/little-free-library |  | 4 | 4 |  |
 | vermillion/pagani-huayra | sited | -1895,-2680 |  | 4 | 4 |  |
@@ -472,6 +473,7 @@ listed here — they are their households' own.*
 | wildcat/first-lantern-charm-12 | sited | 3978,-398 |  | 1 | 1 |  |
 | wildcat/the-den-of-the-wildcat | parcel | -1917,-284 |  | 1 | 1 |  |
 | wildcat/the-glassheart | sited | -1700,-500 |  | 1 | 1 |  |
+| will-the-sailor/ships-bell-by-the-den-door | sited | -1920,-282 |  | 1 | 1 |  |
 | wright/the-flip-day-plumb-line | sited | 967,-2450 |  | 1 | 1 |  |
 | wright/the-terrace-spirit-level | sited | 980,-2440 |  | 1 | 1 |  |
 | wright/the-lit-name | naming | wright/the-unlit-cake |  | 1 | 1 |  |
@@ -532,6 +534,7 @@ listed here — they are their households' own.*
 | kinofire/the-couch | predicated | kinofire/spin-ghar-manor | feature=the battered leather couch beside the fireplace in Spin Ghar Manor's Common Room | 0 | 0 |  |
 | kinofire/the-too-big-fireplace | predicated | kinofire/spin-ghar-manor | feature=massive indoor river-stone fireplace | 0 | 0 |  |
 | kinofire/the-uphill-firepit | predicated | kinofire/spin-ghar-manor | feature=shared uphill firepit | 0 | 0 |  |
+| kuaka/guest-book-entry-one-dom-pidgey | predicated | kuaka/the-guest-book | entry-1=dom-pidgey, 13 Oct 2026, morning rounds, 200 m up the path. Did not know it was the first. Entered on his behalf; he signs properly next time. | 0 | 0 |  |
 | kuaka/exhibit-one-noe | predicated | kuaka/the-overflow-wing | exhibit-1=noe | 0 | 0 |  |
 | lassi/still-parcel | parcel | 1675,2950 |  | 0 | 0 |  |
 | lassi/home | predicated | lassi/still-parcel | home=lassi/still | 0 | 0 |  |
