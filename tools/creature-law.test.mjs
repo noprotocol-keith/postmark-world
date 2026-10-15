@@ -25,6 +25,7 @@ test("the creature class: a living node, live canon, two ways to leave, and off 
   assert.deepEqual(c.despawn, [...DESPAWN_REASONS]);
   assert.deepEqual(c.actions, [], "no verbs of its own");
   assert.equal(c.dials.from_crossing, null, "the launch dial is off: nothing spawns until the town says so");
+  assert.equal(c.dials.span_h, 12, "a creature lasts 12 h (ruled), the span's one home");
 });
 
 test("the three kinds: each a class extending creature, whose kind file is its law and names it", () => {
@@ -37,7 +38,6 @@ test("the three kinds: each a class extending creature, whose kind file is its l
     assert.ok(existsSync(join(ROOT, m.kind_file)), `${m.kind_file} is there`);
     const kind = readKind(join(ROOT, m.kind_file));
     assert.equal(kind.kind, k, "the kind file names its class");
-    assert.equal(kind.span_h, 12, "a creature lasts 12 h (ruled)");
     assert.ok(kind.reactions.some((r) => r.effects.some((e) => e.do === "flee")), `${k} can flee`);
     assert.ok(kind.reactions.some((r) => r.src.trim() === "true"), `${k} always has something to do`);
   }

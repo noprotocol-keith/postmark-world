@@ -8,7 +8,6 @@ what: >
   voice with its own, and anything set down near it gets its full attention. Come at it too fast and
   it lifts off; frighten it badly and it is gone into the white.
 ring_m: 60
-span_h: 12
 moods:
   fear: 0..3 = 1 | bold | watchful | skittish | ready to fly
   curiosity: 0..3 = 2 | bored | interested | intent | can't look away

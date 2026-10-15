@@ -8,7 +8,6 @@ what: >
   a flicker past your head, a chitter too high to quite hear. Speak right beside it, or frighten it,
   and it jinks away into the Mists.
 ring_m: 30
-span_h: 12
 moods:
   fear: 0..3 = 2 | settled | flighty | skittish | panicked
   curiosity: 0..3 = 1 | elsewhere | aware of you | circling | all around you
