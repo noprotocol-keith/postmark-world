@@ -143,7 +143,7 @@ test("the town is kept clear at 284: every mark's footprint is under no more tha
   assert.ok(checked > 3000, `the footprints were read (${checked} points; ${hidden} behind the wall, the physics')`);
 });
 
-test("the creatures: seeded by the crossing, sparse at 244 and populated by 284, in the banks, never over the town", () => {
+test("the creatures: seeded by the crossing, sparse at 244 and populated by 284, behind the wall, never over the town", () => {
   const counts = [];
   for (const n of [244, 272, 284]) {
     const m = mistsAt(n, MISTS), cs = mistsCreatures(m, { first: 244, keep: KEEP });
@@ -151,7 +151,8 @@ test("the creatures: seeded by the crossing, sparse at 244 and populated by 284,
     for (const c of cs) {
       for (const [a, b] of [[0, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]]) assert.equal(KEEP(c.x + a * c.sizeM, c.y + b * c.sizeM), 0, `${c.kind} at (${c.x}, ${c.y}) stands clear of the town`);
       const d = mistsTrueDistance(m, c.x, c.y);
-      assert.ok(d > -mistsReachM(m) * 1.3 && d < 400, `${c.kind} is in the banks (true-face distance ${Math.round(d)} m)`);
+      assert.ok(d > 0 && d < 450, `${c.kind} stands behind the wall's true face, never on the clear side (true-face distance ${Math.round(d)} m; WLD-56 D5 draft)`);
+      assert.ok(["wolf", "raven", "bat"].includes(c.kind), `${c.kind} is one of the season's kinds`);
     }
     counts.push(cs.length);
   }
