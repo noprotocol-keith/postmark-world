@@ -10228,6 +10228,12 @@ export function mountViewer(appEl) {
     setTimeout(step, 0);
   }
   function paintSheetFeather(frame) {
+    // A ROOM NEVER GETS IT (WLD-21). paintMists schedules this as its own task, and a
+    // room can mount before the task runs: `mapCtx` is then the room's scene, and the
+    // town's feather was laid over the room's floor, hiding every floor past the
+    // sheet's edge. A room is an inside; the sheet's edge is not in it. (The town's
+    // feather comes back on the way out: remountTown draws its Mists afresh.)
+    if (sceneRoomId) return;
     const night = (getComputedStyle(mapCtx.svg).getPropertyValue("--night") || "#14171d").trim();
     const key = JSON.stringify(frame) + night;
     if (!mistsFeather || mistsFeather.key !== key) {
