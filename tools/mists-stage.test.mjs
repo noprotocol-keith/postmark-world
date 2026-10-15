@@ -139,8 +139,8 @@ test("the page: an idle second of drift lays the map out zero times, and the sta
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e.message).slice(0, 160)));
-  // ?light=0: the motion this test is about, whatever the machine (a 4-core CI runner would turn light mode on)
-  await page.goto(`http://localhost:${port}/?light=0`, { waitUntil: "domcontentloaded", timeout: 90_000 });
+  // ?lite=0: the motion this test is about, whatever the machine (a 4-core CI runner would turn lite mode on)
+  await page.goto(`http://localhost:${port}/?lite=0`, { waitUntil: "domcontentloaded", timeout: 90_000 });
   await page.waitForSelector(".wv-telling-pane", { state: "attached", timeout: 90_000 });
   await page.evaluate(() => { const el = document.querySelector(".wv-tour-skip"); if (el && el.offsetParent) el.click(); });
   // painted: wherever the paint stands (an <img> on the stage, an <image> in an svg), so a regression fails on its claim, not on a wait

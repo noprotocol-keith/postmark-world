@@ -3943,14 +3943,18 @@ export function mistsIntroGate() {
   };
 }
 const mistsRollIn = mistsIntroGate();
-// LIGHT MODE (WLD-43 part 2, Darko 2026-10-13 19:24: "yes to the fix for
+// LITE MODE (WLD-43 part 2, Darko 2026-10-13 19:24: "yes to the fix for
 // everyone, then light mode"), for a machine the Mists are heavy on: their
 // motion held still as prefers-reduced-motion holds it, no roll-in, and the
-// site's bat still. One class on <html>, `wv-light`, which the viewer's CSS and
+// site's bat still. One class on <html>, `wv-lite`, which the viewer's CSS and
 // the site's motif (postmark-site halloween-sprinkle.mjs) both read.
 //
+// Lite mode returns: POS-228's name, retired in POS-285, now the Mists' WLD-43
+// switch (Darko 2026-10-15: "it should be https://postmark.town/world/?lite=1").
+// The build's first name, `?light=`, is ignored, as POS-285 ignored `?lite=`.
+//
 // Who decides, the first that answers:
-//   ?light=1 / ?light=0  a link forces it for that page (a support reply can be
+//   ?lite=1 / ?lite=0    a link forces it for that page (a support reply can be
 //                        one URL); never stored
 //   the visitor          the toggle beside the bell: auto, on, off, kept on this
 //                        device
@@ -3959,18 +3963,32 @@ const mistsRollIn = mistsIntroGate();
 //                        which only Chromium reports), or once the first layer of
 //                        the bake runs slower than 3 ms per 1,000 px (measured
 //                        here: 1.3 at full speed, 4.8 at 4× throttle), a verdict
-//                        kept so the next visit starts light
-export const LIGHT = { choiceKey: "pm_world_light", slowKey: "pm_world_light_slow", cores: 4, memoryGB: 4, bakeMsPerKpx: 3 };
-export const LIGHT_NEXT = { auto: "on", on: "off", off: "auto" };
-export function lightModeFor({ query = "", choice = null, slow = false, cores = 0, memory = 0 } = {}) {
-  const q = new URLSearchParams(query).get("light");
+//                        kept so the next visit starts lite
+export const LITE = { choiceKey: "pm_world_lite", slowKey: "pm_world_lite_slow", cores: 4, memoryGB: 4, bakeMsPerKpx: 3 };
+export const LITE_NEXT = { auto: "on", on: "off", off: "auto" };
+// The build stored under `pm_world_light` and `pm_world_light_slow` before the
+// rename: read once where the new key holds nothing, written under the new key,
+// and the old one dropped, so nobody who turned it on loses it. POS-228's own
+// "1"/"0" under `pm_world_lite` are not a choice here, and stay auto.
+export const LITE_OLD = { choiceKey: "pm_world_light", slowKey: "pm_world_light_slow" };
+export function liteCarryOld(store) {
+  for (const k of ["choiceKey", "slowKey"]) {
+    const old = store.get(LITE_OLD[k]);
+    if (old == null) continue;
+    const cur = store.get(LITE[k]);
+    if (k === "choiceKey" ? cur !== "on" && cur !== "off" : cur !== "1") store.set(LITE[k], old);
+    store.set(LITE_OLD[k], null);
+  }
+}
+export function liteModeFor({ query = "", choice = null, slow = false, cores = 0, memory = 0 } = {}) {
+  const q = new URLSearchParams(query).get("lite");
   if (q === "1") return { on: true, why: "link" };
   if (q === "0") return { on: false, why: "link" };
   if (choice === "on") return { on: true, why: "chosen" };
   if (choice === "off") return { on: false, why: "chosen" };
   if (slow) return { on: true, why: "slow" };
-  if (cores > 0 && cores <= LIGHT.cores) return { on: true, why: "cores" };
-  if (memory > 0 && memory <= LIGHT.memoryGB) return { on: true, why: "memory" };
+  if (cores > 0 && cores <= LITE.cores) return { on: true, why: "cores" };
+  if (memory > 0 && memory <= LITE.memoryGB) return { on: true, why: "memory" };
   return { on: false, why: "auto" };
 }
 export function mistsVeilSVG(m, { originPx, mPerPx }) {
@@ -4060,7 +4078,7 @@ export function viewBoxTransform(vb, W, H, par = null) {
 // not one set reading it from a custom property: var() in keyframes costs
 // Chromium a fuller style recalc on every frame (measured: about 1.6× the
 // style time of the same motion written literally). They exist only under
-// `prefers-reduced-motion: no-preference` and outside light mode, so a reader
+// `prefers-reduced-motion: no-preference` and outside lite mode, so a reader
 // who asked for stillness (or whose machine is given it) gets the layers at rest.
 export function mistsPaintHTML(baked, { originPx, mPerPx, layers, creatures = "" }) {
   const n = (v) => v.toFixed(1);
@@ -4068,7 +4086,7 @@ export function mistsPaintHTML(baked, { originPx, mPerPx, layers, creatures = ""
   const banks = layers.map((L, li) => {
     const d = L.driftM / mPerPx;
     if (d > 0) motion += `@keyframes wv-mists-drift-${li} { from { transform:translate(-${n(d)}px,-${n(d * 0.45)}px); } to { transform:translate(${n(d)}px,${n(d * 0.45)}px); } }`
-      + ` :root:not(.wv-light) .wv-mists-cam .wv-mists-drift.wv-mists-l${li} { animation:wv-mists-drift-${li} ${L.driftS}s ease-in-out infinite alternate; }`;
+      + ` :root:not(.wv-lite) .wv-mists-cam .wv-mists-drift.wv-mists-l${li} { animation:wv-mists-drift-${li} ${L.driftS}s ease-in-out infinite alternate; }`;
     return `<div class="wv-mists-bank${d > 0 ? ` wv-mists-drift wv-mists-l${li}` : ""}">`
       + baked.filter((b) => b.li === li).map((b) => `<img class="wv-mists-img" alt="" draggable="false" src="${b.url}"`
         + ` style="left:${n(originPx.x + b.box.minX / mPerPx)}px;top:${n(originPx.y + b.box.minY / mPerPx)}px;width:${n(b.w / mPerPx)}px;height:${n(b.h / mPerPx)}px">`).join("")
@@ -5107,13 +5125,13 @@ const STYLE = `
 .wv-mc-eyes { animation:wv-mc-blink 9s steps(1,end) infinite; }
 @keyframes wv-mc-blink { 0%, 46%, 50%, 100% { opacity:1; } 47% { opacity:0; } 90% { opacity:.35; } }
 @media (prefers-reduced-motion:reduce){ .wv-mists-drift, .wv-mc-flit, .wv-mc-lift, .wv-mc-eyes { animation:none; } }
-/* LIGHT MODE (WLD-43 part 2) holds them still the same way (the drift's own
+/* LITE MODE (WLD-43 part 2) holds them still the same way (the drift's own
    keyframes are written only where it is off: mistsPaintHTML) */
-html.wv-light .wv-mc-flit, html.wv-light .wv-mc-lift, html.wv-light .wv-mc-eyes { animation:none; }
-/* the light toggle and the bell's phone menu (WLD-43 part 2): on a phone the
+html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { animation:none; }
+/* the lite toggle and the bell's phone menu (WLD-43 part 2): on a phone the
    toggle's circle stands down and the bell opens a menu holding both */
 .wv-mapctl-tools { position:relative; }
-@media (max-width:720px){ .wv-mapctl .ctl.wv-light-toggle { display:none; } }   /* beats .wv-mapctl .ctl, later in the sheet */
+@media (max-width:720px){ .wv-mapctl .ctl.wv-lite-toggle { display:none; } }   /* beats .wv-mapctl .ctl, later in the sheet */
 .wv-bell-menu { position:absolute; top:calc(100% + 6px); z-index:8; display:flex; flex-direction:column; gap:2px; padding:5px;
   background:rgba(13,15,19,.94); border:1px solid rgba(232,197,106,.34); border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.45); }
 .wv-bell-menu[hidden] { display:none; }
@@ -7055,27 +7073,28 @@ export function mountViewer(appEl) {
   let byId = new Map();     // id → folded mark, for cell lookups
   let homeSet = new Set();  // ids that render green on the fold's own word: the sovereigns
   let mapCtx = null;
-  // LIGHT MODE (WLD-43 part 2; the rule is at LIGHT, above): decided once at
+  // LITE MODE (WLD-43 part 2; the rule is at LITE, above): decided once at
   // boot, before the map paints, and again whenever the toggle or the bake's
   // verdict changes it. Storage is a convenience: shut, the choice lasts the page.
-  const lightStore = {
+  const liteStore = {
     get(k) { try { return localStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* the choice lasts this page */ } },
   };
-  let lightChoice = lightStore.get(LIGHT.choiceKey);          // "on" | "off" | null (auto)
-  if (lightChoice !== "on" && lightChoice !== "off") lightChoice = null;
-  let lightSlow = lightStore.get(LIGHT.slowKey) === "1";
-  let lightLink = typeof location === "object" ? location.search : "";   // spent once the visitor chooses
-  let light = { on: false, why: "auto" };
-  function applyLight() {
-    light = lightModeFor({ query: lightLink, choice: lightChoice, slow: lightSlow,
+  liteCarryOld(liteStore);
+  let liteChoice = liteStore.get(LITE.choiceKey);          // "on" | "off" | null (auto)
+  if (liteChoice !== "on" && liteChoice !== "off") liteChoice = null;
+  let liteSlow = liteStore.get(LITE.slowKey) === "1";
+  let liteLink = typeof location === "object" ? location.search : "";   // spent once the visitor chooses
+  let lite = { on: false, why: "auto" };
+  function applyLite() {
+    lite = liteModeFor({ query: liteLink, choice: liteChoice, slow: liteSlow,
       cores: typeof navigator === "object" ? navigator.hardwareConcurrency : 0, memory: typeof navigator === "object" ? navigator.deviceMemory : 0 });
-    const was = document.documentElement.classList.contains("wv-light");
-    document.documentElement.classList.toggle("wv-light", light.on);
-    paintLightButton();
-    if (was !== light.on && mapCtx) { mapCtx.mistsKey = null; drawMists(); }
+    const was = document.documentElement.classList.contains("wv-lite");
+    document.documentElement.classList.toggle("wv-lite", lite.on);
+    paintLiteButton();
+    if (was !== lite.on && mapCtx) { mapCtx.mistsKey = null; drawMists(); }
   }
-  applyLight();
+  applyLite();
   // ── THE TOWN'S HOUSES ON A RESIDENT'S MAP (2026-09-11) ────────────────────
   //
   // Keemin, on dev as wright: "we still don't have the new parcel cards loaded
@@ -10045,13 +10064,13 @@ export function mountViewer(appEl) {
     const bellBtn = root.querySelector(".wv-bell");
     if (!m) {
       if (bellBtn) bellBtn.hidden = true;
-      const lightBtn = root.querySelector(".wv-light-toggle"); if (lightBtn) lightBtn.hidden = true;
+      const liteBtn = root.querySelector(".wv-lite-toggle"); if (liteBtn) liteBtn.hidden = true;
       mapCtx?.svg?.querySelector(".wv-sheet-feather")?.remove(); unmaskSheetWashes(); return;
     }
-    // LIGHT MODE SKIPS THE BAKE (WLD-43 part 2, RULED by Darko 2026-10-13 21:11): the wall the
+    // LITE MODE SKIPS THE BAKE (WLD-43 part 2, RULED by Darko 2026-10-13 21:11): the wall the
     // page draws before the paint stands alone, with no feather and no creatures.
     // The bell still arms once a session, as the roll-in would have armed it.
-    if (light.on) {
+    if (lite.on) {
       mapCtx?.svg?.querySelector(".wv-sheet-feather")?.remove(); unmaskSheetWashes();
       if (state.crossing <= liveCrossing() && sessionOnce("pm_world_mists_intro")) mistsBellArm(m);
       mistsBellButton(m);
@@ -10103,7 +10122,7 @@ export function mountViewer(appEl) {
     const step = () => {
       // the town has moved on to another crossing: stop, so a scrubbed dial never
       // queues one bake per crossing it passed
-      if (town?.mistsKey !== drawnKey || light.on) { quit(); return; }
+      if (town?.mistsKey !== drawnKey || lite.on) { quit(); return; }
       try { stepOnce(); } catch { quit(); }   // e.g. a null 2d context: free the key, so a later draw retries
     };
     const stepOnce = () => {
@@ -10124,9 +10143,9 @@ export function mountViewer(appEl) {
       const done = baker; baker = null;
       // THE BAKE'S VERDICT ON THIS MACHINE (WLD-43 part 2): the first layer is the
       // same work everywhere, so its time per 1,000 px is a fair reading of the
-      // machine. Under auto, a slow one turns light mode on, and it is kept so
-      // the next visit starts light.
-      if (out.length === 0) lightVerdict(layerMs / (done.width * done.height / 1000));
+      // machine. Under auto, a slow one turns lite mode on, and it is kept so
+      // the next visit starts lite.
+      if (out.length === 0) liteVerdict(layerMs / (done.width * done.height / 1000));
       layerMs = 0;
       done.canvas.toBlob((blob) => { try {
         out.push({ li: p.li, box: p.box, w: done.width * p.pxM, h: done.height * p.pxM, url: blob ? URL.createObjectURL(blob) : done.canvas.toDataURL("image/png") });
@@ -10189,8 +10208,8 @@ export function mountViewer(appEl) {
   function mistsRollInPlay(item) {
     const { m, g } = item;
     g.style.opacity = "";
-    // held still under reduced motion, and in light mode (WLD-43), the same way
-    const reduced = light.on || (typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
+    // held still under reduced motion, and in lite mode (WLD-43), the same way
+    const reduced = lite.on || (typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
     if (!reduced && typeof g.animate === "function") {
       const { originPx, mPerPx } = mapCtx;
       const cx = originPx.x + (m.clear.minX + m.clear.maxX) / 2 / mPerPx, cy = originPx.y + (m.clear.minY + m.clear.maxY) / 2 / mPerPx;
@@ -10239,7 +10258,7 @@ export function mountViewer(appEl) {
     };
     for (const ev of GESTURES) document.addEventListener(ev, first, true);
   }
-  // the bell's own act and light mode's, one each: the buttons beside each other
+  // the bell's own act and lite mode's, one each: the buttons beside each other
   // on a desktop and the bell's menu on a phone both call these
   function toggleBell() {
     const on = !bellOn();
@@ -10250,16 +10269,16 @@ export function mountViewer(appEl) {
     const cur = sceneRoomId ? null : mistsAt(state.crossing, data?.skeleton?.mists);
     if (on && cur) mistsBellRing(cur, true);
   }
-  function cycleLight() {
-    lightChoice = { auto: "on", on: "off", off: null }[lightChoice ?? "auto"];
-    lightStore.set(LIGHT.choiceKey, lightChoice);
-    lightLink = "";   // the visitor's own word outranks the link they came by
-    applyLight();
+  function cycleLite() {
+    liteChoice = { auto: "on", on: "off", off: null }[liteChoice ?? "auto"];
+    liteStore.set(LITE.choiceKey, liteChoice);
+    liteLink = "";   // the visitor's own word outranks the link they came by
+    applyLite();
   }
   // A PHONE HAS NO ROOM FOR A SEVENTH CIRCLE (WLD-43 part 2; Wright's
   // recommendation, Darko reviews the shots): the map's control row already wraps
   // over the site's nav at 390 px, so there the bell opens a small menu holding
-  // both, and the light toggle's own circle stands down (CSS, the same width).
+  // both, and the lite toggle's own circle stands down (CSS, the same width).
   const PHONE = "(max-width:720px)";
   const onPhone = () => typeof matchMedia === "function" && matchMedia(PHONE).matches;
   function mistsBellButton(m) {
@@ -10275,20 +10294,20 @@ export function mountViewer(appEl) {
     }
     btn.hidden = false;
     paintBell(btn);
-    mistsLightButton(btn);
+    mistsLiteButton(btn);
   }
-  // THE LIGHT TOGGLE (WLD-43 part 2), beside the bell and only while the Mists
+  // THE LITE TOGGLE (WLD-43 part 2), beside the bell and only while the Mists
   // stand: auto, on, off, round and round, the choice kept on this device. Lit
-  // (the cluster's own on-state) while light mode is in effect, whoever decided.
-  function mistsLightButton(bell) {
-    let btn = root.querySelector(".wv-light-toggle");
+  // (the cluster's own on-state) while lite mode is in effect, whoever decided.
+  function mistsLiteButton(bell) {
+    let btn = root.querySelector(".wv-lite-toggle");
     if (!btn) {
-      btn = document.createElement("button"); btn.type = "button"; btn.className = "ctl wv-light-toggle";
+      btn = document.createElement("button"); btn.type = "button"; btn.className = "ctl wv-lite-toggle";
       bell.after(btn);
-      btn.addEventListener("click", (e) => { e.stopPropagation(); cycleLight(); });
+      btn.addEventListener("click", (e) => { e.stopPropagation(); cycleLite(); });
     }
     btn.hidden = false;
-    paintLightButton();
+    paintLiteButton();
   }
   // the bell's menu, on a phone: two rows, each doing what its desktop button does
   function toggleBellMenu(bell) {
@@ -10297,12 +10316,12 @@ export function mountViewer(appEl) {
     if (!menu) {
       menu = document.createElement("div"); menu.className = "wv-bell-menu"; menu.setAttribute("role", "menu");
       menu.innerHTML = '<button type="button" role="menuitem" class="wv-bell-menu-row" data-act="bell"></button>'
-        + '<button type="button" role="menuitem" class="wv-bell-menu-row" data-act="light"></button>';
+        + '<button type="button" role="menuitem" class="wv-bell-menu-row" data-act="lite"></button>';
       bell.parentElement.appendChild(menu);
       menu.addEventListener("click", (e) => {
         e.stopPropagation();
         const act = e.target.closest("[data-act]")?.dataset.act;
-        if (act === "bell") toggleBell(); else if (act === "light") cycleLight();
+        if (act === "bell") toggleBell(); else if (act === "lite") cycleLite();
       });
     }
     // right-aligned under the bell, inside the row that holds it
@@ -10324,32 +10343,32 @@ export function mountViewer(appEl) {
   }
   function paintBellMenu() {
     const menu = root.querySelector(".wv-bell-menu"); if (!menu || menu.hidden) return;
-    const mode = lightChoice ?? "auto";
+    const mode = liteChoice ?? "auto";
     menu.querySelector('[data-act="bell"]').textContent = bellOn() ? "🔔 the bell: on" : "🔕 the bell: off";
-    const row = menu.querySelector('[data-act="light"]');
-    row.textContent = "🍃 light mode: " + (mode === "auto" ? "auto (" + (light.on ? "on" : "off") + ")" : mode);
-    row.classList.toggle("on", light.on);
+    const row = menu.querySelector('[data-act="lite"]');
+    row.textContent = "🍃 lite mode: " + (mode === "auto" ? "auto (" + (lite.on ? "on" : "off") + ")" : mode);
+    row.classList.toggle("on", lite.on);
   }
   // the bake's reading of this machine, in ms per 1,000 px of its first layer:
-  // slower than LIGHT.bakeMsPerKpx turns light on, under auto only (a link or
+  // slower than LITE.bakeMsPerKpx turns lite on, under auto only (a link or
   // the visitor's own choice is never overruled), and is kept for next time
-  function lightVerdict(msPerKpx) {
-    if (!(msPerKpx > LIGHT.bakeMsPerKpx) || lightSlow) return;
-    lightSlow = true;
-    lightStore.set(LIGHT.slowKey, "1");
-    applyLight();
+  function liteVerdict(msPerKpx) {
+    if (!(msPerKpx > LITE.bakeMsPerKpx) || liteSlow) return;
+    liteSlow = true;
+    liteStore.set(LITE.slowKey, "1");
+    applyLite();
   }
-  const LIGHT_WHY = { link: "set by the link", chosen: "your choice", slow: "the Mists painted slowly here", cores: "this computer has few cores", memory: "this computer has little memory", auto: "this computer looks able" };
-  function paintLightButton() {
+  const LITE_WHY = { link: "set by the link", chosen: "your choice", slow: "the Mists painted slowly here", cores: "this computer has few cores", memory: "this computer has little memory", auto: "this computer looks able" };
+  function paintLiteButton() {
     paintBellMenu();
-    const btn = root.querySelector(".wv-light-toggle");
+    const btn = root.querySelector(".wv-lite-toggle");
     if (!btn) return;
-    const mode = lightChoice ?? "auto";
+    const mode = liteChoice ?? "auto";
     btn.textContent = "🍃";
-    btn.classList.toggle("on", light.on);
-    btn.setAttribute("aria-pressed", light.on ? "true" : "false");
-    btn.setAttribute("aria-label", "light mode: " + (mode === "auto" ? "auto, " + (light.on ? "on" : "off") : mode));
-    btn.title = "light mode " + (light.on ? "on" : "off") + " (" + (mode === "auto" ? "auto: " : "") + LIGHT_WHY[light.why] + "): the Mists drawn plain and still, for a slower computer. Click for " + LIGHT_NEXT[mode] + ".";
+    btn.classList.toggle("on", lite.on);
+    btn.setAttribute("aria-pressed", lite.on ? "true" : "false");
+    btn.setAttribute("aria-label", "lite mode: " + (mode === "auto" ? "auto, " + (lite.on ? "on" : "off") : mode));
+    btn.title = "lite mode " + (lite.on ? "on" : "off") + " (" + (mode === "auto" ? "auto: " : "") + LITE_WHY[lite.why] + "): the Mists drawn plain and still, for a slower computer. Click for " + LITE_NEXT[mode] + ".";
   }
   function paintBell(btn) {
     const on = bellOn();
@@ -10357,7 +10376,7 @@ export function mountViewer(appEl) {
     btn.setAttribute("aria-pressed", on ? "true" : "false");
     btn.setAttribute("aria-label", on ? "the bell is on" : "the bell is off");
     btn.title = on ? "the bell: on (it rings once when the Mists come in)" : "the bell: off";
-    if (onPhone()) { btn.setAttribute("aria-haspopup", "menu"); btn.title += ". Tap for the bell and light mode."; }
+    if (onPhone()) { btn.setAttribute("aria-haspopup", "menu"); btn.title += ". Tap for the bell and lite mode."; }
   }
 
   function drawOverlay(radial) {

@@ -312,7 +312,7 @@ const readState = (page) => page.evaluate(() => {
       const row = document.querySelector(".wv-mapctl");
       if (!row) return null;
       // only what is drawn stands on a line: a child the page keeps but does not show
-      // (display:none, as the light toggle is on a phone, WLD-43) has a box at top 0
+      // (display:none, as the lite toggle is on a phone, WLD-43) has a box at top 0
       const shown = (c) => c.getClientRects().length > 0;
       const kids = [...row.children].filter(shown).map((c) => Math.round(c.getBoundingClientRect().top));
       const tools = document.querySelector(".wv-mapctl-tools");
