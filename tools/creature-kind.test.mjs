@@ -19,7 +19,7 @@ what: >
 ring_m: 50
 moods:
   fear: 0..3 = 1 | calm | uneasy | frightened | terrified
-  curiosity: 0..3 = 2
+  curiosity: 0..3 = 2 | elsewhere | aware | interested | rapt
 flags: startled
 
 reaction watch "it watches": when true says It watches {actor}.
@@ -35,7 +35,7 @@ test("a kind file reads whole: its fields, moods with their levels, flags and re
   assert.equal(k.span_h, undefined, "the span is the class's dial, not the kind's");
   assert.equal(k.what, "A fixture for the reader's tests. Two lines of it.");
   assert.deepEqual(k.moods.fear, { lo: 0, hi: 3, start: 1, levels: ["calm", "uneasy", "frightened", "terrified"] });
-  assert.deepEqual(k.moods.curiosity, { lo: 0, hi: 3, start: 2 });
+  assert.deepEqual(k.moods.curiosity, { lo: 0, hi: 3, start: 2, levels: ["elsewhere", "aware", "interested", "rapt"] });
   assert.deepEqual(k.flags, ["startled"]);
   assert.deepEqual(k.reactions.map((r) => r.name), ["watch", "start", "nearer", "flee"]);
   assert.deepEqual(k.reactions[1].effects, [{ do: "set", flag: "startled" }, { do: "add", mood: "fear", by: 1 }]);
@@ -94,7 +94,7 @@ test("the Mists' law is held at parse: no harm, no holds, no spring, no verbs of
 });
 
 test("a mood may be named anything a slug allows, even an Object.prototype name, and it is the kind's own", () => {
-  const k = parseKind(FIXTURE.replace("  curiosity: 0..3 = 2\n", "  constructor: 0..3 = 1\n").replaceAll("self.curiosity", "self.constructor"));
+  const k = parseKind(FIXTURE.replace("  curiosity: 0..3 = 2 |", "  constructor: 0..3 = 1 |").replaceAll("self.curiosity", "self.constructor"));
   assert.deepEqual(Object.keys(k.moods), ["fear", "constructor"]);
   const { state } = applyEffects(k, startState(k), k.reactions.find((r) => r.name === "nearer").effects);
   assert.equal(state.moods.constructor, 3);
@@ -109,7 +109,8 @@ test("a line names the actor and nothing more: a name with $ patterns stays a na
 test("a kind with a missing or malformed field is refused, naming it", () => {
   assert.throws(() => parseKind(FIXTURE.replace("kind: test-beast\n", "")), /kind: must be a lowercase slug/);
   assert.throws(() => parseKind(FIXTURE.replace("ring_m: 50", "ring_m: wide")), /ring_m: must be a number above 0/);
-  assert.throws(() => parseKind(FIXTURE.replace("  curiosity: 0..3 = 2\n", "  curiosity: 0..3 = 5\n")), /start inside them/);
+  assert.throws(() => parseKind(FIXTURE.replace("  curiosity: 0..3 = 2 |", "  curiosity: 0..3 = 5 |")), /start inside them/);
+  assert.throws(() => parseKind(FIXTURE.replace("  curiosity: 0..3 = 2 | elsewhere | aware | interested | rapt", "  curiosity: 0..3 = 2")), /the mood curiosity needs one label per level \(4\): Jev's Score reads them/, "a mood without labels cannot be judged");
   assert.throws(() => parseKind(FIXTURE.replace("| calm | uneasy | frightened | terrified", "| calm | uneasy")), /one label per level/);
   assert.throws(() => parseKind(FIXTURE.replace("flags: startled\n", "flags: startled\nwings: two\n")), /line 14: cannot read "wings: two"/);
   assert.throws(() => parseKind(FIXTURE.replace(/reaction [\s\S]*$/, "")), /at least one reaction/);

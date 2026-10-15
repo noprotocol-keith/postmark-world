@@ -148,8 +148,9 @@ test("the fold: spawned, revised by its own acts, gone by `fled` at once or `fad
   const { acts, sched } = windowLog(270, { lateMs: 15000 });
   const [a, b, c] = sched.spawns;
   const later = [
-    { at: t(b.at_ms + 60000), actor: b.id, action: "snarl", object: "kogane", payload: { after: { moods: { fear: 2, curiosity: 1 }, flags: ["startled"] } } },
-    { at: t(c.at_ms + 120000), actor: c.id, action: "flee", object: "kogane", payload: { after: { moods: { fear: 3, curiosity: 1 }, flags: [] } } },
+    { at: t(b.at_ms + 60000), actor: b.id, action: "react", object: "act-1", payload: { reaction: "snarl", moods_after: { fear: 2, curiosity: 1 }, flags_after: ["startled"] } },
+    { at: t(b.at_ms + 70000), actor: b.id, action: "snarl", object: "act-2", payload: { moods_after: { fear: 0, curiosity: 0 }, flags_after: [] } },   // not a reaction row: folds nothing
+    { at: t(c.at_ms + 120000), actor: c.id, action: "react", object: "act-3", payload: { reaction: "flee", moods_after: { fear: 3, curiosity: 1 }, flags_after: [] } },
     { at: t(c.at_ms + 120000), actor: TOWN, action: "withdraw", object: c.id, payload: { reason: "fled" } },
     { at: t(b.at_ms + 90000), actor: "kogane", action: "say", object: null, payload: { text: "hello" } },   // a resident's act is not the creature's
   ];
@@ -159,7 +160,7 @@ test("the fold: spawned, revised by its own acts, gone by `fled` at once or `fad
   assert.deepEqual(at(a.at_ms + 15000).get(a.id), { id: a.id, kind: a.kind, crossing: 270, x: a.x, y: a.y, spawned_at: a.at, fades_at: a.fades_at, moods: { fear: 1, curiosity: 1 }, flags: [] },
     "spawned_at is the scheduled minute, not the write");
   const bLive = at(b.at_ms + 120000).get(b.id);
-  assert.deepEqual([bLive.moods, bLive.flags], [{ fear: 2, curiosity: 1 }, ["startled"]], "its own act revises it");
+  assert.deepEqual([bLive.moods, bLive.flags], [{ fear: 2, curiosity: 1 }, ["startled"]], "its own `react` row revises it; any other action of its folds nothing");
   assert.equal(at(c.at_ms + 119999).has(c.id), true);
   assert.equal(at(c.at_ms + 120000).has(c.id), false, "fled: gone at once");
   assert.equal(at(Date.parse(a.fades_at) - 1).has(a.id), true);
@@ -201,7 +202,7 @@ test("the save photographs the written fold: a fade not yet written stays in it,
 test("snapshot parity: a chain of saves plus the rows since folds to the same creatures as the whole log", () => {
   const { acts: a270, sched } = windowLog(270, { lateMs: 12000 });
   const b = sched.spawns[1];
-  const revise = { at: t(b.at_ms + 60000), actor: b.id, action: "snarl", object: "kogane", payload: { after: { moods: { fear: 3, curiosity: 0 }, flags: [] } } };
+  const revise = { at: t(b.at_ms + 60000), actor: b.id, action: "react", object: "act-1", payload: { reaction: "snarl", moods_after: { fear: 3, curiosity: 0 }, flags_after: [] } };
   const base = [...a270, revise, ...windowLog(271, { lateMs: 12000 }).acts, ...windowLog(272, { lateMs: 12000 }).acts];
   // the tick writes each fade 25 s after it falls
   const fades = [...creaturesWritten(null, base, Infinity).values()]

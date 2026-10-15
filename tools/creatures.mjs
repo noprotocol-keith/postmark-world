@@ -39,7 +39,8 @@
 //
 // ── THE FOLD (W4, W5) ──────────────────────────────────────────────────────────
 // A creature is a fold of the log's rows: `spawn` (the-town, object = its id),
-// its own acts (actor = its id; a payload `after` is its state from then on), and
+// its reactions (action `react`, actor = its id; payload `moods_after` and
+// `flags_after`, a sorted array of the set flags, are its state from then on), and
 // `withdraw` (object = its id, by the-town or itself, payload.reason faded | fled;
 // any other withdraw is not the record's and is ignored).
 //
@@ -66,6 +67,8 @@ import { CROSSING_EPOCH_UTC, CROSSING_MS } from "./walk.mjs";
 export const TOWN = "the-town";
 export const DESPAWN_REASONS = Object.freeze(["faded", "fled"]);
 export const ID_PREFIX = "creature:";
+/** A creature's own act: its reaction, as the office writes it (POS-637 W4). */
+export const REACT_ACTION = "react";
 
 /** The placeholder dials, PENDING Darko's D1 and D2 (Plumb's recommendations,
  *  WLD-56 gap read § 3). The ruled values will ride the creature class's dials. */
@@ -301,10 +304,11 @@ export function creaturesWritten(snapshot, acts, atMs) {
       });
     } else if (lawfulWithdraw(a)) {
       living.delete(a.object);
-    } else if (isCreatureId(a.actor) && living.has(a.actor) && a.payload?.after) {
-      const c = living.get(a.actor), after = a.payload.after;
-      if (after.moods) c.moods = { ...after.moods };
-      if (after.flags) c.flags = [...after.flags];
+    } else if (a.action === REACT_ACTION && isCreatureId(a.actor) && living.has(a.actor)) {
+      // the reaction row as the office writes it (POS-637 W4): its state after, in the payload
+      const c = living.get(a.actor), p = a.payload ?? {};
+      if (p.moods_after && typeof p.moods_after === "object") c.moods = { ...p.moods_after };
+      if (Array.isArray(p.flags_after)) c.flags = [...p.flags_after];
     }
   }
   return living;

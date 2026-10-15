@@ -27,9 +27,9 @@
 //   about: …                       one line on what it does
 //   what: >                        a paragraph (the indented lines that follow)
 //   ring_m: 80                     its awareness ring, in metres (no line of sight, like earshot)
-//   moods:                         each mood a range and its start, and optionally
+//   moods:                         each mood a range, its start, and one label per
 //     fear: 0..3 = 1 | calm | uneasy | frightened | terrified
-//                                  one label per level (what Jev's Score reads)
+//                                  level, required (what Jev's Score reads)
 //   flags: watchful, startled      the flags a reaction may set or clear (optional)
 //   reaction <name> "<sentence>": when <cond> [does <effects>] says <line>
 //
@@ -206,14 +206,13 @@ export function parseKind(text, { source = "kind file" } = {}) {
       if (block === "what") { kind.what = kind.what ? `${kind.what} ${line.trim()}` : line.trim(); continue; }
       if (block === "moods") {
         const m = MOOD.exec(line.trim());
-        if (!m) fail(n, `a mood is "name: lo..hi = start", optionally "| label | label …"`);
+        if (!m) fail(n, `a mood is "name: lo..hi = start | label | label …", one label per level`);
         const [, name, lo, hi, start, labels] = m;
         const mood = { lo: Number(lo), hi: Number(hi), start: Number(start) };
         if (!(mood.lo < mood.hi) || mood.start < mood.lo || mood.start > mood.hi) fail(n, `the mood ${name} needs lo < hi and its start inside them`);
-        if (labels !== undefined) {
-          mood.levels = labels.split("|").map((s) => s.trim());
-          if (mood.levels.length !== mood.hi - mood.lo + 1 || mood.levels.some((s) => !s)) fail(n, `the mood ${name} needs one label per level (${mood.hi - mood.lo + 1})`);
-        }
+        // the labels are what Jev's Score reads, one per level, so a mood without them cannot be judged
+        mood.levels = (labels ?? "").split("|").map((s) => s.trim());
+        if (mood.levels.length !== mood.hi - mood.lo + 1 || mood.levels.some((s) => !s)) fail(n, `the mood ${name} needs one label per level (${mood.hi - mood.lo + 1}): Jev's Score reads them`);
         if (Object.hasOwn(kind.moods, name)) fail(n, `the mood ${name} is declared twice`);
         kind.moods[name] = mood;
         continue;
