@@ -17,6 +17,8 @@
 // clear side of the true face, thinning toward the clear land, at the band's
 // density, so the page and the walk's slowdown agree.
 
+import { MISTS_KEEP } from "../tools/mists-keep.mjs";
+
 // The fog's colour, ONE variable: the skin's variant 2 (Darko 2026-10-10 10:56),
 // its plum-grey between the base and the quiet. The face takes it; depth and the
 // veil darken it toward near-black at the core.
@@ -38,11 +40,11 @@ export const MISTS_PAINT = {
   pxM: 56,               // metres per baked pixel, upscaled smooth (the fog is soft; this keeps a phone's bake small)
   clearingPx: 320,       // a clearing's bake is at most this many pixels across (they are far off)
   clearingLayers: 2,     // and takes the back two layers only
-  keepM: 440,            // the town's margin: past its soft edge plus the widest drift (200 m along, 90 across), so a drifting bank never reaches a mark
+  keepM: MISTS_KEEP.keepM,       // the town's margin (tools/mists-keep.mjs, one definition)
   keepSoftM: 200,        // the margin's soft edge
   keepNoiseM: 420,       // the margin grows by up to this much, by noise, so its edge is ragged (never less than keepM)
   frameInsetM: 260,      // how far over the painted sheet's own edge the fog reaches before its noise
-  townMaxM: 2600,        // past this a mark is open country, not the town
+  townMaxM: MISTS_KEEP.townMaxM, // past this a mark is open country, not the town (tools/mists-keep.mjs)
   faceRampM: 80,         // the least band over which the wall's face rises inside the town's margin
   faceJagM: 700,         // and how far beyond that it may reach, by noise, where the marks leave room
   faceClearM: 70,        // and no part of that band comes nearer a mark than this
@@ -213,34 +215,10 @@ export function mistsBakeFar(m, layer) {
 }
 
 // ── the town's keep-out ─────────────────────────────────────────────────────
-/** The keep-out rectangles, metres: every sited mark's own extent (parcels,
- *  houses, lit marks, districts), grown by MISTS_PAINT.keepM. The world's frame
- *  and its open country are not the town: a mark wider than townMaxM on either
- *  side and the TOWN's own (the root, the sea, the main channel) keeps nothing, unless it stands in
- *  one of `clearings` (the mists block's, or the skeleton's clearings_m). */
-/** The world's open country, which the fog may stand over: a mark of the
- *  town's own (by or household `the-town`) wider than townMaxM on either side.
- *  A household's mark is never open country, whatever its size. */
-export function mistsOpenCountry(mk) {
-  const town = mk?.by === "the-town" || mk?.household === "the-town" || String(mk?.id ?? "").startsWith("the-town/");   // the id too: a path that drops by/household must not keep the root and thin the fog everywhere
-  return town && Math.max(Number(mk?.extent?.w) || 0, Number(mk?.extent?.h) || 0) > MISTS_PAINT.townMaxM;
-}
-export function mistsKeepRects(marks, clearings = []) {
-  const g = MISTS_PAINT.keepM, out = [];
-  const inClearing = (p) => (clearings ?? []).some((k) => Math.hypot(p.x - k.x, p.y - k.y) < (k.r ?? k.r_m));
-  for (const mk of marks ?? []) {
-    if (!mk?.at || !Number.isFinite(mk.at.x) || !Number.isFinite(mk.at.y)) continue;
-    // only the town's own open country goes unkept (the frame, the sea, the main
-    // channel): every household's mark is kept clear at any size (#186 review: a
-    // household's 3.2 km shore went under the fog), and a mark in a clearing too
-    if (mistsOpenCountry(mk) && !inClearing(mk.at)) continue;
-    const w = Math.max(0, Number(mk.extent?.w) || 0) / 2, h = Math.max(0, Number(mk.extent?.h) || 0) / 2;
-    // the mark's own extent (core) and its reach (core grown by the margin)
-    out.push({ cx0: mk.at.x - w, cx1: mk.at.x + w, cy0: mk.at.y - h, cy1: mk.at.y + h,
-      minX: mk.at.x - w - g, maxX: mk.at.x + w + g, minY: mk.at.y - h - g, maxY: mk.at.y + h + g });
-  }
-  return out;
-}
+// The rule itself (which ground is the town's) lives in tools/mists-keep.mjs, one
+// definition shared with the creatures' spawn (WLD-56); the paint re-exports it and
+// adds only the margin's soft edge and its ragged noise, below.
+export { mistsOpenCountry, mistsKeepRects } from "../tools/mists-keep.mjs";
 /** How kept-clear a point is, 0..1: 1 within a mark's margin less the soft
  *  band, 0 outside every rectangle. Pure (the tests' instrument); the bake uses
  *  a raster of the same rule. */
