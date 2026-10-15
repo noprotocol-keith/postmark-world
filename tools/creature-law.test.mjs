@@ -1,7 +1,7 @@
 // creature-law.test.mjs — the creature class and its three kinds, as the law stands (WLD-56).
 //
-// DRAFT with the class marks and kind files: their words and numbers are pending
-// Darko's D1, D2, D4 and D6. What this holds is the shape the rulings fill in.
+// The class marks and kind files hold Darko's words and numbers (D1, D2, D4, D6,
+// 2026-10-15 12:09); the numbers' own test is creatures.test.mjs § the law.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";

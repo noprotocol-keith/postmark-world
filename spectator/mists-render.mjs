@@ -360,7 +360,7 @@ export function mistsBaker(m, layer, box, { tint = MISTS_TINT, pxM = MISTS_PAINT
 // the same ones and nothing jitters. Never inside the town's keep-out, and never
 // deep in the core, where a silhouette can't be seen.
 //
-// THE MISTS' OWN, NOT THE TOWN'S CREATURES (WLD-56, DRAFT pending Darko's D5).
+// THE MISTS' OWN, NOT THE TOWN'S CREATURES (WLD-56 D5, Darko 2026-10-15 12:09).
 // The live creatures (tools/creatures.mjs) come out into the fringe, on the clear
 // side, where a resident can reach them and the read knows them. These painted
 // ones stay wholly behind the wall's true face (true-face distance > 0), so a
@@ -461,7 +461,7 @@ export function mistsCreatureSVG(cr, { originPx, mPerPx, ink, eye = MISTS_EYE })
 export function mistsCreatureHTML(cr, { originPx, mPerPx, ink, eye = MISTS_EYE }) {
   const n = (v) => v.toFixed(1), s = cr.sizeM / 100 / mPerPx;
   const x = originPx.x + cr.x / mPerPx, y = originPx.y + cr.y / mPerPx;
-  const P = cr.kind === "wolf" ? CREATURE_PATHS.wolf : cr.kind === "bat" ? CREATURE_PATHS.bat : cr.pose === "lift" ? CREATURE_PATHS.crowlift : CREATURE_PATHS.crowperch;
+  const P = cr.kind === "wolf" ? CREATURE_PATHS.wolf : cr.kind === "bat" ? CREATURE_PATHS.bat : cr.pose === "lift" ? CREATURE_PATHS.ravenlift : CREATURE_PATHS.ravenperch;
   const box = `style="left:${P.at[0]}px;top:${P.at[1]}px" width="100" height="100" viewBox="0 0 100 100" aria-hidden="true"`;
   const eyes = cr.eyes ? `<div class="wv-mc-eyes" style="animation-delay:-${n(cr.phase * 9)}s"><svg class="wv-mc-art" ${box}><circle cx="64" cy="25" r="1.6" fill="${eye}"/><circle cx="64" cy="25" r="4.5" fill="${eye}" opacity="0.3"/></svg></div>` : "";
   return `<div class="wv-mc-at" style="transform:translate(${n(x)}px,${n(y)}px) scale(${cr.flip ? "-" : ""}${s.toFixed(4)},${s.toFixed(4)})">`

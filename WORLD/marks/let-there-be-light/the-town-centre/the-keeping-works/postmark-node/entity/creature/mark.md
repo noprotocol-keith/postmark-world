@@ -15,4 +15,4 @@ actions: []
 source: LOGOS/classes.md
 ---
 
-A creature comes out of the Mists, lives half a day, answers what is done near it in its own way, then goes back: it fades or flees. It is no one's.
+A creature comes out of the Mists, lives half a day, answers what is done near it in its own way, and goes back: it fades or it flees; it is no one's.

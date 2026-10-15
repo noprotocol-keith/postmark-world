@@ -151,7 +151,7 @@ test("the creatures: seeded by the crossing, sparse at 244 and populated by 284,
     for (const c of cs) {
       for (const [a, b] of [[0, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]]) assert.equal(KEEP(c.x + a * c.sizeM, c.y + b * c.sizeM), 0, `${c.kind} at (${c.x}, ${c.y}) stands clear of the town`);
       const d = mistsTrueDistance(m, c.x, c.y);
-      assert.ok(d > 0 && d < 450, `${c.kind} stands behind the wall's true face, never on the clear side (true-face distance ${Math.round(d)} m; WLD-56 D5 draft)`);
+      assert.ok(d > 0 && d < 450, `${c.kind} stands behind the wall's true face, never on the clear side (true-face distance ${Math.round(d)} m; WLD-56 D5)`);
       assert.ok(["wolf", "raven", "bat"].includes(c.kind), `${c.kind} is one of the season's kinds`);
     }
     counts.push(cs.length);
