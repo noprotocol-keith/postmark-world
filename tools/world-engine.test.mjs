@@ -70,6 +70,35 @@ test("LOD respects the context budget (render cost capped, not world-proportiona
   assert.ok(fov.aggregate.hidden_by_budget >= 0);
 });
 
+test("the landmark lift: a carried mark its stamps seated is `lifted`; one its size seats is not (POS-632)", () => {
+  // three households near the observer (inside cluster_beyond_m), two seats.
+  // By size alone: big (0.5), mid (0.3), small (0.1). Fifty stamps lift small to
+  // 0.1 × (1 + 0.6·ln 51) ≈ 0.336, past mid, so small takes mid's seat.
+  const marks = [
+    { id: "big/a", kind: "sited", household: "big", at: { x: 200, y: 0 }, extent: { w: 100, h: 100 }, weight: 30 },
+    { id: "mid/b", kind: "sited", household: "mid", at: { x: 0, y: 200 }, extent: { w: 60, h: 60 }, weight: 0 },
+    { id: "small/c", kind: "sited", household: "small", at: { x: -200, y: 0 }, extent: { w: 20, h: 20 }, weight: 50 },
+  ];
+  const fov = fieldOfView({ x: 0, y: 0 }, worldOf(marks), { crossing: 0, budget: 2 });
+  const byId = Object.fromEntries(fov.carried.map((m) => [m.id, m]));
+  assert.deepEqual(Object.keys(byId).sort(), ["big/a", "small/c"], "the stamps seat small over mid");
+  assert.equal(byId["small/c"].lifted, true, "small is in view by its weight, not its size");
+  assert.equal("lifted" in byId["big/a"], false, "big is weighted but its size alone seats it");
+  // the counterfactual only reads: the ranking is the one it always was
+  assert.deepEqual(fov.carried.map((m) => m.id), ["big/a", "small/c"]);
+  // a weightless world carries no lift at all, so its rows are the bytes they were
+  const bare = fieldOfView({ x: 0, y: 0 }, worldOf(marks.map((m) => ({ ...m, weight: 0 }))), { crossing: 0, budget: 2 });
+  assert.ok(bare.carried.every((m) => !("lifted" in m)));
+});
+
+test("the landmark lift never touches a cluster count (the counterfactual pass writes nothing)", () => {
+  // one far household of three marks: its rep carries clusteredCount 2, once
+  const marks = [0, 1, 2].map((i) => ({ id: `far/m${i}`, kind: "sited", household: "far", at: { x: 2000 + i * 10, y: 0 }, extent: { w: 50, h: 50 }, weight: i * 20 }));
+  const fov = fieldOfView({ x: 0, y: 0 }, worldOf(marks), { crossing: 0 });
+  assert.equal(fov.carried.length, 1);
+  assert.equal(fov.carried[0].clusteredCount, 2);
+});
+
 test("a signal-mark cuts through fog where a plain mark at the same range does not", () => {
   const far = 6000; // beyond a thick-fog reach, within a signal's multiplied reach
   const marks = [
