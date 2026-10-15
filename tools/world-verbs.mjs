@@ -77,9 +77,20 @@ export function orient(state, world, { crossing = 0, dials = DIALS } = {}) {
 // `actor` is the handle of the resident the eyes belong to (WLD-9): their home,
 // as tools/where-is.mjs § homeOf resolves it, is carried beyond the budget when
 // it is in view. No actor, or a home that resolves to nowhere, changes nothing.
-export function openYourEyes(state, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, actor = null } = {}) {
+/** AN ENTERED MARK IS SHELTER (Darko 2026-10-15): the test of a point the Mists leave alone for a walker whose enter
+ *  stack is `entered` (mark ids): inside any of those marks. null when nothing is entered, so the Mists read as ever.
+ *  The office passes it to mistsRoad, and openYourEyes to fieldOfView. */
+export function shelterOf(world, entered) {
+  const ids = new Set((entered ?? []).filter(Boolean));
+  if (!ids.size) return null;
+  const marks = (world?.marks ?? []).filter((m) => ids.has(m.id) && m.at);
+  if (!marks.length) return null;
+  return (p) => marks.some((m) => pointWithinMark(p, m));
+}
+
+export function openYourEyes(state, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, actor = null, entered = null } = {}) {
   const home = actor ? homeOf(actor, world) : null;
-  const fov = fieldOfView(state, world, { crossing, budget, dials, keep: home?.placed ? home.mark_id : null });
+  const fov = fieldOfView(state, world, { crossing, budget, dials, keep: home?.placed ? home.mark_id : null, shelter: shelterOf(world, entered) });
   const radial = radialSerialize(fov);
   radial.within = containmentChain(state, world.marks); // the spine: root → inward, parents first
   fov.within = radial.within;

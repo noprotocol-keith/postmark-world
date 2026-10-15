@@ -446,18 +446,30 @@ export const MISTS_STRIDE_FLOOR = 1e-4;
  *  or crosses it (with the point where it meets the wall), or `{ factor, deepest }`
  *  — the leg's even stride as a share of the open road's, and how deep into the
  *  fringe it goes (0 untouched, toward 1 at the wall's face). */
-export function mistsRoad(from, toward, crossing, mists) {
+// AN ENTERED MARK IS SHELTER (Darko 2026-10-15): within a mark the walker has entered, the Mists neither slow the
+// walk nor stop it. `shelter` is the caller's test of a point (the engine defines no containment of its own; the
+// office builds it from the walker's enter stack with shelterOf). It follows entering, never standing: with no
+// shelter the road is read exactly as before.
+export function mistsRoad(from, toward, crossing, mists, { shelter = null } = {}) {
   const m = mistsAt(crossing, mists);
   if (!m) return null;
   const L = Math.hypot(toward.x - from.x, toward.y - from.y);
   const at = (t) => ({ x: from.x + (toward.x - from.x) * t, y: from.y + (toward.y - from.y) * t });
-  const wallAt = (p) => { const h = mistsHere(p, m); return h.inWall ? 0 : h.wallM; };
+  const sheltered = (p) => !!shelter?.(p);
+  const wallAt = (p) => { if (sheltered(p)) return Infinity; const h = mistsHere(p, m); return h.inWall ? 0 : h.wallM; };
   // standing still is not going anywhere: a stop is never refused, wherever it stands
   if (L === 0) return { factor: 1, deepest: 0 };
   // A WALKER THE WALL HAS OVERTAKEN may walk straight out, slowly: see mistsWalkOut
   if (wallAt(from) <= 0) return mistsWalkOut(from, toward, L, at, m);
+  // a road whose every step in the wall is sheltered is not cut by the wall's sight line either
+  let underCover = false;
+  if (shelter && (sheltered(from) || sheltered(toward))) {
+    underCover = true;
+    const n = Math.max(1, Math.ceil(L));
+    for (let i = 0; i <= n && underCover; i += 1) { const p = at(i / n); if (!sheltered(p) && mistsHere(p, m).inWall) underCover = false; }
+  }
   // the road may not pass or end in the wall, nor on its face
-  if (wallAt(toward) <= 0 || (L > 0 && mistsHide(from, toward, m))) {
+  if (wallAt(toward) <= 0 || (L > 0 && !underCover && mistsHide(from, toward, m))) {
     let t = 0;
     if (wallAt(from) > 0) { const n = Math.max(1, Math.ceil(L)); for (let i = 1; i <= n; i += 1) { t = i / n; if (wallAt(at(t)) <= 0) break; } }
     const p = at(t);
@@ -585,7 +597,7 @@ export function lodScore({ extentM, distM, weight = 0, dials = DIALS, dimming = 
 // opts:     { crossing, budget, keep }   keep: a mark id carried beyond the budget when visible
 // Returns a structured telling: the observer's state, the ranked visible marks
 // grouped by bearing→band, far-features on the horizon, and the aggregate tail.
-export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, keep = null } = {}) {
+export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, keep = null, shelter = null } = {}) {
   const { marks, terrain, heightfield, light, fogCeilingM } = world;
   const fog = fogModel(crossing, dials);
   // the Mists (POS-466): null before the schedule's first crossing, and then
@@ -661,7 +673,10 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
     const reach = isSignal ? clearReach * signalMult : clearReach;
     // the Mists: the fringe's reach (a signal cuts it as it cuts the weather),
     // and the wall, which nothing cuts
-    const mistHidden = !!mists && (mistsHide(observer, mk.at, mists)
+    // AN ENTERED MARK IS SHELTER (Darko 2026-10-15): nothing inside a mark the reader has entered is cut by the
+    // Mists, neither the wall nor the fringe's reach. `shelter` is the caller's test (the engine defines no
+    // containment of its own): openYourEyes builds it from the reader's enter stack.
+    const mistHidden = !!mists && !shelter?.(mk.at) && (mistsHide(observer, mk.at, mists)
       || distM > (isSignal && !mistSelf.inWall ? mistReach * signalMult : mistReach));
     const fogHidden = distM > reach || mistHidden;
 
@@ -722,7 +737,7 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
       heightM: ff?.height_m ?? markTop(mk, dials),
       label: ff?.label ?? null, body: mk.body ?? ff?.receipt,
       // a horizon object behind the wall is hidden however tall it stands
-      visible: clearHorizon && !(mists && mistsHide(observer, mk.at, mists)),
+      visible: clearHorizon && !(mists && !shelter?.(mk.at) && mistsHide(observer, mk.at, mists)),
     });
   }
 
