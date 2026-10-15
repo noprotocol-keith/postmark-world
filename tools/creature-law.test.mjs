@@ -4,12 +4,12 @@
 // 2026-10-15 12:09); the numbers' own test is creatures.test.mjs § the law.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadMarks } from "./marks-fold.mjs";
+import { loadMarks, parseRecord } from "./marks-fold.mjs";
 import { readKind } from "./creature-kind.mjs";
-import { DESPAWN_REASONS } from "./creatures.mjs";
+import { DESPAWN_REASONS, CREATURE_LAW_DIR, creatureLaw } from "./creatures.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const marks = loadMarks(join(ROOT, "WORLD", "marks"));
@@ -41,4 +41,12 @@ test("the three kinds: each a class extending creature, whose kind file is its l
     assert.ok(kind.reactions.some((r) => r.effects.some((e) => e.do === "flee")), `${k} can flee`);
     assert.ok(kind.reactions.some((r) => r.src.trim() === "true"), `${k} always has something to do`);
   }
+});
+
+test("the law's directory: the class and its kinds all stand under CREATURE_LAW_DIR, so a reader at a ref lists one place", () => {
+  // as the office's tick reads it at a ref: every mark.md under the directory, each through parseRecord
+  const files = readdirSync(join(ROOT, CREATURE_LAW_DIR), { recursive: true }).map(String).filter((p) => /(^|[\\/])mark\.md$/.test(p));
+  const under = files.map((p) => parseRecord(readFileSync(join(ROOT, CREATURE_LAW_DIR, p), "utf8"), p));
+  assert.deepEqual(creatureLaw(under), creatureLaw(marks), "the directory alone reads the same law as the whole world");
+  assert.deepEqual(under.filter((m) => m.kind === "class").map((m) => String(m.class)).sort(), ["bat", "creature", "raven", "wolf"]);
 });

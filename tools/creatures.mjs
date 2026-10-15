@@ -71,6 +71,11 @@ export const ID_PREFIX = "creature:";
 /** A creature's own act: its reaction, as the office writes it (POS-637 W4). */
 export const REACT_ACTION = "react";
 
+/** Where the creature class and its kinds stand in the world: the one directory a
+ *  reader at a ref (the office's tick) lists and parses to read the law. A mark's
+ *  directory never moves (the frozen filing), so this is a durable address. */
+export const CREATURE_LAW_DIR = "WORLD/marks/let-there-be-light/the-town-centre/the-keeping-works/postmark-node/entity/creature";
+
 /** The dials the schedule reads, each from the creature class (or a kind's mark). */
 export const CREATURE_DIAL_NAMES = Object.freeze(["band_from_m", "band_to_m", "keep_m", "apart_m", "span_h"]);
 
