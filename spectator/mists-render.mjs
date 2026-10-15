@@ -363,14 +363,19 @@ export function mistsBaker(m, layer, box, { tint = MISTS_TINT, pxM = MISTS_PAINT
 // THE MISTS' OWN, NOT THE TOWN'S CREATURES (WLD-56 D5, Darko 2026-10-15 12:09).
 // The live creatures (tools/creatures.mjs) come out into the fringe, on the clear
 // side, where a resident can reach them and the read knows them. These painted
-// ones stay wholly behind the wall's true face (true-face distance > 0), so a
-// silhouette is never mistaken for a creature that answers, and they are ravens,
-// as the live kind is.
+// ones stay wholly behind the wall's true face, so a silhouette is never mistaken
+// for a creature that answers, and they are ravens, as the live kind is.
+// WHOLLY means the DRAWN BOX, not the point it is drawn from (review of #219,
+// F1): a wolf is drawn 92% up from its feet and half its size to either side, so
+// its depth is measured from the edge of its box nearest the face. Each face has
+// its own reach toward the clear side (north: the box below the feet; south: the
+// box above them; east and west: half the width), and `depthM` is the gap
+// between that edge and the face.
 export const MISTS_CREATURES = {
   full: 284,
   wolves: [2, 9], ravens: [3, 16], bats: [2, 10],         // at the first crossing and from `full`
   sizeM: { wolf: 620, raven: 320, bat: 230 },
-  // how far behind the wall's true face each stands, metres (> 0: in the wall, never on the clear side)
+  // how far behind the wall's true face each silhouette's nearest edge stands, metres (> 0: wholly in the wall)
   depthM: { wolf: [40, 380], ravenPerch: [30, 300], ravenLift: [60, 420], bat: [50, 360] },
 };
 function seeded(seed) {
@@ -392,39 +397,44 @@ export function mistsCreatures(m, { first = 244, keep = null } = {}) {
     { len: c.maxY - c.minY, at: (s, d) => ({ x: c.maxX + d, y: c.minY + s }) },   // east
   ];
   const total = sides.reduce((a, sd) => a + sd.len, 0);
-  // a point at true-face distance d (positive into the wall), anywhere round the band
-  const onBand = (dIn, dOut) => {
-    let u = r() * total, sd = sides[0];
-    for (const x of sides) { if (u <= x.len) { sd = x; break; } u -= x.len; }
-    return sd.at(u, dIn + (dOut - dIn) * r());
+  // how far a drawn box reaches from its point toward each face (north, south, west, east)
+  const towardFace = (b) => [b.maxY, -b.minY, b.maxX, -b.minX];
+  // a point whose drawn box's nearest edge stands `dIn..dOut` behind the face, anywhere round the band
+  const onBand = (kind, pose, size, dIn, dOut) => {
+    let u = r() * total, i = 0;
+    for (; i < sides.length - 1; i++) { if (u <= sides[i].len) break; u -= sides[i].len; }
+    const reach = towardFace(mistsCreatureBox({ kind, pose, x: 0, y: 0, sizeM: size }))[i];
+    return sides[i].at(u, reach + dIn + (dOut - dIn) * r());
   };
   const out = [];
   const clearOfTown = (x, y, size) => !keep || [[0, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]].every(([a, b]) => keep(x + a * size, y + b * size) === 0);
   const apart = (x, y, size) => out.every((o) => Math.hypot(o.x - x, o.y - y) > (o.sizeM + size) * 0.75);
-  const place = (kind, dIn, dOut, extra) => {
+  const place = (kind, pose, dIn, dOut, extra) => {
     for (let tries = 0; tries < 60; tries++) {
       // judged where it is drawn (whole metres), so a margin's edge never falls between the two
-      const p = onBand(dIn, dOut), x = Math.round(p.x), y = Math.round(p.y), size = Math.round(C.sizeM[kind] * (0.8 + 0.4 * r()));
-      if (!clearOfTown(x, y, size) || !apart(x, y, size)) continue;
-      const cr = { kind, x, y, sizeM: size, flip: r() < 0.5, phase: +r().toFixed(3), ...extra() };
+      const size = Math.round(C.sizeM[kind] * (0.8 + 0.4 * r()));
+      const p = onBand(kind, pose, size, dIn, dOut), x = Math.round(p.x), y = Math.round(p.y);
+      if (!mistsCreatureBehindWall(m, { kind, pose, x, y, sizeM: size }) || !clearOfTown(x, y, size) || !apart(x, y, size)) continue;
+      const cr = { kind, x, y, sizeM: size, flip: r() < 0.5, phase: +r().toFixed(3), pose, ...extra() };
       out.push(cr);
       return cr;
     }
     return null;
   };
-  for (let i = 0, n = count(C.wolves); i < n; i++) place("wolf", ...C.depthM.wolf, () => ({ pose: "stand", eyes: r() < 0.35 + 0.45 * t }));
+  for (let i = 0, n = count(C.wolves); i < n; i++) place("wolf", "stand", ...C.depthM.wolf, () => ({ eyes: r() < 0.35 + 0.45 * t }));
   for (let i = 0, n = count(C.ravens); i < n; i++) {
     const flying = r() < 0.4;
-    place("raven", ...(flying ? C.depthM.ravenLift : C.depthM.ravenPerch), () => ({ pose: flying ? "lift" : "perch", eyes: false }));
+    place("raven", flying ? "lift" : "perch", ...(flying ? C.depthM.ravenLift : C.depthM.ravenPerch), () => ({ eyes: false }));
   }
   for (let i = 0, n = count(C.bats); i < n; i++) {
-    const lead = place("bat", ...C.depthM.bat, () => ({ pose: "flit", eyes: false }));
+    const lead = place("bat", "flit", ...C.depthM.bat, () => ({ eyes: false }));
     if (!lead || r() >= 0.45) continue;
-    // a three: two more close by, if they too stand clear of the town
+    // a three: two more close by, if they too stand wholly behind the wall and clear of the town
     for (const [dx, dy] of [[1.6, -0.7], [-1.3, 0.9]]) {
       const x = Math.round(lead.x + dx * lead.sizeM), y = Math.round(lead.y + dy * lead.sizeM), size = Math.round(lead.sizeM * 0.8);
-      const dd = mistsTrueDistance(m, x, y);
-      if (dd >= C.depthM.bat[0] && dd <= C.depthM.bat[1] && clearOfTown(x, y, size)) out.push({ ...lead, x, y, sizeM: size, phase: +r().toFixed(3) });
+      const follower = { ...lead, x, y, sizeM: size };
+      if (mistsCreatureBehindWall(m, follower) && mistsTrueDistance(m, x, y) <= C.depthM.bat[1] + size && clearOfTown(x, y, size))
+        out.push({ ...follower, phase: +r().toFixed(3) });
     }
   }
   return out;
@@ -441,12 +451,27 @@ const CREATURE_PATHS = {
   ravenlift: { d: "M6 78 L29 58 C28 43 21 29 17 20 Q18 16 22 20 L29 29 L27 13 Q28 9 32 13 L41 26 L40 8 Q42 5 45 10 L55 28 L55 13 Q58 10 60 16 L63 44 C66 40 73 40 77 44 L81 48 L96 52 L96 55 L81 57 C75 66 68 69 57 69 L51 79 L55 82 L53 85 L45 80 L48 71 L41 74 L34 88 L29 87 L34 76 L12 85 Z", at: [-50, -50] },
   bat: { d: "M50 39 L44 28 L41 44 C32 37 24 24 7 18 C12 31 11 44 3 57 C17 52 24 56 25 65 C35 60 41 65 43 73 L50 83 L57 73 C59 65 65 60 75 65 C76 56 83 52 97 57 C89 44 88 31 93 18 C76 24 68 37 59 44 L56 28 Z", at: [-50, -50] },
 };
+const creaturePath = (cr) => (cr.kind === "wolf" ? CREATURE_PATHS.wolf : cr.kind === "bat" ? CREATURE_PATHS.bat
+  : cr.pose === "lift" ? CREATURE_PATHS.ravenlift : CREATURE_PATHS.ravenperch);
+/** The box a creature's silhouette is drawn in (metres, the engine's frame): its
+ *  path's 100-unit box at its size, from its point. A flip mirrors it about the
+ *  point, and every path is centred across (`at[0]` is -50), so the box holds. */
+export function mistsCreatureBox(cr) {
+  const P = creaturePath(cr), k = cr.sizeM / 100;
+  return { minX: cr.x + P.at[0] * k, maxX: cr.x + (P.at[0] + 100) * k, minY: cr.y + P.at[1] * k, maxY: cr.y + (P.at[1] + 100) * k };
+}
+/** Does the whole drawn box stand behind the wall's true face: off the clear box, and off every clearing? */
+export function mistsCreatureBehindWall(m, cr) {
+  const b = mistsCreatureBox(cr), c = m.clear;
+  if (!(b.maxX < c.minX || b.minX > c.maxX || b.maxY < c.minY || b.minY > c.maxY)) return false;
+  return (m.clearings ?? []).every((k) => Math.hypot(Math.max(b.minX - k.x, 0, k.x - b.maxX), Math.max(b.minY - k.y, 0, k.y - b.maxY)) > k.r);
+}
 /** One creature as SVG, in the painting's frame. `ink` is the silhouette's
  *  colour (the fog's core); `eye` the light its eyes catch. */
 export function mistsCreatureSVG(cr, { originPx, mPerPx, ink, eye = MISTS_EYE }) {
   const n = (v) => v.toFixed(1), s = cr.sizeM / 100 / mPerPx;
   const x = originPx.x + cr.x / mPerPx, y = originPx.y + cr.y / mPerPx;
-  const P = cr.kind === "wolf" ? CREATURE_PATHS.wolf : cr.kind === "bat" ? CREATURE_PATHS.bat : cr.pose === "lift" ? CREATURE_PATHS.ravenlift : CREATURE_PATHS.ravenperch;
+  const P = creaturePath(cr);
   // a wolf's eye catches the light on the head, just behind the muzzle's root
   const eyes = cr.eyes ? `<g class="wv-mc-eyes" style="animation-delay:-${n(cr.phase * 9)}s"><circle cx="64" cy="25" r="1.6" fill="${eye}"/><circle cx="64" cy="25" r="4.5" fill="${eye}" opacity="0.3"/></g>` : "";
   return `<g transform="translate(${n(x)} ${n(y)}) scale(${cr.flip ? "-" : ""}${s.toFixed(4)} ${s.toFixed(4)})">`
@@ -461,7 +486,7 @@ export function mistsCreatureSVG(cr, { originPx, mPerPx, ink, eye = MISTS_EYE })
 export function mistsCreatureHTML(cr, { originPx, mPerPx, ink, eye = MISTS_EYE }) {
   const n = (v) => v.toFixed(1), s = cr.sizeM / 100 / mPerPx;
   const x = originPx.x + cr.x / mPerPx, y = originPx.y + cr.y / mPerPx;
-  const P = cr.kind === "wolf" ? CREATURE_PATHS.wolf : cr.kind === "bat" ? CREATURE_PATHS.bat : cr.pose === "lift" ? CREATURE_PATHS.ravenlift : CREATURE_PATHS.ravenperch;
+  const P = creaturePath(cr);
   const box = `style="left:${P.at[0]}px;top:${P.at[1]}px" width="100" height="100" viewBox="0 0 100 100" aria-hidden="true"`;
   const eyes = cr.eyes ? `<div class="wv-mc-eyes" style="animation-delay:-${n(cr.phase * 9)}s"><svg class="wv-mc-art" ${box}><circle cx="64" cy="25" r="1.6" fill="${eye}"/><circle cx="64" cy="25" r="4.5" fill="${eye}" opacity="0.3"/></svg></div>` : "";
   return `<div class="wv-mc-at" style="transform:translate(${n(x)}px,${n(y)}px) scale(${cr.flip ? "-" : ""}${s.toFixed(4)},${s.toFixed(4)})">`
