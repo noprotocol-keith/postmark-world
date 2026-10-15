@@ -101,10 +101,27 @@ before(async () => {
   CLEANUP.push(() => browser.close());
 });
 
+// THE MACHINE'S SPEED IS SET, NOT MEASURED (WLD-60). The bake times its first
+// layer with performance.now() and calls the machine slow past 3 ms per 1,000 px,
+// so on a busy host an "able machine" page read slow and lite came on. Here the
+// page's clock holds still within one task and moves on between tasks: the
+// bake's slices are synchronous, so its reading is exactly 0, the machine
+// infinitely fast, while time still passes between frames and timers. Only a
+// throttled run (the slow machine) keeps the real clock.
+const holdClockWithinATask = () => {
+  const realNow = performance.now.bind(performance);
+  let held = null;
+  performance.now = () => {
+    if (held === null) { held = realNow(); queueMicrotask(() => { held = null; }); }
+    return held;
+  };
+};
+
 // crossing 247, five hours in (the Mists on, whatever today's crossing is), and
 // the machine the page is told it runs on
 async function open({ query = "", cores = 16, memory = 8, throttle = 0 } = {}) {
   const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 }, reducedMotion: "no-preference" });
+  if (!throttle) await ctx.addInitScript(holdClockWithinATask);
   await ctx.addInitScript(({ cores, memory }) => {
     const RealDate = Date, realNow = RealDate.now.bind(RealDate);
     const off = (Date.UTC(2026, 5, 12) + 247 * 12 * 3600e3 + 5 * 3600e3) - realNow();
@@ -213,6 +230,7 @@ test("the page: auto turns lite mode on for a small machine, and for a slow firs
 test("the page on a phone: no seventh circle; the bell opens a menu holding the bell and lite mode", async (t) => {
   if (!chromium) { t.skip("Playwright is not installed: lite mode went UNGUARDED"); return; }
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await ctx.addInitScript(holdClockWithinATask);   // an able phone: its row reads "auto (off)"
   await ctx.addInitScript(() => {
     const RealDate = Date, realNow = RealDate.now.bind(RealDate);
     const off = (Date.UTC(2026, 5, 12) + 247 * 12 * 3600e3 + 5 * 3600e3) - realNow();
