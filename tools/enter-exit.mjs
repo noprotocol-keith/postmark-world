@@ -208,8 +208,17 @@ export function parseEnterExitLedger(text) {
 // never lowercased — because a landing that names no mark is refused by
 // quoting the field, and a quote that has been tidied is not the field.
 // Present only when written, so every law without them reads as before.
+//
+// ── THE STAIRS CLASS (WLD-21, ruled by Darko 2026-10-15) ─────────────────────
+//
+// A mark of class `stairs` that writes no `entry:` at all is a portal by its
+// class: it leads into itself and refuses, with the class's line as its whole
+// answer, until the floor it leads to exists. A stair that writes its own
+// `entry:` is an ordinary portal and keeps the class, so a later floor is
+// reached by writing `into`, `lands_at` and a word, and nothing of the default
+// carries over.
 export function entryLawOf(mark) {
-  const raw = mark?.entry;
+  const raw = mark?.entry ?? (isStairs(mark) ? stairsLaw(mark) : null);
   if (!raw || typeof raw !== "object") return null;
   const word = isEntryWord(raw.word) ? raw.word : DEFAULT_ENTRY_WORD;
   const edge = raw.edge ? String(raw.edge) : null;
@@ -230,6 +239,15 @@ function intoOf(v) {
   const list = Array.isArray(v) ? v : [v];
   return list.filter((x) => typeof x === "string" && x !== "");
 }
+
+export const STAIRS_CLASS = "stairs";
+/** The stairs class's answer, verbatim (Darko, 2026-10-15 13:31). */
+export const STAIRS_LINE = "Moving to higher/lower floors has not been implemented yet. Coming Soon!";
+/** A stairs is an instance: a sited mark carrying the class (never its declaration). */
+export const isStairs = (m) => String(m?.class ?? "") === STAIRS_CLASS && m?.kind === "sited";
+/** The class's default law: into itself, opposed, the line as its consequence.
+ *  Applied only to a stair that writes no `entry:` (entryLawOf). */
+export const stairsLaw = (m) => ({ word: "opposed", consequence: STAIRS_LINE, into: m?.id ?? null });
 
 /** Whether a mark is a portal: its entry law carries `into`. */
 export const isPortal = (mark) => !!entryLawOf(mark)?.into;
@@ -375,9 +393,15 @@ export function entityChild(handle, markId) {
 export function adjudicate(mark, { accepted = false } = {}) {
   const law = entryLawOf(mark);
   const word = law?.word ?? DEFAULT_ENTRY_WORD;
+  // A stair's refusal IS its line (WLD-21, Darko 2026-10-15): `because` is what
+  // every reader prints (the World page prints nothing else), so the class's
+  // answer goes there, not only into the terms. Stairs only: other opposed marks
+  // keep the town's standing sentence.
   if (word === "opposed")
     return { mark: mark.id, word, effect: "refused", terms: termsAt(mark),
-             because: `${mark.id} opposes entry — an entity child opposed is a refusal at the threshold, and you are left standing at the door.` };
+             because: isStairs(mark)
+               ? (law?.consequence || STAIRS_LINE)
+               : `${mark.id} opposes entry — an entity child opposed is a refusal at the threshold, and you are left standing at the door.` };
   if (law?.edge && !accepted)
     return { mark: mark.id, word, effect: "terms", terms: termsAt(mark),
              because: `${mark.id} forms an ${law.edge} edge back at you on entry${law.consequence ? ` — ${law.consequence}` : ""}. Entering means accepting it; say so, or stay outside.` };

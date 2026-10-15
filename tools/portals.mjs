@@ -458,9 +458,11 @@ export function portalFindings(marks) {
         say(m.id, "exit-never-opposed", `this portal leads out of ${d} and answers "opposed" — an exit is locked from the outside, never from the inside. No jails`);
 
     // rooms: every place inside the dungeon a passage can put you, and every
-    // room a portal inside it stands in
+    // room a portal inside it stands in. A portal into ITSELF (a stair whose floor
+    // does not exist yet: the stairs class's default) puts nobody anywhere, so it
+    // makes no room.
     const rooms = new Set();
-    for (const { m, law } of portals) for (const id of law.into) { const n = nodeOf(id); if (n && inD(n)) rooms.add(n); }
+    for (const { m, law } of portals) for (const id of law.into) { if (id === m.id) continue; const n = nodeOf(id); if (n && inD(n)) rooms.add(n); }
     for (const { m } of inner) { const c = containerOf(m, list)?.id; if (c && inD(c)) rooms.add(c); }
     const out = new Map([...rooms].map((r) => [r, { exit: false, to: new Set() }]));
     for (const { m, law } of inner) {
