@@ -740,7 +740,10 @@ export function fieldOfView(observer, world, { crossing = 0, budget = DIALS.cont
   // A carried mark that would NOT be seated then was put there by its stamps, and
   // carries `lifted: true`. Nothing else about the ranking moves: this pass only
   // reads. The weight floor that makes it a landmark is the reader's (the office's).
-  const bareRanked = [...ranked].sort((a, b) => bareScore.get(b.id) - bareScore.get(a.id));
+  // from the visible set in RECORD order, not the weighted rank: a sort is stable,
+  // so re-sorting the weighted order would let the stamps break a weight-0 tie
+  // (review-217 § 4)
+  const bareRanked = seen.filter((s) => s.visible).sort((a, b) => bareScore.get(b.id) - bareScore.get(a.id));
   const bareSeated = new Set(seatsOf(bareRanked, { keep, budget, dials, count: false }).carried.map((s) => s.id));
   for (const s of carried) if (!bareSeated.has(s.id)) s.lifted = true;
   const tailByBearing = {};
