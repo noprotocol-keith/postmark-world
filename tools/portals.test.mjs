@@ -104,13 +104,15 @@ test("THE DOOR BUG: a lands_at naming no mark is refused by quoting the field", 
 
 // ── the passage ──────────────────────────────────────────────────────────────
 
-test("into the Spire: one portal enters the dungeon and the vestibule (never the open Grounds above it), and lands at the inside face", () => {
+test("into the Spire: one portal enters the dungeon and the vestibule (never the open Grounds above it), and lands a step in from the inside face", () => {
   const a = enter(AT(845, 1000), "spire/doors-outside", world(), { occupancy: occ([]), handle: "ann", at: 300 });
   assert.equal(a.error, undefined);
   assert.deepEqual(a.entered, [SPIRE, "spire/vestibule"]);
   assert.equal(a.rows.length, 2);
   assert.match(a.rows[0], / · ann · enters spire\/the-spire · ferry 300\.0000 · word neutral$/);
-  assert.deepEqual(a.landing, { x: 860, y: 1000, mark: "spire/doors-inside", clamped: false });
+  // row 68 (a): a step in from the door, never on its square: the 4×2 inside face at x 860 is 5 m in from the
+  // vestibule west wall, so its far edge is 862 and a step past it is 863
+  assert.deepEqual(a.landing, { x: 863, y: 1000, mark: "spire/doors-inside", clamped: false });
   assert.deepEqual(a.portals.map((p) => p.id), ["spire/doors-inside", "spire/hall-door"]);
   const acts = parseEnterExitLedger(a.rows.join("\n")).acts;
   assert.deepEqual(occupancyAt(acts).get("ann"), [SPIRE, "spire/vestibule"], "the rows derive the stack the answer claims");

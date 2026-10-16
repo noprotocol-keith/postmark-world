@@ -258,37 +258,134 @@ export function clampInto(pt, mark, nudge = LANDING_NUDGE_M) {
   return { x: round2(edge.x), y: round2(edge.y), clamped: true };
 }
 
+/** How far past a door's own edge a landing stands, into the room (row 68 (a), Darko 2026-10-16 19:15). */
+export const LANDING_STEP_M = 1;
+/** And how near a wall a landing may ever stand. */
+export const LANDING_INSET_M = 1;
+
+/** The nearest point of a mark's boundary to `pt`, the unit normal pointing
+ *  INTO the mark there, the distance, and whether `pt` is inside. */
+export function boundaryNearest(pt, mark) {
+  const p = { x: Number(pt.x), y: Number(pt.y) };
+  const inside = pointInMark(p, mark);
+  const ring = polygonOf(mark);
+  if (ring) {
+    let best = null;
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i], b = ring[(i + 1) % ring.length];
+      const q = nearestOnSegment(p, a, b);
+      const d = Math.hypot(q.x - p.x, q.y - p.y);
+      if (!best || d < best.d) best = { q, d, a, b };
+    }
+    const dx = vx(best.b) - vx(best.a), dy = vy(best.b) - vy(best.a), l = Math.hypot(dx, dy) || 1;
+    let n = { x: -dy / l, y: dx / l };
+    if (!pointInMark({ x: best.q.x + n.x * 0.01, y: best.q.y + n.y * 0.01 }, mark)) n = { x: -n.x, y: -n.y };
+    return { q: best.q, n: { x: n.x + 0, y: n.y + 0 }, d: best.d, inside }; // + 0: never a -0 normal
+  }
+  const r = rect(mark), x0 = r.x - r.w / 2, x1 = r.x + r.w / 2, y0 = r.y - r.h / 2, y1 = r.y + r.h / 2;
+  const cx = Math.max(x0, Math.min(x1, p.x)), cy = Math.max(y0, Math.min(y1, p.y));
+  const edges = [
+    { q: { x: x0, y: cy }, n: { x: 1, y: 0 }, e: inside ? p.x - x0 : x0 - p.x },
+    { q: { x: x1, y: cy }, n: { x: -1, y: 0 }, e: inside ? x1 - p.x : p.x - x1 },
+    { q: { x: cx, y: y0 }, n: { x: 0, y: 1 }, e: inside ? p.y - y0 : y0 - p.y },
+    { q: { x: cx, y: y1 }, n: { x: 0, y: -1 }, e: inside ? y1 - p.y : p.y - y1 },
+  ];
+  // inside: the nearest wall; outside: the wall the point stands furthest beyond
+  const pick = inside ? edges.reduce((a, b) => (b.e < a.e ? b : a)) : edges.reduce((a, b) => (b.e > a.e ? b : a));
+  return { q: pick.q, n: pick.n, d: Math.hypot(pick.q.x - p.x, pick.q.y - p.y), inside };
+}
+
+/** A point held at least `inset` metres inside a mark: a point already that far
+ *  in stays exactly where it is; otherwise it moves in off the nearest wall. A
+ *  point mark has one place to stand. */
+export function insetInto(pt, mark, inset = LANDING_INSET_M) {
+  const p = { x: Number(pt.x), y: Number(pt.y) };
+  if (!mark?.extent) return { x: mark.at.x, y: mark.at.y, moved: p.x !== mark.at.x || p.y !== mark.at.y };
+  if (!polygonOf(mark)) {
+    const r = rect(mark), ix = Math.min(inset, r.w / 2), iy = Math.min(inset, r.h / 2);
+    const x = Math.max(r.x - r.w / 2 + ix, Math.min(r.x + r.w / 2 - ix, p.x));
+    const y = Math.max(r.y - r.h / 2 + iy, Math.min(r.y + r.h / 2 - iy, p.y));
+    return { x: round2(x), y: round2(y), moved: round2(x) !== round2(p.x) || round2(y) !== round2(p.y) };
+  }
+  const b = boundaryNearest(p, mark);
+  if (b.inside && b.d >= inset) return { x: round2(p.x), y: round2(p.y), moved: false };
+  const c = { x: b.q.x + b.n.x * inset, y: b.q.y + b.n.y * inset };
+  for (const t of [c, mark.at]) if (pointInMark(t, mark)) return { x: round2(t.x), y: round2(t.y), moved: true };
+  return { x: round2(b.q.x), y: round2(b.q.y), moved: true };
+}
+
+/** A STEP IN FROM THE DOOR (row 68 (a)): from where the door stands, along the
+ *  inward normal of the room's nearest wall, past the door's own edge by a step,
+ *  then held a metre off every wall. So a landing never stands on a wall, nor on
+ *  the door's own square that straddles or touches it. */
+export function stepInFrom(door, room) {
+  const b = boundaryNearest(door.at, room);
+  const half = door.extent ? Math.abs(b.n.x) * (door.extent.w ?? 0) / 2 + Math.abs(b.n.y) * (door.extent.h ?? 0) / 2 : 0;
+  const from = b.inside ? door.at : b.q;
+  const reach = b.inside ? half + LANDING_STEP_M : Math.max(0, half - b.d) + LANDING_STEP_M;
+  const at = insetInto({ x: from.x + b.n.x * reach, y: from.y + b.n.y * reach }, room);
+  return { x: at.x, y: at.y, clamped: at.moved };
+}
+
 /**
  * Where a walker passing through this portal stands, or why he cannot.
  *
- *   { ok: true, x, y, lands_mark, clamped }
+ *   { ok: true, x, y, lands_mark, clamped, by }
  *   { ok: false, field: "lands_at", value, because }
  *
- * A `lands_at` that names no mark is the door bug (WLD-18): the answer quotes
- * the field exactly as written, and that quote is the clue.
+ * `room` is the mark the passage enters (passageTargetOf), `portal` the mark
+ * passed. THE LANDING (row 68 (a), Darko 2026-10-16 19:15), first match wins:
+ *   1. "room": the room's own declared landing, its `entry.lands_at` (a place
+ *      that names no `into` may still say where its entrants land);
+ *   2. "point": a portal `lands_at` written as { x, y }, taken as written;
+ *   3. "door": a step in from the door. The door is the portal's `lands_at`
+ *      mark (the paired door on the far side), else the way picked when it is
+ *      not the room itself (WLD-63's door list), else the portal passed when it
+ *      stands at the room (within LANDING_REACH_M);
+ *   4. "anchor": with no door at all (a portal far from where it leads), the
+ *      room's own anchor.
+ * Every landing is held at least LANDING_INSET_M inside the room. A `lands_at`
+ * that names no mark is the door bug (WLD-18): the answer quotes the field
+ * exactly as written, and that quote is the clue.
  */
-export function landingOf(law, intoMark, byId) {
-  const raw = law?.lands_at;
-  let anchor = null, landsMark = null;
-  if (raw === undefined || raw === null) {
-    anchor = intoMark.at;
-  } else if (typeof raw === "string") {
-    landsMark = byId.get(raw) ?? null;
-    if (!landsMark)
-      return { ok: false, field: "lands_at", value: raw,
-               because: `lands_at: ${JSON.stringify(raw)} names no mark, so this portal leads nowhere` };
-    if (!landsMark.at)
-      return { ok: false, field: "lands_at", value: raw,
-               because: `lands_at: ${JSON.stringify(raw)} names a mark with no place in the world, so there is nowhere to stand` };
-    anchor = landsMark.at;
-  } else if (typeof raw === "object" && Number.isFinite(Number(raw.x)) && Number.isFinite(Number(raw.y))) {
-    anchor = { x: Number(raw.x), y: Number(raw.y) };
-  } else {
-    return { ok: false, field: "lands_at", value: raw,
-             because: `lands_at: ${JSON.stringify(raw)} is neither a mark id nor { x, y }` };
+export function landingOf(law, intoMark, byId, { room = intoMark, portal = null } = {}) {
+  const resolve = (raw, whose) => {
+    if (typeof raw === "string") {
+      const m = byId.get(raw) ?? null;
+      if (!m) return { error: { ok: false, field: "lands_at", value: raw, because: `${whose}lands_at: ${JSON.stringify(raw)} names no mark, so this portal leads nowhere` } };
+      if (!m.at) return { error: { ok: false, field: "lands_at", value: raw, because: `${whose}lands_at: ${JSON.stringify(raw)} names a mark with no place in the world, so there is nowhere to stand` } };
+      return { mark: m };
+    }
+    if (raw && typeof raw === "object" && Number.isFinite(Number(raw.x)) && Number.isFinite(Number(raw.y)))
+      return { point: { x: Number(raw.x), y: Number(raw.y) } };
+    return { error: { ok: false, field: "lands_at", value: raw, because: `${whose}lands_at: ${JSON.stringify(raw)} is neither a mark id nor { x, y }` } };
+  };
+  const done = (at, by, mark = null) => ({ ok: true, x: at.x, y: at.y, lands_mark: mark, clamped: !!(at.clamped ?? at.moved), by });
+  const here = room ?? intoMark;
+  // 1. the room's own word
+  const own = room && room.id !== portal?.id ? entryLawOf(room) : null;
+  if (own && !own.into && own.lands_at !== undefined) {
+    const r = resolve(own.lands_at, `${room.id}'s `);
+    if (r.error) return r.error;
+    return r.point ? done(insetInto(r.point, room), "room") : done(insetInto(r.mark.at, room), "room", r.mark.id);
   }
-  const at = clampInto(anchor, intoMark);
-  return { ok: true, x: at.x, y: at.y, lands_mark: landsMark?.id ?? null, clamped: at.clamped };
+  // 2–3. the portal's
+  const raw = law?.lands_at;
+  let door = null;
+  if (raw !== undefined && raw !== null) {
+    const r = resolve(raw, "");
+    if (r.error) return r.error;
+    if (r.point) return done(insetInto(r.point, here), "point");
+    door = r.mark;
+  } else if (intoMark?.at && room && intoMark.id !== room.id) {
+    door = intoMark;
+  } else if (portal?.at && room?.extent && distanceToMark(portal.at, room) <= LANDING_REACH_M) {
+    door = portal;
+  }
+  const named = raw !== undefined && raw !== null ? door?.id ?? null : null;
+  if (door) return done(here?.extent ? stepInFrom(door, here) : insetInto(door.at, here), "door", named);
+  // 4. no door: the room's anchor
+  return done(insetInto(here.at, here), "anchor");
 }
 
 /** The mark a passage through `into` actually enters: `into` itself when it
