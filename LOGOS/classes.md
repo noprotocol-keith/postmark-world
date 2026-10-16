@@ -72,7 +72,9 @@ v0-proposed markers — vehicle, quest-complete, uncategorized and its shelf —
 stand deliberately source-less until ruled) — and as `the-town/the-wheelhouse`, the timetable class's
 standing institution and its first instance; `the-town/node` and
 `the-town/edge`, the logos primitives the whole ontology roots in; and
-`the-town/character-cap`, the mark class's first predicate-child parameter.
+`the-town/character-cap`, the mark class's first predicate-child parameter
+(*from 2026-10-16 the constitution child property of `mark`'s `body`, § Property
+and predicate*).
 
 The seatings, on the record (prose about the channel, never the channel
 itself): household, member-of
@@ -109,6 +111,10 @@ to its true name and the leave-mark grant's residue follows; `predicate` joins m
 emission as the FOURTH world family — properties are nodes, every world
 family may carry them, and the family is positionless by taxonomy, which is
 where "optional position" went: the optionality dissolved into the tree.
+*(SUPERSEDED 2026-10-16, § Property and predicate: `predicate` is a subclass
+of `mark`, no longer a fourth family beside it — it stood under postmark-node
+only because class-side predicates existed, and those are now properties,
+which live in class-space.)*
 `position` and `exposure` stand as predicate's child classes (a position
 node IS a predicate — it describes the node it hangs off); the position
 SLOT is postmark-node own predicate child, `value: unsealed` — **a slot is a
@@ -321,6 +327,32 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   to say about their own mark that is not a declared property is a
   predicate, like anyone else's claim — so `slot` and `value` stay, because a
   claim's name is the claimant's own words.
+- **A predicate is a mark: `predicate` is a subclass of `mark`** (Darko,
+  2026-10-16 12:50: *"predicate can now cleanly fit under mark. The only
+  reason why we had predicate under node was because of classes."*). With the
+  class side moved to properties, an instance predicate is a signed,
+  contestable claim on the world, which is what a mark is.
+- **Property lives in class-space,** under the meta-class's rails (12:50;
+  § The meta-class: param bounds, slot naming grammar, collision rules, the
+  locks).
+- **The four fields of a property are fixed** (ruled 12:52–12:53, *"that seems
+  right"*): the meta-class defines, once, that every property has a **name**,
+  a **tier**, a **default** and a **body**, as fixed fields — never as child
+  properties, which is where the regress stops.
+- **A property may have child properties, each with its own tier** (ruled
+  12:52: *"let a property have a child property. And the child property can
+  be constitutional even if the parent's sovereign"*). Child properties carry
+  only the rules specific to one property: its caps, bounds and allowed
+  values. Chest `capacity` is sovereign (default 30) with constitution
+  children `min` 1 and `max` 120 — today's `capacity_min` and `capacity_max`
+  dials, flattened.
+- **`body` is a sovereign property of `mark`** (12:48: *"body should become a
+  property of Mark, which would just be inherited by all of its
+  subclasses"*). The maker writes it, and every mark subclass inherits it —
+  sited marks, predicates, parcels, namings, things. Its locked part is a
+  constitution child property, the 150-character cap: `the-town/character-cap`
+  folds into it. Class-nodes and properties take their body from the
+  meta-class, never from `mark`, so the 150 cap does not bind law text (12:50).
 
 **Reading the older clauses.** Where a dated clause in this folder calls a
 class-node's child a "predicate child", "predicate slot", "param predicate" or
@@ -444,6 +476,12 @@ The class of classes is constitutional and carries the rails: admissible
 param bounds (a rival walk-speed of a million is nonconforming, not brave),
 slot naming grammar, collision rules, and the locks. Sanity lives one level
 up, in law — never in a mechanism of its own.
+
+**Properties live here (ruled 2026-10-16, § Property and predicate).** A
+property is class-space, governed by these rails. The meta-class defines once,
+as fixed fields, what every property has — name, tier, default, body — and
+gives class-nodes and properties their bodies, so the 150-character cap on a
+mark's body never binds law text.
 
 Beside the locks it carries **the uniform/devolvable bit** (the sitting's
 resolution, restored 2026-08-13): every param declares whether it is
@@ -1686,8 +1724,9 @@ names its owning doc, and the owner outranks every other use.
   **property** is the class side, a node under a class declaring an attribute
   (name, tier, default, body), filled on the instance as a flat field; a
   **predicate** is the instance side, anyone's contestable claim about a
-  mark, a child mark with `slot` + `value`. Dated clauses that say
-  "predicate" of a class-node's child mean property.
+  mark, a child mark with `slot` + `value` — itself a mark, `predicate` being
+  a subclass of `mark`. Dated clauses that say "predicate" of a class-node's
+  child mean property.
 - **kind** — ① the `kind` field: the node's own class, "like ID. But class
   ID" (2026-10-16, § The LOGOS ladder); ② "a kind of X": a subclass of X
   (Sitting A, 2026-10-12). Before 2026-10-16 the field said how a mark stood,

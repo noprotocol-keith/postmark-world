@@ -79,8 +79,9 @@ in trust
 9. **One node type: identity, its class's property values, and the
    predicates claimed about it.** A class declares properties; an instance
    carries their values as flat fields, and a flat field must be a declared
-   property; a predicate is anyone's contestable claim about a node, and
-   predicates are the atoms of authorship. The `kind` field names the node's
+   property; a predicate is anyone's contestable claim about a node — a
+   mark, `predicate` being a subclass of `mark` — and predicates are the
+   atoms of authorship. The `kind` field names the node's
    own class; lifetimes are vocabulary; classes are law. *(lifetimes ·
    classes § Property and predicate; ruled 2026-10-16)*
    *SUPERSEDED 2026-10-16: "One node type: identity plus predicate children.

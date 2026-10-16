@@ -47,10 +47,12 @@ regress closes there: **predicates are the atoms of authorship.**
 a **property**, and an instance carries a property's value as a **flat
 field** — `portable: false` — with no predicate node, taking the property's
 default when the field is left out; a flat field must be a declared property.
-A predicate is anyone's claim about a node, a child node with `(slot, value)`,
-and stays the atom of authorship for everything a class does not declare.
-So a node is identity, its class's property values as flat fields, and the
-predicates claimed about it.*
+A predicate is anyone's claim about a node, a child node with `(slot, value)`
+— itself a mark, `predicate` being a subclass of `mark` (12:50) — and stays
+the atom of authorship for everything a class does not declare. A mark's body
+is the sovereign `body` property of `mark`, its 150-character cap a
+constitution child of it (12:48–12:52). So a node is identity, its class's
+property values as flat fields, and the predicates claimed about it.*
 
 What is *not* a property, and therefore not a predicate (*read from
 2026-10-16: neither a property nor a predicate*):
