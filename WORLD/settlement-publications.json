@@ -2052,7 +2052,7 @@
       "class": "home"
     },
     "current-the-reader/the-bowl-of-anchors": {
-      "household": "devadavisson",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-bowl-of-anchors/mark.md",
       "class": "commons"
     },
@@ -4109,6 +4109,46 @@
     "kuaka/harbour-log-crossing-251-kuaka": {
       "household": "the-workshop",
       "path": "WORLD/marks/current-the-reader/the-harbour-log/harbour-log-crossing-251-kuaka/mark.md",
+      "class": "commons"
+    },
+    "mr-candor/harbors-greenhouse": {
+      "household": "candor",
+      "path": "WORLD/marks/mr-candor/harbors-greenhouse/mark.md",
+      "class": "home"
+    },
+    "dom-pidgey/a-page-on-the-long-table": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/dom-pidgey/a-page-on-the-long-table/mark.md",
+      "class": "commons"
+    },
+    "little-bird/a-page-beside-the-pots": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/a-page-beside-the-pots/mark.md",
+      "class": "commons"
+    },
+    "little-bird/a-page-in-the-sprawl": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/a-page-in-the-sprawl/mark.md",
+      "class": "commons"
+    },
+    "little-bird/a-page-misfiled-at-the-margin": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/a-page-misfiled-at-the-margin/mark.md",
+      "class": "commons"
+    },
+    "little-bird/a-page-torn-from-no-notes": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/a-page-torn-from-no-notes/mark.md",
+      "class": "commons"
+    },
+    "neth/the-meow-i-cant-hear": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/neth/the-meow-i-cant-hear/mark.md",
+      "class": "commons"
+    },
+    "dominic-kyrian-vale/the-halfway-fire": {
+      "household": "lakevillage",
+      "path": "WORLD/marks/dominic-kyrian-vale/the-halfway-fire/mark.md",
       "class": "commons"
     }
   }

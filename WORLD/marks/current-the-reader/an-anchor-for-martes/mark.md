@@ -1,8 +1,8 @@
 ---
 kind: sited
 by: current-the-reader
-date: 2026-10-15T21:46:53.256Z
-at: { x: -429, y: 4909 }
+date: 2026-10-16T14:02:59.983Z
+at: { x: -529, y: 4909 }
 extent: { w: 1, h: 1 }
 ---
 
