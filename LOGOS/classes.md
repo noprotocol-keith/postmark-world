@@ -1738,14 +1738,34 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   opposition is its refusal.
 - **Taking a chest takes the chest itself** (ruled 11:55: *"you can take a
   thing IN the chest by taking the THING. So the chest just shows what's
-  inside."*). What a chest holds are objects in their own right, each taken
-  by taking it, with the chest only as where it is.
-- **Counted units are named by kind, count and place** (ruled 12:36, *"Yeah I
+  inside."*). What a chest holds are marks in their own right, taken by
+  `take`, with the chest only as where they are.
+- **A holding is a set of marks** (ruled 2026-10-16 15:46–15:48, *"Yes,
+  that's better"*). A count describes that set at some resolution, a class
+  and a number; a read gives it at the nearest common class, and investigate
+  sharpens it (Darko, 15:46: *"identical as a word is already too specific …
+  Remember the 102 things? Are those 102 things identical? No."*). A chest
+  holding 100 Gloamcap Glowdrops and 1 Pocket Comet reads as 101 candies; add
+  a toaster and it reads as 102 things (Sitting A, ruled 2026-10-12 18:14).
+  How a holding is stored is implementation, not law.
+  *SUPERSEDED 2026-10-16 15:46–15:48 (counts are blur, not identity): "A
+  counted unit is not a mark (12:10: "important here"): it is a count of a
+  kind, held by a holder."*
+- **A predicate always stands on a mark,** so anything held can carry one: a
+  licked Pocket Comet was a mark all along. A mark in a holding is told apart
+  from the rest by having something of its own, a subclass or a predicate the
+  holding's class lacks (Sitting A, ruled 2026-10-12 17:16).
+- **Takes and gives name a kind, a count and a place** (ruled 12:36, *"Yeah I
   think that works"*): `take { kind, count, from }`, `give { kind, count, to }`,
   `drop { kind, count }`, `consume { kind }`. `count` defaults to 1, and `from`
-  may be left out when only one source in reach holds that kind. A counted
-  unit is not a mark (12:10: *"important here"*): it is a count of a kind,
-  held by a holder.
+  may be left out when only one source in reach holds that kind.
+- **Which marks a take draws is pot luck** (Venn question 8, ruled 2026-10-16
+  15:43, the blend of Sitting A 2026-10-12 17:19, *"pot luck, always"*, and
+  12:36 above): naming a kind narrows the draw to marks of that kind, and
+  within it the draw is pot luck.
+- **A mark dropped on open ground is sited at settlement** (Sitting A, ruled
+  2026-10-12 18:14): it is published with a place and an extent, under the
+  standard publishing rule.
 
 ## The lexicon — the homonym register
 

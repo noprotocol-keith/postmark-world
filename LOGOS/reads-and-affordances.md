@@ -75,6 +75,12 @@ history/arcana/nature/religion check versus an investigation check."*
   higher resolution, from where you stand. Its answer carries that mark's
   **`can`** — the verbs you can do to it right now (ruled 12:01, *"Agreed"*).
   Acting stays `do: <verb>`; a read never acts.
+- **A holding reads as its top class and a count; investigate gives the
+  breakdown** (Sitting A, ruled 2026-10-12 17:18): a read of a chest says "10
+  Pocket Comets", and investigate sharpens it to the marks with something of
+  their own ("9 Pocket Comets; 1, licked by jetto (pending)"). The top class
+  is the nearest common class of what is held ([classes.md](classes.md)
+  § The transfer edge).
 - **There is no `interact` verb** (ruled 2026-10-16 12:01, *"Agreed"*): what
   you can do to one mark is investigate's `can`, and acting on it is the verb
   itself. The 10:22–10:30 proposal of one general `use` / `interact` verb is

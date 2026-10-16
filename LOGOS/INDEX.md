@@ -149,13 +149,13 @@ claim: the seed the piecewise renderings accrete under (Keemin, 2026-08-13).
 | [the-derivation.md](the-derivation.md) | why a stamp exists: the ladder from majority vote, the evidence law, the money seam, the firewall — the argument the economy's law answers to |
 | [three-layers.md](three-layers.md) | the law → the log → the graph — and which pen writes each |
 | [lifetimes.md](lifetimes.md) | one node type; property values are flat fields, claims are predicates; standing / living / fleeting are lifetimes, not kinds |
-| [classes.md](classes.md) | class-nodes: the registries, property and predicate, the label → property → subclass ladder, the two constitutionalities, the household class, the custody ladder, the transfer edge |
+| [classes.md](classes.md) | class-nodes: the registries, property and predicate, the label → property → subclass ladder, the two constitutionalities, the household class, the custody ladder, the transfer edge and holdings |
 | [edit-law.md](edit-law.md) | the one primitive — declare an edge; create, amend, withdraw; the constitutive flip |
 | [state-and-time.md](state-and-time.md) | the log is the only stored truth; witnesses; crossings are epochs; history is absolute |
 | [tiers.md](tiers.md) | tiers are response outcomes; conferral's two channels; the two apexes; geometry never confers |
 | [the-response-function.md](the-response-function.md) | the one axis: welcomed · neutral · opposed — the town speaks through law, residents through words |
 | [conflict-matrix.md](conflict-matrix.md) | market and canon: claims, rivalry, incumbency, the jury, trueing |
-| [reads-and-affordances.md](reads-and-affordances.md) | the world decoupled from observability; projections; the apex as the class tree's shadow; explain climbs the class, investigate goes deeper; verbs show only when usable |
+| [reads-and-affordances.md](reads-and-affordances.md) | the world decoupled from observability; projections; the apex as the class tree's shadow; explain climbs the class, investigate goes deeper; a holding reads at its top class; verbs show only when usable |
 | [the-web-of-towns.md](the-web-of-towns.md) | one harbor vocabulary expressed through each connected world's own physics |
 
 [PROPOSED.md](PROPOSED.md) is not law either, and is the one file here that
