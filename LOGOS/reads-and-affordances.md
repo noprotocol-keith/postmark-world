@@ -98,8 +98,9 @@ standpoint (§ The apex), and it shows a verb only when you can use it (Darko,
 2026-10-16 10:30: *"these verbs only reveal themselves when you can actually
 use them"*). Verbs that need nothing but being a resident are always shown;
 everything else shows when its conditions hold. The roster below is ruled
-16:02, as listed at 10:30, without `refill` and `interact`, which are gone
-(16:02 and 12:01).
+16:02, as listed at 10:30, without `interact` (gone, 12:01) and without
+`refill`, which is no general verb (16:02) but an afforded action a town
+subclass may declare (18:44).
 
 - **Always shown:** walk, say, note-to-self and leave-mark, plus the reads
   (look, `read:`, `explain:`, `investigate:`, since).
