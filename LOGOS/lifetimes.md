@@ -47,7 +47,7 @@ regress closes there: **predicates are the atoms of authorship.**
 a **property**, and an instance carries a property's value as a **flat
 field** — `portable: false` — with no predicate node, taking the property's
 default when the field is left out; a flat field must be a declared property.
-A predicate is anyone's claim about a node, a child mark with `(slot, value)`
+A predicate is anyone's claim about a mark, a child mark with `(slot, value)`
 — `predicate` being a subclass of `mark` (12:50; ruled 15:43, B over Sitting A) — and stays
 the atom of authorship for everything a class does not declare. A mark's body
 is the sovereign `body` property of `mark`, its 150-character cap a

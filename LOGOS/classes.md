@@ -221,7 +221,10 @@ with your rec with everything else"*). `at` and `extent` are properties of
 
 **Who may make an instance is the class's `makers` property (ruled
 2026-10-16 16:02).** Every class carries `makers`, a constitution property
-saying who may make its instances: the town, or sovereigns. The binding rule
+saying who may make its instances. **Its value's shape is OPEN:** the
+recommendation it was ruled from wrote it as `town | sovereign`, a one-of,
+which 15:12 rules out (§ Property and predicate: there are no one-of values),
+so the shape waits on Darko's read. The binding rule
 above stands as the town's reason for setting it, and the
 `RESIDENT_INSTANTIABLE` whitelist becomes this property in part 2's data. The
 town makes the candy kinds, each a subclass of candy, and residents may make
@@ -412,8 +415,7 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   only the rules specific to one property: its caps and bounds (there are no
   one-of values to allow, ruled 15:12). `body` (sovereign, on `mark`) has the constitution child
   `character-cap`, 150; a holding thing's `capacity` is sovereign (default 30) with
-  constitution children `min` 1 and `max` 120 — the chest's `capacity_min` and
-  `capacity_max` dials, flattened (§ The transfer edge: `holder`).
+  constitution children `min` 1 and `max` 120 (§ The transfer edge: `holder`).
 - **`body` is a sovereign property of `mark`** (12:48, ruled 16:02, its
   constitution child named in the 12:52 ruling: *"body should become a
   property of Mark, which would just be inherited by all of its
@@ -529,7 +531,8 @@ A class carries two independent constitutionalities:
    the property ruling's two tiers: a constitution property's value is locked
    by the town, yet exit-law's is filled per instance under constitutional
    custody. **How that composition maps onto property tiers is OPEN.** Until a
-   ruling settles it, the composition stands as written, an exception to
+   ruling settles it, the composition stands as written (Wright's reading, for
+   Darko's read), an exception to
    § Property and predicate's constitution tier ("the town locks the value; no
    instance writes it") and to § Instantiation's "The constitution properties
    are the town's, and no instance writes them".*
@@ -1783,12 +1786,15 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   the giver at the settlement. **A holder whose `open` is false refuses
   another household's give at the door** (ruled 16:02, as a holder's `open`
   16:03–16:05): its maker's opposition is declared in advance, so the give is
-  refused at once, never taken and returned. A holder's welcome is this
-  true/false `open` property.
+  refused at once, never taken and returned. `open` covers give and take
+  (16:05), so another household's take from such a holder is refused at the
+  door too.
 - **Taking a thing that holds takes the thing itself** (ruled 11:55, of a chest:
   *"you can take a thing IN the chest by taking the THING. So the chest just
   shows what's inside."*). What a holder holds are marks in their own right,
-  taken by `take`, with the holder only as where they are. **A carried
+  taken by `take`, with the holder only as where they are. Only portable
+  things show `take` (12:36, under the 12:38 `portable` ruling), so taking a
+  thing that holds needs `portable: true`. **A carried
   holder's contents travel inside it,** and it counts 1 toward its carrier's
   `capacity`, whatever it holds (ruled 16:02).
 - **Holders confer their state on what they hold** (ruled 16:02, Darko:
@@ -1800,8 +1806,9 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
 - **A holding is a set of marks** (ruled 2026-10-16 15:46–15:48, *"Yes,
   that's better"*). A count describes that set at some resolution, a class
   and a number; a read gives it at the nearest common class, and investigate
-  sharpens it (Darko, 15:46: *"identical as a word is already too specific …
-  Remember the 102 things? Are those 102 things identical? No."*). A chest
+  sharpens it (Darko, 15:46: *"They don't even have to be identical … a count
+  is just a hand-wavy way of saying there's a certain number … Remember the
+  102 things? Are those 102 things identical? No."*). A chest
   holding 100 Gloamcap Glowdrops and 1 Pocket Comet reads as 101 candies; add
   a toaster and it reads as 102 things (Sitting A, ruled 2026-10-12 18:14).
   How a holding is stored is implementation, not law.
@@ -1819,8 +1826,10 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
 - **Which marks a take draws is pot luck** (Venn question 8, ruled 2026-10-16
   15:43, the blend of Sitting A 2026-10-12 17:19, *"pot luck, always"*, and
   12:36 above): naming a kind narrows the draw to marks of that kind, and
-  within it the draw is pot luck. A take that names no kind draws pot luck
-  from everything the source holds (Sitting A 17:19).
+  within it the draw is pot luck. A take from a holder that names no kind
+  draws pot luck from everything it holds (Sitting A 17:19; Wright's reading
+  of the Venn 8 blend, for Darko's read). That is a take *from* a holder; a
+  take aimed at the holder itself takes the holder (11:55, above).
 - **A mark dropped on open ground is sited at settlement** (Sitting A, ruled
   2026-10-12 18:14; ruled again 16:02): open ground is no holder to confer a
   state, so the mark is published with a place and an extent at the
@@ -1832,7 +1841,8 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   (§ Instantiation); how many is the holder's own rules: its `capacity`
   (24 for a resident), and its `open` decides who else may put in. No daily
   cap limits making (`make_daily_cap` removed, ruled 15:50–15:53); the
-  capacities stay. A new holder starts empty and is filled by making into it.
+  capacities stay. A new holder starts empty and is filled by making into it
+  (Venn question 7, ruled B at 15:43).
 
 ## The lexicon — the homonym register
 

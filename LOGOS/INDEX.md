@@ -79,7 +79,7 @@ in trust
 9. **One node type: identity, its class's property values, and the
    predicates claimed about it.** A class declares properties; an instance
    carries their values as flat fields, and a flat field must be a declared
-   property; a predicate is anyone's contestable claim about a node — a
+   property; a predicate is anyone's contestable claim about a mark — a
    mark, `predicate` being a subclass of `mark` — and predicates are the
    atoms of authorship. The `kind` field names the node's
    own class; lifetimes are vocabulary; classes are law. *(lifetimes ·
@@ -129,8 +129,8 @@ node classes and edge classes — both nodes in the constitutional tree, tier
 conferred down it by welcome alone. One action primitive: declare an edge,
 naming its class. Every authored edge is from an action; derived edges such as
 containment and `instance-of` are readings and are never stored. Every property
-is declared on a class and filled on its instances as a flat field, and every
-other claim about a node is a predicate (*"Every property is a predicate"
+is declared on a class, the sovereign ones filled on their instances as flat
+fields, and every other claim about a mark is a predicate (*"Every property is a predicate"
 until 2026-10-16*); every difference is a class param; everything else — standing,
 rank, canon, position, affordances — is derived. The town is a single response function:
 neutral by default, opposition compiled into classes, welcome reserved as

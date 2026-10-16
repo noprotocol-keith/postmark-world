@@ -97,10 +97,22 @@ The door's menu is the permission calculus over the class tree at your
 standpoint (§ The apex), and it shows a verb only when you can use it (Darko,
 2026-10-16 10:30: *"these verbs only reveal themselves when you can actually
 use them"*). Verbs that need nothing but being a resident are always shown;
-take shows when a thing is in view or in reach, give and drop when you carry
-something, and so on (Darko's examples, 10:30; ruled 16:02). The always-shown
-verbs are walk, say, note-to-self and leave-mark, plus the reads (ruled
-16:02).
+everything else shows when its conditions hold. The roster below is ruled
+16:02, as listed at 10:30, without `refill` and `interact`, which are gone
+(16:02 and 12:01).
+
+- **Always shown:** walk, say, note-to-self and leave-mark, plus the reads
+  (look, `read:`, `explain:`, `investigate:`, since).
+- **Shown when usable:** take, a portable thing in reach; give, carrying and
+  someone in reach; drop, carrying; consume, a consumable carried or at hand;
+  enter, at something enterable; exit, inside something; ride, at a vehicle;
+  stake and unstake, a stakeable mark in view and stamps, or a stake held;
+  withdraw, a mark of your own; plus the verbs a ground lends, as before.
+- **Hidden until usable never means unknowable** (ruled 16:02, as listed at
+  10:30): `explain:` lists every use with its conditions, and a verb tried
+  while it isn't showing is refused with its reason, never "no such verb".
+- **A class declares its own uses:** who may use it, from where, and its
+  effect. There is no `tool` class (ruled 16:02).
 
 - **The bare read's `can` lists each verb once** (Darko, 10:36: *"it's object
   agnostic … you can give an object to 10 different residents … That doesn't
