@@ -4,9 +4,15 @@
 thing, born the same way, differing in one class param.*
 
 Standing, living and fleeting are **lifetimes**, not kinds (Darko, Sitting A,
-2026-10-12; WLD-39). A mark's `kind` field says only how it stands — sited,
-predicated, parcel, naming or `class` — and is a different word for a
-different thing (WORLD/marks/SCHEMA.md). This document was `LOGOS/kinds.md`;
+2026-10-12; WLD-39). A node's `kind` field names its own class (Darko,
+2026-10-16: *"like ID. But class ID"*; [classes.md](classes.md) § The LOGOS
+ladder), and how a mark stands — sited, predicated, a parcel, a naming — is
+read from its structure; either way it is a different word for a different
+thing from a lifetime. *SUPERSEDED 2026-10-16: "A mark's `kind` field says
+only how it stands — sited, predicated, parcel, naming or `class` — and is a
+different word for a different thing (WORLD/marks/SCHEMA.md)." The records,
+the mark lint and SCHEMA.md keep that filing until the owed data change
+(WLD-73 part 2).* This document was `LOGOS/kinds.md`;
 that path stays for a season as a pointer here, so its older mentions still
 resolve.
 
@@ -36,7 +42,18 @@ a predicate edge — its name, its body, its colors, its asks. A predicate's
 `(slot, value)` pair is its own identity payload, not fields of its own — the
 regress closes there: **predicates are the atoms of authorship.**
 
-What is *not* a property, and therefore not a predicate:
+*SUPERSEDED in part 2026-10-16 (the candy sitting, [classes.md](classes.md)
+§ Property and predicate): what a node "has" because its class declares it is
+a **property**, and an instance carries a property's value as a **flat
+field** — `portable: false` — with no predicate node, taking the property's
+default when the field is left out; a flat field must be a declared property.
+A predicate is anyone's claim about a node, a child node with `(slot, value)`,
+and stays the atom of authorship for everything a class does not declare.
+So a node is identity, its class's property values as flat fields, and the
+predicates claimed about it.*
+
+What is *not* a property, and therefore not a predicate (*read from
+2026-10-16: neither a property nor a predicate*):
 
 - **relational data** — authorship (`by:` is the create-edge, not a field),
   position and frame (the containment edge plus an offset, meaningful only

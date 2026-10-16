@@ -20,6 +20,14 @@ walk derives the answer). A node's tier is **the response it stands under**:
 | yellow | market | neutral-admitted — standing in canon, uncoupled, contested by weight |
 | gray | draft | sovereign space not yet admitted — a branch state, not a standing |
 
+**A property's tier is not a node's tier (2026-10-16).** A property, the class
+side of an attribute ([classes.md](classes.md) § Property and predicate),
+declares which tier writes its value: **constitution** — the town locks it —
+or **sovereign** — the maker of each instance fills it. That declaration is
+the class speaking about who may write a value, never a tier stored on a
+node; every node's own tier is still the response it stands under, derived
+by the one walk.
+
 ## Conferral has exactly two channels
 
 **Ruled 2026-08-13, restoring the sitting's full design.** (This section
@@ -27,8 +35,9 @@ replaces "welcome is the only conferral" — that clause stated one channel and
 silently dropped the other; the supersession is hereby written down.)
 
 1. **The class channel — instance-of.** A class declares what its instances
-   are **born as**: the birth-tier is a class predicate, so a constitutional
-   law can manufacture sovereign actors. This is the mechanism by which
+   are **born as**: the birth-tier is a class predicate (*a class property,
+   read from 2026-10-16: [classes.md](classes.md) § Property and predicate*),
+   so a constitutional law can manufacture sovereign actors. This is the mechanism by which
    const makes sov — the household class, constitutionally predicated, is
    exactly the law that mints sovereign households
    ([classes.md](classes.md) § the household class).

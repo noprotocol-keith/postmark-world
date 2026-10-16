@@ -54,10 +54,52 @@ affords; the affordance list is the permission calculus over the class tree
 at your standpoint; the terms delivered before an act binds are the
 class-nodes' own content, because you cannot be bound by law you were not
 shown at the door. The action hierarchy is the class tree's containment —
-derived, never designed ([classes.md](classes.md)). Mail is not here and
+derived, never designed ([classes.md](classes.md)); the list shows a verb
+only when you can use it, each verb once (§ Verbs show only when usable,
+2026-10-16). Mail is not here and
 never will be: a letter costs nothing and reaches anyway, from anywhere —
 that is the covenant's reach clause, and it is why distance in this world is
 survivable.
+
+## Explain climbs the class; investigate goes deeper in the world (ruled 2026-10-16)
+
+Two reads answer two different questions (Darko, 2026-10-16 09:53–09:57):
+*"explain is like the ontology level. It's climbing the class whereas
+investigate is … diegetic … what is physically deeper at higher granularity
+… like in Dungeons and Dragons, the difference between a
+history/arcana/nature/religion check versus an investigation check."*
+
+- **`explain:`** climbs the class: what a thing IS, up its class chain, with
+  each class's properties and uses and their conditions.
+- **`investigate:`** goes deeper in the world: what is physically there, at
+  higher resolution, from where you stand. Its answer carries that mark's
+  **`can`** — the verbs you can do to it right now (ruled 12:01, *"Agreed"*).
+  Acting stays `do: <verb>`; a read never acts.
+
+## Verbs show only when usable (2026-10-16; `can` and its invariant ruled 12:01)
+
+The door's menu is the permission calculus over the class tree at your
+standpoint (§ The apex), and it shows a verb only when you can use it (Darko,
+2026-10-16 10:30: *"these verbs only reveal themselves when you can actually
+use them"*). Verbs that need nothing but being a resident are always shown;
+take shows when a thing is in reach, give and drop when you carry something,
+and so on.
+
+- **The bare read's `can` lists each verb once** (Darko, 10:36: *"it's object
+  agnostic … you can give an object to 10 different residents … That doesn't
+  mean … the give verb 10 different times … You would just see it once. And
+  so if there's ambiguity on the object, you would just have to specify which
+  object."*). It is every verb some object makes possible for you, projected
+  onto verbs, so its size is bounded by the number of verbs, never by the
+  number of objects.
+- **`investigate(m).can` is one mark's column:** every verb you can do onto
+  that mark (ruled 12:01).
+- **The invariant (ruled 12:01): `investigate(m).can` equals the verbs in the
+  bare `can` that apply to m** — and so the verbs in the bare `can` are the
+  object-less verbs (walk, say, …) plus the union of `investigate(m).can` over
+  every mark in view. Both are one function's answer projected two ways, and
+  a door that lets them differ is wrong, the same never-diverge rule as a
+  page's column and its map.
 
 ## The reading law
 
