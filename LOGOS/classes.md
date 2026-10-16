@@ -208,6 +208,12 @@ whitelist — "The enforced whitelist lives in `tools/board-grammar.test.mjs`
 (`RESIDENT_INSTANTIABLE`) and grows by ruling, never by drift" — gives way to
 each class's `makers`, whose roots one principle sets. The list itself
 retires in part 2's code.*
+*SUPERSEDED in part 2026-10-16 18:44 (the `makers` paragraph below): the
+binding rule's role as the reason for the roots — "a class is
+resident-instantiable when its instance binds only its author", and the
+classes "whose instances would bind others … stay town-only" — passes to one
+principle, `the-town/nothing-you-control-mints`. Its words stand as the
+history of how the roots were set until then.*
 
 **What an instance writes (ruled 2026-10-16, the candy sitting; § Property and
 predicate).** An instance names its class in its `kind` field (09:36;
@@ -1845,7 +1851,9 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
 - **An ambiguous object is refused** (ruled 18:44): when more than one
   object in reach could answer, the act changes nothing and lists the
   candidates, each by owner, id and distance ("take from which? the Treat
-  Bowl (kai's, 3 m), the Treat Bowl (mari's, 6 m)").
+  Bowl (kai's, 3 m), the Treat Bowl (mari's, 6 m)"). A count names no unit:
+  it is shorthand for that many marks of one kind, and the units in it are
+  never named or listed one by one (ruled 18:44, under 15:46).
 - **Which marks a take draws is pot luck** (Venn question 8, ruled 2026-10-16
   15:43, the blend of Sitting A 2026-10-12 17:19, *"pot luck, always"*, and
   12:36 above): naming a kind narrows the draw to marks of that kind, and
