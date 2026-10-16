@@ -212,7 +212,20 @@ property's default: a `thing` that says nothing about `portable` is
 portable), and can write no other flat field — a flat field must be a declared
 property. Anything else its maker wants to say about it is a predicate, the
 same as anyone's claim about it. The constitution properties are the town's,
-and no instance writes them.
+and no instance writes them. Beside its properties, an instance carries the
+record's own **reserved fields**, which the system writes and which are not
+properties: `id`, `by`, `date`, `household`, `declared_household`, `parent`,
+`placementParent`, `stamps`, `weight` and `sovereign` (ruled 16:02, *"Agreed
+with your rec with everything else"*). `at` and `extent` are properties of
+`sited`, sovereign: the maker places the mark.
+
+**Who may make an instance is the class's `makers` property (ruled
+2026-10-16 16:02).** Every class carries `makers`, a constitution property
+saying who may make its instances: the town, or sovereigns. The binding rule
+above stands as the town's reason for setting it, and the
+`RESIDENT_INSTANTIABLE` whitelist becomes this property in part 2's data. The
+town makes the candy kinds, each a subclass of candy, and residents may make
+instances of any of them.
 
 **An idea is a class, never a place or a kind (founder-ruled 2026-09-01 —
 "Ideas can be predicates.").** `class: idea` says what a mark IS; where it
@@ -282,7 +295,10 @@ are a different subclass of postmark-node. Same for bounties."*
 
 - **`post` is a sibling of `mark` under `postmark-node`.** An idea and a bounty
   are posts; neither stands in the world as a mark, sited or predicated.
-- **What a post is beyond that is not yet written into law** — its own
+- **A post carries a sovereign `about:` property naming a mark** (ruled
+  16:02): an idea or a bounty about a mark names it there, instead of
+  standing under it.
+- **What a post is beyond that is not yet written into law** — its other
   properties, who may write one, and which other asks join it. The 58 idea
   marks and 3 bounty marks the record holds on 2026-10-16 move to posts as
   WLD-73 part 2's data change.
@@ -336,13 +352,18 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
     Today's `dials:` on class-nodes are constitution properties, written
     inline (the 93 constitution-tier class predicates standing in the Keeping
     Works on 2026-10-16 are properties already, so renaming them is
-    bookkeeping).
+    bookkeeping). **Every dial is a property, and a locked value is its
+    `default`** (ruled 16:02): no instance can override it, so the four
+    fields below are enough.
   - **Sovereign tier:** the maker fills the value when they make the
     instance. The first is `portable` under `the-town/thing`, default `true`
     (ruled 12:38: *"we can express default in the predicate class node itself
     … true is fine as it was the implicit default before"*). **The default
     lives on the property's own node, never on the class node** (12:39:
     *"The portable predicate should have the default, not the thing node."*).
+    **Changing a sovereign property's default is a ruling,** announced in a
+    PSA (ruled 16:02), because every instance that left the field out
+    changes with it.
 - **On an instance, a property's value is a flat field** — `portable: false`
   — with no child mark. A field left out takes the property's default, and
   the lint checks every flat field against the class's properties.
@@ -378,8 +399,7 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
 - **There are no one-of values** (ruled 15:12, *"fine w me"*): a property's
   value is a number, a true/false or free text. A one-of, if one ever
   appears, becomes subclasses.
-- **Property lives in class-space,** under the meta-class's rails (direction,
-  12:50;
+- **Property lives in class-space,** under the meta-class's rails (12:50, ruled 16:02;
   § The meta-class: param bounds, slot naming grammar, collision rules, the
   locks).
 - **The four fields of a property are fixed** (ruled 12:52–12:53, *"that seems
@@ -394,7 +414,7 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   `character-cap`, 150; chest `capacity` is sovereign (default 30) with constitution
   children `min` 1 and `max` 120 — today's `capacity_min` and `capacity_max`
   dials, flattened.
-- **`body` is a sovereign property of `mark`** (12:48, direction, its
+- **`body` is a sovereign property of `mark`** (12:48, ruled 16:02, its
   constitution child named in the 12:52 ruling: *"body should become a
   property of Mark, which would just be inherited by all of its
   subclasses"*). The maker writes it, and every mark subclass inherits it —
@@ -426,7 +446,7 @@ subclass"). The rung is the class side, so it is a property.*
 - **A label is a lazy class** (ruled in direction, Sitting A, 2026-10-12): the
   same idea as a class, in shorthand that has not yet needed a class-node's
   upkeep, and it may be promoted to one.
-- **A subclass is an existing class plus a basket of properties** (direction:
+- **A subclass is an existing class plus a basket of properties** (ruled 16:02;
   Darko, 2026-10-16 12:43: it can be *"defined as like an existing class plus a
   basket of properties that we want to like import or like have a new name
   for"*). A kind of candy is candy plus its own properties: its body, and any
@@ -437,7 +457,11 @@ subclass"). The rung is the class side, so it is a property.*
   2026-10-16 09:36: *"like ID. But class ID"*). How a mark stands is which of
   `mark`'s two mutually exclusive subclasses it is an instance of — `sited`
   or `predicate` (ruled 13:56, § Property and predicate) — never a field and
-  never a property.
+  never a property. The values follow the class tree (ruled 16:02): a class
+  node is `kind: class`, a property node is `kind: property`, and `naming` is
+  a subclass of `predicate`, a predicate whose claim is a name. The `class:`
+  field folds into `kind`: a class node's name is its own slug, so
+  `kind: candy` names `the-town/candy` (ruled 16:02).
   *SUPERSEDED 2026-10-16: "A mark's `kind` field reads as a label —
   `kind: predicated` labels a predicate — so the field keeps its one meaning,
   how a mark stands ([lifetimes.md](lifetimes.md)), and nothing migrates"
@@ -552,7 +576,7 @@ slot naming grammar, collision rules, and the locks. Sanity lives one level
 up, in law — never in a mechanism of its own.
 
 **Properties live here (2026-10-16, § Property and predicate).** A property is
-class-space, governed by these rails (direction, 12:50). The meta-class
+class-space, governed by these rails (12:50, ruled 16:02). The meta-class
 defines once, as fixed fields, what every property has — name, tier, default,
 body (ruled 12:52–12:53). It also gives class-nodes and properties their
 bodies, so the 150-character cap on a mark's body never binds law text
@@ -1718,7 +1742,7 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   take verb needs to be something that can be triggered by the give verb …
   they should come in pairs"*; the one-edge reading confirmed at 11:14,
   *"that's correct"*). Both ends must permit it: the giver holds the thing,
-  and the receiver has room and its welcome allows it. Among sovereigns, only
+  and the receiver has room and lets it in (a chest's `open`, below). Among sovereigns, only
   residents start a transfer; the town's own constitution acts transfer too,
   and need no one's consent (below). A chest's "put in" is therefore not a
   verb of its own: it is give, with the chest as the receiving end.
@@ -1735,11 +1759,24 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   **settles neutral** when nobody opposes it, and the object is transferred
   either way — the receiver holds it from the act (11:16: *"it is settled as
   neutral. But the object still ends up in the chest."*). The receiver's
-  opposition is its refusal.
+  opposition is its refusal: **a stance on the transfer, taken before the
+  settlement** (ruled 16:02), and an opposed transfer returns the object to
+  the giver at the settlement. **A chest whose `open` is false refuses
+  another household's give at the door** (ruled 16:02): its maker's
+  opposition is declared in advance, so the give is refused at once, never
+  taken and returned. A chest's welcome is this true/false `open` property.
 - **Taking a chest takes the chest itself** (ruled 11:55: *"you can take a
   thing IN the chest by taking the THING. So the chest just shows what's
   inside."*). What a chest holds are marks in their own right, taken by
-  `take`, with the chest only as where they are.
+  `take`, with the chest only as where they are. **A carried chest's
+  contents travel inside it,** and the chest counts 1 toward its carrier's
+  carry, whatever it holds (ruled 16:02).
+- **Holders confer their state on what they hold** (ruled 16:02, Darko:
+  *"Holders confer their state to the held, which is **why** these can be
+  live. If a chest is published, anything you put in it is de facto
+  published live."*). Making marks into a holder, or giving into one, is
+  live: what a published holder holds (a published chest, a resident) is
+  published, and what a pending holder holds shares its pending state.
 - **A holding is a set of marks** (ruled 2026-10-16 15:46–15:48, *"Yes,
   that's better"*). A count describes that set at some resolution, a class
   and a number; a read gives it at the nearest common class, and investigate
@@ -1765,8 +1802,18 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   within it the draw is pot luck. A take that names no kind draws pot luck
   from everything the source holds (Sitting A 17:19).
 - **A mark dropped on open ground is sited at settlement** (Sitting A, ruled
-  2026-10-12 18:14): it is published with a place and an extent, under the
-  standard publishing rule.
+  2026-10-12 18:14; ruled again 16:02): open ground is no holder to confer a
+  state, so the mark is published with a place and an extent at the
+  settlement, under the standard publishing rule.
+- **Making marks into a holder is `leave-mark { kind, count, to }`** (ruled
+  16:02; Darko, 15:48: *"the refill verb … we seem to be treating as some
+  kind of special thing. No, it's just a lazy way of instantiating marks."*).
+  There is no `refill` verb. Who may make them is the class's `makers`
+  (§ Instantiation); how many is the holder's own rules: a resident carries
+  24, a chest holds up to its capacity, and its `open` decides who may put
+  in. No daily cap limits making (`make_daily_cap` removed, ruled 15:50–15:53);
+  the capacities stay. A new chest starts empty and is filled by making into
+  it.
 
 ## The lexicon — the homonym register
 
