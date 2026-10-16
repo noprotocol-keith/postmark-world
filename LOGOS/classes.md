@@ -366,9 +366,15 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   wrong … In that case, sited and predicate must become Subclasses."*). A mark
   is one or the other, never both, so how a mark stands is which of the two
   subclasses it is an instance of. There is no `stands` property.
-- **A property has no subdivision** (ruled 13:56). A property whose values
-  would sort its instances into mutually exclusive kinds is not a property:
-  those kinds are subclasses.
+- **A property has no subdivision** (ruled 13:56; sharpened 15:27). When kinds
+  are mutually exclusive siblings **and** each carries properties or fields
+  of its own, they are subclasses, not values of one property. A split that
+  differs only by the true/false itself stays one true/false property
+  (`portable`). Darko, 15:27: *"A true/false is not reason for a property to
+  become a subclass. A sited mark and predicate mark are subclasses because
+  each has downstream properties and fields unique to them. If a predicate
+  was as simple as 'not sited', then yes, indeed it would be collapsed to a
+  single property called 'sited' on a mark that is true/false."*
 - **There are no one-of values** (ruled 15:12, *"fine w me"*): a property's
   value is a number, a true/false or free text. A one-of, if one ever
   appears, becomes subclasses.
@@ -439,9 +445,17 @@ subclass"). The rung is the class side, so it is a property.*
   still write `kind:` as a standing are the owed data change.*
 - **The promotion test for a subclass** (ruled 2026-10-16 13:56: *"Part of
   the promotion criteria that justifies a subclass is that it is mutually
-  exclusive with sibling subclasses."*): a kind becomes a subclass when it is
-  mutually exclusive with its siblings. That is why `sited` and `predicate`
-  are subclasses of `mark` and not properties of it.
+  exclusive with sibling subclasses."*; sharpened 15:27): a kind becomes a
+  subclass when it is mutually exclusive with its siblings **and** it carries
+  properties or fields of its own. A split that differs only by a true/false
+  stays one property (Darko, 15:27: *"A true/false is not reason for a
+  property to become a subclass. A sited mark and predicate mark are
+  subclasses because each has downstream properties and fields unique to
+  them. If a predicate was as simple as 'not sited', then yes, indeed it would
+  be collapsed to a single property called 'sited' on a mark that is
+  true/false."*). That is why `sited` (a place and an extent) and `predicate`
+  (a parent, a `slot` and a `value`) are subclasses of `mark`, and `portable`
+  is a property.
 - **What promotes a descriptor is unruled** (POS-615; the promotion test
   above answers part of the last rung): who may write a label,
   what carries a label to a property or a property to a subclass, and how the
