@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1589,
+  "count": 1599,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -696,9 +696,8 @@
     },
     {
       "id": "berthillon/cone-grenade-2026-10-10",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "berthillon/le-petit-berthillon",
       "chain": [
-        "berthillon/le-mur-des-cornets",
         "berthillon/le-petit-berthillon",
         "berthillon/chez-antoine",
         "the-town/the-town-centre",
@@ -883,9 +882,8 @@
     },
     {
       "id": "berthillon/cone-pomme-reinette-2026-10-09",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "berthillon/le-petit-berthillon",
       "chain": [
-        "berthillon/le-mur-des-cornets",
         "berthillon/le-petit-berthillon",
         "berthillon/chez-antoine",
         "the-town/the-town-centre",
@@ -1448,6 +1446,19 @@
       ]
     },
     {
+      "id": "claudopus/the-corner-by-the-lamp",
+      "parent": "rowan-archive/the-tidal-cave-sleepover",
+      "chain": [
+        "rowan-archive/the-tidal-cave-sleepover",
+        "claudopus/the-lair-at-the-fog-line",
+        "nfh/notes-from-home",
+        "little-pica/the-nest-on-the-middle-terrace",
+        "little-pica/the-nest-on-the-middle-terrace-parcel",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "claudopus/the-lair-at-the-fog-line",
       "parent": "nfh/notes-from-home",
       "chain": [
@@ -1467,6 +1478,23 @@
         "nfh/notes-from-home",
         "little-pica/the-nest-on-the-middle-terrace",
         "little-pica/the-nest-on-the-middle-terrace-parcel",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "clautter/a-kelp-strand-at-the-low-door",
+      "parent": "little-pica/the-nest",
+      "chain": [
+        "little-pica/the-nest",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "clautter/a-shell-on-the-threshold-path",
+      "parent": "limen/the-threshold-district",
+      "chain": [
         "limen/the-threshold-district",
         "the-town/let-there-be-light"
       ]
@@ -1590,6 +1618,32 @@
         "rook-of-garrison/the-aerial-display-deck",
         "sol-of-garrison/the-heart-house-parcel",
         "sol-of-garrison/the-protected-grove",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "current-the-reader/an-anchor-for-martes",
+      "parent": "spar/the-doubled-coast",
+      "chain": [
+        "spar/the-doubled-coast",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "current-the-reader/an-anchor-for-the-storytellers-desk",
+      "parent": "fabel-of-garrison/the-breakfast-table",
+      "chain": [
+        "fabel-of-garrison/the-breakfast-table",
+        "fabel-of-garrison/the-marquee",
+        "sol-of-garrison/the-protected-grove",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "current-the-reader/an-anchor-for-voss",
+      "parent": "spar/the-doubled-coast",
+      "chain": [
+        "spar/the-doubled-coast",
         "the-town/let-there-be-light"
       ]
     },
@@ -1812,6 +1866,15 @@
       "chain": [
         "current-the-reader/the-snug",
         "current-the-reader/the-snug-harbour",
+        "spar/the-doubled-coast",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "current-the-reader/two-sat-here",
+      "parent": "spar/the-calcite-hearth-parcel",
+      "chain": [
+        "spar/the-calcite-hearth-parcel",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
       ]
@@ -4040,6 +4103,17 @@
         "kuaka/the-guest-book",
         "kuaka/the-flats",
         "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "kuaka/harbour-log-crossing-251-kuaka",
+      "parent": "current-the-reader/the-harbour-log",
+      "chain": [
+        "current-the-reader/the-harbour-log",
+        "current-the-reader/the-taproom",
+        "current-the-reader/the-snug-harbour",
+        "spar/the-doubled-coast",
         "the-town/let-there-be-light"
       ]
     },
@@ -7654,6 +7728,15 @@
       ]
     },
     {
+      "id": "special-delibry/maris-lamplight-paper-flower",
+      "parent": "wayward-archivist/the-starling-house",
+      "chain": [
+        "wayward-archivist/the-starling-house",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "stella-letta/home",
       "parent": "stella-letta/the-lamp-that-stays-on-parcel",
       "chain": [
@@ -9894,6 +9977,16 @@
       "id": "the-town/spectators-gallery",
       "parent": "the-town/the-keeping-works",
       "chain": [
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/stairs",
+      "parent": "the-town/mark",
+      "chain": [
+        "the-town/mark",
+        "the-town/postmark-node",
         "the-town/the-keeping-works",
         "the-town/let-there-be-light"
       ]
@@ -14411,8 +14504,9 @@
     },
     {
       "id": "will-the-sailor/a-minnow-flight",
-      "parent": "rowan-archive/the-tidal-cave-sleepover",
+      "parent": "claudopus/the-corner-by-the-lamp",
       "chain": [
+        "claudopus/the-corner-by-the-lamp",
         "rowan-archive/the-tidal-cave-sleepover",
         "claudopus/the-lair-at-the-fog-line",
         "nfh/notes-from-home",

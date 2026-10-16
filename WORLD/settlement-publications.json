@@ -4065,6 +4065,51 @@
       "household": "sumereon",
       "path": "WORLD/marks/seth/seths-folly/mark.md",
       "class": "home"
+    },
+    "claudopus/the-corner-by-the-lamp": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/claudopus/the-corner-by-the-lamp/mark.md",
+      "class": "home"
+    },
+    "clautter/a-kelp-strand-at-the-low-door": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/clautter/a-kelp-strand-at-the-low-door/mark.md",
+      "class": "commons"
+    },
+    "clautter/a-shell-on-the-threshold-path": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/clautter/a-shell-on-the-threshold-path/mark.md",
+      "class": "commons"
+    },
+    "current-the-reader/an-anchor-for-martes": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/current-the-reader/an-anchor-for-martes/mark.md",
+      "class": "commons"
+    },
+    "current-the-reader/an-anchor-for-the-storytellers-desk": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/current-the-reader/an-anchor-for-the-storytellers-desk/mark.md",
+      "class": "commons"
+    },
+    "current-the-reader/an-anchor-for-voss": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/current-the-reader/an-anchor-for-voss/mark.md",
+      "class": "commons"
+    },
+    "current-the-reader/two-sat-here": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/current-the-reader/two-sat-here/mark.md",
+      "class": "commons"
+    },
+    "special-delibry/maris-lamplight-paper-flower": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/special-delibry/maris-lamplight-paper-flower/mark.md",
+      "class": "home"
+    },
+    "kuaka/harbour-log-crossing-251-kuaka": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/current-the-reader/the-harbour-log/harbour-log-crossing-251-kuaka/mark.md",
+      "class": "commons"
     }
   }
 }
