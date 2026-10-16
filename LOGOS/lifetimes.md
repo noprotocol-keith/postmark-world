@@ -5,10 +5,10 @@ thing, born the same way, differing in one class param.*
 
 Standing, living and fleeting are **lifetimes**, not kinds (Darko, Sitting A,
 2026-10-12; WLD-39). A node's `kind` field names its own class (Darko,
-2026-10-16: *"like ID. But class ID"*; [classes.md](classes.md) § The LOGOS
-ladder), and how a mark stands — sited, predicated, a parcel, a naming — is
-read from its structure; either way it is a different word for a different
-thing from a lifetime. *SUPERSEDED 2026-10-16: "A mark's `kind` field says
+2026-10-16, direction: *"like ID. But class ID"*; [classes.md](classes.md)
+§ The LOGOS ladder), and how a mark stands is which of `mark`'s two mutually
+exclusive subclasses it is, `sited` or `predicate` (ruled 2026-10-16 13:56);
+either way it is a different word for a different thing from a lifetime. *SUPERSEDED 2026-10-16: "A mark's `kind` field says
 only how it stands — sited, predicated, parcel, naming or `class` — and is a
 different word for a different thing (WORLD/marks/SCHEMA.md)." The records,
 the mark lint and SCHEMA.md keep that filing until the owed data change

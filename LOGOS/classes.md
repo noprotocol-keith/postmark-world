@@ -193,6 +193,12 @@ enforced whitelist lives in `tools/board-grammar.test.mjs`
 (`RESIDENT_INSTANTIABLE`) and grows by ruling, never by drift. First
 instances under this law: a resident's pocket lantern (`thing`) and the
 waiting-room bounty (`bounty`), settled the night it was ruled.
+*SUPERSEDED in part 2026-10-16 (ruled 15:12, § Posts below): `idea` and
+`bounty` are no longer mark classes — "ideas are no longer marks. They are
+posts, which are a different subclass of postmark-node. Same for bounties."
+The resident-instantiable mark classes in this paragraph are `thing` and
+`note`; the binding rule stands, and the whitelist in the test file moves with
+part 2's data change.*
 
 **What an instance writes (ruled 2026-10-16, the candy sitting; § Property and
 predicate).** An instance names its class in its `kind` field (direction,
@@ -217,6 +223,11 @@ idea an idea. The 2026-08-30 sentence stands beside this one unchanged: the
 body IS the claim, and a thought binds nobody but its thinker. Enforced:
 `tools/mark-lint.mjs` § THE IDEA GRAMMAR (sited or predicated, every other
 kind refused, the refusal quoting the four words).
+*SUPERSEDED 2026-10-16 (ruled 15:12, § Posts below): an idea is a **post**,
+not a mark, so it neither stands sited nor stands predicated; this paragraph
+and the 2026-08-30 "the Think Tank's stage-1 mark" are the record of how ideas
+stood until then. The idea marks in the record move to posts as part 2's
+data.*
 
 One dated exception stands beside the whitelist (founder ruling, 2026-08-29,
 the night after the fight — "I'd like for you, wright, to own the marks from
@@ -259,6 +270,18 @@ ruling affirms: *"a guest's holdings key on their ids"* (world `61c5fdfb`).
 The good lighter is doubly held here: its `held_grant` may only hang on a
 thing whose `by:` is the town's own pen (§ the held channel), so it could not
 move today even if the holdings did.
+
+## Posts — ideas and bounties are not marks (ruled 2026-10-16, the candy sitting)
+
+Darko, 2026-10-16 15:12: *"ideas are no longer marks. They are posts, which
+are a different subclass of postmark-node. Same for bounties."*
+
+- **`post` is a sibling of `mark` under `postmark-node`.** An idea and a bounty
+  are posts; neither stands in the world as a mark, sited or predicated.
+- **What a post is beyond that is not yet written into law** — its own
+  properties, who may write one, and which other asks join it. The 58 idea
+  marks and 3 bounty marks the record holds on 2026-10-16 move to posts as
+  WLD-73 part 2's data change.
 
 ## Class-nodes
 
@@ -333,6 +356,18 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   reason why we had predicate under node was because of classes."*). With the
   class side moved to properties, an instance predicate is a signed,
   contestable claim on the world, which is what a mark is.
+- **`sited` and `predicate` are mutually exclusive subclasses of `mark`**
+  (ruled 13:56: *"Sited should be a property, and predicated should be a
+  property. But … what if a mark is both sited and predicated? Surely that is
+  wrong … In that case, sited and predicate must become Subclasses."*). A mark
+  is one or the other, never both, so how a mark stands is which of the two
+  subclasses it is an instance of. There is no `stands` property.
+- **A property has no subdivision** (ruled 13:56). A property whose values
+  would sort its instances into mutually exclusive kinds is not a property:
+  those kinds are subclasses.
+- **There are no one-of values** (ruled 15:12, *"fine w me"*): a property's
+  value is a number, a true/false or free text. A one-of, if one ever
+  appears, becomes subclasses.
 - **Property lives in class-space,** under the meta-class's rails (direction,
   12:50;
   § The meta-class: param bounds, slot naming grammar, collision rules, the
@@ -344,8 +379,8 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
 - **A property may have child properties, each with its own tier** (ruled
   12:52: *"let a property have a child property. And the child property can
   be constitutional even if the parent's sovereign"*). Child properties carry
-  only the rules specific to one property: its caps, bounds and allowed
-  values. `body` (sovereign, on `mark`) has the constitution child
+  only the rules specific to one property: its caps and bounds (there are no
+  one-of values to allow, ruled 15:12). `body` (sovereign, on `mark`) has the constitution child
   `character-cap`, 150; chest `capacity` is sovereign (default 30) with constitution
   children `min` 1 and `max` 120 — today's `capacity_min` and `capacity_max`
   dials, flattened.
@@ -389,15 +424,22 @@ subclass"). The rung is the class side, so it is a property.*
 - **Kind and subclass are one word** (ruled, Sitting A, 2026-10-12): "a kind
   of candy" is a subclass of candy.
 - **`kind` is a flat field naming the node's own class** (direction: Darko,
-  2026-10-16 09:36: *"like ID. But class ID"*). How a mark stands — sited, predicated, a
-  parcel, a naming — is read from its structure (whether it has a place and
-  an extent, or a parent it stands under), never from a field.
+  2026-10-16 09:36: *"like ID. But class ID"*). How a mark stands is which of
+  `mark`'s two mutually exclusive subclasses it is an instance of — `sited`
+  or `predicate` (ruled 13:56, § Property and predicate) — never a field and
+  never a property.
   *SUPERSEDED 2026-10-16: "A mark's `kind` field reads as a label —
   `kind: predicated` labels a predicate — so the field keeps its one meaning,
   how a mark stands ([lifetimes.md](lifetimes.md)), and nothing migrates"
   (Sitting A, 2026-10-12). The field now names the class; the records that
   still write `kind:` as a standing are the owed data change.*
-- **What promotes a descriptor is unruled** (POS-615): who may write a label,
+- **The promotion test for a subclass** (ruled 2026-10-16 13:56: *"Part of
+  the promotion criteria that justifies a subclass is that it is mutually
+  exclusive with sibling subclasses."*): a kind becomes a subclass when it is
+  mutually exclusive with its siblings. That is why `sited` and `predicate`
+  are subclasses of `mark` and not properties of it.
+- **What promotes a descriptor is unruled** (POS-615; the promotion test
+  above answers part of the last rung): who may write a label,
   what carries a label to a property or a property to a subclass, and how the
   town lists the labels in use all wait for that sitting.
   *SUPERSEDED 2026-10-16 in its middle rung: "what carries a label to a
@@ -1744,8 +1786,9 @@ names its owning doc, and the owner outranks every other use.
   child mean property.
 - **kind** — ① the `kind` field: the node's own class, "like ID. But class
   ID" (direction, 2026-10-16 09:36, § The LOGOS ladder); ② "a kind of X": a subclass of X
-  (Sitting A, 2026-10-12). Before 2026-10-16 the field said how a mark stood,
-  which is now read from structure. A creature's kind (bat, raven, wolf;
+  (Sitting A, 2026-10-12). Before 2026-10-16 the field said how a mark stood;
+  that is now which of `mark`'s mutually exclusive subclasses, `sited` or
+  `predicate`, the mark is (ruled 13:56). A creature's kind (bat, raven, wolf;
   `tools/creature-kind.mjs`) is not yet registered against these senses.
 - **gate** — ① the mark lint's pre-flight check (the-gate); ② any boundary
   judgment at action admission ("judged at the gate", [edit-law.md](edit-law.md));
@@ -1833,6 +1876,9 @@ lane apart:
   the chest (the postmark-blueprints repo's `BLUEPRINTS/`), and a
   blueprint PR is accepted only when it CITES its standing idea
   (`idea: <by>/<slug>`). Never a board notice at any stage.
+  *SUPERSEDED in part 2026-10-16 (§ Posts): the idea is a post, not "a mark
+  (`class: idea`) … sited or predicated"; the road from idea to blueprint is
+  not restated by that ruling and stands.*
 
 Consequences drawn the same day: the **civic notice lane closes** —
 `by: the-town` on the board, with its `threshold` bar, was implemented and
