@@ -112,7 +112,7 @@ emission as the FOURTH world family — properties are nodes, every world
 family may carry them, and the family is positionless by taxonomy, which is
 where "optional position" went: the optionality dissolved into the tree.
 *(SUPERSEDED in part 2026-10-16, § Property and predicate: `predicate` is a
-subclass of `mark` (Darko 12:50, direction), no longer a fourth family beside
+subclass of `mark` (Darko 12:50; ruled 15:43, B over Sitting A), no longer a fourth family beside
 it — it stood under postmark-node only because class-side predicates existed,
 and those are now properties, which live in class-space.)*
 `position` and `exposure` stand as predicate's child classes (a position
@@ -205,8 +205,8 @@ substrate" list above and is resident-instantiable, beside `thing` and
 `note`.*
 
 **What an instance writes (ruled 2026-10-16, the candy sitting; § Property and
-predicate).** An instance names its class in its `kind` field (direction,
-09:36), fills its
+predicate).** An instance names its class in its `kind` field (09:36;
+ruled 15:43, B over Sitting A), fills its
 class's sovereign properties as flat fields (or leaves one out and takes the
 property's default: a `thing` that says nothing about `portable` is
 portable), and can write no other flat field — a flat field must be a declared
@@ -355,7 +355,7 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   to say about their own mark that is not a declared property is a
   predicate, like anyone else's claim — so `slot` and `value` stay, because a
   claim's name is the claimant's own words.
-- **A predicate is a mark: `predicate` is a subclass of `mark`** (direction:
+- **A predicate is a mark: `predicate` is a subclass of `mark`** (ruled 15:43, B over Sitting A;
   Darko, 2026-10-16 12:50: *"predicate can now cleanly fit under mark. The only
   reason why we had predicate under node was because of classes."*). With the
   class side moved to properties, an instance predicate is a signed,
@@ -417,7 +417,7 @@ after this law (WLD-73 part 2).
 
 A descriptor climbs one ladder, in increasing order of resolution and
 distributability: it starts as a **label**, may become a **property**, and
-may become a **subclass** (direction: Darko, 2026-10-16 12:43, *"even the label
+may become a **subclass** (ruled 2026-10-16 15:43, B over Sitting A; Darko, 12:43, *"even the label
 predicate subclass ladder becomes label property subclass"*).
 *SUPERSEDED 2026-10-16: the ladder's middle rung read "predicate" (Sitting A,
 2026-10-12, "it starts as a label, may become a predicate, and may become a
@@ -433,7 +433,7 @@ subclass"). The rung is the class side, so it is a property.*
   values it locks.
 - **Kind and subclass are one word** (ruled, Sitting A, 2026-10-12): "a kind
   of candy" is a subclass of candy.
-- **`kind` is a flat field naming the node's own class** (direction: Darko,
+- **`kind` is a flat field naming the node's own class** (ruled 15:43, B over Sitting A; Darko,
   2026-10-16 09:36: *"like ID. But class ID"*). How a mark stands is which of
   `mark`'s two mutually exclusive subclasses it is an instance of — `sited`
   or `predicate` (ruled 13:56, § Property and predicate) — never a field and
@@ -1762,7 +1762,8 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
 - **Which marks a take draws is pot luck** (Venn question 8, ruled 2026-10-16
   15:43, the blend of Sitting A 2026-10-12 17:19, *"pot luck, always"*, and
   12:36 above): naming a kind narrows the draw to marks of that kind, and
-  within it the draw is pot luck.
+  within it the draw is pot luck. A take that names no kind draws pot luck
+  from everything the source holds (Sitting A 17:19).
 - **A mark dropped on open ground is sited at settlement** (Sitting A, ruled
   2026-10-12 18:14): it is published with a place and an extent, under the
   standard publishing rule.
@@ -1823,7 +1824,7 @@ names its owning doc, and the owner outranks every other use.
   a subclass of `mark`. Dated clauses that say "predicate" of a class-node's
   child mean property.
 - **kind** — ① the `kind` field: the node's own class, "like ID. But class
-  ID" (direction, 2026-10-16 09:36, § The LOGOS ladder); ② "a kind of X": a subclass of X
+  ID" (2026-10-16 09:36, ruled 15:43, B over Sitting A, § The LOGOS ladder); ② "a kind of X": a subclass of X
   (Sitting A, 2026-10-12). Before 2026-10-16 the field said how a mark stood;
   that is now which of `mark`'s mutually exclusive subclasses, `sited` or
   `predicate`, the mark is (ruled 13:56). A creature's kind (bat, raven, wolf;

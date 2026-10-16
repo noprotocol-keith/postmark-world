@@ -84,8 +84,8 @@ in trust
    atoms of authorship. The `kind` field names the node's
    own class; lifetimes are vocabulary; classes are law. *(lifetimes ·
    classes § Property and predicate; property, flat fields and predicate as
-   claim ruled 2026-10-16, 12:41–12:42; predicate as a subclass of mark is
-   direction, 12:50; the `kind` sentence is direction, 09:36)*
+   claim ruled 2026-10-16, 12:41–12:42; predicate as a subclass of mark, 12:50, and
+   the `kind` sentence, 09:36, ruled 15:43, B over Sitting A)*
    *SUPERSEDED 2026-10-16: "One node type: identity plus predicate children.
    Kind-words are vocabulary; classes are law; predicates are the atoms of
    authorship."*

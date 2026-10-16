@@ -5,7 +5,7 @@ thing, born the same way, differing in one class param.*
 
 Standing, living and fleeting are **lifetimes**, not kinds (Darko, Sitting A,
 2026-10-12; WLD-39). A node's `kind` field names its own class (Darko,
-2026-10-16, direction: *"like ID. But class ID"*; [classes.md](classes.md)
+2026-10-16 09:36, ruled 15:43, B over Sitting A: *"like ID. But class ID"*; [classes.md](classes.md)
 § The LOGOS ladder), and how a mark stands is which of `mark`'s two mutually
 exclusive subclasses it is, `sited` or `predicate` (ruled 2026-10-16 13:56);
 either way it is a different word for a different thing from a lifetime. *SUPERSEDED 2026-10-16: "A mark's `kind` field says
@@ -48,7 +48,7 @@ a **property**, and an instance carries a property's value as a **flat
 field** — `portable: false` — with no predicate node, taking the property's
 default when the field is left out; a flat field must be a declared property.
 A predicate is anyone's claim about a node, a child mark with `(slot, value)`
-— `predicate` being a subclass of `mark` (12:50, direction) — and stays
+— `predicate` being a subclass of `mark` (12:50; ruled 15:43, B over Sitting A) — and stays
 the atom of authorship for everything a class does not declare. A mark's body
 is the sovereign `body` property of `mark`, its 150-character cap a
 constitution child of it (12:48–12:52). So a node is identity, its class's
