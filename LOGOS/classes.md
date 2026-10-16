@@ -236,7 +236,14 @@ to the instantiation edge: a constitution true/false, inherited down
 `extends`. The root, `postmark-node`, answers false; `thing`, `note`, `post`
 and `predicate` answer true (`predicate` by 15:14, Darko: *"Yes, residents
 may."*), and everything under them inherits it (the candy kinds,
-consumables); a subclass sets false only to be the town's alone. One
+consumables); a subclass sets false only to be the town's alone. **`sited`
+answers true** (ruled 19:39), so a plain mark left with leave-mark is a
+resident's to make, as the always-shown leave-mark says. The sited classes
+that would give a resident control over something that mints or confers
+standing set false, by `the-town/nothing-you-control-mints`:
+`the-town/parcel` (sovereign ground), `the-town/portal-ground` (the town's
+passage machinery) and `the-town/vehicle` (the Post Office timetable; ruled
+19:39). One
 principle sets the roots, `the-town/nothing-you-control-mints` (filed under
 `postmark-rules`, § The rules): a resident may make an instance unless it
 would give them control over something that mints or confers standing, so
