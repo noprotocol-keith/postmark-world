@@ -25,7 +25,7 @@ import {
 } from "./enter-exit.mjs"; // DEMO SLICE — the enter-exit acts (step 5, jetto/enter-exit-demo)
 import {
   pointInMark, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence,
-  landingOf, enterTargetOf, portalsIn, portalsInto, dungeonLanding,
+  landingOf, passageTargetOf, portalsIn, portalsInto, dungeonLanding,
 } from "./portals.mjs"; // WLD-5: portals and the dungeon class, one home for the verbs and the lint
 // The office loads this file and enter-exit.mjs from the clone, and nothing else,
 // so the portal reads it needs ride out through here.
@@ -349,9 +349,14 @@ export function enter(state, targetId, world, {
   // A mark a dungeon hides from you is no mark at all to you: the same answer
   // as an id that does not exist, so naming one from outside learns nothing.
   if (named && hiddenFrom(marks, held).has(targetId)) return { error: `no mark '${targetId}' to enter` };
+  // ENTERING A MARK ENTERS ITS `into` (WLD-5's ruling, restored by WLD-63): any
+  // mark carrying one is passed through it, the dungeon itself included. The
+  // Starforge Spire carries `into` its vestibule, so entering it from anywhere
+  // in its outline sets you down inside the Gilded Doors; a list asks which.
   if (named && entryLawOf(named)?.into) return enterThroughPortal(state, named, world, { held, handle, at, iso, accepted, into });
-  // Inside a dungeon, or into one, the only enter is through a portal: the cure
-  // for the Swiss-cheese exit must not leak on the way in.
+  // Inside a dungeon the only enter is through a portal (G3: the cure for the
+  // Swiss-cheese exit must not leak on the way in), and a dungeon that names no
+  // `into` of its own is entered by the portals that lead into it.
   if (named && dungeonIndex(marks).dungeons.length) {
     const inside = heldDungeon(held, marks);
     const governs = dungeonsOf(named, marks);
@@ -361,7 +366,7 @@ export function enter(state, targetId, world, {
       return {
         error: inside
           ? `you are inside ${d}, a dungeon — inside one, the only way to enter anything is a portal. The portals where you stand: ${ways.map((p) => p.id).join(", ") || "(none)"}`
-          : `${d} is a dungeon — it is entered through its portals, never directly. Its ways in: ${ways.map((p) => p.id).join(", ") || "(none)"}`,
+          : `${d} is a dungeon that names no way in of its own (no \`into\`), so it is entered through the portals that lead into it. Its ways in: ${ways.map((p) => p.id).join(", ") || "(none)"}`,
         refused: "dungeon", dungeon: d, portals: ways,
       };
     }
@@ -473,7 +478,7 @@ function enterThroughPortal(state, portal, world, { held, handle, at, iso, accep
 
   if (verdict.effect === "terms") return { ...base, crossings: [verdict], stranded: portal.id, awaiting: verdict };
 
-  const target = enterTargetOf(intoMark, marks);
+  const target = passageTargetOf(portal, intoMark, marks);
   const chain = target
     ? [...ancestorsByGeometry(target, world, { kinds: THRESHOLD_KINDS }).slice().reverse().map((m) => m.id), target.id]
     : [];
