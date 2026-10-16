@@ -612,7 +612,7 @@ The clearest instance of everything above (the sitting's own illustration,
 reached law):
 
 - **The class-node is sovereign** — the founders' claim about what a
-  household is — **carrying the named constitutional set**: the spawn law
+  household is — **carrying the named constitutional set**: the landing law
   (what residents a household may declare — admission law lives here, never
   on the resident class), the registration predicate, and the logos-tier
   floor above.
