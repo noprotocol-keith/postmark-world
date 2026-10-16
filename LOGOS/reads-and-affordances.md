@@ -70,9 +70,9 @@ investigate is … diegetic … what is physically deeper at higher granularity
 history/arcana/nature/religion check versus an investigation check."*
 
 - **`explain:`** climbs the class: what a thing IS, up its class chain, with
-  each class's properties and uses and their conditions. It answers the class
+  each class's properties and afforded actions and their conditions. It answers the class
   body, the `extends` chain, each property with its tier, default and
-  children, each use with who may use it, from where and its effect, and the
+  children, each afforded action with who may take it, from where and its effect, and the
   class's `makers` (ruled 16:02).
 - **Every instance read carries a one-line class pointer** (ruled 16:02):
   `kind: candy · a consumable · a thing — explain: "candy"`.
@@ -109,10 +109,12 @@ everything else shows when its conditions hold. The roster below is ruled
   stake and unstake, a stakeable mark in view and stamps, or a stake held;
   withdraw, a mark of your own; plus the verbs a ground lends, as before.
 - **Hidden until usable never means unknowable** (ruled 16:02, as listed at
-  10:30): `explain:` lists every use with its conditions, and a verb tried
+  10:30): `explain:` lists every afforded action with its conditions, and a verb tried
   while it isn't showing is refused with its reason, never "no such verb".
-- **A class declares its own uses:** who may use it, from where, and its
-  effect. There is no `tool` class (ruled 16:02).
+- **A class declares its own afforded actions:** who may take them, from
+  where, and their effect (ruled 16:02; named 18:06, Darko: *"let's call
+  them afforded actions"*). The resident still sees them as verbs in `can`.
+  There is no `tool` class (ruled 16:02).
 
 - **The bare read's `can` lists each verb once** (Darko, 10:36: *"it's object
   agnostic … you can give an object to 10 different residents … That doesn't
