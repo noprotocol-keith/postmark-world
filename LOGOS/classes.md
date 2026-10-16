@@ -227,8 +227,9 @@ with your rec with everything else"*). `at` and `extent` are properties of
 **Who may make an instance is the class's `makers` property (ruled
 2026-10-16 16:02; its shape ruled 18:44).** `makers` is the class's answer
 to the instantiation edge: a constitution true/false, inherited down
-`extends`. The root, `postmark-node`, answers false; `thing`, `note` and
-`post` answer true, and everything under them inherits it (the candy kinds,
+`extends`. The root, `postmark-node`, answers false; `thing`, `note`, `post`
+and `predicate` answer true (`predicate` by 15:14, Darko: *"Yes, residents
+may."*), and everything under them inherits it (the candy kinds,
 consumables); a subclass sets false only to be the town's alone. One
 principle sets the roots, `the-town/nothing-you-control-mints` (filed under
 `postmark-rules`, § The rules): a resident may make an instance unless it
