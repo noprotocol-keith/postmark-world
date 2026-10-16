@@ -20,18 +20,18 @@ walk derives the answer). A node's tier is **the response it stands under**:
 | yellow | market | neutral-admitted — standing in canon, uncoupled, contested by weight |
 | gray | draft | sovereign space not yet admitted — a branch state, not a standing |
 
-**A property's `tier` field says who writes its value (2026-10-16).** A
-property, the class side of an attribute ([classes.md](classes.md)
-§ Property and predicate), does store a `tier` — it is one of the four fixed
-fields every property has (ruled 12:52–12:53) — and that field says who
-writes its instances' values: **constitution** — the town locks the value —
-or **sovereign** — the maker of each instance fills it. How this sits beside
-08-12's "Nothing stores a tier" is Wright's reading, for Darko's read: the
-field names who writes a value, never the property node's own standing nor
-any node's, so "Tier is not a field" above is about standing, and every
-node's standing is still the response it stands under, derived by the one
-walk. Where entry-law and exit-law compose scope and custody, the mapping
-onto these two tiers is OPEN ([classes.md](classes.md) § The two
+**A property's `tier` field says whose word decides its value (ruled
+2026-10-16 18:44).** A property, the class side of an attribute
+([classes.md](classes.md) § Property and predicate), does store a `tier` —
+it is one of the four fixed fields every property has (ruled 12:52–12:53) —
+and that field says whose word decides its value on each instance:
+**constitution** — the town's, locked — or **sovereign** — the maker's. The
+field keeps its name because it is the same ladder applied to values. A
+mark's own standing is still never stored (08-12): "Tier is not a field"
+above is about standing, and every node's standing is still the response it
+stands under, derived by the one walk. Where entry-law and exit-law compose
+scope and custody, the mapping onto these two tiers is OPEN, for part 2's
+sitting (agreed 18:44; [classes.md](classes.md) § The two
 constitutionalities).
 
 ## Conferral has exactly two channels

@@ -203,6 +203,11 @@ part 2's data change.*
 residents may make predicates. `predicate` leaves the town-only "graph's own
 substrate" list above and is resident-instantiable, beside `thing` and
 `note`.*
+*SUPERSEDED in part 2026-10-16 18:44 (the `makers` paragraph below): the hand-kept
+whitelist — "The enforced whitelist lives in `tools/board-grammar.test.mjs`
+(`RESIDENT_INSTANTIABLE`) and grows by ruling, never by drift" — gives way to
+each class's `makers`, whose roots one principle sets. The list itself
+retires in part 2's code.*
 
 **What an instance writes (ruled 2026-10-16, the candy sitting; § Property and
 predicate).** An instance names its class in its `kind` field (09:36;
@@ -220,15 +225,25 @@ with your rec with everything else"*). `at` and `extent` are properties of
 `sited`, sovereign: the maker places the mark.
 
 **Who may make an instance is the class's `makers` property (ruled
-2026-10-16 16:02).** Every class carries `makers`, a constitution property
-saying who may make its instances. **Its value's shape is OPEN:** the
-recommendation it was ruled from wrote it as `town | sovereign`, a one-of,
-which 15:12 rules out (§ Property and predicate: there are no one-of values),
-so the shape waits on Darko's read. The binding rule
-above stands as the town's reason for setting it, and the
-`RESIDENT_INSTANTIABLE` whitelist becomes this property in part 2's data. The
+2026-10-16 16:02; its shape ruled 18:44).** `makers` is the class's answer
+to the instantiation edge: a constitution true/false, inherited down
+`extends`. The root, `postmark-node`, answers false; `thing`, `note` and
+`post` answer true, and everything under them inherits it (the candy kinds,
+consumables); a subclass sets false only to be the town's alone. One
+principle sets the roots, `the-town/nothing-you-control-mints` (filed under
+`postmark-rules`, § The rules): a resident may make an instance unless it
+would give them control over something that mints or confers standing, so
+identities, households, parcels, stakes, money, crossings and the graph's own
+classes stay town-only. It is the response function applied to one more
+edge: a placement, and the ground answers; a value, and the property's tier
+answers; an instance, and the class answers. It replaces the hand-kept
+`RESIDENT_INSTANTIABLE` whitelist. When residents coin classes (POS-436), a
+household-made class is sovereign, and its answer is the household's. The
 town makes the candy kinds, each a subclass of candy, and residents may make
 instances of any of them.
+*SUPERSEDED 2026-10-16 18:44: "Its value's shape is OPEN: the recommendation
+it was ruled from wrote it as `town | sovereign`, a one-of, which 15:12 rules
+out …, so the shape waits on Darko's read."*
 
 **An idea is a class, never a place or a kind (founder-ruled 2026-09-01 —
 "Ideas can be predicates.").** `class: idea` says what a mark IS; where it
@@ -416,6 +431,9 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   one-of values to allow, ruled 15:12). `body` (sovereign, on `mark`) has the constitution child
   `character-cap`, 150; a holding thing's `capacity` is sovereign (default 30) with
   constitution children `min` 1 and `max` 120 (§ The transfer edge: `holder`).
+  **A subclass may set its own child bounds** (ruled 18:44): the first case
+  is the Halloween Candy Bag's `capacity` 200, above `thing`'s 120, a class
+  node in the data (WLD-73 part 2), not a class in this law.
 - **`body` is a sovereign property of `mark`** (12:48, ruled 16:02, its
   constitution child named in the 12:52 ruling: *"body should become a
   property of Mark, which would just be inherited by all of its
@@ -423,8 +441,8 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   sited marks, predicates, parcels, namings, things. Its locked part is a
   constitution child property, the 150-character cap: `the-town/character-cap`
   folds into it. Class-nodes and properties take their body from the
-  meta-class, never from `mark`, so the 150 cap does not bind law text
-  (Wright's reading, for Darko's read).
+  meta-class, never from `mark`, uncapped; the 150 cap stays on residents'
+  marks (ruled 18:44).
 
 **Reading the older clauses.** Where a dated clause in this folder calls a
 class-node's child a "predicate child", "predicate slot", "param predicate" or
@@ -530,9 +548,9 @@ A class carries two independent constitutionalities:
    custody, filled per instance — does not map onto
    the property ruling's two tiers: a constitution property's value is locked
    by the town, yet exit-law's is filled per instance under constitutional
-   custody. **How that composition maps onto property tiers is OPEN.** Until a
-   ruling settles it, the composition stands as written (Wright's reading, for
-   Darko's read), an exception to
+   custody. **How that composition maps onto property tiers is OPEN, for
+   part 2's sitting (agreed 18:44).** Until a ruling settles it, the
+   composition stands as written (agreed 18:44), an exception to
    § Property and predicate's constitution tier ("the town locks the value; no
    instance writes it") and to § Instantiation's "The constitution properties
    are the town's, and no instance writes them".*
@@ -582,8 +600,8 @@ up, in law — never in a mechanism of its own.
 class-space, governed by these rails (12:50, ruled 16:02). The meta-class
 defines once, as fixed fields, what every property has — name, tier, default,
 body (ruled 12:52–12:53). It also gives class-nodes and properties their
-bodies, so the 150-character cap on a mark's body never binds law text
-(Wright's reading, for Darko's read).
+bodies, uncapped, so the 150-character cap stays on residents' marks and never
+binds law text (ruled 18:44).
 
 Beside the locks it carries **the uniform/devolvable bit** (the sitting's
 resolution, restored 2026-08-13): every param declares whether it is
@@ -1823,12 +1841,16 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   think that works"*): `take { kind, count, from }`, `give { kind, count, to }`,
   `drop { kind, count }`, `consume { kind }`. `count` defaults to 1, and `from`
   may be left out when only one source in reach holds that kind.
+- **An ambiguous object is refused** (ruled 18:44): when more than one
+  object in reach could answer, the act changes nothing and lists the
+  candidates, each by owner, id and distance ("take from which? the Treat
+  Bowl (kai's, 3 m), the Treat Bowl (mari's, 6 m)").
 - **Which marks a take draws is pot luck** (Venn question 8, ruled 2026-10-16
   15:43, the blend of Sitting A 2026-10-12 17:19, *"pot luck, always"*, and
   12:36 above): naming a kind narrows the draw to marks of that kind, and
   within it the draw is pot luck. A take from a holder that names no kind
-  draws pot luck from everything it holds (Sitting A 17:19; Wright's reading
-  of the Venn 8 blend, for Darko's read). That is a take *from* a holder; a
+  draws pot luck from everything it holds (Sitting A 17:19; ruled 18:44).
+  That is a take *from* a holder; a
   take aimed at the holder itself takes the holder (11:55, above).
 - **A mark dropped on open ground is sited at settlement** (Sitting A, ruled
   2026-10-12 18:14; ruled again 16:02): open ground is no holder to confer a
@@ -1837,7 +1859,12 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
 - **Making marks into a holder is `leave-mark { kind, count, to }`** (ruled
   16:02; Darko, 15:48: *"the refill verb … we seem to be treating as some
   kind of special thing. No, it's just a lazy way of instantiating marks."*).
-  There is no `refill` verb. Who may make them is the class's `makers`
+  There is no general `refill` verb; a town subclass may declare refill as
+  its own afforded action (ruled 18:44), shorthand for
+  `leave-mark { kind, count, to }` into itself. The first case is the
+  Halloween Candy Bowl, a class node in the data (WLD-73 part 2), not a class
+  in this law; "container", like "chest", stays an everyday word, never a
+  class. Who may make them is the class's `makers`
   (§ Instantiation); how many is the holder's own rules: its `capacity`
   (24 for a resident), and its `open` decides who else may put in. No daily
   cap limits making (`make_daily_cap` removed, ruled 15:50–15:53); the
