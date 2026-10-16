@@ -356,7 +356,8 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   sited marks, predicates, parcels, namings, things. Its locked part is a
   constitution child property, the 150-character cap: `the-town/character-cap`
   folds into it. Class-nodes and properties take their body from the
-  meta-class, never from `mark`, so the 150 cap does not bind law text (12:50).
+  meta-class, never from `mark`, so the 150 cap does not bind law text
+  (Wright's reading, for Darko's read).
 
 **Reading the older clauses.** Where a dated clause in this folder calls a
 class-node's child a "predicate child", "predicate slot", "param predicate" or
@@ -439,8 +440,8 @@ A class carries two independent constitutionalities:
    class" and "unsealed carries `value: unsealed`" describe the filing before
    that ruling; the property node's `default` and tier replace them in the
    owed data change. The composition of scope and custody this gloss rules —
-   entry-law unsealed + sovereign custody; exit-law (and the held-grant slot)
-   unsealed + constitutional custody, filled per instance — does not map onto
+   entry-law unsealed + sovereign custody; exit-law unsealed + constitutional
+   custody, filled per instance — does not map onto
    the property ruling's two tiers: a constitution property's value is locked
    by the town, yet exit-law's is filled per instance under constitutional
    custody. **How that composition maps onto property tiers is OPEN.** Until a
@@ -490,11 +491,12 @@ param bounds (a rival walk-speed of a million is nonconforming, not brave),
 slot naming grammar, collision rules, and the locks. Sanity lives one level
 up, in law — never in a mechanism of its own.
 
-**Properties live here (ruled 2026-10-16, § Property and predicate).** A
-property is class-space, governed by these rails. The meta-class defines once,
-as fixed fields, what every property has — name, tier, default, body — and
-gives class-nodes and properties their bodies, so the 150-character cap on a
-mark's body never binds law text.
+**Properties live here (2026-10-16, § Property and predicate).** A property is
+class-space, governed by these rails (direction, 12:50). The meta-class
+defines once, as fixed fields, what every property has — name, tier, default,
+body (ruled 12:52–12:53). It also gives class-nodes and properties their
+bodies, so the 150-character cap on a mark's body never binds law text
+(Wright's reading, for Darko's read).
 
 Beside the locks it carries **the uniform/devolvable bit** (the sitting's
 resolution, restored 2026-08-13): every param declares whether it is
