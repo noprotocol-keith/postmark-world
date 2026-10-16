@@ -10,6 +10,13 @@
 // 247), standing inside a room by the enter ledger, and the page asked to read the
 // record again (the handle every host page uses), so the room mounts while the
 // town's Mists are being painted. Taking the guard out of paintSheetFeather reds it.
+//
+// THE ORDER IS SET, NOT RACED (S112, 2026-10-16). The page first opens in the town
+// (the ledger it is served holds no enter yet), so the town's Mists wall is drawn;
+// only then does the ledger carry ann's enter, and the reload mounts the room. Served
+// the enter from the start, a loaded machine could mount the room before the town
+// ever drew its Mists. That is correct (a room has no border), but the wait for the
+// wall then never ended: the keeper's full run held S112 on it (120 s, not-ok 887).
 
 import { test, after, before } from "node:test";
 import assert from "node:assert/strict";
@@ -73,7 +80,8 @@ test("THE PAGE: a resident standing in a room while the Mists are on sees the ro
   });
   // signed in as ann, who entered the room at crossing 240 (before the Mists, so
   // every clock on the page holds it)
-  const ledger = LEDGER.replace(/\s*$/, "\n") + formatEnterExit({ handle: "ann", act: "enters", mark: ROOM.id, at: 240, word: "neutral", iso: "2026-10-09T12:00:00.000Z" }) + "\n";
+  let ledger = LEDGER;   // the town first: the enter is served only once the wall is drawn
+  const entered = LEDGER.replace(/\s*$/, "\n") + formatEnterExit({ handle: "ann", act: "enters", mark: ROOM.id, at: 240, word: "neutral", iso: "2026-10-09T12:00:00.000Z" }) + "\n";
   await ctx.route("**/ops/whoami*", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ handles: ["ann"], handle: "ann", household: "ann", principal: false }) }));
   await ctx.route("**/world/enter-exit-ledger*", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ledger }) }));
   await ctx.route("**/WORLD/enter-exit-ledger.md*", (r) => r.fulfill({ status: 200, contentType: "text/markdown", body: ledger }));
@@ -85,6 +93,8 @@ test("THE PAGE: a resident standing in a room while the Mists are on sees the ro
   await page.evaluate(() => { const el = document.querySelector(".wv-tour-skip"); if (el && el.offsetParent) el.click(); });
   await page.waitForSelector("#wv-mists-layer .wv-mists-wall", { state: "attached", timeout: 120_000 });
   await page.waitForFunction(() => !!window.__pmViewer, null, { timeout: 60_000 });
+  assert.equal(await page.locator(".wv-minimap.is-scene-mark").count(), 0, "the page opened in the town, not the room");
+  ledger = entered;   // now the record says ann stands in the room
   await page.evaluate(() => window.__pmViewer.reload());
   await page.waitForSelector(".wv-minimap.is-scene-mark .wv-scene-ground", { state: "attached", timeout: 60_000 });
   await page.waitForTimeout(3000);   // every task the Mists' paint schedules has run
