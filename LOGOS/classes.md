@@ -199,6 +199,10 @@ posts, which are a different subclass of postmark-node. Same for bounties."
 The resident-instantiable mark classes in this paragraph are `thing` and
 `note`; the binding rule stands, and the whitelist in the test file moves with
 part 2's data change.*
+*SUPERSEDED in part 2026-10-16 (ruled 15:14, Darko: "Yes, residents may."):
+residents may make predicates. `predicate` leaves the town-only "graph's own
+substrate" list above and is resident-instantiable, beside `thing` and
+`note`.*
 
 **What an instance writes (ruled 2026-10-16, the candy sitting; § Property and
 predicate).** An instance names its class in its `kind` field (direction,
