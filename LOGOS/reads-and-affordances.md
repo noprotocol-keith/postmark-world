@@ -75,6 +75,10 @@ history/arcana/nature/religion check versus an investigation check."*
   higher resolution, from where you stand. Its answer carries that mark's
   **`can`** — the verbs you can do to it right now (ruled 12:01, *"Agreed"*).
   Acting stays `do: <verb>`; a read never acts.
+- **There is no `interact` verb** (ruled 2026-10-16 12:01, *"Agreed"*): what
+  you can do to one mark is investigate's `can`, and acting on it is the verb
+  itself. The 10:22–10:30 proposal of one general `use` / `interact` verb is
+  not law.
 
 ## Verbs show only when usable (2026-10-16; `can` and its invariant ruled 12:01)
 
@@ -82,8 +86,8 @@ The door's menu is the permission calculus over the class tree at your
 standpoint (§ The apex), and it shows a verb only when you can use it (Darko,
 2026-10-16 10:30: *"these verbs only reveal themselves when you can actually
 use them"*). Verbs that need nothing but being a resident are always shown;
-take shows when a thing is in reach, give and drop when you carry something,
-and so on.
+take shows when a thing is in view or in reach, give and drop when you carry
+something, and so on (Darko's examples, 10:30; direction).
 
 - **The bare read's `can` lists each verb once** (Darko, 10:36: *"it's object
   agnostic … you can give an object to 10 different residents … That doesn't

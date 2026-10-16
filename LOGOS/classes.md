@@ -73,8 +73,8 @@ stand deliberately source-less until ruled) — and as `the-town/the-wheelhouse`
 standing institution and its first instance; `the-town/node` and
 `the-town/edge`, the logos primitives the whole ontology roots in; and
 `the-town/character-cap`, the mark class's first predicate-child parameter
-(*from 2026-10-16 the constitution child property of `mark`'s `body`, § Property
-and predicate*).
+(*SUPERSEDED in part 2026-10-16: it is the constitution child property of
+`mark`'s sovereign `body` property, § Property and predicate*).
 
 The seatings, on the record (prose about the channel, never the channel
 itself): household, member-of
@@ -111,10 +111,10 @@ to its true name and the leave-mark grant's residue follows; `predicate` joins m
 emission as the FOURTH world family — properties are nodes, every world
 family may carry them, and the family is positionless by taxonomy, which is
 where "optional position" went: the optionality dissolved into the tree.
-*(SUPERSEDED 2026-10-16, § Property and predicate: `predicate` is a subclass
-of `mark`, no longer a fourth family beside it — it stood under postmark-node
-only because class-side predicates existed, and those are now properties,
-which live in class-space.)*
+*(SUPERSEDED in part 2026-10-16, § Property and predicate: `predicate` is a
+subclass of `mark` (Darko 12:50, direction), no longer a fourth family beside
+it — it stood under postmark-node only because class-side predicates existed,
+and those are now properties, which live in class-space.)*
 `position` and `exposure` stand as predicate's child classes (a position
 node IS a predicate — it describes the node it hangs off); the position
 SLOT is postmark-node own predicate child, `value: unsealed` — **a slot is a
@@ -195,7 +195,8 @@ instances under this law: a resident's pocket lantern (`thing`) and the
 waiting-room bounty (`bounty`), settled the night it was ruled.
 
 **What an instance writes (ruled 2026-10-16, the candy sitting; § Property and
-predicate).** An instance names its class in its `kind` field, fills its
+predicate).** An instance names its class in its `kind` field (direction,
+09:36), fills its
 class's sovereign properties as flat fields (or leaves one out and takes the
 property's default: a `thing` that says nothing about `portable` is
 portable), and can write no other flat field — a flat field must be a declared
@@ -327,12 +328,13 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   to say about their own mark that is not a declared property is a
   predicate, like anyone else's claim — so `slot` and `value` stay, because a
   claim's name is the claimant's own words.
-- **A predicate is a mark: `predicate` is a subclass of `mark`** (Darko,
-  2026-10-16 12:50: *"predicate can now cleanly fit under mark. The only
+- **A predicate is a mark: `predicate` is a subclass of `mark`** (direction:
+  Darko, 2026-10-16 12:50: *"predicate can now cleanly fit under mark. The only
   reason why we had predicate under node was because of classes."*). With the
   class side moved to properties, an instance predicate is a signed,
   contestable claim on the world, which is what a mark is.
-- **Property lives in class-space,** under the meta-class's rails (12:50;
+- **Property lives in class-space,** under the meta-class's rails (direction,
+  12:50;
   § The meta-class: param bounds, slot naming grammar, collision rules, the
   locks).
 - **The four fields of a property are fixed** (ruled 12:52–12:53, *"that seems
@@ -343,10 +345,12 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   12:52: *"let a property have a child property. And the child property can
   be constitutional even if the parent's sovereign"*). Child properties carry
   only the rules specific to one property: its caps, bounds and allowed
-  values. Chest `capacity` is sovereign (default 30) with constitution
+  values. `body` (sovereign, on `mark`) has the constitution child
+  `character-cap`, 150; chest `capacity` is sovereign (default 30) with constitution
   children `min` 1 and `max` 120 — today's `capacity_min` and `capacity_max`
   dials, flattened.
-- **`body` is a sovereign property of `mark`** (12:48: *"body should become a
+- **`body` is a sovereign property of `mark`** (12:48, direction, its
+  constitution child named in the 12:52 ruling: *"body should become a
   property of Mark, which would just be inherited by all of its
   subclasses"*). The maker writes it, and every mark subclass inherits it —
   sited marks, predicates, parcels, namings, things. Its locked part is a
@@ -367,7 +371,7 @@ after this law (WLD-73 part 2).
 
 A descriptor climbs one ladder, in increasing order of resolution and
 distributability: it starts as a **label**, may become a **property**, and
-may become a **subclass** (Darko, 2026-10-16 12:43: *"even the label
+may become a **subclass** (direction: Darko, 2026-10-16 12:43, *"even the label
 predicate subclass ladder becomes label property subclass"*).
 *SUPERSEDED 2026-10-16: the ladder's middle rung read "predicate" (Sitting A,
 2026-10-12, "it starts as a label, may become a predicate, and may become a
@@ -376,15 +380,15 @@ subclass"). The rung is the class side, so it is a property.*
 - **A label is a lazy class** (ruled in direction, Sitting A, 2026-10-12): the
   same idea as a class, in shorthand that has not yet needed a class-node's
   upkeep, and it may be promoted to one.
-- **A subclass is an existing class plus a basket of properties** (Darko,
-  2026-10-16 12:43: it can be *"defined as like an existing class plus a
+- **A subclass is an existing class plus a basket of properties** (direction:
+  Darko, 2026-10-16 12:43: it can be *"defined as like an existing class plus a
   basket of properties that we want to like import or like have a new name
   for"*). A kind of candy is candy plus its own properties: its body, and any
   values it locks.
 - **Kind and subclass are one word** (ruled, Sitting A, 2026-10-12): "a kind
   of candy" is a subclass of candy.
-- **`kind` is a flat field naming the node's own class** (Darko, 2026-10-16
-  09:36: *"like ID. But class ID"*). How a mark stands — sited, predicated, a
+- **`kind` is a flat field naming the node's own class** (direction: Darko,
+  2026-10-16 09:36: *"like ID. But class ID"*). How a mark stands — sited, predicated, a
   parcel, a naming — is read from its structure (whether it has a place and
   an extent, or a parent it stands under), never from a field.
   *SUPERSEDED 2026-10-16: "A mark's `kind` field reads as a label —
@@ -395,6 +399,8 @@ subclass"). The rung is the class side, so it is a property.*
 - **What promotes a descriptor is unruled** (POS-615): who may write a label,
   what carries a label to a property or a property to a subclass, and how the
   town lists the labels in use all wait for that sitting.
+  *SUPERSEDED 2026-10-16 in its middle rung: "what carries a label to a
+  predicate or a predicate to a subclass" (Sitting A, 2026-10-12).*
 
 ## The two constitutionalities
 
@@ -433,8 +439,15 @@ A class carries two independent constitutionalities:
    class" and "unsealed carries `value: unsealed`" describe the filing before
    that ruling; the property node's `default` and tier replace them in the
    owed data change. The composition of scope and custody this gloss rules —
-   entry-law unsealed + sovereign, exit-law unsealed + constitutional — is not
-   restated by the property ruling and stands as written.*
+   entry-law unsealed + sovereign custody; exit-law (and the held-grant slot)
+   unsealed + constitutional custody, filled per instance — does not map onto
+   the property ruling's two tiers: a constitution property's value is locked
+   by the town, yet exit-law's is filled per instance under constitutional
+   custody. **How that composition maps onto property tiers is OPEN.** Until a
+   ruling settles it, the composition stands as written, an exception to
+   § Property and predicate's constitution tier ("the town locks the value; no
+   instance writes it") and to § Instantiation's "The constitution properties
+   are the town's, and no instance writes them".*
 2. **Its shape is governed like its values.** The class-node is ground; a
    new predicate slot is a child declared on that ground. Whether the slot
    roster is closed (new slots meet compiled opposition; only the town's pen
@@ -1643,9 +1656,10 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   take verb needs to be something that can be triggered by the give verb …
   they should come in pairs"*; the one-edge reading confirmed at 11:14,
   *"that's correct"*). Both ends must permit it: the giver holds the thing,
-  and the receiver has room and its welcome allows it. Only residents start
-  a transfer. A chest's "put in" is therefore not a verb of its own: it is
-  give, with the chest as the receiving end.
+  and the receiver has room and its welcome allows it. Among sovereigns, only
+  residents start a transfer; the town's own constitution acts transfer too,
+  and need no one's consent (below). A chest's "put in" is therefore not a
+  verb of its own: it is give, with the chest as the receiving end.
 - **A holder is whatever can take** (11:12: *"a holder should literally just
   be that which has the capability to hold … whatever has the take verb
   exposed to it is considered a holder"*). There is no holder role: a
@@ -1659,8 +1673,7 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   **settles neutral** when nobody opposes it, and the object is transferred
   either way — the receiver holds it from the act (11:16: *"it is settled as
   neutral. But the object still ends up in the chest."*). The receiver's
-  opposition is its refusal; a chest answers through its maker's `welcome`,
-  declared in advance ([the-response-function.md](the-response-function.md)).
+  opposition is its refusal.
 - **Taking a chest takes the chest itself** (ruled 11:55: *"you can take a
   thing IN the chest by taking the THING. So the chest just shows what's
   inside."*). What a chest holds are objects in their own right, each taken
@@ -1728,7 +1741,7 @@ names its owning doc, and the owner outranks every other use.
   a subclass of `mark`. Dated clauses that say "predicate" of a class-node's
   child mean property.
 - **kind** — ① the `kind` field: the node's own class, "like ID. But class
-  ID" (2026-10-16, § The LOGOS ladder); ② "a kind of X": a subclass of X
+  ID" (direction, 2026-10-16 09:36, § The LOGOS ladder); ② "a kind of X": a subclass of X
   (Sitting A, 2026-10-12). Before 2026-10-16 the field said how a mark stood,
   which is now read from structure. A creature's kind (bat, raven, wolf;
   `tools/creature-kind.mjs`) is not yet registered against these senses.

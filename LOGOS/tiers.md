@@ -20,13 +20,16 @@ walk derives the answer). A node's tier is **the response it stands under**:
 | yellow | market | neutral-admitted — standing in canon, uncoupled, contested by weight |
 | gray | draft | sovereign space not yet admitted — a branch state, not a standing |
 
-**A property's tier is not a node's tier (2026-10-16).** A property, the class
-side of an attribute ([classes.md](classes.md) § Property and predicate),
-declares which tier writes its value: **constitution** — the town locks it —
-or **sovereign** — the maker of each instance fills it. That declaration is
-the class speaking about who may write a value, never a tier stored on a
-node; every node's own tier is still the response it stands under, derived
-by the one walk.
+**A property's `tier` field is custody, not standing (2026-10-16).** A
+property, the class side of an attribute ([classes.md](classes.md)
+§ Property and predicate), does store a `tier` — it is one of the four fixed
+fields every property has — and that field records the tier its instances'
+values are written under: **constitution** — the town locks the value — or
+**sovereign** — the maker of each instance fills it. It is a custody
+declaration about who may write a value. It is never the property node's own
+standing, nor any node's: "Tier is not a field" above is about standing, and
+every node's standing is still the response it stands under, derived by the
+one walk.
 
 ## Conferral has exactly two channels
 
