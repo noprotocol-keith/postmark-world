@@ -83,3 +83,46 @@ test("the air line says so: entered, the wall is around you but hides nothing; u
   assert.match(airLine(bare.you, 10), /nothing past arm's reach/);
   assert.deepEqual(orient(STAND, w, { crossing: 10, dials: CLEAR, entered: ["beyond/cairn"] }), bare, "an entered mark you are not standing in shelters nothing here");
 });
+
+// review-shelter #1/#2 (2026-10-15): shelter is the entered mark you STAND in, and the telling says so
+test("entered but standing outside the mark: nothing it holds is uncovered, field for field", () => {
+  const w = worldOf(marks);
+  const outside = { x: 0, y: -980 };   // short of the border, outside the Grounds
+  assert.deepEqual(openYourEyes(outside, w, { crossing: 10, dials: CLEAR, entered: ["beyond/grounds"] }).fov,
+    openYourEyes(outside, w, { crossing: 10, dials: CLEAR }).fov);
+  // standing in the Grounds with only the cairn entered: the cairn, 400 m off in the wall, stays hidden
+  const { fov } = openYourEyes(STAND, w, { crossing: 10, dials: CLEAR, entered: ["beyond/cairn"] });
+  assert.ok(!shown(fov).includes("beyond/cairn"));
+  assert.ok(!shown(fov).includes("beyond/tower"));
+  assert.equal(shelterOf(w, ["beyond/grounds"], outside), null, "the standpoint's own test: no entered mark holds it");
+});
+
+test("walking IN from outside is the Mists as ever, entered or not: shelter is only for a road that starts inside", () => {
+  const sh = shelterOf(worldOf(marks), ["beyond/grounds"]);
+  for (const [a, b] of [[{ x: 0, y: -950 }, { x: 0, y: -1010 }], [{ x: 0, y: -900 }, { x: 0, y: -1100 }], [{ x: 200, y: -700 }, { x: 0, y: -1150 }]]) {
+    assert.deepEqual(mistsRoad(a, b, 10, MISTS, { shelter: sh }), mistsRoad(a, b, 10, MISTS), `${JSON.stringify(a)} → ${JSON.stringify(b)}`);
+  }
+});
+
+test("the eyes' telling: sheltered in the wall, the ruled line, never 'nothing past it'; unentered, as ever", () => {
+  const w = worldOf(marks);
+  const inside = openYourEyes(STAND, w, { crossing: 10, dials: CLEAR, entered: ["beyond/grounds"] });
+  assert.equal(inside.fov.mists.sheltered, true);
+  assert.match(inside.tell(), /You stand inside the mist, but within the mark you have entered it hides nothing from you\./);
+  assert.doesNotMatch(inside.tell(), /nothing past it/);
+  const bare = openYourEyes(STAND, w, { crossing: 10, dials: CLEAR });
+  assert.equal("sheltered" in bare.fov.mists, false);
+  assert.match(bare.tell(), /You can see about \d+ m, and nothing past it\./);
+});
+
+test("the fringe, sheltered: the telling and the air line say the haze hides nothing within the mark", () => {
+  const ROOM = { id: "near/room", kind: "sited", at: { x: 0, y: -850 }, extent: { w: 60, h: 60 } };
+  const w = worldOf([...marks, ROOM]);
+  const p = { x: 0, y: -850 };   // 150 m in from the border: the fringe
+  const eyes = openYourEyes(p, w, { crossing: 10, dials: CLEAR, entered: ["near/room"] });
+  assert.equal(eyes.fov.mists.in_wall, false);
+  assert.ok(eyes.fov.mists.thickness > 0);
+  assert.match(eyes.tell(), /its haze is on you, but within the mark you have entered it hides nothing from you\./);
+  assert.match(airLine(orient(p, w, { crossing: 10, dials: CLEAR, entered: ["near/room"] }).you, 10), /hides nothing from you/);
+  assert.match(openYourEyes(p, w, { crossing: 10, dials: CLEAR }).tell(), /nothing past the mist can be seen/);
+});
