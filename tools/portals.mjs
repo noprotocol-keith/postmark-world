@@ -421,6 +421,14 @@ export function portalsIn(roomId, marks) {
   return out.sort((a, b) => a.id.localeCompare(b.id));
 }
 
+/** THE WAYS OF THE ROOM YOU HAVE ENTERED (row 72): the portals of the innermost
+ *  mark in your enter stack. With A1 every one of them is at hand from anywhere in
+ *  that room, so every one is in view, whatever the sight budget leaves out. */
+export function waysAt(held, marks) {
+  const room = (held ?? []).at(-1);
+  return room ? portalsIn(room, marks ?? []).map((p) => p.id) : [];
+}
+
 /** The ways INTO a dungeon: portals standing outside it whose passage puts
  *  you inside it. What a refused direct enter hands back instead of the deed. */
 export function portalsInto(dungeonId, marks) {

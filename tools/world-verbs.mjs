@@ -25,7 +25,7 @@ import {
 } from "./enter-exit.mjs"; // DEMO SLICE — the enter-exit acts (step 5, jetto/enter-exit-demo)
 import {
   pointInMark, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence,
-  landingOf, passageTargetOf, portalsIn, portalsInto, dungeonLanding,
+  landingOf, passageTargetOf, portalsIn, portalsInto, dungeonLanding, waysAt,
 } from "./portals.mjs"; // WLD-5: portals and the dungeon class, one home for the verbs and the lint
 // The office loads this file and enter-exit.mjs from the clone, and nothing else,
 // so the portal reads it needs ride out through here.
@@ -93,7 +93,8 @@ export function shelterOf(world, entered, standpoint = null) {
 
 export function openYourEyes(state, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, actor = null, entered = null } = {}) {
   const home = actor ? homeOf(actor, world) : null;
-  const fov = fieldOfView(state, world, { crossing, budget, dials, keep: home?.placed ? home.mark_id : null, shelter: shelterOf(world, entered, state) });
+  const fov = fieldOfView(state, world, { crossing, budget, dials, keep: home?.placed ? home.mark_id : null,
+    always: waysAt(entered, world.marks), shelter: shelterOf(world, entered, state) });
   const radial = radialSerialize(fov);
   radial.within = containmentChain(state, world.marks); // the spine: root → inward, parents first
   fov.within = radial.within;
