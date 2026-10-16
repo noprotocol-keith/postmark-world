@@ -411,9 +411,9 @@ pedantic to require like an entire child predicate mark"*; ruled 12:42:
   be constitutional even if the parent's sovereign"*). Child properties carry
   only the rules specific to one property: its caps and bounds (there are no
   one-of values to allow, ruled 15:12). `body` (sovereign, on `mark`) has the constitution child
-  `character-cap`, 150; chest `capacity` is sovereign (default 30) with constitution
-  children `min` 1 and `max` 120 — today's `capacity_min` and `capacity_max`
-  dials, flattened.
+  `character-cap`, 150; a holding thing's `capacity` is sovereign (default 30) with
+  constitution children `min` 1 and `max` 120 — the chest's `capacity_min` and
+  `capacity_max` dials, flattened (§ The transfer edge: `holder`).
 - **`body` is a sovereign property of `mark`** (12:48, ruled 16:02, its
   constitution child named in the 12:52 ruling: *"body should become a
   property of Mark, which would just be inherited by all of its
@@ -1738,18 +1738,37 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
 ## The transfer edge — give and take, one edge with two ends (ruled 2026-10-16, the candy sitting)
 
 - **A transfer is one edge with two ends.** You give, so the receiver takes;
-  you take from a chest, so the chest gives (Darko, 2026-10-16 11:12: *"the
+  you take from a holder, so the holder gives (Darko, 2026-10-16 11:12: *"the
   take verb needs to be something that can be triggered by the give verb …
   they should come in pairs"*; the one-edge reading confirmed at 11:14,
   *"that's correct"*). Both ends must permit it: the giver holds the thing,
-  and the receiver has room and lets it in (a chest's `open`, below). Among sovereigns, only
+  and the receiver has room and lets it in (its `capacity` and `open`, below). Among sovereigns, only
   residents start a transfer; the town's own constitution acts transfer too,
-  and need no one's consent (below). A chest's "put in" is therefore not a
-  verb of its own: it is give, with the chest as the receiving end.
-- **A holder is whatever can take** (11:12: *"a holder should literally just
-  be that which has the capability to hold … whatever has the take verb
-  exposed to it is considered a holder"*). There is no holder role: a
-  resident and a chest are both holders because both can take.
+  and need no one's consent (below). Putting something into a chest is
+  therefore not a verb of its own: it is give, with the chest as the
+  receiving end.
+- **A holder is anything with `holder: true`** (ruled 16:03–16:05, Darko
+  16:04: *"How about making holder a property? That way we can give it to
+  both residents and containers."*; *"Agreed"*). `holder` is a true/false
+  property with two child properties: `capacity`, how many it can hold, and
+  `open`, whether other households may give and take.
+  - **On `resident`:** `holder: true` and `capacity: 24`, both constitution
+    and locked (today's `carry_cap`). A resident has no `open`: a give to a
+    resident follows the general consent law below.
+  - **On `thing`:** `holder` is sovereign, default false, so a thing holds
+    nothing unless its maker says so. When it is true, `capacity` (sovereign,
+    default 30, with constitution children `min` 1 and `max` 120) and `open`
+    (sovereign, default true) apply.
+  *SUPERSEDED 2026-10-16 16:03–16:05: "A holder is whatever can take (11:12:
+  "a holder should literally just be that which has the capability to hold …
+  whatever has the take verb exposed to it is considered a holder"). There is
+  no holder role: a resident and a chest are both holders because both can
+  take."*
+- **There is no `chest` class** (ruled 16:03–16:05). With `holder` a property
+  it has no properties of its own, so it fails the promotion test (§ The LOGOS
+  ladder). A chest, a bag, a bowl or a crate is a thing with `holder: true`,
+  made by whoever makes it, and any thing can hold at its maker's choice.
+  "Chest" stays an everyday word, never a class.
 - **Consent follows the general law** (ruled 11:14: *"it just falls under the
   consent rules that everything else falls under, which is constitution takes
   precedent … you do not consent to constitution acts … if the town gives you
@@ -1761,16 +1780,17 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   neutral. But the object still ends up in the chest."*). The receiver's
   opposition is its refusal: **a stance on the transfer, taken before the
   settlement** (ruled 16:02), and an opposed transfer returns the object to
-  the giver at the settlement. **A chest whose `open` is false refuses
-  another household's give at the door** (ruled 16:02): its maker's
-  opposition is declared in advance, so the give is refused at once, never
-  taken and returned. A chest's welcome is this true/false `open` property.
-- **Taking a chest takes the chest itself** (ruled 11:55: *"you can take a
-  thing IN the chest by taking the THING. So the chest just shows what's
-  inside."*). What a chest holds are marks in their own right, taken by
-  `take`, with the chest only as where they are. **A carried chest's
-  contents travel inside it,** and the chest counts 1 toward its carrier's
-  carry, whatever it holds (ruled 16:02).
+  the giver at the settlement. **A holder whose `open` is false refuses
+  another household's give at the door** (ruled 16:02, as a holder's `open`
+  16:03–16:05): its maker's opposition is declared in advance, so the give is
+  refused at once, never taken and returned. A holder's welcome is this
+  true/false `open` property.
+- **Taking a thing that holds takes the thing itself** (ruled 11:55, of a chest:
+  *"you can take a thing IN the chest by taking the THING. So the chest just
+  shows what's inside."*). What a holder holds are marks in their own right,
+  taken by `take`, with the holder only as where they are. **A carried
+  holder's contents travel inside it,** and it counts 1 toward its carrier's
+  `capacity`, whatever it holds (ruled 16:02).
 - **Holders confer their state on what they hold** (ruled 16:02, Darko:
   *"Holders confer their state to the held, which is **why** these can be
   live. If a chest is published, anything you put in it is de facto
@@ -1809,11 +1829,10 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   16:02; Darko, 15:48: *"the refill verb … we seem to be treating as some
   kind of special thing. No, it's just a lazy way of instantiating marks."*).
   There is no `refill` verb. Who may make them is the class's `makers`
-  (§ Instantiation); how many is the holder's own rules: a resident carries
-  24, a chest holds up to its capacity, and its `open` decides who may put
-  in. No daily cap limits making (`make_daily_cap` removed, ruled 15:50–15:53);
-  the capacities stay. A new chest starts empty and is filled by making into
-  it.
+  (§ Instantiation); how many is the holder's own rules: its `capacity`
+  (24 for a resident), and its `open` decides who else may put in. No daily
+  cap limits making (`make_daily_cap` removed, ruled 15:50–15:53); the
+  capacities stay. A new holder starts empty and is filled by making into it.
 
 ## The lexicon — the homonym register
 
