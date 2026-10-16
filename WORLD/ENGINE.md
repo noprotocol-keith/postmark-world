@@ -296,6 +296,10 @@ the `ride` act, the deposit branch in exit, the ground block) is postmark-town/p
     household's: if it grows or moves past the rim it may be covered too, and the suite says
     so without failing (`tools/mists.test.mjs`). This supersedes the 2026-10-09 rule that no
     household's parcel is covered.
+  - **An entered mark is shelter** (Darko, 2026-10-15). Within a mark you have entered (it is on your
+    enter stack), the Mists neither slow your walk nor hide what it holds: no fringe pace, no wall stop,
+    and nothing inside it is cut from your reads. It follows entering, never standing: fog-covered ground
+    you have not entered is the Mists as ever, and nothing is drawn differently for anyone.
 - **Render cost capped by a context budget, never world size.** Candidates are
   culled to a sight radius, ranked, and carried to the budget; the rest aggregate.
 

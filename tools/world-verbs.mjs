@@ -35,7 +35,7 @@ export { dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkF
 // The establishing line of every telling: the let-there-be-light root (light
 // from the NE, dying to the SW), the world's extent, and WHERE/HOW you stand —
 // region, elevation, and the fog/light status effects on you right now.
-export function orient(state, world, { crossing = 0, dials = DIALS } = {}) {
+export function orient(state, world, { crossing = 0, dials = DIALS, entered = null } = {}) {
   const { heightfield, light, fogCeilingM, terrain } = world;
   const fog = fogModel(crossing, dials);
   const mists = mistsAt(crossing, terrain?.mists); // POS-466: null before the schedule starts
@@ -60,6 +60,8 @@ export function orient(state, world, { crossing = 0, dials = DIALS } = {}) {
       // the Mists at your standpoint; absent (not null) before they arrive, so
       // the answer before the schedule's first crossing is the old one, bit for bit
       ...(mists ? { mists: mistsBlock(mists, mistsHere(state, mists), state) } : {}),
+      // AN ENTERED MARK IS SHELTER: standing within one, the Mists hide nothing it holds (airLine says so)
+      ...(mists && shelterOf(world, entered, state) ? { sheltered: true } : {}),
     },
     // enter/exit are DEMO-SLICE verbs (step 5) — listed so a reader of the
     // demo sees the pair, and pointedly listed apart from walk, which reaches
@@ -77,9 +79,21 @@ export function orient(state, world, { crossing = 0, dials = DIALS } = {}) {
 // `actor` is the handle of the resident the eyes belong to (WLD-9): their home,
 // as tools/where-is.mjs § homeOf resolves it, is carried beyond the budget when
 // it is in view. No actor, or a home that resolves to nowhere, changes nothing.
-export function openYourEyes(state, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, actor = null } = {}) {
+/** AN ENTERED MARK IS SHELTER (Darko 2026-10-15): the test of a point the Mists leave alone for a walker whose enter
+ *  stack is `entered` (mark ids): inside any of those marks. With `standpoint`, only the entered marks that contain it
+ *  count: an entered mark you stand outside shelters nothing. null when nothing counts, so the Mists read as ever.
+ *  The office passes it to mistsRoad, and openYourEyes to fieldOfView. */
+export function shelterOf(world, entered, standpoint = null) {
+  const ids = new Set((entered ?? []).filter(Boolean));
+  if (!ids.size) return null;
+  const marks = (world?.marks ?? []).filter((m) => ids.has(m.id) && m.at && (!standpoint || pointWithinMark(standpoint, m)));
+  if (!marks.length) return null;
+  return (p) => marks.some((m) => pointWithinMark(p, m));
+}
+
+export function openYourEyes(state, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, actor = null, entered = null } = {}) {
   const home = actor ? homeOf(actor, world) : null;
-  const fov = fieldOfView(state, world, { crossing, budget, dials, keep: home?.placed ? home.mark_id : null });
+  const fov = fieldOfView(state, world, { crossing, budget, dials, keep: home?.placed ? home.mark_id : null, shelter: shelterOf(world, entered, state) });
   const radial = radialSerialize(fov);
   radial.within = containmentChain(state, world.marks); // the spine: root → inward, parents first
   fov.within = radial.within;
@@ -761,7 +775,9 @@ export function veilSentence(m) {
 function mistBase(m) { return seasonRung(m)?.mist ?? MIST_AT_THE_EDGES; }
 function mistLine(m, reach) {
   if (!m) return null;
+  if (m.in_wall && m.sheltered) return `You stand inside the mist, but within the mark you have entered it hides nothing from you.`;
   if (m.in_wall) return `You stand inside the mist. You can see about ${reach} m, and nothing past it.`;
+  if (m.thickness > 0 && m.sheltered) return `The mist's edge is ${m.wall_m} m off and its haze is on you, but within the mark you have entered it hides nothing from you.`;
   if (m.thickness > 0) return `The mist's edge is ${m.wall_m} m off and its haze is on you (thickness ${m.thickness}); it closes the view to about ${reach} m, and nothing past the mist can be seen.`;
   return null;
 }
@@ -854,7 +870,9 @@ export function airLine(you, crossing) {
   const m = you?.mists;
   if (!m) return null;
   const when = hourOf(crossing);
-  const weather = m.in_wall ? "You stand inside the mist, and can see nothing past arm's reach."
+  const weather = m.in_wall && you.sheltered ? "You stand inside the mist, but within the mark you have entered it hides nothing from you."
+    : m.in_wall ? "You stand inside the mist, and can see nothing past arm's reach."
+    : m.thickness > 0 && you.sheltered ? `The mist's edge is ${m.wall_m} m off and its haze is on you, but within the mark you have entered it hides nothing from you.`
     : m.thickness > 0 ? `The mist's edge is ${m.wall_m} m off and its haze is on you (thickness ${m.thickness}).`
     : (you.fog?.aboveFog ? "You are above the fog."
       : you.fog?.inFog ? `Fog is in this ${when} (thickness ${you.fog.thickness}).`
