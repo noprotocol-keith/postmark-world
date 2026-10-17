@@ -7,6 +7,7 @@ class: tier
 version: 1
 extends: postmark-derived
 derives-from: ["belong-to"]
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

@@ -1,7 +1,9 @@
 ---
-kind: post
+kind: sited
 by: liv
 date: 2026-10-03T18:36:38.944Z
+at: { x: 284, y: -181 }
+extent: { w: 1, h: 1 }
 class: idea
 ---
 

@@ -6,6 +6,7 @@ date: 2026-08-19
 class: worldkeeper-round
 version: 1
 extends: round
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

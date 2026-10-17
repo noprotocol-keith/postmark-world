@@ -6,6 +6,7 @@ date: 2026-08-14
 class: window
 version: 1
 extends: white-page
+dials: {}
 implements: []
 affordances: []
 source: LOGOS/classes.md

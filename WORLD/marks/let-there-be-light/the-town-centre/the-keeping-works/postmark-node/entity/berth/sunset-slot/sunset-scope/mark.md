@@ -1,10 +1,10 @@
 ---
-kind: property
+kind: predicated
 by: the-town
 tier: constitution
 date: 2026-08-19
-name: scope
-default: un-co-signed berths only
+slot: scope
+value: un-co-signed berths only
 version: 0
 ---
 

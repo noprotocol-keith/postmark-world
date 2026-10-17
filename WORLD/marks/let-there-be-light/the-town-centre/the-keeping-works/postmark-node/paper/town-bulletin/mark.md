@@ -7,6 +7,7 @@ class: town-bulletin
 version: 1
 extends: paper
 belong-to: town
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

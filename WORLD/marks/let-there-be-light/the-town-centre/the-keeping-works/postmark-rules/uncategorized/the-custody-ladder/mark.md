@@ -7,6 +7,7 @@ class: the-custody-ladder
 version: 0
 extends: uncategorized
 source: LOGOS/classes.md
+dials: {}
 implements: []
 ---
 

@@ -6,6 +6,7 @@ date: 2026-08-26
 class: what-you-carry-grants-to-you
 version: 1
 extends: postmark-rules
+dials: {"custody": "by: the-town"}
 implements: []
 source: LOGOS/classes.md
 ---

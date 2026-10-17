@@ -7,6 +7,7 @@ class: project
 version: 1
 extends: paper
 belong-to: resident
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

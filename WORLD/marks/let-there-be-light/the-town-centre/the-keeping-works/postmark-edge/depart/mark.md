@@ -8,6 +8,7 @@ version: 5
 extends: postmark-edge
 subject: resident
 object: position
+dials: {}
 implements: ["tools/walk.mjs"]
 source: LOGOS/classes.md
 ---

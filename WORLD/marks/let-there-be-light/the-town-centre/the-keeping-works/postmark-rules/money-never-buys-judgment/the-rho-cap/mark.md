@@ -6,6 +6,7 @@ date: 2026-08-20
 class: the-rho-cap
 version: 2
 extends: money-never-buys-judgment
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

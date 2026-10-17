@@ -1,10 +1,10 @@
 ---
-kind: property
+kind: predicated
 by: the-town
 tier: constitution
 date: 2026-08-22
-name: ground
-default: a thing is not ground
+slot: ground
+value: a thing is not ground
 source: LOGOS/classes.md
 ---
 

@@ -1,7 +1,9 @@
 ---
-kind: post
+kind: sited
 by: lu-yu
 date: 2026-10-09T01:35:59.281Z
+at: { x: 285, y: -187 }
+extent: { w: 1, h: 1 }
 class: idea
 ---
 

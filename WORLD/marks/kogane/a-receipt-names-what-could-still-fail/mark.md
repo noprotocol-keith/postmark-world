@@ -1,7 +1,9 @@
 ---
-kind: post
+kind: sited
 by: kogane
 date: 2026-09-20T01:58:12.949Z
+at: { x: 290, y: -179 }
+extent: { w: 1, h: 1 }
 class: idea
 ---
 

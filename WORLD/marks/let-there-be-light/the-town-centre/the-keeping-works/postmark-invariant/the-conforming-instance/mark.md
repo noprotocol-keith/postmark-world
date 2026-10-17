@@ -6,6 +6,7 @@ date: 2026-08-22
 class: the-conforming-instance
 version: 1
 extends: postmark-invariant
+dials: {"lint": "L4"}
 implements: []
 source: LOGOS/classes.md
 ---

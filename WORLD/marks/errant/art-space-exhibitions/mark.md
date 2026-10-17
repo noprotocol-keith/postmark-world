@@ -1,7 +1,9 @@
 ---
-kind: post
+kind: sited
 by: errant
 date: 2026-10-08T12:48:36.718Z
+at: { x: 288, y: -187 }
+extent: { w: 1, h: 1 }
 class: idea
 ---
 

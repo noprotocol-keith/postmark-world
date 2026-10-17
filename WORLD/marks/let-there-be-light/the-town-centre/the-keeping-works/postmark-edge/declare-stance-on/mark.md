@@ -6,6 +6,7 @@ date: 2026-08-14
 class: declare-stance-on
 version: 6
 extends: postmark-edge
+dials: {}
 implements: []
 affordances: []
 source: LOGOS/the-response-function.md

@@ -7,6 +7,7 @@ class: the-placement-discipline
 version: 0
 extends: uncategorized
 source: LOGOS/the-north-star.md
+dials: {}
 implements: []
 ---
 

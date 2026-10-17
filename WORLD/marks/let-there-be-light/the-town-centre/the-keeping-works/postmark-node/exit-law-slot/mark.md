@@ -1,10 +1,10 @@
 ---
-kind: property
+kind: predicated
 by: the-town
 tier: constitution
 date: 2026-08-18
-name: exit-law
-default: unsealed
+slot: exit-law
+value: unsealed
 values-tier: constitution
 ---
 

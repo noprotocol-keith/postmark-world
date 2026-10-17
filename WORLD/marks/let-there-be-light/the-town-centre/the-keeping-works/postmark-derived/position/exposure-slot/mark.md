@@ -1,10 +1,10 @@
 ---
-kind: property
+kind: predicated
 by: the-town
 tier: constitution
 date: 2026-08-18
-name: exposure
-default: unsealed
+slot: exposure
+value: unsealed
 values-tier: sovereign
 ---
 

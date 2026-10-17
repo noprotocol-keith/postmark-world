@@ -6,6 +6,7 @@ date: 2026-08-20
 class: staked
 version: 1
 extends: stamp
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

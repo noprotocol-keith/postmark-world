@@ -7,6 +7,7 @@ class: light
 version: 1
 extends: emission
 rides: thing
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

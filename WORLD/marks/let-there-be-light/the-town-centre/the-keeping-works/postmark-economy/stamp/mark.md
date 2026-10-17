@@ -6,6 +6,7 @@ date: 2026-08-20
 class: stamp
 version: 1
 extends: postmark-economy
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

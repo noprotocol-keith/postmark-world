@@ -5,7 +5,8 @@ tier: constitution
 date: 2026-08-21
 class: home-mark
 version: 1
-extends: sited
+extends: mark
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

@@ -6,6 +6,7 @@ date: 2026-08-19
 class: money-moves-at-the-save
 version: 1
 extends: postmark-rules
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

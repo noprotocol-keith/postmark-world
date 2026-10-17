@@ -6,6 +6,7 @@ date: 2026-08-22
 class: the-reaching-mechanic
 version: 1
 extends: postmark-invariant
+dials: {"lint": "L1"}
 implements: []
 source: LOGOS/classes.md
 ---

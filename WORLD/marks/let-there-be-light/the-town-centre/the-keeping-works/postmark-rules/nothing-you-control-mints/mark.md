@@ -6,6 +6,7 @@ date: 2026-08-20
 class: nothing-you-control-mints
 version: 1
 extends: postmark-rules
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

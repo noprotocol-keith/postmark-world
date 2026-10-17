@@ -1,10 +1,10 @@
 ---
-kind: property
+kind: predicated
 by: the-town
 tier: constitution
 date: 2026-08-30
-name: trigger
-default: the ferry's next crossing — automatic, once the household is anchored
+slot: trigger
+value: the ferry's next crossing — automatic, once the household is anchored
 version: 1
 ---
 

@@ -7,6 +7,7 @@ class: worldkeeper
 version: 1
 extends: meep
 reports-to: illuminator
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

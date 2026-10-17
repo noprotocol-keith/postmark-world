@@ -11,7 +11,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : join(dirname(fileURLToPath(import.meta.url)), "..");
 const DRY = process.argv.includes("--dry");
-const { loadMarks, containmentParents } = await import(pathToFileURL(join(ROOT, "tools/marks-fold.mjs")).href);
+const { loadMarks } = await import(pathToFileURL(join(ROOT, "tools/marks-fold.mjs")).href);
 const marks = loadMarks(join(ROOT, "WORLD/marks"));
 const byId = new Map(marks.map((m) => [m.id, m]));
 const TOWN = "the-town";
@@ -72,8 +72,14 @@ function writeNode(dir, fm, body) {
   return dir;
 }
 const slugOf = (s) => String(s).replace(/_/g, "-").toLowerCase();
-function property(parentDir, slug, { name, tier, dflt, body }) {
-  return writeNode(join(parentDir, slug), { kind: "property", by: TOWN, tier, date: DATE, name, default: dflt === undefined ? undefined : String(dflt) }, body);
+// THE LAYOUT (Windows MAX_PATH, 2026-10-17): every new property node files FLAT in
+// its class's directory, slug `<class>-<path>`, so its id is unique by
+// construction. A child property (capacity under holder, max under capacity)
+// names its parent property in its own `of:` field instead of nesting a folder
+// under it. Returns the node's id, which is what a child's `of:` names.
+function property(classDir, slug, { name, tier, dflt, body, of }) {
+  writeNode(join(classDir, slug), { kind: "property", by: TOWN, tier, date: DATE, name, of, default: dflt === undefined ? undefined : String(dflt) }, body);
+  return `${TOWN}/${slug}`;
 }
 function classNode(parentDir, name, { ext, body, extra = {} }) {
   return writeNode(join(parentDir, name), { kind: "class", by: TOWN, tier: "constitution", date: DATE, class: name, version: 1, extends: ext, implements: "[]", ...extra }, body);
@@ -91,14 +97,23 @@ const classSide = (m, hops = 0) => {
   return (up.kind === "predicated" || up.kind === "property") && classSide(up, hops + 1);
 };
 const classPreds = marks.filter((m) => m.kind === "predicated" && classSide(m));
+// Two of them take one more line (settled 2026-10-17, WLD-73 F3 and the freeze):
+//   - the-town/one-per-resident's slot was `holder`, the same name as the new
+//     holder true/false; no property name may clash (G9), so it is `owner`;
+//   - the-town/character-cap is `body`'s constitution child (12:52), and the
+//     freeze will not move its directory under body's, so it names its parent
+//     property in its own `of:` field, the way every new child does.
+const RENAMED = { "the-town/one-per-resident": "owner" };
+const OF = { "the-town/character-cap": "the-town/mark-body" };
 for (const p of classPreds) {
   edit(p, (lines) => {
     setLine(lines, "kind", "property");
     const si = lines.findIndex((l) => keyOf(l) === "slot");
-    lines[si] = lines[si].replace(/^slot:/, "name:");
+    lines[si] = RENAMED[p.id] ? `name: ${RENAMED[p.id]}` : lines[si].replace(/^slot:/, "name:");
     const vi = lines.findIndex((l) => keyOf(l) === "value");
     lines[vi] = lines[vi].replace(/^value:/, "default:");
-  }, "class predicate → property (slot → name, value → default)");
+    if (OF[p.id]) lines.splice(vi, 0, `of: ${OF[p.id]}`);
+  }, `class predicate → property (slot → name, value → default)${RENAMED[p.id] ? `, renamed ${RENAMED[p.id]}` : ""}${OF[p.id] ? `, of ${OF[p.id]}` : ""}`);
 }
 note(`class predicates converted: ${classPreds.length}`);
 
@@ -108,6 +123,14 @@ note(`class predicates converted: ${classPreds.length}`);
 // Ruled exceptions: thing's make_daily_cap is removed (15:50); thing's carry_cap is the
 // resident's holder capacity 24 (16:03–16:05), written in § 3 below.
 const DROPPED = { "the-town/thing": new Set(["make_daily_cap", "carry_cap"]) };
+// The instance dials are the maker's word, so tier sovereign (settled 2026-10-17,
+// WLD-73 F2; 18:44 item 7, "a property's tier says whose word decides its value on
+// each instance"): the arena's turn timeout ("each encounter may set its own") and
+// the adversary's five `unsealed` numbers.
+const SOVEREIGN_DIALS = {
+  "the-town/arena": new Set(["turn_timeout_s"]),
+  "the-town/adversary": new Set(["hp", "hits_for", "to_hit_die", "damage_die", "initiative_bonus"]),
+};
 const B = {
   "the-town/cast": { to_hit_die: "Cast rolls this die to hit.", damage_die: "Cast rolls this die for damage.", beats_ac: "Cast hits when its roll beats this armour.", ends_turn: "Whether casting ends your turn on the wheel." },
   "the-town/strike": { to_hit_die: "Strike rolls this die to hit.", damage_die: "Strike rolls this die for damage.", beats_ac: "Strike hits when its roll beats this armour.", ends_turn: "Whether striking ends your turn on the wheel." },
@@ -149,7 +172,7 @@ for (const c of dialed) {
     if (DROPPED[c.id]?.has(k)) { note(`DROP dial ${c.id}.${k} (ruled)`); continue; }
     const body = B[c.id]?.[k];
     if (!body) throw new Error(`no body for ${c.id}.${k}`);
-    property(c._dir, `${c.slug}-${slugOf(k)}`, { name: k, tier: "constitution", dflt: v === null ? "null" : v, body });
+    property(c._dir, `${c.slug}-${slugOf(k)}`, { name: k, tier: SOVEREIGN_DIALS[c.id]?.has(k) ? "sovereign" : "constitution", dflt: v === null ? "null" : v, body });
     dialProps++;
   }
 }
@@ -182,12 +205,12 @@ property(MARK._dir, "mark-body", { name: "body", tier: "sovereign", body: "What 
 
 // holder, capacity, open (16:03–16:05)
 const RH = property(RESIDENT._dir, "resident-holder", { name: "holder", tier: "constitution", dflt: true, body: "A resident is a holder: what they carry is held by them." });
-property(RH, "resident-capacity", { name: "capacity", tier: "constitution", dflt: 24, body: "The most a resident carries at once. A carried holder counts one, whatever it holds." });
+property(RESIDENT._dir, "resident-capacity", { of: RH, name: "capacity", tier: "constitution", dflt: 24, body: "The most a resident carries at once. A carried holder counts one, whatever it holds." });
 const TH = property(THING._dir, "thing-holder", { name: "holder", tier: "sovereign", dflt: false, body: "Whether a thing holds other things: the maker says so, and a thing holds nothing unless they do." });
-const TC = property(TH, "thing-capacity", { name: "capacity", tier: "sovereign", dflt: 30, body: "How many marks a holding thing can hold: the maker sets it, within its bounds." });
-property(TC, "thing-capacity-min", { name: "min", tier: "constitution", dflt: 1, body: "The least a holding thing's capacity may be." });
-property(TC, "thing-capacity-max", { name: "max", tier: "constitution", dflt: 120, body: "The most a holding thing's capacity may be. A town subclass may set its own bound." });
-property(TH, "thing-open", { name: "open", tier: "sovereign", dflt: true, body: "Whether other households may give into and take from a holding thing. When it is false, another household's give or take is refused at the door." });
+const TC = property(THING._dir, "thing-capacity", { of: TH, name: "capacity", tier: "sovereign", dflt: 30, body: "How many marks a holding thing can hold: the maker sets it, within its bounds." });
+property(THING._dir, "thing-capacity-min", { of: TC, name: "min", tier: "constitution", dflt: 1, body: "The least a holding thing's capacity may be." });
+property(THING._dir, "thing-capacity-max", { of: TC, name: "max", tier: "constitution", dflt: 120, body: "The most a holding thing's capacity may be. A town subclass may set its own bound." });
+property(THING._dir, "thing-open", { of: TH, name: "open", tier: "sovereign", dflt: true, body: "Whether other households may give into and take from a holding thing. When it is false, another household's give or take is refused at the door." });
 property(THING._dir, "thing-portable", { name: "portable", tier: "sovereign", dflt: true, body: "Whether a thing can be taken and carried. Only a portable thing shows take." });
 
 // makers (18:44, 19:39): a constitution true/false, inherited down extends
@@ -206,6 +229,11 @@ const MAKERS = [
   [cls("dungeon"), false, "Only the town makes a dungeon: passage machinery (the-town/nothing-you-control-mints)."],
   [cls("home-mark"), false, "Only the town makes a home mark: the home act makes it, never leave-mark (the-town/nothing-you-control-mints)."],
   [cls("stairs"), false, "Only the town makes stairs: passage machinery (the-town/nothing-you-control-mints)."],
+  // settled 2026-10-17 01:0x (WLD-73): money and stakes stay the town's, under
+  // 18:44 item 2 ("Identities, households, parcels, stakes, money, crossings …
+  // stay town-only"); a home stays false from the root (the home act makes it)
+  [cls("funding-quest"), false, "Only the town makes a funding quest: it is money (the-town/nothing-you-control-mints)."],
+  [cls("stakeable"), false, "Only the town makes a stakeable predicate: it publishes a staking menu (the-town/nothing-you-control-mints)."],
 ];
 const dirOfName = { post: POST, sited: SITED };
 for (const [c, v, body] of MAKERS) {
@@ -215,8 +243,9 @@ for (const [c, v, body] of MAKERS) {
   property(dir, `${slug}-makers`, { name: "makers", tier: "constitution", dflt: v, body });
 }
 
-// the tree's extends edges (13:56, 15:12, 15:43, 19:39; G1 for thing/parcel/portal-ground)
-const REPARENT = { thing: "sited", parcel: "sited", "portal-ground": "sited", adversary: "sited", dungeon: "sited", "home-mark": "sited", stairs: "sited", predicate: "mark", idea: "post", bounty: "post" };
+// the tree's extends edges (13:56, 15:12, 15:43, 19:39; G1 for thing/parcel/portal-ground
+// and note, settled 2026-10-17: note carries at and extent, the promotion test)
+const REPARENT = { note: "sited", thing: "sited", parcel: "sited", "portal-ground": "sited", adversary: "sited", dungeon: "sited", "home-mark": "sited", stairs: "sited", predicate: "mark", idea: "post", bounty: "post" };
 for (const [name, ext] of Object.entries(REPARENT)) {
   const c = cls(name);
   edit(c, (lines) => setLine(lines, "extends", ext, "version"), `extends: ${c.extends ?? "(none)"} → ${ext}`);
@@ -233,32 +262,14 @@ const BOWL = classNode(THING._dir, "halloween-candy-bowl", {
 property(BOWL, "halloween-candy-bowl-holder", { name: "holder", tier: "constitution", dflt: true, body: "A candy bowl always holds." });
 const BAG = classNode(THING._dir, "halloween-candy-bag", { ext: "thing", body: "A Halloween Candy Bag is a thing that holds, for carrying what you gather. Carried, it counts one toward your 24, with its contents inside." });
 const BH = property(BAG, "halloween-candy-bag-holder", { name: "holder", tier: "constitution", dflt: true, body: "A candy bag always holds." });
-const BC = property(BH, "halloween-candy-bag-capacity", { name: "capacity", tier: "sovereign", dflt: 200, body: "How much a candy bag holds: 200, above a thing's 120." });
-property(BC, "halloween-candy-bag-capacity-min", { name: "min", tier: "constitution", dflt: 1, body: "The least a candy bag's capacity may be." });
-property(BC, "halloween-candy-bag-capacity-max", { name: "max", tier: "constitution", dflt: 200, body: "The most a candy bag's capacity may be: the bag's own bound, above a thing's 120." });
+const BC = property(BAG, "halloween-candy-bag-capacity", { of: BH, name: "capacity", tier: "sovereign", dflt: 200, body: "How much a candy bag holds: 200, above a thing's 120." });
+property(BAG, "halloween-candy-bag-capacity-min", { of: BC, name: "min", tier: "constitution", dflt: 1, body: "The least a candy bag's capacity may be." });
+property(BAG, "halloween-candy-bag-capacity-max", { of: BC, name: "max", tier: "constitution", dflt: 200, body: "The most a candy bag's capacity may be: the bag's own bound, above a thing's 120." });
 
-// =====================================================================================
-// 4. THE 58 IDEAS AND 3 BOUNTIES BECOME POSTS (kind: post; class kept for W2; about:)
-// =====================================================================================
-// about: is what the post stood in (or predicated), except a reading room or the root:
-// the Think Tank and the bounty board are where posts were read, never what they're about.
-const READING_ROOMS = new Set(["the-town/the-think-tank", "the-town/the-bounty-board", "the-town/let-there-be-light"]);
-const { parent: containedBy } = containmentParents(marks);
-const posts = marks.filter((m) => (m.class === "idea" || m.class === "bounty") && m.kind !== "class" && m.kind !== "post");
-const aboutTally = {};
-for (const p of posts) {
-  const was = p.kind;
-  const subject = was === "predicated" ? p.parent : containedBy.get(p.id);
-  const about = subject && !READING_ROOMS.has(subject) ? subject : null;
-  aboutTally[about ?? `(none: ${subject})`] = (aboutTally[about ?? `(none: ${subject})`] ?? 0) + 1;
-  edit(p, (lines) => {
-    setLine(lines, "kind", "post");
-    for (const k of ["at", "extent", "slot", "value"]) dropLine(lines, k);
-    if (about) setLine(lines, "about", about, "class");
-  }, `${was} ${p.class} → post${about ? `, about: ${about}` : ""}`);
-}
-note(`posts: ${posts.length} (${posts.filter((p) => p.class === "idea").length} ideas, ${posts.filter((p) => p.class === "bounty").length} bounties)`);
-note(`about: ${JSON.stringify(aboutTally)}`);
+// THE 58 IDEAS AND 3 BOUNTIES ARE NOT REWRITTEN (settled 2026-10-17 00:1x, WLD-73 G7):
+// posts live in the office's post machine, one record, and a later lane imports
+// them there with about:. The class tree above still has post, with idea and
+// bounty beneath it; their instances stay the marks they are.
 
 console.log(log.join("\n"));
 console.log(`\ncreated ${created.length} nodes`);

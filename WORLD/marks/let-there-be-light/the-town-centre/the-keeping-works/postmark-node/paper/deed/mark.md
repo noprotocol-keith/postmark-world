@@ -6,6 +6,7 @@ date: 2026-08-20
 class: deed
 version: 1
 extends: paper
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

@@ -6,6 +6,7 @@ date: 2026-08-15
 class: mark
 version: 2
 extends: postmark-node
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

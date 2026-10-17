@@ -6,6 +6,7 @@ date: 2026-08-19
 class: posting
 version: 1
 extends: town-bulletin
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

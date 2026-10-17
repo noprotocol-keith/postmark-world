@@ -8,6 +8,7 @@ version: 4
 extends: postmark-edge
 subject: resident
 object: mark
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

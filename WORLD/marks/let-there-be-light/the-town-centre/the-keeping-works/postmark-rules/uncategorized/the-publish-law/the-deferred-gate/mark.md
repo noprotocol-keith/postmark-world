@@ -1,10 +1,10 @@
 ---
-kind: property
+kind: predicated
 by: the-town
 tier: constitution
 date: 2026-08-22
-name: gate
-default: the door writes; the crossing judges
+slot: gate
+value: the door writes; the crossing judges
 source: LOGOS/conflict-matrix.md
 ---
 

@@ -6,6 +6,7 @@ date: 2026-08-26
 class: downed-not-dead
 version: 1
 extends: postmark-rules
+dials: {"scope": "the portal only"}
 implements: []
 source: LOGOS/classes.md
 ---

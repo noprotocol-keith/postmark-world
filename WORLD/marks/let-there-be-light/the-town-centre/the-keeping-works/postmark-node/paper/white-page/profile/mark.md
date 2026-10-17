@@ -7,6 +7,7 @@ class: profile
 version: 2
 extends: white-page
 tells: resident
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

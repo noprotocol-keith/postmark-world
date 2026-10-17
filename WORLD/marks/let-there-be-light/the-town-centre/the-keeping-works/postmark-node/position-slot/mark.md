@@ -1,10 +1,10 @@
 ---
-kind: property
+kind: predicated
 by: the-town
 tier: constitution
 date: 2026-08-18
-name: position
-default: unsealed
+slot: position
+value: unsealed
 values-tier: sovereign
 ---
 

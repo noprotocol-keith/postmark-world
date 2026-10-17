@@ -7,6 +7,7 @@ class: address
 version: 2
 extends: white-page
 tells: parcel
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---

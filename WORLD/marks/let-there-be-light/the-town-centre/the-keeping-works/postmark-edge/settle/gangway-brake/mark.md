@@ -1,10 +1,10 @@
 ---
-kind: property
+kind: predicated
 by: the-town
 tier: constitution
 date: 2026-08-19
-name: brake
-default: state: open | frozen — the founder's pen only, default open
+slot: brake
+value: state: open | frozen — the founder's pen only, default open
 version: 0
 ---
 

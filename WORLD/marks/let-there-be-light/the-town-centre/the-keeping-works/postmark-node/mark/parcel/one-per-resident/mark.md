@@ -1,10 +1,10 @@
 ---
-kind: property
+kind: predicated
 by: the-town
 tier: constitution
 date: 2026-10-04
-name: holder
-default: exactly one resident; a resident holds at most one parcel
+slot: holder
+value: exactly one resident; a resident holds at most one parcel
 source: LOGOS/classes.md
 ---
 

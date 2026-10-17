@@ -6,6 +6,7 @@ date: 2026-08-19
 class: postmaster
 version: 1
 extends: meep
+dials: {}
 implements: []
 source: LOGOS/classes.md
 ---
