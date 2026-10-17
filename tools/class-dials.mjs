@@ -26,9 +26,10 @@ export function propertyFilesUnder(markFile) {
   return out;
 }
 
-/** `{ name: value }` for the properties directly under a class file: its dials. */
+/** `{ name: value }` for the properties directly under a class file: its dials
+ *  (a child property, which names its parent in `of:`, is its parent's, not the class's). */
 export function dialsOf(markFile) {
   const out = {};
-  for (const p of propertyFilesUnder(markFile)) out[p.name] = propertyValue(p.default);
+  for (const p of propertyFilesUnder(markFile)) if (p.of === undefined) out[p.name] = propertyValue(p.default);
   return out;
 }

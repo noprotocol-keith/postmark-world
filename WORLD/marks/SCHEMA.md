@@ -117,20 +117,22 @@ Every record is `---` frontmatter then a body. The **path owns nothing but
 containment**; everything else is a field.
 
 The field `kind` describes how a record stands — sited, predicated, parcel,
-naming, `class`, `property` or `post` (note ⁷) — and nothing else: standing, living and fleeting
+naming, `class` or `property` (note ⁷) — and nothing else: standing, living and fleeting
 are lifetimes, a different distinction, kept in
 [LOGOS/lifetimes.md](../../LOGOS/lifetimes.md) (WLD-39).
 *SUPERSEDED 2026-10-17 (LOGOS v2 part 2, the data change WLD-73 part 2 owed):
 "The field `kind` describes how a mark stands — sited, predicated, parcel,
 naming, or `class` (note ⁷)". A class's property is a node of its own,
-`kind: property`, standing under its class with `name`, `tier`, `default` and a
-body (LOGOS/classes.md § Property and predicate); an idea or a bounty is a
-`post`, standing nowhere, with an optional `about:` naming the mark it is about
-(§ Posts). The kind migration then folds `class:` into `kind:`, so `kind` names
+`kind: property`, filed in its class's directory with `name`, `tier`, `default` and a
+body (LOGOS/classes.md § Property and predicate); a child property (a cap or a
+bound) files beside it and names its parent property in `of:`. Ideas and bounties
+are posts in the law (§ Posts), but posts live in the office's post machine: the
+idea and bounty marks stay as they are until a later lane moves them. The kind migration then folds `class:` into `kind:`, so `kind` names
 the node's own class (§ The LOGOS ladder).*
 **The kind migration (W2, 2026-10-17):** an instance of a declared class writes
-that class as its kind — `kind: thing`, `kind: idea`, `kind: portal-ground` —
-and no `class:` line. The standing words above stay the kind of a plain mark of
+that class as its kind — `kind: thing`, `kind: portal-ground`, `kind: town` —
+and no `class:` line. A post class's instances (idea, bounty) keep the old form
+until the post lane moves them to the office's post machine. The standing words above stay the kind of a plain mark of
 each standing (an unclassed `sited` mark, a `parcel`, a `predicated` claim, a
 `naming`). Both forms are read (tools/mark-kind.mjs); the lint tells a record
 still written `kind: sited` + `class: thing` that `class:` folds into `kind:`.

@@ -1621,7 +1621,7 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
       // page can climb the class to the property it inherits
       // (tools/class-properties.mjs). A post's `about:` rides the same way.
       // Undefined on every other mark, so nothing else changes.
-      ...(mk.kind === "property" ? { name: mk.name, default: mk.default, property_tier: mk.tier } : {}),
+      ...(mk.kind === "property" ? { name: mk.name, of: mk.of, default: mk.default, property_tier: mk.tier } : {}),
       extends: mk.extends, about: mk.about,
       // image (2026-08-15): the media-shelf pointer — one allowlisted URL the
       // door validated and the lint re-checks; undefined on every imageless

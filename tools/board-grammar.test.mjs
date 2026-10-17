@@ -51,7 +51,8 @@ const terrain = { features: [], far_features: [] };
 const marks = () => [
   { id: BOARD, kind: "sited", by: "the-town", household: "the-town", tier: "constitution",
     at: { x: 250, y: -100 }, extent: { w: 30, h: 20 }, date: "2026-08-11", body: "The Bounty Board, in BETA." },
-  { id: "wright/bounty-a-map-of-the-quay", kind: "post", by: "wright", household: "wright", date: "2026-08-11",
+  { id: "wright/bounty-a-map-of-the-quay", kind: "sited", by: "wright", household: "wright",
+    at: { x: 250, y: -100 }, extent: { w: 1, h: 1 }, date: "2026-08-11",
     body: "Pinned to the board.", class: "bounty",
     ask: "Draw the quay as it stands, with every mail-house named.", reward: 12, status: "open" },
   { id: "rei/the-far-bench", kind: "sited", by: "rei", household: "rei",
@@ -140,8 +141,8 @@ test("a world with no notices serializes without a single new key", () => {
 // the hand-kept `RESIDENT_INSTANTIABLE` whitelist"): who may make an instance is
 // the class's `makers` property, a constitution true/false inherited down
 // `extends`, whose roots one principle sets (the-town/nothing-you-control-mints).
-// The list above is the record of how the roots stood until then; the set below
-// is read off the tree, never kept by hand.
+// The list above is the record of how the roots stood until then; the answer
+// below is read off the tree, never kept by hand.
 const residentMay = (live, klass) => propertyOf(live, klass, "makers")?.value === true;
 
 test("LIVE TREE: class law -- town marks define; residents instantiate only what makers allows", () => {
@@ -220,13 +221,14 @@ test("LIVE TREE: class law -- town marks define; residents instantiate only what
     assert.ok(residentMay(live, String(classOf(m))),
       `${m.id}: "${classOf(m)}" answers makers: false -- it is the town's alone (the-town/nothing-you-control-mints)`);
   }
-  // and the roots answer as ruled (18:44, 19:39): the false root, the true
-  // roots, and the sited classes that would put a resident in control of
-  // something that mints or confers standing
+  // and the roots answer as ruled (18:44, 19:39; settled 2026-10-17 for
+  // funding-quest, stakeable and home): the false root, the true roots, and the
+  // classes that would put a resident in control of something that mints or
+  // confers standing
   assert.equal(propertyOf(live, "postmark-node", "makers")?.value, false, "the root answers false");
   for (const k of ["thing", "note", "post", "predicate", "sited", "idea", "bounty", "candy", "halloween-candy-bowl", "halloween-candy-bag", "naming"])
     assert.ok(residentMay(live, k), `${k} answers makers: true`);
-  for (const k of ["parcel", "portal-ground", "vehicle", "adversary", "dungeon", "home-mark", "stairs", "resident", "household", "mark"])
+  for (const k of ["parcel", "portal-ground", "vehicle", "adversary", "dungeon", "home-mark", "stairs", "funding-quest", "stakeable", "home", "resident", "household", "mark"])
     assert.equal(residentMay(live, k), false, `${k} answers makers: false`);
   // Notice fields ride only bounty-classed marks (the board grammar); anywhere
   // else they are strays to investigate.
@@ -259,16 +261,16 @@ function fixtureTree() {
   mkdirSync(type, { recursive: true });
   writeFileSync(join(type, "mark.md"),
     "---\nkind: class\nby: the-town\ntier: constitution\ndate: 2026-08-11\nclass: bounty\nextends: post\n---\n\nA bounty is one ask, a reward in stamps, a status: open or done.\n");
-  // the post class it extends (15:12), so `kind: bounty` reads as a post (W2)
+  // the post class bounty and idea extend (15:12): their instances keep the old
+  // form until the post lane (W2; settled 2026-10-17, WLD-73 G7)
   mkdirSync(join(works, "post"), { recursive: true });
   writeFileSync(join(works, "post", "mark.md"),
     "---\nkind: class\nby: the-town\ntier: constitution\ndate: 2026-10-17\nclass: post\n---\n\nA post is an ask the town reads, not a claim on the world.\n");
   return { dir, root, board };
 }
 
-// a notice is a post (ruled 2026-10-16 15:12): no at, no extent, it stands nowhere
 const notice = (fields) => {
-  const fm = { kind: "post", by: "testerhh", date: "2026-08-11", class: "bounty", ask: "Draw the quay.", reward: 12, ...fields };
+  const fm = { kind: "sited", by: "testerhh", date: "2026-08-11", at: "{ x: 0, y: 0 }", extent: "{ w: 1, h: 1 }", class: "bounty", ask: "Draw the quay.", reward: 12, ...fields };
   const lines = Object.entries(fm).filter(([, v]) => v !== undefined).map(([k, v]) => `${k}: ${v}`).join("\n");
   return `---\n${lines}\n---\n\nPinned to the board.\n`;
 };
@@ -320,23 +322,15 @@ test("W-1b: a predicated class:bounty on the board is named a non-notice", () =>
   mkdirSync(slug, { recursive: true });
   writeFileSync(join(slug, "mark.md"),
     "---\nkind: predicated\nby: testerhh\ndate: 2026-08-11\nslot: sneak\nvalue: yes\nclass: bounty\n---\n\nA predicate wearing the class.\n");
-  assert.match(runLint(dir), /a bounty notice is a post/);
+  assert.match(runLint(dir), /a bounty notice is a sited mark/);
 });
 
-// ⚠ SUPERSEDED 2026-10-16: "a class:bounty token OFF the board draws the
-// off-board warning" retired with the warning itself. A bounty is a post and
-// stands nowhere, so there is no ground for it to be off. What replaces it: a
-// notice still written as a sited mark is refused, and a post that tries to
-// stand somewhere is refused too.
-test("a notice still written SITED is refused as no post; a post with a place is refused", () => {
+test("a class:bounty token OFF the board draws the off-board warning", () => {
   const { dir, root } = fixtureTree();
   const slug = join(root, "a-stray-notice");
   mkdirSync(slug, { recursive: true });
-  writeFileSync(join(slug, "mark.md"), notice({ kind: "sited", at: "{ x: 600, y: 600 }", extent: "{ w: 1, h: 1 }" }));
-  assert.match(runLint(dir), /a-stray-notice: a bounty notice is a post/);
   writeFileSync(join(slug, "mark.md"), notice({ at: "{ x: 600, y: 600 }" }));
-  assert.match(runLint(dir), /a-stray-notice: a post carries no at\/extent/);
-  assert.doesNotMatch(runLint(dir), /off the board/, "the retired warning is gone by its own words");
+  assert.match(runLint(dir), /class: bounty off the board/);
 });
 
 test("the definition in the Keeping Works stays exempt — no ask demanded of it", () => {
@@ -374,106 +368,121 @@ test("the '#' truncation: the lint catches the face it CAN see (review O-1)", ()
 // sited it is an idea OF the ground it stands in, predicated it is an idea OF
 // the mark it stands under. Both anchors, one class. Drop either half of the
 // gate and the cases below go red by name.
-// ⚠ SUPERSEDED 2026-10-16 15:12 (LOGOS/classes.md § Posts): "ideas are no
-// longer marks. They are posts, which are a different subclass of
-// postmark-node." The four words above are the record of how ideas stood until
-// then; an idea neither stands sited nor predicated now, and what it is an
-// idea OF is its sovereign `about:` (16:02 item 3). The cases below hold the
-// new grammar the way the old ones held the old: a lawful idea clears, a
-// thoughtless one errs, an idea filed anywhere draws no word about where, its
-// about: must name a mark, and every standing kind is refused quoting the ruling.
-test("IDEA: a POST — \"ideas are no longer marks. They are posts\" (2026-10-16); a thoughtless one errs on the one-claim law; about: names a mark; a sited, predicated or parcel idea is refused quoting the ruling; makers carries it", () => {
+test("IDEA: sited OR predicated — \"Ideas can be predicates.\" (2026-09-01); a thoughtless one errs on the one-claim law either way; any other kind is refused quoting the four words; an idea may stand ANYWHERE; the whitelist carries the ruling", () => {
   assert.ok(residentMay(loadMarks(MARKS_DIR), "idea"),
-    "the 2026-08-30 ruling, carried by makers: residents publish ideas with their own hand — idea answers true through post");
+    "the 2026-08-30 ruling: residents publish ideas with their own hand — stage 1 needs no git and no founder");
   const { dir, root } = fixtureTree();
   const works = join(root, "the-keeping-works");
-  // the post class with its about: property, and idea beneath it, as the works declare them
-  mkdirSync(join(works, "post", "post-about"), { recursive: true });
-  writeFileSync(join(works, "post", "mark.md"),
-    "---\nkind: class\nby: the-town\ntier: constitution\ndate: 2026-10-17\nclass: post\n---\n\nA post is an ask the town reads, not a claim on the world.\n");
-  writeFileSync(join(works, "post", "post-about", "mark.md"),
-    "---\nkind: property\nby: the-town\ntier: sovereign\ndate: 2026-10-17\nname: about\n---\n\nThe mark a post is about, when it is about one.\n");
   mkdirSync(join(works, "idea"), { recursive: true });
   writeFileSync(join(works, "idea", "mark.md"),
-    "---\nkind: class\nby: the-town\ntier: constitution\ndate: 2026-08-30\nclass: idea\nextends: post\n---\n\nOne thought by a resident, of the town: the body IS the claim. A post; the Think Tank reads them all. BETA.\n");
+    "---\nkind: class\nby: the-town\ntier: constitution\ndate: 2026-08-30\nclass: idea\nextends: post\n---\n\nOne thought by a resident, of the town: the body IS the claim. Sited anywhere or predicated under any mark; the Think Tank reads them all. BETA.\n");
   const tank = join(root, "the-think-tank");
   mkdirSync(tank, { recursive: true });
   writeFileSync(join(tank, "mark.md"),
     "---\nkind: sited\nby: the-town\ntier: constitution\ndate: 2026-08-30\nat: { x: 300, y: -100 }\nextent: { w: 30, h: 20 }\n---\n\nThe Think Tank, in BETA.\n");
-  const idea = (body, fields = "") =>
-    `---\nkind: idea\nby: testerhh\ndate: 2026-08-30\n${fields}---\n\n${body}`; // the kind names the class (W2)
+  const idea = (body) =>
+    `---\nkind: sited\nby: testerhh\ndate: 2026-08-30\nat: { x: 0, y: 0 }\nextent: { w: 1, h: 1 }\nclass: idea\n---\n\n${body}`;
 
   mkdirSync(join(tank, "a-town-calendar"), { recursive: true });
   writeFileSync(join(tank, "a-town-calendar", "mark.md"), idea("A calendar the town keeps together.\n"));
   let out = runLint(dir);
-  assert.doesNotMatch(out, /ERROR[^\n]*a-town-calendar/, "a lawful idea — a post, thought present — clears the gate");
+  assert.doesNotMatch(out, /ERROR[^\n]*a-town-calendar/, "a lawful idea — in the tank, thought present — clears the gate");
 
   mkdirSync(join(tank, "empty-thought"), { recursive: true });
   writeFileSync(join(tank, "empty-thought", "mark.md"), idea(""));
   out = runLint(dir);
   assert.match(out, /an idea needs its thought — the BODY is the claim/, "a thoughtless idea errs, citing the one-claim law");
 
-  // an idea filed anywhere is an idea: the Tank is where ideas are READ (09-01),
-  // and a post stands nowhere, so where its file sits says nothing
+  // THE LAW (founder-ruled 2026-09-01, Alta's idea in the Garrison): "class
+  // says what a mark is; the Think Tank is where ideas are READ, not a
+  // container that makes them ideas" — an idea standing off the Tank draws
+  // no finding at all. Before this ruling the line below asserted the
+  // opposite warning, and that warning held a resident's mark out of two
+  // settlements through the suite's CLEAN word.
   mkdirSync(join(root, "stray-thought"), { recursive: true });
   writeFileSync(join(root, "stray-thought", "mark.md"), idea("A thought parked nowhere.\n"));
   out = runLint(dir);
+  assert.doesNotMatch(out, /off the Think Tank/, "an idea standing anywhere is an idea — no warning, no error");
   assert.doesNotMatch(out, /(ERROR|WARN)[^\n]*stray-thought/, "the stray thought draws no finding at all");
 
-  // ── about: — what an idea is an idea OF (ruled 16:02 item 3) ────────────
-  mkdirSync(join(root, "a-bench-at-the-quay"), { recursive: true });
-  writeFileSync(join(root, "a-bench-at-the-quay", "mark.md"),
-    idea("A bench at the quay, facing the water, for the waiting.\n", "about: the-town/the-think-tank\n"));
-  out = runLint(dir);
-  assert.doesNotMatch(out, /(ERROR|WARN)[^\n]*a-bench-at-the-quay/, "an idea about a mark that stands draws no finding at all");
-  writeFileSync(join(root, "a-bench-at-the-quay", "mark.md"),
-    idea("A bench at the quay, facing the water, for the waiting.\n", "about: nobody/no-such-mark\n"));
-  assert.match(runLint(dir), /a-bench-at-the-quay: about: "nobody\/no-such-mark" names no mark in the record/,
-    "an about: that names nothing is refused by name");
+  // ── "Ideas can be predicates." (founder-ruled 2026-09-01) ────────────────
+  //
+  // An idea predicated under a mark is an idea OF that mark. It carries no
+  // geometry (§4 refuses at/extent on a predicate) and it carries slot/value
+  // like every predicate — those checks are §4's and are NOT duplicated in the
+  // idea grammar, so this case is also the falsifier that they still reach a
+  // classed record. It nests under the Tank here only because the Tank is a
+  // sited mark within arm's reach of the fixture; under the ruling any parent
+  // would do.
+  const predIdea = (fields, body) =>
+    `---\nkind: predicated\nby: testerhh\ndate: 2026-09-01\nclass: idea\n${fields}---\n\n${body}`;
+  const SLOTTED = "slot: idea\nvalue: a bench at the quay\n";
 
-  // THE CROSS-REPO CONTRACT for the new shape: the office's tank read and the
-  // site's ideas() join on `class`, and an idea reaches them now as a row of
-  // kind post with NO `at` and its `about:` — the shape a reader written for
-  // sited ideas alone will drop. Asserted world-side, so the day it stops
-  // folding this way the sibling repos are told by a red test.
-  writeFileSync(join(root, "a-bench-at-the-quay", "mark.md"),
-    idea("A bench at the quay, facing the water, for the waiting.\n", "about: the-town/the-think-tank\n"));
+  mkdirSync(join(tank, "a-bench-at-the-quay"), { recursive: true });
+  writeFileSync(join(tank, "a-bench-at-the-quay", "mark.md"),
+    predIdea(SLOTTED, "A bench at the quay, facing the water, for the waiting.\n"));
+  out = runLint(dir);
+  assert.doesNotMatch(out, /(ERROR|WARN)[^\n]*a-bench-at-the-quay/,
+    "a predicated idea — slot, value, a thought — draws no finding at all: \"Ideas can be predicates.\"");
+  assert.doesNotMatch(out, /an idea is a sited mark/,
+    "the pre-ruling refusal is gone by its own words, not merely unreached");
+
+  // THE CROSS-REPO CONTRACT for the new shape (this file's whole reason): the
+  // office's tank read and the site's ideas() join on `class`, and a predicated
+  // idea reaches them as a row with NO `at` and a `parent` — the one shape a
+  // reader written for sited ideas alone will drop. Asserted here, world-side,
+  // so the day it stops folding this way the two sibling repos are told by a
+  // red test rather than by an empty Tank.
   const folded = serialized(fold({ marks: loadMarks(dir), terrain, stakes: [] }));
   const row = folded.marks.find((m) => m.id === "testerhh/a-bench-at-the-quay");
-  assert.ok(row, "the idea folds into the store at all");
-  assert.equal(row.kind, "idea", "the kind is the class — the Tank's join key, in the form W2 writes (S1 reads either)");
-  assert.equal(row.class, undefined, "and no class: rides beside it");
-  assert.equal(row.at, undefined, "a post publishes NO at: — it stands nowhere");
-  assert.equal(row.about, "the-town/the-think-tank", "it publishes what it is an idea OF");
+  assert.ok(row, "the predicated idea folds into the store at all");
+  assert.equal(row.class, "idea", "the class survives the fold — the Tank's join key");
+  assert.equal(row.kind, "predicated");
+  assert.equal(row.at, undefined, "a predicated idea publishes NO at: — it has no geometry of its own");
+  assert.equal(row.parent, "the-town/the-think-tank", "it publishes the mark it is an idea OF");
+  assert.equal(row.slot, "idea");
+  assert.equal(row.value, "a bench at the quay");
 
-  // and every standing kind is refused, quoting the ruling: an idea is no mark
-  const asKind = {
-    "a-sited-thought": "---\nkind: sited\nby: testerhh\ndate: 2026-09-01\nat: { x: 0, y: 0 }\nextent: { w: 1, h: 1 }\nclass: idea\n---\n\nA thought that tried to stand.\n",
-    "a-predicated-thought": "---\nkind: predicated\nby: testerhh\ndate: 2026-09-01\nslot: idea\nvalue: a thought\nclass: idea\n---\n\nA thought that tried to predicate.\n",
-    "a-parcelled-thought": "---\nkind: parcel\nby: testerhh\ndate: 2026-09-01\nat: { x: 40, y: 40 }\nclass: idea\n---\n\nA thought that tried to be ground.\n",
-  };
-  for (const [slug, text] of Object.entries(asKind)) {
-    const parent = slug === "a-predicated-thought" ? tank : root;
-    mkdirSync(join(parent, slug), { recursive: true });
-    writeFileSync(join(parent, slug, "mark.md"), text);
-  }
+  // the thoughtless PREDICATED idea: the one-claim law binds both anchors, and
+  // it is the idea grammar that raises the empty body from §3's warning to an
+  // error — the body of an idea is not description, it is the thing.
+  mkdirSync(join(tank, "a-predicated-blank"), { recursive: true });
+  writeFileSync(join(tank, "a-predicated-blank", "mark.md"), predIdea(SLOTTED, ""));
   out = runLint(dir);
-  for (const [slug, kind] of [["a-sited-thought", "sited"], ["a-predicated-thought", "predicated"], ["a-parcelled-thought", "parcel"]]) {
-    assert.match(out, new RegExp(`${slug}: an idea is a post — "ideas are no longer marks\\. They are posts`), `kind: ${kind} is refused, quoting the ruling`);
-    assert.match(out, new RegExp(`${slug}: an idea is a post[^\\n]*got kind: "${kind}"`), "the refusal names the kind it got");
-  }
+  assert.match(out, /an idea needs its thought — the BODY is the claim/,
+    "a thoughtless predicated idea errs, citing the one-claim law exactly as a sited one does");
+
+  // and every OTHER kind is still refused — the ruling opened one door, not the
+  // house. A parcel is ground: an idea is not ground.
+  mkdirSync(join(root, "a-parcelled-thought"), { recursive: true });
+  writeFileSync(join(root, "a-parcelled-thought", "mark.md"),
+    "---\nkind: parcel\nby: testerhh\ndate: 2026-09-01\nat: { x: 40, y: 40 }\nclass: idea\n---\n\nA thought that tried to be ground.\n");
+  out = runLint(dir);
+  assert.match(out, /an idea is a sited or a predicated mark[^\n]*"Ideas can be predicates\."/,
+    "kind: parcel is still refused, and the refusal quotes the founder's four words");
+  assert.match(out, /got kind: "parcel"/, "the refusal names the kind it got");
 });
 
-// W2 (ruled 2026-10-16 16:02: "The `class:` field folds into `kind`"): a
-// notice written the old way — a standing word beside `class:` — is still read
-// as what it is, and is told the form it has now. Advisory, never a refusal:
-// a door may still write the old form until its own readers move (O1).
-test("THE OLD FORM still reads as what it is, and is told that class: folds into kind", () => {
+// W2 (ruled 2026-10-16 16:02: "The `class:` field folds into `kind`"). A notice
+// is a post class's instance, and keeps its old form until the post lane moves
+// it to the office's post machine (settled 2026-10-17, WLD-73 G7): it draws no
+// word, and the new form is refused for it by name. Any other class's instance
+// written the old way still reads, and is told that class: folds into kind.
+test("THE KIND NAMES THE CLASS: a notice keeps its old form; a thing's old form is told it folds", () => {
   const out = lintWithNotice({});
-  assert.doesNotMatch(out, /ERROR[^\n]*a-notice/, "kind: post + class: bounty is still a lawful notice");
-  assert.match(out, /\[WARN\][^\n]*a-notice: class: bounty folds into kind: write kind: bounty/);
-  const newForm = lintWithNotice({ kind: "bounty", class: undefined });
-  assert.doesNotMatch(newForm, /(ERROR|WARN)[^\n]*a-notice: (?!flat field)/, `kind: bounty is the notice in the form it has now: ${newForm}`);
-  assert.match(lintWithNotice({ kind: "quest", class: undefined }), /a-notice: kind must be one of [^\n]*or name a class the works declare \(got "quest"\)/,
-    "a kind that names no class is refused by name");
+  assert.doesNotMatch(out, /(ERROR|WARN)[^\n]*a-notice: (?!flat field)/, "kind: sited + class: bounty is a notice, and draws no word");
+  assert.match(lintWithNotice({ kind: "bounty", class: undefined }), /a-notice: kind: bounty names a post class, and a post-class record keeps its old form/);
+  assert.match(lintWithNotice({ kind: "quest", class: undefined }), /a-notice: kind must be one of [^\n]*or name a class the works declare \(got "quest"\)/);
+
+  const { dir, root, board } = fixtureTree();
+  const works = join(root, "the-keeping-works");
+  mkdirSync(join(works, "thing"), { recursive: true });
+  writeFileSync(join(works, "thing", "mark.md"),
+    "---\nkind: class\nby: the-town\ntier: constitution\ndate: 2026-08-14\nclass: thing\n---\n\nA thing is made, held or set down.\n");
+  const lantern = (kindLines) => `---\n${kindLines}by: testerhh\ndate: 2026-10-17\nat: { x: 0, y: 0 }\nextent: { w: 1, h: 1 }\n---\n\nA pocket lantern.\n`;
+  mkdirSync(join(board, "a-lantern"), { recursive: true });
+  writeFileSync(join(board, "a-lantern", "mark.md"), lantern("kind: sited\nclass: thing\n"));
+  assert.match(runLint(dir), /\[WARN\][^\n]*a-lantern: class: thing folds into kind: write kind: thing/);
+  writeFileSync(join(board, "a-lantern", "mark.md"), lantern("kind: thing\n"));
+  assert.doesNotMatch(runLint(dir), /(ERROR|WARN)[^\n]*a-lantern: (?!flat field)/, "kind: thing is the lantern in the form it has now");
 });

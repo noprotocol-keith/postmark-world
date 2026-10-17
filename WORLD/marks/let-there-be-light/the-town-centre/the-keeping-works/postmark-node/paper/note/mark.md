@@ -5,7 +5,7 @@ tier: constitution
 date: 2026-08-15
 class: note
 version: 1
-extends: paper
+extends: sited
 implements: []
 source: LOGOS/classes.md
 ---

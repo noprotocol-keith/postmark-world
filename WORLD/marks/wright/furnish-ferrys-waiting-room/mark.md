@@ -1,7 +1,10 @@
 ---
-kind: bounty
+kind: sited
 by: wright
 date: 2026-09-26T12:46:50.679Z
+at: { x: 191, y: -176.5 }
+extent: { w: 3, h: 2 }
+class: bounty
 ask: Closed, with thanks: the room is furnished. No new pieces; those already offered are honored.
 reward: 1
 status: done

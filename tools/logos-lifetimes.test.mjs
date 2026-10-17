@@ -97,11 +97,11 @@ test("the relative links into and out of the new document resolve", () => {
 // ("the field and its five values are what they were"). lifetimes.md already
 // marks that sentence SUPERSEDED (2026-10-16) and names the records, the lint and
 // SCHEMA.md as keeping the old filing "until the owed data change". This is it:
-// `property` and `post` join, so what is pinned now is that the record's own
+// `property` joins, so what is pinned now is that the record's own
 // explanation (SCHEMA.md) and the lint agree, kind for kind.
-test("the record's own explanation of `kind` names every value the lint accepts — class, property and post included", () => {
+test("the record's own explanation of `kind` names every value the lint accepts — class and property included", () => {
   const kinds = JSON.parse(read("tools/mark-lint.mjs").match(/^const KINDS = new Set\((\[[^\n]+\])\);$/m)[1]);
-  assert.deepEqual(kinds, ["sited", "predicated", "naming", "parcel", "class", "property", "post"]);
+  assert.deepEqual(kinds, ["sited", "predicated", "naming", "parcel", "class", "property"]);
   // only the enumeration sentence of SCHEMA.md, never its superseded quotation
   const explanation = read("WORLD/marks/SCHEMA.md").match(/The field `kind` describes how a record stands[\s\S]*?\(WLD-39\)/)?.[0];
   assert.ok(explanation, "SCHEMA.md explains the kind field");
@@ -110,7 +110,7 @@ test("the record's own explanation of `kind` names every value the lint accepts 
 
 test("`kind` is still how a record stands, and lifetimes are still another word: SCHEMA says so, and the table row is untouched", () => {
   const schema = read("WORLD/marks/SCHEMA.md");
-  assert.match(schema, /The field `kind` describes how a record stands — sited, predicated, parcel,\nnaming, `class`, `property` or `post` \(note ⁷\) — and nothing else: standing, living and fleeting\nare lifetimes/);
+  assert.match(schema, /The field `kind` describes how a record stands — sited, predicated, parcel,\nnaming, `class` or `property` \(note ⁷\) — and nothing else: standing, living and fleeting\nare lifetimes/);
   assert.match(schema, /^\| `kind` \| required \| required \| required \| required \|$/m, "the frontmatter table row is untouched");
   const lint = read("tools/mark-lint.mjs");
   assert.match(lint, /cite\("the-town\/the-kinds"\)/, "historical mark ids keep their names");

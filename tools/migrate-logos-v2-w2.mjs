@@ -9,8 +9,9 @@
 // name: it IS the class, it is not an instance of one. Nothing else in a record
 // changes, and no directory moves (the freeze).
 //
-// Run once on the W1 tree it produces this branch's WORLD/marks; re-run on its
-// own output it changes nothing.
+// Instances of post classes are left as they are (below). Run once on the W1
+// tree it produces this branch's WORLD/marks; re-run on its own output it
+// changes nothing.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -19,12 +20,20 @@ const ROOT = process.argv[2] && !process.argv[2].startsWith("--") ? process.argv
 const DRY = process.argv.includes("--dry");
 const { loadMarks } = await import(pathToFileURL(join(ROOT, "tools/marks-fold.mjs")).href);
 const marks = loadMarks(join(ROOT, "WORLD/marks"));
+const { classIndex, classChain } = await import(pathToFileURL(join(ROOT, "tools/class-properties.mjs")).href);
+const idx = classIndex(marks.filter((m) => !m._error));
+// Instances of a post class (idea, bounty, funding-quest) keep the form they
+// have: posts live in the office's post machine, and a later lane moves those
+// records there (settled 2026-10-17, WLD-73 G7). Migrating their kind here would
+// be writing a post's shape into a record that is leaving.
+const isPostClass = (name) => classChain(idx, name).some((c) => String(c.class) === "post");
 
 const keyOf = (line) => (line.match(/^([A-Za-z_][\w-]*):/) || [])[1];
 const tally = {};
 let edited = 0;
 for (const m of marks) {
   if (m._error || m.kind === "class" || m.kind === "property" || m.class === undefined) continue;
+  if (isPostClass(String(m.class))) { tally[`kept: ${m.kind} + class: ${m.class} (a post class)`] = (tally[`kept: ${m.kind} + class: ${m.class} (a post class)`] ?? 0) + 1; continue; }
   const f = join(m._dir, "mark.md");
   const text = readFileSync(f, "utf8");
   const fm = text.match(/^---\r?\n([\s\S]*?)\r?\n---(\r?\n[\s\S]*)$/);

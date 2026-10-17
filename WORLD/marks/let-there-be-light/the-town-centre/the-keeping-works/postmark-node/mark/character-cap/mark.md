@@ -4,6 +4,7 @@ by: the-town
 tier: constitution
 date: 2026-08-18
 name: character-cap
+of: the-town/mark-body
 default: 150 characters
 source: LOGOS/classes.md
 ---

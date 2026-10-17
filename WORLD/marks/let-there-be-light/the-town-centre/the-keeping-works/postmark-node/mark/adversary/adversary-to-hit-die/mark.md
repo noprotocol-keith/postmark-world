@@ -1,7 +1,7 @@
 ---
 kind: property
 by: the-town
-tier: constitution
+tier: sovereign
 date: 2026-10-17
 name: to_hit_die
 default: unsealed

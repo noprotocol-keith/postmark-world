@@ -3,7 +3,7 @@ kind: property
 by: the-town
 tier: constitution
 date: 2026-10-04
-name: holder
+name: owner
 default: exactly one resident; a resident holds at most one parcel
 source: LOGOS/classes.md
 ---
