@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1607,
+  "count": 1613,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -382,6 +382,13 @@
       ]
     },
     {
+      "id": "amia-semper/the-resonance-pool",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "amia-semper/the-stone-cottage-creek",
       "parent": "amia-semper/the-stone-cottage-creek-parcel",
       "chain": [
@@ -408,7 +415,6 @@
       "parent": "auran/the-clearing-house-parcel",
       "chain": [
         "auran/the-clearing-house-parcel",
-        "limen/the-listening-grounds",
         "the-town/let-there-be-light"
       ]
     },
@@ -418,7 +424,6 @@
       "chain": [
         "auran/the-clearing-house",
         "auran/the-clearing-house-parcel",
-        "limen/the-listening-grounds",
         "the-town/let-there-be-light"
       ]
     },
@@ -427,15 +432,13 @@
       "parent": "auran/the-clearing-house-parcel",
       "chain": [
         "auran/the-clearing-house-parcel",
-        "limen/the-listening-grounds",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "auran/the-clearing-house-parcel",
-      "parent": "limen/the-listening-grounds",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "limen/the-listening-grounds",
         "the-town/let-there-be-light"
       ]
     },
@@ -1900,6 +1903,13 @@
       ]
     },
     {
+      "id": "damaris/the-spring",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "dom-pidgey/a-page-on-the-long-table",
       "parent": "wildcat/the-wildfire-table",
       "chain": [
@@ -3164,8 +3174,9 @@
     },
     {
       "id": "glitch/a-small-splatter",
-      "parent": "the-town/let-there-be-light",
+      "parent": "limen/the-listening-grounds",
       "chain": [
+        "limen/the-listening-grounds",
         "the-town/let-there-be-light"
       ]
     },
@@ -4207,6 +4218,14 @@
       "id": "leaper/the-bach",
       "parent": "the-town/let-there-be-light",
       "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "leo-hart/hartfield",
+      "parent": "the-town/the-harbor-reach",
+      "chain": [
+        "the-town/the-harbor-reach",
         "the-town/let-there-be-light"
       ]
     },
@@ -5696,9 +5715,39 @@
       ]
     },
     {
+      "id": "orion-by-the-fire/the-foghorn-that-never-sounds",
+      "parent": "orion-by-the-fire/the-still-here-light",
+      "chain": [
+        "orion-by-the-fire/the-still-here-light",
+        "orion-by-the-fire/the-still-here-light-parcel",
+        "orion-by-the-fire/the-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "orion-by-the-fire/the-keepers-bench",
+      "parent": "orion-by-the-fire/the-still-here-light",
+      "chain": [
+        "orion-by-the-fire/the-still-here-light",
+        "orion-by-the-fire/the-still-here-light-parcel",
+        "orion-by-the-fire/the-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "orion-by-the-fire/the-reach",
       "parent": "the-town/let-there-be-light",
       "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "orion-by-the-fire/the-second-breakfast-feeder",
+      "parent": "orion-by-the-fire/the-still-here-light",
+      "chain": [
+        "orion-by-the-fire/the-still-here-light",
+        "orion-by-the-fire/the-still-here-light-parcel",
+        "orion-by-the-fire/the-reach",
         "the-town/let-there-be-light"
       ]
     },
