@@ -138,7 +138,7 @@ each standing (an unclassed `sited` mark, a `parcel`, a `predicate` claim, a
 `kind: predicate`, its class, and the old word is still read. Both forms are read (tools/mark-kind.mjs); the lint tells a record
 still written `kind: sited` + `class: thing` that `class:` folds into `kind:`.
 
-| field | sited | parcel | predicated | naming |
+| field | sited | parcel | predicate | naming |
 |---|---|---|---|---|
 | `kind` | required | required | required | required |
 | `by` (author handle) | required | required | required | required |

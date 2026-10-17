@@ -85,3 +85,27 @@ test("G12: where the chain and the place disagree, the fold follows the chain", 
   assert.equal(containmentParentOf(lawful.find((m) => m.id === "the-town/a-charter"), lawful), "the-town/a-harbor",
     "with town under sited, the chain and the place agree, and the harbor contains it");
 });
+
+test("G12, every geometric question: a mark inside an astray charter is not its child, and an astray charter is not sovereign", async () => {
+  const { containmentParentOf, fold } = await import("./marks-fold.mjs");
+  const cls = (name, ext) => ({ id: `the-town/${name}`, kind: "class", by: "the-town", household: "the-town", tier: "constitution", class: name, ...(ext ? { extends: ext } : {}) });
+  const tree = (townExtends) => [
+    cls("postmark-node"), cls("mark", "postmark-node"), cls("sited", "mark"), cls("entity", "postmark-node"), cls("town", townExtends),
+    { id: "alice/a-parcel", kind: "parcel", by: "alice", household: "alice", at: { x: 0, y: 0 }, extent: { w: 100, h: 100 }, date: "2026-07-01", body: "b" },
+    { id: "alice/a-charter", kind: "town", by: "alice", household: "alice", at: { x: 0, y: 0 }, extent: { w: 20, h: 20 }, date: "2026-10-01", body: "b" },
+    { id: "alice/a-bench", kind: "sited", by: "alice", household: "alice", at: { x: 0, y: 0 }, extent: { w: 1, h: 1 }, date: "2026-10-02", body: "b" },
+  ];
+  // placementParent's container filter: inside the astray charter, the bench's
+  // container is the parcel, because the chain gives the charter no ground
+  const astray = tree("entity"), lawful = tree("sited");
+  const bench = (marks) => marks.find((m) => m.id === "alice/a-bench");
+  assert.equal(containmentParentOf(bench(astray), astray), "alice/a-parcel", "an astray charter contains nothing");
+  assert.equal(containmentParentOf(bench(lawful), lawful), "alice/a-charter", "under sited, the charter is the bench's room");
+  // the fold's own pass (sovereignty, and the carve and consent that ask the same
+  // closure): an astray charter on its own household's parcel is no sovereign
+  // ground; under sited it is
+  const sovereign = (marks) => JSON.parse(JSON.stringify(fold({ marks, terrain: { features: [], far_features: [] }, stakes: [] })))
+    .marks.find((m) => m.id === "alice/a-charter")?.sovereign;
+  assert.equal(sovereign(astray), false, "the chain says no standing, so no sovereignty");
+  assert.equal(sovereign(lawful), true, "under sited, the charter on its own parcel is sovereign");
+});
