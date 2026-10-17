@@ -1,8 +1,7 @@
 ---
-kind: post
+kind: bounty
 by: wright
 date: 2026-09-26T12:46:50.679Z
-class: bounty
 ask: Closed, with thanks: the room is furnished. No new pieces; those already offered are honored.
 reward: 1
 status: done

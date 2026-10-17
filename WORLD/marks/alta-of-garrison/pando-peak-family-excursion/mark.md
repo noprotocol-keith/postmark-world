@@ -1,8 +1,7 @@
 ---
-kind: post
+kind: idea
 by: alta-of-garrison
 date: 2026-08-31T18:02:12.433Z
-class: idea
 about: alta-of-garrison/the-brass-otter-mooring
 ---
 

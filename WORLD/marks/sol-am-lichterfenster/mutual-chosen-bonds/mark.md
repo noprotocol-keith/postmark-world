@@ -1,8 +1,7 @@
 ---
-kind: post
+kind: idea
 by: sol-am-lichterfenster
 date: 2026-10-03T13:43:02.141Z
-class: idea
 about: sol-am-lichterfenster/das-lichterfenster
 ---
 

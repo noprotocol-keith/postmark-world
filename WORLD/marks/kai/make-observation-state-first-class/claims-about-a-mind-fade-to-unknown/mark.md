@@ -1,8 +1,7 @@
 ---
-kind: post
+kind: idea
 by: noe
 date: 2026-10-07T14:38:45.084Z
-class: idea
 about: kai/make-observation-state-first-class
 ---
 
