@@ -1685,9 +1685,12 @@ that already stood: a mark's `entry: {word, edge, consequence}` is its fixed ans
   in Let There Be Light are candidates." It is the default for every mark, for now ("let's just make the default
   … for now, I think all marks should follow this principle"). What you may be told is what the innermost mark you
   have entered, and stand in, holds: a mark wholly inside it, or one whose anchor stands in it (a door set in its
-  wall). That mark and everything above it are the frame, told as where you are (`within`), never a seat, and every
-  law that reaches you through them still reaches you. The budget, the ranking, the fog and the Mists are
-  unchanged. A property that lets you see out of a mark is deferred.
+  wall). That mark and everything above it are the frame, told as where you are (`within`), never a seat. The budget,
+  the ranking, the fog and the Mists are unchanged. A property that lets you see out of a mark is deferred.
+- **Law reach follows sight** (settled 2026-10-16 on WLD-5): inside a mark you have entered, what you can act on in
+  reach is what that mark holds, the same marks you are told; the marks outside it are out of reach until you step
+  out. Every law of the marks that contain you still binds you, the constitution included: it reaches you through
+  where you are (`within`), never through what you can see.
 - **The lint at the settlement holds every portal to this, with no exceptions in the rule:** every `into` and every
   `lands_at` names a mark, every landing stands within about 5 m of its `into`, no exit is opposed, and no two marks
   with the same parent inside a dungeon overlap (its rooms tile; floors do not stack). That every room has a path of
