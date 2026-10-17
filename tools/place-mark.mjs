@@ -50,7 +50,7 @@ const die = (defect, hint) => {
 };
 
 const kind = opt("--kind");
-if (!["sited", "parcel", "predicated", "naming"].includes(kind ?? ""))
+if (!["sited", "parcel", "predicate", "predicated", "naming"].includes(kind ?? ""))
   die("--kind must be sited, parcel, predicated, or naming", "what shape of claim is this? (WORLD/FURNISHING.md explains the four)");
 
 const slug = opt("--slug");

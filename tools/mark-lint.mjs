@@ -38,7 +38,7 @@ import { consentMap, CONSENT_WORDS, CONSENT_FIELD, townOwnedMark, cameAfter, inC
 import { crossHouseholdRiders, householdResolver } from "./household-frames.mjs";
 import { portalFindings, applyPortalExceptions, PORTAL_RULES } from "./portals.mjs";
 import { classIndex, classChain, ownProperties, propertiesOf, propertyNames, propertyValue } from "./class-properties.mjs";
-import { instanceClassOf, isSited } from "./mark-kind.mjs";
+import { instanceClassOf, isSited, isPredicate } from "./mark-kind.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -75,7 +75,9 @@ const JSON_OUT = args.includes("--json");
 // names how a mark stands until the kind migration (W2) folds `class:` into it.
 // (Posts are not world records: they live in the office's post machine, and
 // the 61 idea and bounty marks move there in a later lane; settled WLD-73 G7.)
-const KINDS = new Set(["sited", "predicated", "naming", "parcel", "class", "property"]);
+// `predicate` joins with W2's G10 (settled 2026-10-17): a claim's kind names its
+// class, `predicate`; `predicated` is the standing word it replaces, still read.
+const KINDS = new Set(["sited", "predicate", "predicated", "naming", "parcel", "class", "property"]);
 // A repo-relative mark path longer than this is refused: a Windows checkout
 // without core.longpaths cannot create it (MAX_PATH 260, less a clone's own
 // root). The fossil's longest on 2026-10-17 is 171.
@@ -159,7 +161,7 @@ const CLASS_IDX = classIndex(marks.filter((m) => !m._error));
 const chainOf = (name) => classChain(CLASS_IDX, String(name)).map((c) => String(c.class));
 const isPostClass = (name) => name !== undefined && chainOf(name).includes("post");
 const standingOfRecord = (rec) => {
-  if (KINDS.has(rec.kind)) return rec.kind;
+  if (KINDS.has(rec.kind)) return rec.kind === "predicate" ? "predicated" : rec.kind; // one standing, two spellings
   if (rec.kind == null || !CLASS_ROSTER.has(String(rec.kind)) || isPostClass(rec.kind)) return null;
   const chain = chainOf(rec.kind);
   if (chain.includes("naming")) return "naming";
@@ -458,9 +460,9 @@ for (const rec of marks) {
     if (rec._error || !rec._parentMarkId) continue;
     const pk = kindById.get(rec._parentMarkId);
     if (pk === "naming") err(rec, `a naming mark cannot contain child marks (move this out)${cite("the-town/the-continuation")}`);
-    else if (pk === "predicated" && rec.kind !== "predicated" && rec.kind !== "naming")
+    else if ((pk === "predicated" || pk === "predicate") && !isPredicate(rec) && rec.kind !== "naming")
       err(rec, `a ${rec.kind} mark cannot nest under a predicate — a predicate's children must be predicates (the continuation law); geometry needs a geometric parent${cite("the-town/the-continuation")}`);
-    else if (pk === "class" && rec.kind !== "class" && rec.kind !== "property" && rec.kind !== "predicated" && rec.kind !== "naming")
+    else if (pk === "class" && rec.kind !== "class" && rec.kind !== "property" && !isPredicate(rec) && rec.kind !== "naming")
       err(rec, `a ${rec.kind} mark cannot nest under a class-node — class-space holds classes and their properties; geometry needs a geometric parent`);
     else if (pk === "property" && rec.kind !== "property")
       err(rec, `a ${rec.kind} mark cannot nest under a property — a property's children are its child properties (its caps and bounds)`);
@@ -474,7 +476,7 @@ for (const rec of marks) {
     // asking to describe a thing while being immune to it, and there is no
     // re-pointing that makes that true.
     const parent = byId.get(rec._parentMarkId);
-    if ((rec.kind === "predicated" || rec.kind === "naming") && parent && rankOf(rec) > rankOf(parent))
+    if ((isPredicate(rec) || rec.kind === "naming") && parent && rankOf(rec) > rankOf(parent))
       err(rec, `${standingOf(rec)} standing over a parent standing as ${standingOf(parent)} (${parent.id}) — a predicate cannot outrank what it predicates: it is its parent continued${cite("the-town/the-continuation")}`);
   }
 }
@@ -585,7 +587,7 @@ const WORLD_CENTRE = ROOT_MARK?.at ? { x: ROOT_MARK.at.x, y: ROOT_MARK.at.y } : 
 // directly inside `start` — the nearest positioned ancestor from `start` up
 // (start itself included) whose tier ranks at or above rec's own.
 const frameOriginFrom = (rec, start) => {
-  const continued = rec.kind === "predicated" || rec.kind === "naming";
+  const continued = isPredicate(rec) || rec.kind === "naming";
   const rank = rankOf(rec);
   const seen = new Set([rec.id]);
   for (let p = start; p && !seen.has(p.id); p = p._parentMarkId ? byId.get(p._parentMarkId) : null) {

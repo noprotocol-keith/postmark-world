@@ -27,7 +27,7 @@
 // Browser-pure: the viewer and the store readers ask through it too.
 
 /** The standing words `kind:` wrote before it named the class, and the node kinds. */
-export const STANDING_WORDS = Object.freeze(new Set(["sited", "predicated", "naming", "parcel", "class", "property", "post"]));
+export const STANDING_WORDS = Object.freeze(new Set(["sited", "predicated", "predicate", "naming", "parcel", "class", "property", "post"]));
 
 const NEVER_GROUND = new Set(["predicated", "predicate", "naming", "class", "property", "parcel"]);
 
@@ -40,3 +40,9 @@ export function instanceClassOf(m) {
 export const isSited = (m) => !!m && !!m.at && !NEVER_GROUND.has(String(m.kind));
 
 export const isGround = (m) => !!m && !!m.at && (m.kind === "parcel" || isSited(m));
+
+/** A claim standing under a mark, in either spelling: `kind: predicate` names the
+ *  class (G10, settled 2026-10-17); `kind: predicated` is the standing word it
+ *  replaced, which every store folded before it, and every door that writes it
+ *  until its readers move, still carries. A naming is its own kind. */
+export const isPredicate = (m) => m?.kind === "predicated" || m?.kind === "predicate";

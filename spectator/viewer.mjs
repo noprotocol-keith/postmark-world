@@ -21,7 +21,7 @@
 // One engine, imported the clone's way (relative into the package): the browser
 // runs the exact library anyone can `node`. If this page and a clone disagree,
 // the office has explaining to do.
-import { isGround, instanceClassOf } from "../tools/mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
+import { isGround, instanceClassOf, isPredicate } from "../tools/mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 import { orient, openYourEyes, investigate, containmentChain, mistsSentence, veilSentence, standpointSight } from "../tools/world-verbs.mjs";
 import { assembleWorld } from "../tools/world-build.mjs";
 import { DIALS, bearingDeg, quantizeBearing, mistsAt, mistsRoad } from "../tools/world-engine.mjs";
@@ -90,7 +90,7 @@ export function isEmbodiedMark(mark) {
 export function isAmbientMark(mark, marks = []) {
   if (!mark) return false;
   if (mark.id === WORLD_ROOT_ID) return true;
-  if (mark.kind !== "predicated" && mark.kind !== "naming") return false;
+  if (!isPredicate(mark) && mark.kind !== "naming") return false;
   const byMarkId = markIndex(marks);
   const seen = new Set([mark.id]);
   let parentId = mark.parent;
@@ -4559,7 +4559,7 @@ export function createMarkInteractionStore() {
 }
 
 const isPredicateAttribute = (mark) =>
-  mark?.kind === "predicated" || mark?.kind === "naming";
+  isPredicate(mark) || mark?.kind === "naming";
 
 // Cells v1.5 folds only one safe level: a predicate/naming mark may become an
 // attribute of a rendered, non-predicate subject cell. Predicated-on-predicated
@@ -4609,7 +4609,7 @@ export function backingButton(markId, stamps = 0) {
  *  ask: enter refuses a mark with no extent — "a point has no inside" — so a
  *  naming, a predicate, or a bare coordinate affords nothing. */
 export function enterableMark(mark) {
-  if (!mark || mark.kind === "predicated" || mark.kind === "naming") return false;
+  if (!mark || isPredicate(mark) || mark.kind === "naming") return false;
   const at = mark.at, extent = mark.extent;
   if (!at || !Number.isFinite(Number(at.x)) || !Number.isFinite(Number(at.y))) return false;
   return Number(extent?.w) > 0 && Number(extent?.h) > 0;
@@ -4981,7 +4981,7 @@ export function worldFrameReading(mark, marks = []) {
     body: mark.body,
     // its own attributes are its own — the light axis, the clock, the origin are
     // properties of the frame, not marks living inside it
-    predicates: marks.filter((m) => (m.kind === "predicated" || m.kind === "naming" || m.kind === "property") && m.parent === mark.id)
+    predicates: marks.filter((m) => (isPredicate(m) || m.kind === "naming" || m.kind === "property") && m.parent === mark.id)
       .map((m) => ({ id: m.id, slot: m.slot ?? m.name ?? (m.kind === "naming" ? "name" : null), value: m.value ?? m.default, weight: m.weight ?? 0, stamps: m.stamps ?? 0, body: m.body })),
     parents: [], children: [], alongside: [],
     more: { predicates: 0, children: 0 },

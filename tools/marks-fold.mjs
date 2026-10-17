@@ -28,7 +28,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSy
 import { dirname, join, basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { markStanding } from "./mark-standing.mjs";   // the ONE standing rule (see § what the rank is READ FROM)
-import { isSited, isGround, instanceClassOf } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
+import { isSited, isGround, instanceClassOf, isPredicate } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -355,7 +355,7 @@ export function frameMarks(out) {
   // error here. What the walk can never do is hand a record a centre from a
   // mark that does not bind it.
   const frameOriginOf = (rec) => {
-    const continued = rec.kind === "predicated" || rec.kind === "naming";
+    const continued = isPredicate(rec) || rec.kind === "naming";
     const rank = standingRank(rec, byId);
     const walked = new Set([rec]);
     let p = rec._parentMarkId ? byId.get(rec._parentMarkId) : null;
@@ -495,7 +495,7 @@ function walkMarks(nodeDir, parentMarkId, out) {
     // way — their registry standing IS the enclosing dir, never geometry. So do
     // property nodes (LOGOS v2 part 2): a property stands under the class (or
     // the property) it belongs to, and that nesting is what it is a property OF.
-    if (rec.kind === "predicated" || rec.kind === "naming" || rec.kind === "class" || rec.kind === "property") {
+    if (isPredicate(rec) || rec.kind === "naming" || rec.kind === "class" || rec.kind === "property") {
       if (parentMarkId) rec.parent = parentMarkId;
     } else {
       delete rec.parent; // sited/parcel never carry an authored parent; containment is geometry
@@ -813,7 +813,7 @@ export const ONE_PARCEL_PER_HANDLE_EXCEPTIONS = ONE_PER_RESIDENT_PRIOR_ESTATE;
 export const DECLARED_HOME_LAW = "the-town/declared-home";
 export const HOME_OUTSIDE_HOUSEHOLD_REFUSAL =
   `a home is declared only on a parcel of your own household (${DECLARED_HOME_LAW})`;
-const isHomeWord = (mk) => mk?.kind === "predicated" && mk.slot === "home";
+const isHomeWord = (mk) => isPredicate(mk) && mk.slot === "home";
 // The parcel dial (MARKS.md § Parcels; locked at the door 2026-07-31, Keemin:
 // "the resident should not even have to declare an extent"). Seeded prior
 // estate at other sizes stands; the door writes only this.
@@ -1203,7 +1203,7 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
     }
   }
   for (const mk of byId.values()) {
-    if ((mk.kind === "predicated" || mk.kind === "naming" || mk.kind === "class" || mk.kind === "property") && mk.parent) {
+    if ((isPredicate(mk) || mk.kind === "naming" || mk.kind === "class" || mk.kind === "property") && mk.parent) {
       if (!byId.has(mk.parent) && !terrainIds.has(mk.parent)) { errors.push({ mark: mk.id, error: `parent '${mk.parent}' not found` }); continue; }
       parentOf.set(mk.id, mk.parent);
     }
@@ -1343,11 +1343,11 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
       if (parentOf.has(id)) {
         const eff = effectiveParent(id);
         if (eff.to !== undefined) {
-          es.push({ to: eff.to, channel: (mk.kind === "predicated" || mk.kind === "naming") ? "describes" : "contains", conducts: true });
+          es.push({ to: eff.to, channel: (isPredicate(mk) || mk.kind === "naming") ? "describes" : "contains", conducts: true });
           if (eff.skipped.length) skips.push({ from: id, skipped: eff.skipped, to: eff.to });
         } else {
           // no consenting ancestor anywhere in the chain — flow stops, receipted
-          es.push({ to: parentOf.get(id), channel: (mk.kind === "predicated" || mk.kind === "naming") ? "describes" : "contains", conducts: false });
+          es.push({ to: parentOf.get(id), channel: (isPredicate(mk) || mk.kind === "naming") ? "describes" : "contains", conducts: false });
         }
       }
       if (instanceClassOf(mk) !== undefined) {
@@ -1480,7 +1480,7 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
   const slots = new Map(); // key -> { values: Map(value -> stamps), marks: [] }
   for (const mk of byId.values()) {
     if (gone.has(mk.id)) continue;
-    if (mk.kind === "predicated" || mk.kind === "naming") {
+    if (isPredicate(mk) || mk.kind === "naming") {
       if (terrainIds.has(mk.parent) && mk.slot !== "name" && mk.kind === "naming") { /* naming terrain allowed */ }
       const key = isHomeWord(mk) ? `${mk.parent}::home::${mk.by}` : `${mk.parent}::${mk.kind === "naming" ? "name" : mk.slot}`;
       if (!slots.has(key)) slots.set(key, { values: new Map(), marks: [] });

@@ -10,7 +10,7 @@
 //   { marks, terrain, heightfield, light, fogCeilingM, charter }
 // A `state` is the walker: { x, y, name, household? }.
 
-import { isSited, isGround } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
+import { isSited, isGround, isPredicate } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 import {
   fieldOfView, radialSerialize, statusAt, lightLevelAt, fogModel,
   mistsAt, mistsHere, mistsBlock,
@@ -159,7 +159,7 @@ export function investigate(markId, world, { depth = 1, budget = DIALS.context_b
   // a class's properties list beside a mark's predicates, as they did while the
   // class side was filed as predicates (LOGOS v2 part 2): the name is the slot,
   // the default the value
-  const predicates = world.marks.filter((m) => (m.kind === "predicated" || m.kind === "naming" || m.kind === "property") && m.parent === markId)
+  const predicates = world.marks.filter((m) => (isPredicate(m) || m.kind === "naming" || m.kind === "property") && m.parent === markId)
     .slice(0, budget).map((m) => ({ id: m.id, slot: m.slot ?? m.name ?? (m.kind === "naming" ? "name" : null), value: m.value ?? m.default, weight: m.weight ?? 0, stamps: m.stamps ?? 0, body: m.body }));
   // NEAREST FIRST, so the budget cuts the far ones rather than whichever the fold
   // happened to list last. Under fold order a child 212 m from the threshold
@@ -205,7 +205,7 @@ export function investigate(markId, world, { depth = 1, budget = DIALS.context_b
   // the world does not hold as a mark (a terrain feature, a mark gone) is not
   // invented.
   const geometric = ancestorsByGeometry(target, world);
-  const declares = target.kind === "predicated" || target.kind === "naming" || target.kind === "property";
+  const declares = isPredicate(target) || target.kind === "naming" || target.kind === "property";
   const declared = geometric.length === 0 && declares && target.parent ? byId.get(target.parent) ?? null : null;
   const ancestry = declared ? [declared] : geometric;
   const parents = ancestry.slice(0, 1)
@@ -932,7 +932,7 @@ export function shortName(mark) {
       || String(mark?.id ?? "").split("/").pop().replace(/-/g, " ")
       || String(mark?.id ?? "");
 }
-function countPredicates(id, world) { return world.marks.filter((m) => (m.kind === "predicated" || m.kind === "naming" || m.kind === "property") && m.parent === id).length; }
+function countPredicates(id, world) { return world.marks.filter((m) => (isPredicate(m) || m.kind === "naming" || m.kind === "property") && m.parent === id).length; }
 function attachedTo(id, world, budget) { return world.marks.filter((m) => m.parent === id).slice(0, budget).map((m) => ({ id: m.id, slot: m.slot, value: m.value })); }
 function householdNear(target, world, radius = DIALS.cluster_beyond_m) {
   if (!target.at || !target.household) return [];
