@@ -1653,12 +1653,13 @@ that already stood: a mark's `entry: {word, edge, consequence}` is its fixed ans
   a step in from the door (the paired door, the door picked from a list, or the portal itself when it stands at the
   room), 1.5 m past the door's own edge, so never on the door's square that touches or straddles the wall, and a
   `lands_at` that points outside the room comes here too; and with no door at all, the room's anchor. Every
-  landing stands at least a metre off every wall, inside the room. *Superseded:* "it is clamped into `into`'s shape and set about a metre inside. With neither,
-  you stand at `into`'s anchor" (10-13).
+  landing stands at least a metre off every wall, inside the room. *Superseded:* "it is clamped into `into`'s
+  shape and set about a metre inside. With neither, you stand at `into`'s anchor" (10-13).
 - **A passage lands you; it never walks you** (row 68 B). Where it sets you down is its own line on the record, a
-  landing (`the-town/land`, its body approved by Darko 2026-10-16 19:39), distinct from a departure: so are the whole-dungeon exit's set-down, the Post Office's
-  deposit at a stop, and a ground that places its entrants. Every reader of where you stand reads a landing as it
-  reads an arrived departure. Stopping a walk to go in stays a walk.
+  landing (`the-town/land`, its body approved by Darko 2026-10-16 19:39), distinct from a departure: so are the
+  whole-dungeon exit's set-down, the Post Office's deposit at a stop, and a ground that places its entrants.
+  Every reader of where you stand reads a landing as it reads an arrived departure. Stopping a walk to go in
+  stays a walk.
 - **One step at a time.** A room's answer lists the portals in it, and you pick the next. There is no
   route-finding. *Superseded 2026-10-16 19:15 (row 68 A1):* "leaving a room means walking to the portal that leads
   out and entering it ('not unreasonable for a DM to make you move your token to the door of a room full of

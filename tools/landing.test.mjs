@@ -14,7 +14,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { entryLawOf } from "./enter-exit.mjs";
-import { landingOf, stepInFrom, insetInto, boundaryNearest, pointInMark, portalFindings, LANDING_STEP_M, LANDING_INSET_M } from "./portals.mjs";
+import { landingOf, stepInFrom, insetInto, boundaryNearest, pointInMark, strictlyInside, portalFindings, LANDING_STEP_M, LANDING_INSET_M } from "./portals.mjs";
 import { enter } from "./world-verbs.mjs";
 
 // two rooms sharing a wall at y = 0: the hall north of it, the chamber south
@@ -136,4 +136,34 @@ test("the landing-inside lint fires for a ring room that holds no interior point
   assert.match(found[0].msg, /on or outside the ring of t\/flat/);
   assert.deepEqual(portalFindings([HALL, CHAMBER, door("t/x", { x: 5, y: -2 }, { word: "neutral", into: "t/chamber" })]).filter((f) => f.rule === "landing-inside"), [],
     "a rectangle always holds a landing");
+});
+
+// ── review-231's re-review: the corner (pointInMark counts the wall as inside) ──
+
+test("a landing off a corner never stands on the wall: a 10×10 ring room whose own lands_at is outside it falls through to its centroid", () => {
+  const ring = { id: "t/ring-room", kind: "sited", by: "t", at: { x: 5, y: 5 }, extent: { w: 10, h: 10 },
+    points: [[0, 0], [10, 0], [10, 10], [0, 10]], entry: { lands_at: { x: -3, y: -3 } } };
+  const p = door("t/to-ring", { x: 5, y: -2 }, { word: "neutral", into: "t/ring-room" });
+  const l = landingOf(entryLawOf(p), ring, byIdOf([ring, p]), { room: ring, portal: p });
+  assert.deepEqual({ x: l.x, y: l.y, by: l.by }, { x: 5, y: 5, by: "room" }, "not (0, 1), which is on the wall");
+  assert.ok(strictlyInside(l, ring));
+});
+
+test("an L-shaped ring room with an anchor far outside lands strictly inside, never on its inner corner", () => {
+  const L = { id: "t/ell2", kind: "sited", by: "t", at: { x: 5, y: 5 }, extent: { w: 10, h: 10 },
+    points: [[0, 0], [10, 0], [10, 3.5], [2.5, 3.5], [2.5, 10], [0, 10]] };
+  for (const pt of [{ x: -50, y: -50 }, { x: 2.5, y: 3.5 }, { x: 50, y: 50 }]) {
+    const at = insetInto(pt, L);
+    assert.ok(strictlyInside(at, L), `(${pt.x}, ${pt.y}) → (${at.x}, ${at.y}) is off the wall`);
+  }
+  assert.equal(strictlyInside({ x: 2.5, y: 3.5 }, L), false, "the inner corner itself is on the wall");
+  assert.equal(pointInMark({ x: 0, y: 1 }, L), true, "and pointInMark counts a point on a wall as inside, which is why strictness is asked");
+  assert.equal(strictlyInside({ x: 0, y: 1 }, L), false);
+});
+
+test("the landing-inside lint reads a landing on the wall as outside it (a ring with no inside fires it)", () => {
+  const sliver = { id: "t/sliver", kind: "sited", by: "t", at: { x: 5, y: 0 }, extent: { w: 10, h: 1 }, points: [[0, 0], [10, 0], [10, 0], [0, 0]] };
+  const p = door("t/to-sliver", { x: 5, y: -2 }, { word: "neutral", into: "t/sliver" });
+  const found = portalFindings([sliver, p]).filter((f) => f.rule === "landing-inside");
+  assert.equal(found.length, 1, "a landing that can only stand on the ring's line is refused by name");
 });
