@@ -20,7 +20,7 @@
 // so what a portal does and what the lint holds it to are one definition. Pure:
 // no fs, no engine import, browser-safe like geometry.mjs.
 
-import { marksContain, overlapArea, pointInPolygon, pointInRect, polygonOf, rect } from "./geometry.mjs";
+import { marksContain, overlapArea, pointInPolygon, pointInRect, polygonBBox, polygonOf, rect } from "./geometry.mjs";
 import { entryLawOf, isStairs } from "./enter-exit.mjs";
 
 export const DUNGEON_CLASS = "dungeon";
@@ -46,8 +46,22 @@ const area = (m) => (m?.extent?.w ?? 0) * (m?.extent?.h ?? 0);
  *  world's own containment (marksContain), a point mark by its anchor. */
 export function markInside(outer, m) {
   if (!outer?.at || !outer.extent || !m?.at || m === outer || m.id === outer.id) return false;
+  // THE BOX FIRST (review-233, the office holds constant load): a mark whose box
+  // does not meet the outer's box has no point inside it, so it is refused before
+  // marksContain rasterizes it. Exact, not a heuristic: entering the 15 × 13 km
+  // Pando Plains asked the raster of every mark in town.
+  if (!boxesMeet(boxOf(outer), boxOf(m))) return false;
   return m.extent ? marksContain(outer, m) : pointInMark(m.at, outer);
 }
+
+/** A mark's own box: its ring's, when it carries one, else its at/extent rect. */
+const boxOf = (m) => {
+  const ring = polygonOf(m);
+  if (ring) { const b = polygonBBox(ring); return { x0: b.minx, x1: b.maxx, y0: b.miny, y1: b.maxy }; }
+  const r = rect(m);
+  return { x0: r.x - r.w / 2, x1: r.x + r.w / 2, y0: r.y - r.h / 2, y1: r.y + r.h / 2 };
+};
+const boxesMeet = (a, b) => a.x0 <= b.x1 && b.x0 <= a.x1 && a.y0 <= b.y1 && b.y0 <= a.y1;
 
 /** The room a mark stands in: the smallest sited mark with an extent, larger
  *  than it, whose shape holds its anchor. Measured at the anchor on purpose — a
@@ -73,10 +87,22 @@ export function containerOf(m, marks) {
  *  dungeon hides) and world-verbs § sightFrameOf (what sight may tell). */
 export function roomHolds(room, mk, marks) {
   if (!room?.at || !room.extent || !mk || mk.id === room.id) return false;
-  if (markInside(room, mk)) return true;
-  if (!mk.at || !pointInMark(mk.at, room) || (mk.extent && marksContain(mk, room))) return false;
-  return containerOf(mk, marks)?.id === room.id;
+  // ASKED ONCE PER FOLD: the answer is a fact about these mark objects, and the
+  // office reads the same fold many times between settlements, so a giant ring's
+  // raster is paid on the first entered read and never again (review-233)
+  const key = Array.isArray(marks) ? marks : HOLDS_NO_LIST;
+  let byRoom = HOLDS.get(key); if (!byRoom) HOLDS.set(key, (byRoom = new WeakMap()));
+  let byMark = byRoom.get(room); if (!byMark) byRoom.set(room, (byMark = new WeakMap()));
+  const hit = byMark.get(mk);
+  if (hit !== undefined) return hit;
+  const answer = markInside(room, mk)
+    || (!!mk.at && boxesMeet(boxOf(room), boxOf(mk)) && pointInMark(mk.at, room) && !(mk.extent && marksContain(mk, room))
+      && containerOf(mk, marks)?.id === room.id);
+  byMark.set(mk, answer);
+  return answer;
 }
+const HOLDS = new WeakMap();
+const HOLDS_NO_LIST = [];
 
 // ── the dungeon index ────────────────────────────────────────────────────────
 //
