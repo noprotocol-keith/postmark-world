@@ -17,7 +17,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fold } from "./marks-fold.mjs";
 import { buildHeightfield, fieldOfView } from "./world-engine.mjs";
-import { openYourEyes, sightFrameOf } from "./world-verbs.mjs";
+import { openYourEyes, sightFrameOf, enter, standpointSight } from "./world-verbs.mjs";
 
 const flatHF = buildHeightfield({ controlPoints: [{ x: 0, y: 0, h: 5 }, { x: 10000, y: 0, h: 5 }, { x: 0, y: 10000, h: 5 }, { x: -10000, y: 0, h: 5 }] });
 const light = { dawn_pole_m: { x: 5000, y: -5000 }, dark_pole_m: { x: -5000, y: 5000 } };
@@ -37,10 +37,11 @@ const IN_HALL = [
   M("s/the-red-stair", -5, -50, 6, 10, { class: "stairs" }),
   // a door SET IN the hall's west wall (x = -50), straddling it, its anchor just inside:
   // the Chapel front-door shape, the room's to see though not wholly inside it (review-233)
-  M("s/hall-west-door", -49.5, -30, 2, 2, { entry: { word: "neutral", into: "s/blue-room" } }),
+  M("s/hall-west-door", -49.5, -38, 2, 2, { entry: { word: "neutral", into: "s/blue-room" } }),
 ];
 const ROSE = M("s/rose-hall", -5, -5, 40, 30);
-const BLUE = M("s/blue-room", -70, -45, 20, 20);
+// the Blue Room shares the hall's west wall (x = -50), so the west door straddles into it
+const BLUE = M("s/blue-room", -60, -45, 20, 20);
 // outdoor courts in the Grounds, big and near: they outrank a 2×2 door 40 m off
 const COURTS = Array.from({ length: 10 }, (_, i) => M(`c${i}/court`, -140 + i * 30, 150, 28, 28, { weight: 50 }));
 // an ordinary house on open ground, with a chair in it, and a neighbour's stall outside
@@ -129,4 +130,28 @@ test("the frame is the innermost entered mark the body stands in; a stack it has
   const frame = sightFrameOf(w, ["s/grounds", "s/spire", "s/red-stair-hall"], inSpireNotHall);
   assert.equal(frame(HALL) && frame(ROSE), true, "the Spire's rooms are candidates");
   assert.equal(frame(COURTS[0]), false);
+});
+
+test("through the reads' own path (standpointSight → scopeWorld → hiddenFrom): the wall door is the hall's to see and to enter, and hidden from the Blue Room", () => {
+  const w = W();
+  const inHall = new Map([["visitor", ["s/grounds", "s/spire", "s/red-stair-hall"]]]);
+  const inBlue = new Map([["visitor", ["s/grounds", "s/spire", "s/blue-room"]]]);
+  const seen = (occ) => new Set(standpointSight(w, { occupancy: occ, handle: "visitor" }).marks.map((m) => m.id));
+  assert.ok(seen(inHall).has("s/hall-west-door"), "the dungeon rule no longer hides a door set in the hall's wall from inside the hall");
+  assert.equal(seen(inBlue).has("s/hall-west-door"), false, "from the Blue Room it is the hall's door, hidden");
+  const a = enter(IN_THE_HALL, "s/hall-west-door", w, { occupancy: inHall, handle: "visitor", at: 300 });
+  assert.equal(a.error, undefined, "enter finds it from inside its room (A1's consistency)");
+  assert.equal(a.into, "s/blue-room");
+  assert.equal(enter({ x: -60, y: -45, name: "visitor" }, "s/hall-west-door", w, { occupancy: inBlue, handle: "visitor" }).error,
+    "no mark 's/hall-west-door' to enter", "and from the Blue Room it is no mark at all");
+});
+
+test("a door anchored exactly on a wall two rooms share belongs to ONE room, the one portalsIn lists it under", async () => {
+  const { roomHolds, portalsIn } = await import("./portals.mjs");
+  const onTheWall = M("s/on-the-wall", -50, -40, 2, 2, { entry: { word: "neutral", into: "s/blue-room" } });
+  const w = worldOf([ROOT, GROUNDS, SPIRE, HALL, BLUE, onTheWall]);
+  const byId = new Map(w.marks.map((m) => [m.id, m]));
+  const holders = ["s/red-stair-hall", "s/blue-room"].filter((r) => roomHolds(byId.get(r), byId.get("s/on-the-wall"), w.marks));
+  assert.equal(holders.length, 1, `held by exactly one room, got ${holders.join(", ")}`);
+  assert.ok(portalsIn(holders[0], w.marks).some((p) => p.id === "s/on-the-wall"), "the same room portalsIn lists it under");
 });

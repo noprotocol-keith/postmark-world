@@ -24,7 +24,7 @@ import {
   isMark, occupantsOf, termsAt, withinOf,
 } from "./enter-exit.mjs"; // DEMO SLICE — the enter-exit acts (step 5, jetto/enter-exit-demo)
 import {
-  pointInMark, markInside, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence,
+  pointInMark, markInside, roomHolds, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence,
   landingOf, passageTargetOf, portalsIn, portalsInto, dungeonLanding,
 } from "./portals.mjs"; // WLD-5: portals and the dungeon class, one home for the verbs and the lint
 // The office loads this file and enter-exit.mjs from the clone, and nothing else,
@@ -94,10 +94,10 @@ export function shelterOf(world, entered, standpoint = null) {
 /** THE FRAME OF SIGHT (WLD-5, RULED by Darko 2026-10-16 19:52–19:53): "when you have
  *  entered a mark … your line of sight [is] scoped to the interior of the mark you
  *  are within." The test of a mark the reader may see: inside the innermost mark of
- *  the enter stack `entered`: a mark wholly inside it (portals.mjs § markInside), or
- *  one whose ANCHOR stands in it, as containerOf counts a mark's room, so a door set
- *  in the room's wall (straddling it) is the room's to see (review-233). The room's
- *  own ancestors never count. With `standpoint`, as shelter's test has it, only an
+ *  the enter stack `entered`, by portals.mjs § roomHolds (wholly inside it, or anchored
+ *  in it as its container), the same test hiddenFrom asks, so a door set in the room's
+ *  wall is the room's to see and to enter (review-233). The room's own ancestors never
+ *  count. With `standpoint`, as shelter's test has it, only an
  *  entered mark that holds it counts: the frame is the innermost entered mark the
  *  body stands in, and a stack the body has stepped out of entirely reads as nothing
  *  entered. Null when nothing counts: then the whole world (Let There Be Light) is the
@@ -107,7 +107,8 @@ export function sightFrameOf(world, entered, standpoint = null) {
   const held = (entered ?? []).filter(Boolean).map((id) => byId.get(id)).filter((m) => m?.at && m.extent);
   const room = [...held].reverse().find((m) => !standpoint || pointWithinMark(standpoint, m)) ?? null;
   if (!room) return null;
-  return (mk) => mk.id !== room.id && (markInside(room, mk) || (!!mk.at && pointInMark(mk.at, room) && !marksContain(mk, room)));
+  const marks = world?.marks ?? [];
+  return (mk) => roomHolds(room, mk, marks);
 }
 
 export function openYourEyes(state, world, { crossing = 0, budget = DIALS.context_budget, dials = DIALS, actor = null, entered = null } = {}) {

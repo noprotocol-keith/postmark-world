@@ -64,6 +64,20 @@ export function containerOf(m, marks) {
   return best;
 }
 
+/** WHETHER A ROOM HOLDS A MARK, the one test for "what this room has in it"
+ *  (review-233): wholly inside it, or anchored in it as its container, the way
+ *  containerOf finds a mark's room. So a door set IN the room's wall (straddling
+ *  it, the Chapel front-door shape) is the room's, and a door anchored exactly on a
+ *  wall two rooms share is the one room's that portalsIn lists it under. The room
+ *  itself, and any mark that contains it, never are. Read by hiddenFrom (what a
+ *  dungeon hides) and world-verbs § sightFrameOf (what sight may tell). */
+export function roomHolds(room, mk, marks) {
+  if (!room?.at || !room.extent || !mk || mk.id === room.id) return false;
+  if (markInside(room, mk)) return true;
+  if (!mk.at || !pointInMark(mk.at, room) || (mk.extent && marksContain(mk, room))) return false;
+  return containerOf(mk, marks)?.id === room.id;
+}
+
 // ── the dungeon index ────────────────────────────────────────────────────────
 //
 // Which dungeons each mark stands inside, outermost first. Built once per marks
@@ -152,7 +166,7 @@ export function hiddenFrom(marks, held = []) {
     if (!m?.at || heldSet.has(id)) continue;
     if (ds.some((d) => !heldSet.has(d))) { hidden.add(id); continue; }
     const inner = byId.get(innerOf.get(ds[ds.length - 1]));
-    if (!inner || !markInside(inner, m)) hidden.add(id);
+    if (!inner || !roomHolds(inner, m, marks)) hidden.add(id);
   }
   // a predicate or a naming has no place of its own: it is hidden exactly when
   // the mark it describes is (chains of them included)
