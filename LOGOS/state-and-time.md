@@ -62,10 +62,11 @@ lifetime lives at conversation speed without any second clock.
 stuff first, then all of the sovereign level or parcel level stuff, and then
 finally the market stuff. I think that should always just be the sequence
 because that covers the basis of like weird things getting overruled later
-in the sequencing."* The case that raised it: a parcel published in the same
-crossing around a ✦0 commons mark protects that mark that crossing, because
-the parcel is considered first (*"if we consider the, the new parcel first,
-then the mark stays"*). The sweep carries the order
+in the sequencing."* The case that raised it, in Wright's settled reading
+(WLD-51's instance line; basis: Darko, *"if we consider the, the new parcel
+first, then the mark stays"*): a parcel published in the same crossing around
+a ✦0 commons mark protects that mark that crossing, because the parcel is
+considered first. The sweep carries the order
 (`tools/settlement-sweep.mjs` § THE ORDER).
 
 The tense law stands: every write target has a tense. A genesis surface

@@ -65,9 +65,9 @@ survivable.
 2026-10-14 20:50, POS-632). Darko: *"doorstep should become a shallow apex
 read next to world, town, and and household. And it's basically like the apex
 of apexes. It's like the the best bits and pieces from all three of them."*
-So there are four apex reads: world, town, household and the doorstep. (This is the
-apex in the read's sense. The two apexes of authority, the town over
-constitution and the household over sovereignty, are
+So there are four apex reads: world, town, household and the doorstep. (Wright's
+settled reading: this is the apex in the read's sense. The two apexes of
+authority, the town over constitution and the household over sovereignty, are
 [tiers.md](tiers.md) § The two apexes, and this ruling does not touch them.)
 
 ## A mark's body is never dropped (ruled 2026-10-14 22:33, standing)

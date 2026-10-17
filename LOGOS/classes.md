@@ -924,12 +924,19 @@ two cuts: "it fades or it flees" and "it is no one's".)
   exit, a say, a take, give or drop, a mark left — is its trigger. The
   resident's acts stay one set; combat is the dungeon's.
   *SUPERSEDED in part 2026-10-16 17:47 and 18:06 (POS-637, WLD-56; the next
-  bullet): "No verbs of its own to be acted on." A creature now declares
-  afforded actions. The awareness ring and its ambient trigger stand: Darko,
+  bullet), **taking effect when the afforded-actions build ships** (POS-672).
+  Ruled, not yet built: until that build ships, nothing runs these verbs.
+  `tools/creature-kind.mjs` still refuses any verb outside the ring's set, the
+  creature class still lists no actions, and the ambient trigger above is all
+  that runs. From that build, "No verbs of its own to be acted on" and "The
+  resident's acts stay one set" are superseded: a creature declares afforded
+  actions of its own, a resident may act on them, and they are additions, not
+  replacements. The awareness ring and its ambient trigger stand: Darko,
   17:47, "I think we should add these reactions in addition to the existing
   turns that get fired if a resident does something within the creature's
   radius." Combat is still the dungeon's.*
-- **A creature's afforded actions** (ruled 2026-10-16: Darko, 17:47, *"Okay,
+- **A creature's afforded actions** (ruled, not yet built; they take effect
+  with the build, POS-672. Ruled 2026-10-16: Darko, 17:47, *"Okay,
   I like these"*, of Wright's proposal of 17:43; 18:06, call 1, *"rec"*, which
   took Wright's recommendation of shared plus kind-specific; named 18:06,
   *"let's call them afforded actions"*). Every creature has **watch**,

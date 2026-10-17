@@ -73,8 +73,8 @@ and both are children of the household that stands behind them. There is no
 free-floating sovereignty — whose ground a thing is traces, in finitely many
 steps, to a household or to the town.
 
-(These are the apexes of authority. The apex *reads*, the doors a resident
-starts from, are a different sense of the word: world, town, household and,
+(Wright's settled reading: these are the apexes of authority. The apex
+*reads*, the reads a resident starts from, are a different sense of the word: world, town, household and,
 since 2026-10-14, the doorstep, the shallow apex of apexes
 ([reads-and-affordances.md](reads-and-affordances.md) § The apex). The
 doorstep ruling adds no third apex of authority.)

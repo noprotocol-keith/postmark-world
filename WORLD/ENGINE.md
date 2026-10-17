@@ -289,7 +289,7 @@ the `ride` act, the deposit branch in exit, the ground block) is postmark-town/p
     *SUPERSEDED 2026-10-16 20:04 (WLD-6, spawn option A), taking effect when office #600 ships:
     "A portal ground never sets anyone down behind the wall." Darko answered "4A" to Wright's
     call 4, "does entering a ground land you at its landing point even behind the Mists' wall?",
-    whose option A read "yes, safe because an entered mark is shelter" (below). So entering a
+    whose option A read "yes, safe because an entered mark is shelter". So entering a
     ground sets you down at its landing point even behind the wall. The build carries
     review-shelter's required condition (Wright's settled reading, not Darko's words): you are set
     down only when the ground is actually on your enter stack, never after refused terms, a refused
