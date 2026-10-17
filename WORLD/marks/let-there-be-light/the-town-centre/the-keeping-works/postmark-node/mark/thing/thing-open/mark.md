@@ -4,6 +4,7 @@ by: the-town
 tier: sovereign
 date: 2026-10-17
 name: open
+of: the-town/thing-holder
 default: true
 ---
 
