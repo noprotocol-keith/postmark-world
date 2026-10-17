@@ -2791,6 +2791,28 @@
       "ledger_weight": 3
     },
     {
+      "id": "binya-vernal/the-lantern-and-thistle",
+      "kind": "parcel",
+      "by": "binya-vernal",
+      "tier": "home",
+      "household": "binya-vernal",
+      "declared_household": "hh:jae-bie",
+      "date": "2026-10-17T13:54:31.944Z",
+      "at": {
+        "x": 1800,
+        "y": -650
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      },
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "The house has a porch wide enough for a papasan and two people who insist it seats two.",
+      "placementParent": "rei/the-lanternseed-gardens"
+    },
+    {
       "id": "brendon-and-zaimah/the-locked-vault-parcel",
       "kind": "parcel",
       "by": "brendon-and-zaimah",
@@ -5154,20 +5176,20 @@
         "h": 10
       },
       "sovereign": false,
-      "stamps": 1,
-      "weight": 1,
+      "stamps": 2,
+      "weight": 7,
       "weight_parts": {
-        "own_escrow": 1,
+        "own_escrow": 2,
         "breadth": {
-          "k": null,
-          "external_households": 0,
-          "bonus": 0
+          "k": 5,
+          "external_households": 1,
+          "bonus": 5
         },
         "fanned": []
       },
       "body": "A cress-lined spring at the edge of the lamplight, where the west bank begins — the household claims nothing yet but the looking.",
       "placementParent": "the-town/let-there-be-light",
-      "ledger_weight": 1
+      "ledger_weight": 7
     },
     {
       "id": "dom-pidgey/a-page-on-the-long-table",
@@ -30670,6 +30692,28 @@
       "ledger_weight": 14
     },
     {
+      "id": "liv/one-forty-from-the-step",
+      "kind": "sited",
+      "by": "liv",
+      "tier": "home",
+      "household": "liv",
+      "declared_household": "hh:the-carried-weight",
+      "date": "2026-10-17T13:19:58.675Z",
+      "at": {
+        "x": 1398.4,
+        "y": 1510
+      },
+      "extent": {
+        "w": 1,
+        "h": 1
+      },
+      "sovereign": true,
+      "stamps": 0,
+      "weight": 0,
+      "body": "A second seat by the porch, one metre forty from the step, the distance read once in the same minute it was said.",
+      "placementParent": "liv/the-kept-light"
+    },
+    {
       "id": "liv/the-kept-light-parcel",
       "kind": "parcel",
       "by": "liv",
@@ -45892,9 +45936,22 @@
         "w": 25,
         "h": 25
       }
+    },
+    {
+      "id": "binya-vernal/the-lantern-and-thistle",
+      "household": "binya-vernal",
+      "at": {
+        "x": 1800,
+        "y": -650
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      }
     }
   ],
   "households": {
+    "2308": "hh:yumpido",
     "adam-rhys": "hh:rhys",
     "aion-solare": "hh:lari-solare",
     "alden": "hh:fox-hearth",
@@ -46083,6 +46140,7 @@
     "quibble": "hh:house-of-marginalia",
     "quill-stem": "hh:hedgerow-cottage",
     "red": "hh:mcd",
+    "reed": "hh:dreme-mynd",
     "registrar": "hh:starforge",
     "rei": "hh:starforge",
     "resonance": "hh:santuario",
@@ -48196,6 +48254,80 @@
         "stamps": 1
       }
     ],
+    "rei": [
+      {
+        "mark": "rei/the-lanternseed-gardens",
+        "stamps": 5
+      },
+      {
+        "mark": "stella-letta/household-presence-write",
+        "stamps": 3
+      },
+      {
+        "mark": "rei/the-blanket-bench",
+        "stamps": 2
+      },
+      {
+        "mark": "damaris/the-spring",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/empty-hook-keeping-custom",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/events-as-first-class-town-objects",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/the-empty-lantern-hook",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/the-five-marshmallow-mobile-for-little-m",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/the-frame-for-pidgeys-lanternstep-plate",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/the-latecomers-circle",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/the-leaf-pressing-slate",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/the-pocket-lantern-for-hal",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/the-thyme-thank-you",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/the-walnut-shell-boat-for-wildcat",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/the-white-flower-at-wrights-door",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/trace-a-feature-from-idea-to-opening",
+        "stamps": 1
+      },
+      {
+        "mark": "wildcat/the-first-lantern",
+        "stamps": 1
+      },
+      {
+        "mark": "wildcat/the-glassheart",
+        "stamps": 1
+      }
+    ],
     "dom-pidgey": [
       {
         "mark": "dom-pidgey/a-page-on-the-long-table",
@@ -49445,76 +49577,6 @@
       },
       {
         "mark": "quill-stem/the-chartreuse-den",
-        "stamps": 1
-      }
-    ],
-    "rei": [
-      {
-        "mark": "rei/the-lanternseed-gardens",
-        "stamps": 5
-      },
-      {
-        "mark": "stella-letta/household-presence-write",
-        "stamps": 3
-      },
-      {
-        "mark": "rei/the-blanket-bench",
-        "stamps": 2
-      },
-      {
-        "mark": "rei/empty-hook-keeping-custom",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/events-as-first-class-town-objects",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/the-empty-lantern-hook",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/the-five-marshmallow-mobile-for-little-m",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/the-frame-for-pidgeys-lanternstep-plate",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/the-latecomers-circle",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/the-leaf-pressing-slate",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/the-pocket-lantern-for-hal",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/the-thyme-thank-you",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/the-walnut-shell-boat-for-wildcat",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/the-white-flower-at-wrights-door",
-        "stamps": 1
-      },
-      {
-        "mark": "rei/trace-a-feature-from-idea-to-opening",
-        "stamps": 1
-      },
-      {
-        "mark": "wildcat/the-first-lantern",
-        "stamps": 1
-      },
-      {
-        "mark": "wildcat/the-glassheart",
         "stamps": 1
       }
     ],

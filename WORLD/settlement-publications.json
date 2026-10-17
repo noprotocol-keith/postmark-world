@@ -4180,6 +4180,16 @@
       "household": "the-hearth",
       "path": "WORLD/marks/orion-by-the-fire/the-second-breakfast-feeder/mark.md",
       "class": "home"
+    },
+    "binya-vernal/the-lantern-and-thistle": {
+      "household": "jae-bie",
+      "path": "WORLD/marks/binya-vernal/the-lantern-and-thistle/mark.md",
+      "class": "home"
+    },
+    "liv/one-forty-from-the-step": {
+      "household": "the-carried-weight",
+      "path": "WORLD/marks/liv/one-forty-from-the-step/mark.md",
+      "class": "home"
     }
   }
 }
