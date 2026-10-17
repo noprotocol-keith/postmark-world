@@ -87,22 +87,25 @@ export function containerOf(m, marks) {
  *  dungeon hides) and world-verbs § sightFrameOf (what sight may tell). */
 export function roomHolds(room, mk, marks) {
   if (!room?.at || !room.extent || !mk || mk.id === room.id) return false;
-  // ASKED ONCE PER FOLD: the answer is a fact about these mark objects, and the
-  // office reads the same fold many times between settlements, so a giant ring's
-  // raster is paid on the first entered read and never again (review-233)
-  const key = Array.isArray(marks) ? marks : HOLDS_NO_LIST;
-  let byRoom = HOLDS.get(key); if (!byRoom) HOLDS.set(key, (byRoom = new WeakMap()));
-  let byMark = byRoom.get(room); if (!byMark) byRoom.set(room, (byMark = new WeakMap()));
-  const hit = byMark.get(mk);
-  if (hit !== undefined) return hit;
-  const answer = markInside(room, mk)
-    || (!!mk.at && boxesMeet(boxOf(room), boxOf(mk)) && pointInMark(mk.at, room) && !(mk.extent && marksContain(mk, room))
-      && containerOf(mk, marks)?.id === room.id);
-  byMark.set(mk, answer);
-  return answer;
+  if (insideKept(room, mk)) return true;
+  // the anchor branch: a door set in the wall. Only a mark whose anchor stands in the
+  // room and which is not wholly inside it gets here, so this is a handful per room
+  if (!mk.at || !boxesMeet(boxOf(room), boxOf(mk)) || !pointInMark(mk.at, room) || (mk.extent && marksContain(mk, room))) return false;
+  return containerOf(mk, marks)?.id === room.id;
 }
-const HOLDS = new WeakMap();
-const HOLDS_NO_LIST = [];
+
+// MARKINSIDE, KEPT PER (room, mark) OBJECT (review-233): the answer is a fact about
+// those two marks alone, and the office's reads hand the eyes a FRESH marks list each
+// time (scopeWorld filters the fold) built of the SAME mark objects, so a cache keyed
+// on the objects, not the list, is paid once per fold: a giant ring's raster with it.
+const INSIDE = new WeakMap();
+function insideKept(room, mk) {
+  let byMark = INSIDE.get(room);
+  if (!byMark) INSIDE.set(room, (byMark = new WeakMap()));
+  let v = byMark.get(mk);
+  if (v === undefined) { v = markInside(room, mk); byMark.set(mk, v); }
+  return v;
+}
 
 // ── the dungeon index ────────────────────────────────────────────────────────
 //
