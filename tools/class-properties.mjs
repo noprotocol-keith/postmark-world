@@ -8,8 +8,9 @@
 // a property, and a locked value is its default" (16:02), so what the class
 // nodes once wrote inline as `dials:` is read here, from the property nodes.
 //
-// A property may have child properties (its caps and bounds), nested under it
-// the same way. A class inherits its ancestors' properties down `extends`, and a
+// A property may have child properties (its caps and bounds). A child names its
+// parent property in its own `of:` field and files beside it in the class's
+// directory (a few older clauses are filed under their parent instead). A class inherits its ancestors' properties down `extends`, and a
 // subclass that declares a property of the same name shadows the ancestor's
 // (the Halloween Candy Bag's `capacity` 200 over thing's).
 //
@@ -43,9 +44,13 @@ export function classIndex(marks) {
   const propsUnder = new Map();
   for (const m of marks ?? []) {
     if (isClassNode(m) && m.class != null && !byName.has(String(m.class))) byName.set(String(m.class), m);
-    if (isProperty(m) && m.parent) {
-      if (!propsUnder.has(m.parent)) propsUnder.set(m.parent, []);
-      propsUnder.get(m.parent).push(m);
+    // a child property names its parent property in `of:` and files flat in its
+    // class's directory (the layout, 2026-10-17); a property without `of:`
+    // belongs to the node it is filed under
+    const under = isProperty(m) ? (m.of ?? m.parent) : null;
+    if (under) {
+      if (!propsUnder.has(under)) propsUnder.set(under, []);
+      propsUnder.get(under).push(m);
     }
   }
   return { byName, propsUnder };

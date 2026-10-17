@@ -69,11 +69,16 @@ const FREEZE_PATH = opt("--freeze", OWN_TREE ? join(REPO, "WORLD/filing-freeze.j
 // Same findings, same exit code; only the rendering differs.
 const JSON_OUT = args.includes("--json");
 
-// `property` and `post` join with LOGOS v2 part 2 (ruled 2026-10-16): a class's
-// property is a node of its own (§ Property and predicate), and an idea or a
-// bounty is a post, a sibling of mark (§ Posts). The instances' `kind:` still
+// `property` joins with LOGOS v2 part 2 (ruled 2026-10-16): a class's property
+// is a node of its own (§ Property and predicate). The instances' `kind:` still
 // names how a mark stands until the kind migration (W2) folds `class:` into it.
-const KINDS = new Set(["sited", "predicated", "naming", "parcel", "class", "property", "post"]);
+// (Posts are not world records: they live in the office's post machine, and
+// the 61 idea and bounty marks move there in a later lane; settled WLD-73 G7.)
+const KINDS = new Set(["sited", "predicated", "naming", "parcel", "class", "property"]);
+// A repo-relative mark path longer than this is refused: a Windows checkout
+// without core.longpaths cannot create it (MAX_PATH 260, less a clone's own
+// root). The fossil's longest on 2026-10-17 is 171.
+const MARK_PATH_MAX = 180;
 const TIERS = new Set(["constitution", "sovereignty", "market", "draft"]); // v2 protection tiers + draft (gray, 2026-08-09)
 // A property's `tier:` is a different line: whose word decides its value on each
 // instance (18:44 item 7) — the town's, locked, or the maker's.
@@ -183,6 +188,12 @@ for (const rec of marks) {
   if (!KINDS.has(rec.kind)) { err(rec, `kind must be one of ${[...KINDS].join(" | ")} (got ${JSON.stringify(rec.kind)})${cite("the-town/the-kinds")}`); }
   if (rec.by == null) err(rec, `by: <author> is required — in the spatial tree (v2) authorship is frontmatter, not the path${cite("the-town/the-own-hand")}`);
   if (!SLUG_RE.test(rec.slug)) err(rec, `slug "${rec.slug}" must be lowercase-hyphenated (it is the directory name and the leaf of the id)`);
+  if (rec._dir) {
+    // repo-relative, as a clone lays it out: WORLD/marks/<path from the marks root>
+    const rel = `WORLD/marks/${resolve(rec._dir).replace(/\\/g, "/").slice(resolve(MARKS_DIR).replace(/\\/g, "/").length + 1)}/mark.md`;
+    if (rel.length > MARK_PATH_MAX)
+      err(rec, `the mark path ${rel} is ${rel.length} characters; the most is ${MARK_PATH_MAX}, or a Windows checkout cannot create it — file it shallower (a child property files beside its parent and names it in of:)`);
+  }
   if (byId.has(rec.id)) err(rec, `duplicate id "${rec.id}" — a leaf slug must be unique per author (by)${cite("the-town/the-own-hand")}`);
   byId.set(rec.id, rec);
   // tier: valid, and constitution belongs to the town alone. On a property node
@@ -276,12 +287,14 @@ for (const rec of marks) {
   // the works); the old direct-parent test was this rule's per-bounty prototype
   const isClassDefinition = isClassDeclaration(rec);
   if (rec.class === "bounty" && !isClassDefinition) {
-    // A BOUNTY IS A POST (ruled 2026-10-16 15:12: "ideas are no longer marks.
-    // They are posts … Same for bounties."). It stands nowhere, so the
-    // off-the-board warning that stood here ("the board reads only notices
-    // standing on the-town/the-bounty-board") has no ground to ask about: a
-    // post is read by its class, and what it is about is its `about:`.
-    if (rec.kind !== "post") err(rec, `a bounty notice is a post — "ideas are no longer marks. They are posts … Same for bounties." (ruled 2026-10-16) (got kind: ${JSON.stringify(rec.kind)})`);
+    // ON THE BOARD means standing on the board's GROUND, not filed in its
+    // directory (re-keyed 2026-08-25). A notice filed at its id — which is where
+    // every notice written after the freeze goes — has no directory parent at
+    // all, and under the old test every one of them read as "off the board" and
+    // was told it could never render, while sitting squarely on it.
+    if (containedBy.get(rec.id) !== "the-town/the-bounty-board")
+      warn(rec, `class: bounty off the board — the board reads only notices standing on the-town/the-bounty-board; this mark can never render there`);
+    if (rec.kind !== "sited") err(rec, `a bounty notice is a sited mark (got kind: ${JSON.stringify(rec.kind)})`);
     const askLen = [...String(rec.ask ?? "").trim()].length;
     if (askLen === 0) err(rec, `a bounty notice needs ask: — one claim, ≤${BODY_MAX} chars`);
     else if (askLen > BODY_MAX) err(rec, `ask is ${askLen} chars; the cap is ${BODY_MAX}${cite("the-town/the-one-claim")}`);
@@ -327,15 +340,9 @@ for (const rec of marks) {
   // (§3's ≤150 cap is kind-agnostic; the empty-body WARN is raised to an ERROR
   // here because for an idea the body is not description, it is the thing).
   // Every other kind is still refused, and the refusal now quotes the ruling.
-  //
-  // AN IDEA IS A POST (ruled 2026-10-16 15:12, SUPERSEDING the 09-01 anchor law
-  // above: "ideas are no longer marks. They are posts, which are a different
-  // subclass of postmark-node."). It neither stands sited nor predicated; what
-  // it is an idea OF is its sovereign `about:` (16:02 item 3). The body is still
-  // the claim.
   if (rec.class === "idea" && !isClassDeclaration(rec)) {
-    if (rec.kind !== "post")
-      err(rec, `an idea is a post — "ideas are no longer marks. They are posts, which are a different subclass of postmark-node." (ruled 2026-10-16); what it is an idea of is its about: (got kind: ${JSON.stringify(rec.kind)})`);
+    if (rec.kind !== "sited" && rec.kind !== "predicated")
+      err(rec, `an idea is a sited or a predicated mark — "Ideas can be predicates." (founder-ruled 2026-09-01); sited stands in the ground it is an idea of, predicated stands under the mark it is an idea of (got kind: ${JSON.stringify(rec.kind)})`);
     if ([...String(rec.body ?? "").trim()].length === 0)
       err(rec, `an idea needs its thought — the BODY is the claim${cite("the-town/the-one-claim")}`);
   }
@@ -392,15 +399,17 @@ for (const rec of marks) {
     if (rec.class !== undefined) err(rec, `a property names no class: — it stands under the class it belongs to`);
     if (rec._explicitParent) err(rec, `property marks never declare a parent — the class (or property) they stand under is the enclosing directory`);
     else if (!rec._parentMarkId) err(rec, `a property stands under the class (or the property) it belongs to — this one stands under nothing`);
-  } else if (rec.kind === "post") {
-    // A POST IS NOT A MARK (ruled 2026-10-16 15:12): an idea or a bounty is a
-    // post, a sibling of mark under postmark-node. It stands nowhere, and what
-    // it is about is its sovereign `about:` (16:02 item 3).
-    if (rec.at !== undefined || rec.extent !== undefined) err(rec, `a post carries no at/extent — "ideas are no longer marks. They are posts" (ruled 2026-10-16); what it is about is its about:`);
-    if (rec.slot !== undefined || rec.value !== undefined) err(rec, `a post carries no slot/value — it is no predicate; its body is the claim`);
-    if (rec.class === undefined) err(rec, `a post names its class: (idea, bounty, …)`);
-    if (rec.about !== undefined && !standingIndex.has(String(rec.about)))
-      err(rec, `about: ${JSON.stringify(rec.about)} names no mark in the record — a post's about: names the mark it is about`);
+    // A CHILD PROPERTY NAMES ITS PARENT PROPERTY IN `of:` (the layout, 2026-10-17:
+    // children file flat in their class's directory, so no mark path grows
+    // past Windows' limit). The parent it names is a property of the same
+    // class: filed in the same directory, or the property it is filed under.
+    if (rec.of !== undefined) {
+      const up = standingIndex.get(String(rec.of));
+      if (!up || up.kind !== "property")
+        err(rec, `of: ${JSON.stringify(rec.of)} names no property — a child property's of: names the property it bounds`);
+      else if (up._parentMarkId !== rec._parentMarkId && up.id !== rec._parentMarkId)
+        err(rec, `of: ${up.id} is another class's property — a child property bounds a property of its own class (${rec._parentMarkId})`);
+    }
   }
 
 }
@@ -474,9 +483,11 @@ const CLASS_IDX = classIndex(marks.filter((m) => !m._error));
     if (d != null && lo != null && d < lo) err(node, `${node.name}'s default ${d} is below its own min ${lo}`);
     if (d != null && hi != null && d > hi) err(node, `${node.name}'s default ${d} is above its own max ${hi}`);
   }
-  for (const c of classNodes) {
-    const chain = classChain(CLASS_IDX, String(c.class));
-    const inherited = chain.length > 1 ? propertiesOf(CLASS_IDX, String(chain[1].class)) : new Map();
+  // every class node, the town's and a household's alike (settled 2026-10-17,
+  // WLD-73 G6): a town subclass may shadow a constitution value, since
+  // constitution is the town's word; a household's subclass, only a sovereign one
+  for (const c of marks.filter((m) => !m._error && m.kind === "class")) {
+    const inherited = c.extends ? propertiesOf(CLASS_IDX, String(c.extends)) : new Map();
     for (const p of ownProperties(CLASS_IDX, c.id)) {
       const up = inherited.get(p.name);
       if (up && up.tier === "constitution" && c.by !== TOWN)
@@ -496,7 +507,7 @@ const CLASS_IDX = classIndex(marks.filter((m) => !m._error));
 {
   const RESERVED = new Set(["id", "by", "date", "household", "declared_household", "parent", "placementParent", "stamps", "weight", "sovereign", "kind", "class", "tier", "body", "slug"]);
   // how a mark stands names its class until W2 folds `class:` into `kind:`
-  const STANDING_CLASS = { sited: "sited", parcel: "parcel", predicated: "predicate", naming: "naming", post: "post" };
+  const STANDING_CLASS = { sited: "sited", parcel: "parcel", predicated: "predicate", naming: "naming" };
   const STANDING_FIELDS = { sited: ["at", "extent"], parcel: ["at", "extent"], predicated: ["slot", "value"], naming: ["slot", "value"] };
   const undeclared = new Map(); // `${class}\u0000${field}` -> { first, count }
   for (const rec of marks) {

@@ -50,7 +50,9 @@ test("the claim cap in code IS the claim-cap law mark's value", () => {
 
 test("the per-resident refusal names the one-per-resident law, and says the cap the law says", () => {
   const one = law(ONE_PER_RESIDENT_LAW);
-  assert.equal(one.name, "holder");
+  // `holder` until LOGOS v2 part 2; renamed so no property name clashes with the
+  // holder true/false (settled 2026-10-17, WLD-73 F3)
+  assert.equal(one.name, "owner");
   assert.match(String(one.default), /exactly one resident; a resident holds at most one parcel/);
   assert.ok(ONE_PER_RESIDENT_REFUSAL.includes(ONE_PER_RESIDENT_LAW), "the sentence names the law it enforces");
   assert.ok(ONE_PER_RESIDENT_REFUSAL.startsWith(
