@@ -9,8 +9,7 @@ extends: postmark-edge
 subject: resident
 object: position
 dials: {}
-implements: ["tools/portals.mjs — landingOf: where a passage sets you down, a step in from the door", "the office's land pen — one line per placement: a door passed, a dungeon left, a stop you were carried to, a ground that places its entrants"]
-actions: []
+implements: ["tools/portals.mjs"]
 source: LOGOS/classes.md
 ---
 

@@ -1649,13 +1649,14 @@ that already stood: a mark's `entry: {word, edge, consequence}` is its fixed ans
   its door; on ground you have not entered, you still stand at the portal).
 - **Where a passage sets you down** (Darko 2026-10-16 19:15, row 68 (a)): fully inside the room it enters, first
   match wins: the room's own `entry.lands_at` (a place may say where its entrants land without naming an `into`);
-  a portal `lands_at` written as a point, as written; a step in from the door (the paired door, the door picked from
-  a list, or the portal itself when it stands at the room), past the door's own edge, so never on the door's square
-  that touches or straddles the wall; and with no door at all, the room's anchor. Every landing stands at least a
-  metre off every wall. *Superseded:* "it is clamped into `into`'s shape and set about a metre inside. With neither,
+  a portal `lands_at` that points inside the room, as written (a point in it, or a mark in it that is not a door);
+  a step in from the door (the paired door, the door picked from a list, or the portal itself when it stands at the
+  room), 1.5 m past the door's own edge, so never on the door's square that touches or straddles the wall, and a
+  `lands_at` that points outside the room comes here too; and with no door at all, the room's anchor. Every
+  landing stands at least a metre off every wall, inside the room. *Superseded:* "it is clamped into `into`'s shape and set about a metre inside. With neither,
   you stand at `into`'s anchor" (10-13).
 - **A passage lands you; it never walks you** (row 68 B). Where it sets you down is its own line on the record, a
-  landing (`the-town/land`), distinct from a departure: so are the whole-dungeon exit's set-down, the Post Office's
+  landing (`the-town/land`, its body approved by Darko 2026-10-16 19:39), distinct from a departure: so are the whole-dungeon exit's set-down, the Post Office's
   deposit at a stop, and a ground that places its entrants. Every reader of where you stand reads a landing as it
   reads an arrived departure. Stopping a walk to go in stays a walk.
 - **One step at a time.** A room's answer lists the portals in it, and you pick the next. There is no

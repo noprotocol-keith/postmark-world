@@ -96,6 +96,44 @@ test("through the engine: room to room, the passage's landing is a step in, and 
   const world = { marks: [HALL, CHAMBER, hallSide, chamberSide] };
   const a = enter({ x: 5, y: -2, name: "ann" }, "t/hall-to-chamber", world, { occupancy: new Map([["ann", ["t/hall"]]]), handle: "ann", at: 300 });
   assert.deepEqual(a.within, ["t/chamber"]);
-  assert.deepEqual(a.landing, { x: 5, y: 4, mark: "t/chamber-to-hall", clamped: false });
+  assert.deepEqual(a.landing, { x: 5, y: 4.5, mark: "t/chamber-to-hall", clamped: false });
   assert.deepEqual(portalFindings(world.marks).filter((f) => f.sev === "ERROR"), []);
+});
+
+// ── review-231's probes ──────────────────────────────────────────────────────
+
+test("a lands_at that points INSIDE the room is taken as written: a point in it, or a mark in it that is not a door (the rug)", () => {
+  const rug = { id: "t/rug", kind: "sited", by: "t", at: { x: -6, y: 12 }, extent: { w: 4, h: 3 }, body: "A rug." };
+  const p = door("t/to-rug", { x: 0, y: -2 }, { word: "neutral", into: "t/chamber", lands_at: "t/rug" });
+  const l = landingOf(entryLawOf(p), CHAMBER, byIdOf([CHAMBER, rug, p]), { room: CHAMBER, portal: p });
+  assert.deepEqual({ x: l.x, y: l.y, by: l.by, mark: l.lands_mark }, { x: -6, y: 12, by: "mark", mark: "t/rug" }, "on the rug, not a step in from it");
+});
+
+test("a lands_at that points OUTSIDE the room falls through to the step in from the door, never a far wall", () => {
+  const p = door("t/gate", { x: 0, y: -1 }, { word: "neutral", into: "t/chamber", lands_at: { x: 400, y: 400 } });
+  const l = landingOf(entryLawOf(p), CHAMBER, byIdOf([CHAMBER, p]), { room: CHAMBER, portal: p });
+  assert.deepEqual({ x: l.x, y: l.y, by: l.by }, { x: 0, y: LANDING_STEP_M, by: "door" }, "a step in from the gate, not clamped to the room's far corner");
+  const far = { id: "t/far-thing", kind: "sited", by: "t", at: { x: 300, y: 300 }, extent: { w: 2, h: 2 }, body: "Far off." };
+  const q = door("t/gate2", { x: 0, y: -1 }, { word: "neutral", into: "t/chamber", lands_at: "t/far-thing" });
+  assert.equal(landingOf(entryLawOf(q), CHAMBER, byIdOf([CHAMBER, far, q]), { room: CHAMBER, portal: q }).by, "door");
+});
+
+test("an L-shaped ring room whose wall is nearest everywhere still sets you down strictly inside it, never on the wall", () => {
+  // a 0.6 m-wide L: a metre in from its wall is outside it, so the landing falls back to a true interior point
+  const L = { id: "t/ell", kind: "sited", by: "t", at: { x: 5, y: 5 }, extent: { w: 10, h: 10 },
+    points: [[0, 0], [10, 0], [10, 0.6], [0.6, 0.6], [0.6, 10], [0, 10]] };
+  for (const pt of [{ x: 20, y: 20 }, { x: 0.05, y: 5 }, { x: 5, y: 5 }]) {
+    const at = insetInto(pt, L);
+    assert.ok(pointInMark(at, L), `(${pt.x}, ${pt.y}) → (${at.x}, ${at.y}) is inside the L`);
+  }
+});
+
+test("the landing-inside lint fires for a ring room that holds no interior point, and only for ring rooms", () => {
+  const flat = { id: "t/flat", kind: "sited", by: "t", at: { x: 5, y: 0 }, extent: { w: 10, h: 1 }, points: [[0, 0], [5, 0], [10, 0]] };
+  const p = door("t/to-flat", { x: 5, y: -2 }, { word: "neutral", into: "t/flat" });
+  const found = portalFindings([flat, p]).filter((f) => f.rule === "landing-inside");
+  assert.equal(found.length, 1);
+  assert.match(found[0].msg, /on or outside the ring of t\/flat/);
+  assert.deepEqual(portalFindings([HALL, CHAMBER, door("t/x", { x: 5, y: -2 }, { word: "neutral", into: "t/chamber" })]).filter((f) => f.rule === "landing-inside"), [],
+    "a rectangle always holds a landing");
 });

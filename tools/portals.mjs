@@ -24,8 +24,6 @@ import { marksContain, overlapArea, pointInPolygon, pointInRect, polygonOf, rect
 import { entryLawOf, isStairs } from "./enter-exit.mjs";
 
 export const DUNGEON_CLASS = "dungeon";
-/** How far inside `into` a clamped landing is nudged (Wright, 2026-10-13 20:14). */
-export const LANDING_NUDGE_M = 1;
 /** How far a `lands_at` anchor may stand from its `into` shape before the lint refuses it. */
 export const LANDING_REACH_M = 5;
 
@@ -223,43 +221,8 @@ function nearestOnSegment(p, a, b) {
 }
 const round2 = (n) => Math.round(n * 100) / 100;
 
-/** CLAMPING (Wright 20:14, agreed by Darko): a point outside the mark moves to
- *  the nearest point of it, nudged about a metre inward. A point already inside
- *  stays exactly where it is; a point mark has one place to stand. */
-export function clampInto(pt, mark, nudge = LANDING_NUDGE_M) {
-  const p = { x: Number(pt.x), y: Number(pt.y) };
-  if (!mark?.extent) return { x: mark.at.x, y: mark.at.y, clamped: p.x !== mark.at.x || p.y !== mark.at.y };
-  if (pointInMark(p, mark)) return { ...p, clamped: false };
-  const ring = polygonOf(mark);
-  if (!ring) {
-    const r = rect(mark);
-    const nx = Math.min(nudge, r.w / 2), ny = Math.min(nudge, r.h / 2);
-    const x = Math.max(r.x - r.w / 2 + nx, Math.min(r.x + r.w / 2 - nx, p.x));
-    const y = Math.max(r.y - r.h / 2 + ny, Math.min(r.y + r.h / 2 - ny, p.y));
-    return { x: round2(x), y: round2(y), clamped: true };
-  }
-  let edge = null, bd = Infinity;
-  for (let i = 0; i < ring.length; i++) {
-    const q = nearestOnSegment(p, ring[i], ring[(i + 1) % ring.length]);
-    const d = Math.hypot(q.x - p.x, q.y - p.y);
-    if (d < bd) { bd = d; edge = q; }
-  }
-  // inward is the way we were already going; on a concave stretch that can
-  // leave the ring again, so the second try heads for the anchor instead
-  const step = (from, dx, dy) => {
-    const l = Math.hypot(dx, dy);
-    return l ? { x: from.x + (dx / l) * nudge, y: from.y + (dy / l) * nudge } : null;
-  };
-  const onward = step(edge, edge.x - p.x, edge.y - p.y);
-  const toAnchor = step(edge, mark.at.x - edge.x, mark.at.y - edge.y);
-  for (const c of [onward, toAnchor, mark.at]) {
-    if (c && pointInMark(c, mark)) return { x: round2(c.x), y: round2(c.y), clamped: true };
-  }
-  return { x: round2(edge.x), y: round2(edge.y), clamped: true };
-}
-
-/** How far past a door's own edge a landing stands, into the room (row 68 (a), Darko 2026-10-16 19:15). */
-export const LANDING_STEP_M = 1;
+/** How far past a door's own edge a landing stands, into the room: 1.5 m (row 68 (a), Darko 2026-10-16 19:15). */
+export const LANDING_STEP_M = 1.5;
 /** And how near a wall a landing may ever stand. */
 export const LANDING_INSET_M = 1;
 
@@ -279,7 +242,10 @@ export function boundaryNearest(pt, mark) {
     }
     const dx = vx(best.b) - vx(best.a), dy = vy(best.b) - vy(best.a), l = Math.hypot(dx, dy) || 1;
     let n = { x: -dy / l, y: dx / l };
-    if (!pointInMark({ x: best.q.x + n.x * 0.01, y: best.q.y + n.y * 0.01 }, mark)) n = { x: -n.x, y: -n.y };
+    // which way is in is asked at the stretch's MIDDLE, never at a corner, where
+    // the nudge can fall on the neighbouring wall
+    const mid = { x: (vx(best.a) + vx(best.b)) / 2, y: (vy(best.a) + vy(best.b)) / 2 };
+    if (!pointInMark({ x: mid.x + n.x * 0.01, y: mid.y + n.y * 0.01 }, mark)) n = { x: -n.x, y: -n.y };
     return { q: best.q, n: { x: n.x + 0, y: n.y + 0 }, d: best.d, inside }; // + 0: never a -0 normal
   }
   const r = rect(mark), x0 = r.x - r.w / 2, x1 = r.x + r.w / 2, y0 = r.y - r.h / 2, y1 = r.y + r.h / 2;
@@ -309,9 +275,50 @@ export function insetInto(pt, mark, inset = LANDING_INSET_M) {
   }
   const b = boundaryNearest(p, mark);
   if (b.inside && b.d >= inset) return { x: round2(p.x), y: round2(p.y), moved: false };
-  const c = { x: b.q.x + b.n.x * inset, y: b.q.y + b.n.y * inset };
-  for (const t of [c, mark.at]) if (pointInMark(t, mark)) return { x: round2(t.x), y: round2(t.y), moved: true };
-  return { x: round2(b.q.x), y: round2(b.q.y), moved: true };
+  // off the nearest wall by the inset, then by half of it (a narrow neck), then
+  // the ring's centroid, then the deepest of a sampled grid: always a point
+  // strictly inside, never a point on the wall (review-231, an L-shaped room)
+  const tries = [
+    { x: b.q.x + b.n.x * inset, y: b.q.y + b.n.y * inset },
+    { x: b.q.x + b.n.x * inset / 2, y: b.q.y + b.n.y * inset / 2 },
+    ringCentroid(polygonOf(mark)),
+  ];
+  for (const t of tries) if (t && pointInMark(t, mark)) return { x: round2(t.x), y: round2(t.y), moved: true };
+  const deep = interiorNear(mark, b.q, inset);
+  return deep ? { x: round2(deep.x), y: round2(deep.y), moved: true } : { x: round2(b.q.x), y: round2(b.q.y), moved: true };
+}
+
+/** The area centroid of a ring (null for a degenerate one). */
+function ringCentroid(ring) {
+  if (!ring) return null;
+  let a = 0, cx = 0, cy = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const p = ring[i], q = ring[(i + 1) % ring.length], k = p.x * q.y - q.x * p.y;
+    a += k; cx += (p.x + q.x) * k; cy += (p.y + q.y) * k;
+  }
+  return Math.abs(a) < 1e-9 ? null : { x: cx / (3 * a), y: cy / (3 * a) };
+}
+
+/** A point just inside a ring, found off the stretches of wall nearest `near`:
+ *  each stretch's middle, nudged inward by shrinking steps. Any ring with an
+ *  inside has such a point; a degenerate ring (no area) answers null. */
+function interiorNear(mark, near, inset) {
+  const ring = polygonOf(mark);
+  if (!ring) return null;
+  const stretches = ring.map((a, i) => ({ a, b: ring[(i + 1) % ring.length] }))
+    .map((st) => ({ ...st, d: Math.hypot(nearestOnSegment(near, st.a, st.b).x - near.x, nearestOnSegment(near, st.a, st.b).y - near.y) }))
+    .sort((p, q) => p.d - q.d);
+  for (const { a, b } of stretches) {
+    const dx = vx(b) - vx(a), dy = vy(b) - vy(a), l = Math.hypot(dx, dy);
+    if (!l) continue;
+    const mid = { x: (vx(a) + vx(b)) / 2, y: (vy(a) + vy(b)) / 2 }, n = { x: -dy / l, y: dx / l };
+    for (const step of [inset / 2, inset / 4, 0.05, 0.01])
+      for (const sign of [1, -1]) {
+        const t = { x: mid.x + sign * n.x * step, y: mid.y + sign * n.y * step };
+        if (pointInMark(t, mark)) return t;
+      }
+  }
+  return null;
 }
 
 /** A STEP IN FROM THE DOOR (row 68 (a)): from where the door stands, along the
@@ -337,11 +344,14 @@ export function stepInFrom(door, room) {
  * passed. THE LANDING (row 68 (a), Darko 2026-10-16 19:15), first match wins:
  *   1. "room": the room's own declared landing, its `entry.lands_at` (a place
  *      that names no `into` may still say where its entrants land);
- *   2. "point": a portal `lands_at` written as { x, y }, taken as written;
- *   3. "door": a step in from the door. The door is the portal's `lands_at`
- *      mark (the paired door on the far side), else the way picked when it is
- *      not the room itself (WLD-63's door list), else the portal passed when it
- *      stands at the room (within LANDING_REACH_M);
+ *   2. "point" / "mark": a portal `lands_at` that points INSIDE the room, taken
+ *      as written: a point in it, or a mark in it that is not itself a door;
+ *   3. "door": a step in from the door, LANDING_STEP_M (1.5 m) past its own
+ *      edge. The door is the portal's `lands_at` when that names a door (the
+ *      paired door on the far side), else the way picked when it is not the room
+ *      itself (WLD-63's door list), else the portal passed when it stands at the
+ *      room (within LANDING_REACH_M). A `lands_at` that points outside the room
+ *      falls through to here;
  *   4. "anchor": with no door at all (a portal far from where it leads), the
  *      room's own anchor.
  * Every landing is held at least LANDING_INSET_M inside the room. A `lands_at`
@@ -371,18 +381,24 @@ export function landingOf(law, intoMark, byId, { room = intoMark, portal = null 
   }
   // 2–3. the portal's
   const raw = law?.lands_at;
-  let door = null;
+  let door = null, named = null;
   if (raw !== undefined && raw !== null) {
     const r = resolve(raw, "");
     if (r.error) return r.error;
-    if (r.point) return done(insetInto(r.point, here), "point");
-    door = r.mark;
-  } else if (intoMark?.at && room && intoMark.id !== room.id) {
+    // 2. a landing written INSIDE the room is taken as written: a point in it, or
+    // a mark in it that is not itself a door (a rug, a dais). Anything else falls
+    // through to the step in from the door (review-231)
+    if (r.point && here?.extent && pointInMark(r.point, here)) return done(insetInto(r.point, here), "point");
+    if (r.mark && !entryLawOf(r.mark)?.into && here?.extent && (markInside(here, r.mark) || pointInMark(r.mark.at, here)))
+      return done(insetInto(r.mark.at, here), "mark", r.mark.id);
+    // 3. a door named as the landing (the paired door on the far side) is stepped in from
+    if (r.mark && entryLawOf(r.mark)?.into) { door = r.mark; named = r.mark.id; }
+  }
+  if (!door && intoMark?.at && room && intoMark.id !== room.id) {
     door = intoMark;
-  } else if (portal?.at && room?.extent && distanceToMark(portal.at, room) <= LANDING_REACH_M) {
+  } else if (!door && portal?.at && room?.extent && distanceToMark(portal.at, room) <= LANDING_REACH_M) {
     door = portal;
   }
-  const named = raw !== undefined && raw !== null ? door?.id ?? null : null;
   if (door) return done(here?.extent ? stepInFrom(door, here) : insetInto(door.at, here), "door", named);
   // 4. no door: the room's anchor
   return done(insetInto(here.at, here), "anchor");
@@ -471,6 +487,8 @@ export function dungeonLanding(dungeonId, marks, { enteredVia = null, state = nu
 //                          Darko's 21:13 change: a whole-dungeon exit is always
 //                          offered, so a room without a portal out strands
 //                          nobody; the finding comes back with sev "WARN"
+//   landing-inside         a passage into a ring room sets you down inside its
+//                          ring (row 68 (a); a rectangle always holds one)
 //   rooms-do-not-overlap   inside a dungeon, two marks with the same parent
 //                          never overlap (Darko, 2026-10-13 20:31: siblings
 //                          only; a room's contents sit inside it, and floors
@@ -481,7 +499,7 @@ export function dungeonLanding(dungeonId, marks, { enteredVia = null, state = nu
 // honoured so the record shows the portal was let through, and by whom.
 export const PORTAL_RULES = Object.freeze([
   "into-names-a-mark", "lands-at-names-a-mark", "lands-at-reaches-into", "exit-never-opposed", "path-to-an-exit",
-  "rooms-do-not-overlap",
+  "rooms-do-not-overlap", "landing-inside",
 ]);
 
 /** A mark's parent, by true containment: the smallest sited mark with an
@@ -553,8 +571,20 @@ export function portalFindings(marks) {
         if (!into?.at) continue;
         const d = into.extent ? distanceToMark(anchor, into) : Math.hypot(anchor.x - into.at.x, anchor.y - into.at.y);
         if (d > LANDING_REACH_M)
-          say(m.id, "lands-at-reaches-into", `entry.lands_at stands ${Math.round(d)} m from ${id} — a landing is clamped into its into, and one more than ${LANDING_REACH_M} m away is a portal drawn in the wrong place`);
+          say(m.id, "lands-at-reaches-into", `entry.lands_at stands ${Math.round(d)} m from ${id} — a landing is set down inside its into, and one more than ${LANDING_REACH_M} m away is a portal drawn in the wrong place`);
       }
+    }
+    // THE LANDING STANDS INSIDE THE ROOM IT ENTERS (row 68 (a), review-231). A
+    // rectangle always holds one; a ring drawn too thin or degenerate may hold
+    // none, and the passage would set you down on its wall
+    for (const id of law.into) {
+      const into = byId.get(id);
+      if (!into?.at) continue;
+      const room = passageTargetOf(m, into, list) ?? into;
+      if (!polygonOf(room)) continue;
+      const l = landingOf(law, into, byId, { room, portal: m });
+      if (l.ok && !pointInMark(l, room))
+        say(m.id, "landing-inside", `passing into ${id} would set you down at (${l.x}, ${l.y}), on or outside the ring of ${room.id} — a landing stands inside the room it enters`);
     }
   }
 

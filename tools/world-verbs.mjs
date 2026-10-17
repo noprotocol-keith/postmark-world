@@ -432,9 +432,9 @@ export function enter(state, targetId, world, {
  *     alone, as the Post Office's stops always did. Every row carries the
  *     portal's word; nothing above a dungeon is written.
  *
- *  `landing` is where he now stands (portals.mjs § landingOf, clamped into
- *  `into`); the office's pen writes it as the walk ledger's zero-length stop,
- *  the same write the Post Office's deposit makes. `portals` are the portals of
+ *  `landing` is where he now stands (portals.mjs § landingOf: inside the room
+ *  entered, a step in from the door); the office's land pen writes it as a
+ *  landing (the-town/land), the same write the Post Office's deposit makes. `portals` are the portals of
  *  the room he lands in: the next step is his to pick. */
 function enterThroughPortal(state, portal, world, { held, handle, at, iso, accepted, into: pick }) {
   const marks = world.marks ?? [];
