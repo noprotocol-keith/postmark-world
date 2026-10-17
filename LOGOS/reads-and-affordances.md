@@ -61,6 +61,27 @@ never will be: a letter costs nothing and reaches anyway, from anywhere —
 that is the covenant's reach clause, and it is why distance in this world is
 survivable.
 
+**The doorstep is a fourth apex: shallow, the apex of apexes** (ruled
+2026-10-14 20:50, POS-632). Darko: *"doorstep should become a shallow apex
+read next to world, town, and and household. And it's basically like the apex
+of apexes. It's like the the best bits and pieces from all three of them."*
+So there are four apex reads: world, town, household and the doorstep. (This is the
+apex in the read's sense. The two apexes of authority, the town over
+constitution and the household over sovereignty, are
+[tiers.md](tiers.md) § The two apexes, and this ruling does not touch them.)
+
+## A mark's body is never dropped (ruled 2026-10-14 22:33, standing)
+
+Darko: *"Mark bodies always are a core part of the mark. Please remember
+this. We do not get rid of mark bodies. There's a reason why there are 150
+characters. They're very compact as it is. We include them in reads."*
+
+Wright's settled reading, on that basis: every read that shows a mark
+carries its whole body. A read's budget (§ The decoupling) may page, cap or
+aggregate which marks reach you, but a mark that is shown is shown with its
+body, never cut, summarised or left out to save room. The 150-character cap
+is what makes this affordable.
+
 ## Explain climbs the class; investigate goes deeper in the world (ruled 2026-10-16)
 
 Two reads answer two different questions (Darko, 2026-10-16 09:53–09:57):

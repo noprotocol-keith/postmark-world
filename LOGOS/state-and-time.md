@@ -57,6 +57,17 @@ the town sees them at the crossing. Classes whose claims cannot conflict
 canonize trivially (`canon: live`) and read as continuous — the fleeting
 lifetime lives at conversation speed without any second clock.
 
+**A crossing judges in one order: town, then sovereign, then market**
+(ruled 2026-10-14 14:51, WLD-51). Darko: *"we should do all of the town level
+stuff first, then all of the sovereign level or parcel level stuff, and then
+finally the market stuff. I think that should always just be the sequence
+because that covers the basis of like weird things getting overruled later
+in the sequencing."* The case that raised it: a parcel published in the same
+crossing around a ✦0 commons mark protects that mark that crossing, because
+the parcel is considered first (*"if we consider the, the new parcel first,
+then the mark stays"*). The sweep carries the order
+(`tools/settlement-sweep.mjs` § THE ORDER).
+
 The tense law stands: every write target has a tense. A genesis surface
 speaks from creation; a current-truth surface speaks from now; confusing the
 two is how a timetable edit once re-derived a voyage already ridden. The
