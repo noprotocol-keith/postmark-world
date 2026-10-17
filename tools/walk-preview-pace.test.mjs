@@ -77,7 +77,12 @@ test("departPaceKm refuses anything that is not a usable stride", () => {
 test("THE FOLD CARRIES A CLASS'S DIALS — without that the viewer's read has nothing to read", () => {
   const classed = STORE.marks.filter((m) => m.kind === "class");
   assert.ok(classed.length > 100, `expected the keeping works in the store; found ${classed.length} class marks`);
+  // a class's dials are its property rows now (LOGOS v2 part 2), each carrying
+  // its name and default under the class; a store folded before the change
+  // carries them as the class row's `dials`
+  const classIds = new Set(classed.map((m) => m.id));
+  const properties = STORE.marks.filter((m) => m.kind === "property" && classIds.has(m.parent) && m.name && m.default !== undefined);
   const withDials = classed.filter((m) => m.dials && Object.keys(m.dials).length);
-  assert.ok(withDials.length >= 1,
+  assert.ok(properties.length >= 1 || withDials.length >= 1,
     "no class in the store carries its dials — the fold has stopped publishing them and every dial-reading surface is guessing again");
 });
