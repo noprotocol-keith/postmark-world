@@ -37,7 +37,7 @@ import { markStanding } from "./mark-standing.mjs";
 import { consentMap, CONSENT_WORDS, CONSENT_FIELD, townOwnedMark, cameAfter, inContact, seniorAtContact } from "./consent.mjs";
 import { crossHouseholdRiders, householdResolver } from "./household-frames.mjs";
 import { portalFindings, applyPortalExceptions, PORTAL_RULES } from "./portals.mjs";
-import { classIndex, classChain, ownProperties, propertiesOf, propertyNames, propertyValue } from "./class-properties.mjs";
+import { classIndex, classChain, ownProperties, propertiesOf, propertyAt, propertyNames, propertyValue } from "./class-properties.mjs";
 import { instanceClassOf, isSited, isPredicate } from "./mark-kind.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -151,12 +151,14 @@ const CLASS_ROSTER = new Set(marks.filter(isClassDeclaration).map((m) => String(
 // standing words the field carried until then (both forms are read, always: a
 // door or a fixture may still write `kind: sited` + `class: thing`), or a class
 // the works declare. How such a record stands is read off its class's chain:
-// under predicate a predicate (naming a naming), under parcel a parcel, and
-// anything else that carries a place stands sited (a thing, and the town and
-// timetable instances whose classes are not under sited, which is a gap of the
-// tree's, not of the record's). A post class's instances keep the old form:
-// posts live in the office's post machine, and a later lane moves them there
-// (settled 2026-10-17, WLD-73 G7), so a `kind:` naming a post class is refused.
+// under predicate a predicate (naming a naming), under parcel a parcel, under
+// sited sited. A class under none of them has no standing instance (G13,
+// settled 2026-10-17: the lint never reads a record as sited from its place).
+// Only a chain that reaches the root can answer; a fixture's partial tree, which
+// cannot, is read as the sited mark its old form would have said. A post
+// class's instances keep the old form: posts live in the office's post machine,
+// and a later lane moves them there (settled 2026-10-17, WLD-73 G7), so a
+// `kind:` naming a post class is refused.
 const CLASS_IDX = classIndex(marks.filter((m) => !m._error));
 const chainOf = (name) => classChain(CLASS_IDX, String(name)).map((c) => String(c.class));
 const isPostClass = (name) => name !== undefined && chainOf(name).includes("post");
@@ -167,7 +169,8 @@ const standingOfRecord = (rec) => {
   if (chain.includes("naming")) return "naming";
   if (chain.includes("predicate")) return "predicated";
   if (chain.includes("parcel")) return "parcel";
-  return "sited";
+  if (chain.includes("sited") || !chain.includes("postmark-node")) return "sited";
+  return null;
 };
 
 // the gate quotes the law (rung 1, 2026-08-02): a refusal cites the clause of
@@ -217,6 +220,8 @@ for (const rec of marks) {
   const klass = instanceClassOf(rec);
   if (standing == null && isPostClass(rec.kind))
     err(rec, `kind: ${rec.kind} names a post class, and a post-class record keeps its old form (kind: sited or predicated, with class: ${rec.kind}) until the post lane moves it to the office's post machine (settled 2026-10-17, WLD-73 G7)`);
+  else if (standing == null && CLASS_ROSTER.has(String(rec.kind)))
+    err(rec, `kind: ${rec.kind} names a class whose instances do not stand in the record: ${rec.kind} is under none of sited, predicate, naming or parcel (its chain: ${chainOf(rec.kind).join(" → ")}) (G13, settled 2026-10-17)`);
   else if (standing == null) { err(rec, `kind must be one of ${[...KINDS].join(" | ")}, or name a class the works declare (got ${JSON.stringify(rec.kind)})${cite("the-town/the-kinds")}`); }
   // the old form still reads, and is told what it is now: class: folds into kind
   // (a post class's instances excepted, above)
@@ -505,29 +510,89 @@ for (const rec of marks) {
   }
   const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
   for (const node of marks.filter((m) => !m._error && (isClassDeclaration(m) || m.kind === "property"))) {
-    const props = ownProperties(CLASS_IDX, node.id);
     const seen = new Map();
-    for (const p of props) {
+    for (const p of ownProperties(CLASS_IDX, node.id)) {
       if (seen.has(p.name)) err(p, `two properties of ${node.id} share the name "${p.name}" (${seen.get(p.name).id} and this one) — a node's properties are named once`);
       else seen.set(p.name, p);
     }
-    if (node.kind !== "property") continue;
-    const lo = num(propertyValue(seen.get("min")?.default)), hi = num(propertyValue(seen.get("max")?.default));
-    const d = num(propertyValue(node.default));
-    if (lo != null && hi != null && lo > hi) err(node, `${node.name}'s bounds are out of order: min ${lo} > max ${hi}`);
-    if (d != null && lo != null && d < lo) err(node, `${node.name}'s default ${d} is below its own min ${lo}`);
-    if (d != null && hi != null && d > hi) err(node, `${node.name}'s default ${d} is above its own max ${hi}`);
   }
-  // every class node, the town's and a household's alike (settled 2026-10-17,
-  // WLD-73 G6): a town subclass may shadow a constitution value, since
-  // constitution is the town's word; a household's subclass, only a sovereign one
+  // G9, as amended 2026-10-17 (WLD-73 B2): no property name may equal a class
+  // name, or `kind: X` and a field `X:` would say two things. It binds NEW
+  // names: these eight stood before the rule, and the office reads their names
+  // verbatim (household-stamps.mjs), so they keep them by id.
+  const NAME_CLASH_GRANDFATHERED = new Set([
+    "the-town/mark-stakeable-slot", "the-town/bounty-stakeable-slot", "the-town/ballot-stakeable-slot",
+    "the-town/pot-stakeable-slot", "the-town/position-slot", "the-town/honestly-nowhere",
+    "the-town/exposure-slot", "the-town/co-sign-guard",
+  ]);
+  for (const p of marks.filter((m) => !m._error && m.kind === "property"))
+    if (CLASS_ROSTER.has(String(p.name)) && !NAME_CLASH_GRANDFATHERED.has(p.id))
+      err(p, `property name "${p.name}" is a class's name — kind: ${p.name} and a field ${p.name}: would say two things (G9); name it otherwise`);
+
+  // BY PATH (WLD-73 S1, S2): a property's place in its class is its path
+  // (holder → capacity → max), the way propertyAt reads it, so the bounds and
+  // the locks are asked by path down the class chain, never by bare name.
+  const ownTree = (c) => {   // [path, node] for every property the class declares itself, any depth
+    const out = [];
+    const walk = (id, path, hops) => {
+      if (hops > 16) return;
+      for (const p of ownProperties(CLASS_IDX, id)) { out.push([[...path, String(p.name)], p]); walk(p.id, [...path, String(p.name)], hops + 1); }
+    };
+    walk(c.id, [], 0);
+    return out;
+  };
+  const ownAt = (c, path) => ownTree(c).find(([p]) => p.join("/") === path.join("/"))?.[1] ?? null;
+  const inheritedAt = (c, path) => (c.extends ? propertyAt(CLASS_IDX, String(c.extends), path) : null);
+  const effectiveAt = (c, path) => {
+    const own = ownAt(c, path);
+    return own ? { node: own, value: propertyValue(own.default), tier: own.tier, from: String(c.class) } : inheritedAt(c, path);
+  };
   for (const c of marks.filter((m) => !m._error && m.kind === "class")) {
-    const inherited = c.extends ? propertiesOf(CLASS_IDX, String(c.extends)) : new Map();
-    for (const p of ownProperties(CLASS_IDX, c.id)) {
-      const up = inherited.get(p.name);
-      if (up && up.tier === "constitution" && c.by !== TOWN)
-        err(p, `${c.id} redeclares ${up.from}'s ${p.name}, a constitution property — a constitution value is the town's word, and only the town's own subclass may set it`);
+    const tree = ownTree(c);
+    // the bounds: wherever the class sets a value or a bound, its effective
+    // default stands within its effective bounds, its own or inherited
+    const paths = new Map();
+    for (const [path] of tree) {
+      const base = ["min", "max"].includes(path.at(-1)) ? path.slice(0, -1) : path;
+      if (base.length) paths.set(base.join("/"), base);
     }
+    for (const base of paths.values()) {
+      const at = effectiveAt(c, base), lo = effectiveAt(c, [...base, "min"]), hi = effectiveAt(c, [...base, "max"]);
+      const d = num(at?.value), l = num(lo?.value), h = num(hi?.value);
+      const where = (b) => (b && b.from !== String(c.class) ? ` (${b.from}'s)` : "");
+      const node = ownAt(c, base) ?? ownAt(c, [...base, "max"]) ?? ownAt(c, [...base, "min"]);
+      const name = base.join(" → ");
+      if (l != null && h != null && l > h) err(node, `${name}'s bounds are out of order in ${c.id}: min ${l}${where(lo)} > max ${h}${where(hi)}`);
+      if (d != null && l != null && d < l) err(node, `${name}'s default ${d} is below its min ${l}${where(lo)} in ${c.id}`);
+      if (d != null && h != null && d > h) err(node, `${name}'s default ${d} is above its max ${h}${where(hi)} in ${c.id}`);
+    }
+    // the locks (settled 2026-10-17, WLD-73 G6), the town's class and a
+    // household's alike: a town subclass may shadow a constitution value, since
+    // constitution is the town's word; a household's subclass, only a sovereign one
+    for (const [path, p] of tree) {
+      const up = inheritedAt(c, path);
+      if (up && up.tier === "constitution" && c.by !== TOWN)
+        err(p, `${c.id} redeclares ${up.from}'s ${path.join(" → ")}, a constitution property — a constitution value is the town's word, and only the town's own subclass may set it`);
+    }
+  }
+}
+
+// 5b'. A PLACE IS SITED'S, OR A POST'S (G13, settled 2026-10-17, WLD-73). `at`
+// and `extent` are properties of sited (16:02 item 8), so an instance that
+// stands at a place is an instance of a class under sited, or of a class under
+// post (an idea may stand anywhere, founder-ruled 2026-09-01). A place on any
+// other class's instance is refused: the lint never reads a record as sited
+// from its place alone. Asked only of a class whose chain reaches the root, so
+// a fixture's partial tree, which cannot answer, is left alone.
+{
+  // both forms (W2): the old form's class:, or the kind that names it now
+  const placed = marks.filter((m) => !m._error && m.at !== undefined && m.kind !== "class" && m.kind !== "property" && !isPredicate(m) && m.kind !== "naming");
+  for (const rec of placed) {
+    const klass = String(instanceClassOf(rec) ?? rec.kind);
+    const chain = classChain(CLASS_IDX, klass).map((c) => String(c.class));
+    if (!chain.includes("postmark-node")) continue;
+    if (!chain.includes("sited") && !chain.includes("post"))
+      err(rec, `a ${klass} stands at a place, but ${klass} is not under sited (its chain: ${chain.join(" → ")}) — at and extent are sited's properties; a place is lawful only on an instance of a class under sited or under post (G13, settled 2026-10-17)`);
   }
 }
 

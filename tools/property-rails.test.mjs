@@ -67,10 +67,50 @@ test("the control: thing's holder → capacity → min/max, flat with of:, lints
 test("a default stands within its own bounds, and the bounds are in order", () => {
   const t = tree();
   prop(t.thing, "thing-capacity", { name: "capacity", tier: "sovereign", dflt: 121, of: "the-town/thing-holder" });
-  assert.match(lint(t.dir).out, /\[ERROR\][^\n]*thing-capacity: capacity's default 121 is above its own max 120/);
+  assert.match(lint(t.dir).out, /\[ERROR\][^\n]*thing-capacity: holder → capacity's default 121 is above its max 120 in the-town\/thing/);
   const u = tree();
   prop(u.thing, "thing-capacity-min", { name: "min", tier: "constitution", dflt: 200, of: "the-town/thing-capacity" });
-  assert.match(lint(u.dir).out, /capacity's bounds are out of order: min 200 > max 120/);
+  assert.match(lint(u.dir).out, /holder → capacity's bounds are out of order in the-town\/thing: min 200 > max 120/);
+});
+
+test("BY PATH (WLD-73 S2): a subclass's default stands within the bounds it inherits", () => {
+  // a town subclass that sets capacity 500 and no max of its own is held to thing's 120
+  const t = tree();
+  const crate = cls(t.thing, "a-crate", "thing");
+  prop(crate, "a-crate-holder", { name: "holder", tier: "constitution", dflt: "true" });
+  prop(crate, "a-crate-capacity", { name: "capacity", tier: "sovereign", dflt: 500, of: "the-town/a-crate-holder" });
+  assert.match(lint(t.dir).out, /a-crate-capacity: holder → capacity's default 500 is above its max 120 \(thing's\) in the-town\/a-crate/);
+  // the Candy Bag's shape passes: its own max 200 over thing's 120
+  const u = tree();
+  const bag = cls(u.thing, "a-bag", "thing");
+  prop(bag, "a-bag-holder", { name: "holder", tier: "constitution", dflt: "true" });
+  prop(bag, "a-bag-capacity", { name: "capacity", tier: "sovereign", dflt: 200, of: "the-town/a-bag-holder" });
+  prop(bag, "a-bag-capacity-max", { name: "max", tier: "constitution", dflt: 200, of: "the-town/a-bag-capacity" });
+  assert.doesNotMatch(lint(u.dir).out, /ERROR/);
+});
+
+test("BY PATH (WLD-73 S1): the lock reaches a child — a household's holder → capacity → max is refused", () => {
+  const t = tree();
+  const box = cls(t.root, "alices-box", "thing", "alice");
+  prop(box, "alices-box-holder", { name: "holder", tier: "sovereign", dflt: "true" });
+  prop(box, "alices-box-capacity", { name: "capacity", tier: "sovereign", dflt: 40, of: "the-town/alices-box-holder" });
+  prop(box, "alices-box-capacity-max", { name: "max", tier: "constitution", dflt: 400, of: "the-town/alices-box-capacity" });
+  const out = lint(t.dir).out;
+  assert.match(out, /alices-box-capacity-max: alice\/alices-box redeclares thing's holder → capacity → max, a constitution property/);
+  assert.doesNotMatch(out, /alices-box-capacity: [^\n]*redeclares/, "capacity is sovereign: the maker's to set");
+});
+
+test("G9 as amended (WLD-73 B2): no property name may be a class's name, but the eight grandfathered keep theirs", () => {
+  const t = tree();
+  cls(t.works, "lantern", undefined);
+  prop(t.thing, "thing-lantern", { name: "lantern", tier: "sovereign", dflt: "false" });
+  assert.match(lint(t.dir).out, /thing-lantern: property name "lantern" is a class's name/);
+  // a grandfathered id keeps its clashing name (the office reads it verbatim)
+  const u = tree();
+  cls(u.works, "stakeable", undefined);
+  const mark = cls(u.works, "mark", undefined);
+  prop(mark, "mark-stakeable-slot", { name: "stakeable", tier: "constitution", dflt: "mark-mode" });
+  assert.doesNotMatch(lint(u.dir).out, /mark-stakeable-slot: property name/);
 });
 
 test("of: names a property of the same class, or it is refused by name", () => {
@@ -137,4 +177,25 @@ test("a flat field must be a declared property: an advisory, one per class and f
   assert.match(out, /\[WARN\][^\n]*flat field glow: is no declared property of thing \(2 mark\(s\) of thing carry it/);
   assert.doesNotMatch(out, /flat field portable:/, "portable is thing's own property");
   assert.doesNotMatch(out, /\[ERROR\][^\n]*a-lantern/, "an advisory, never a refusal");
+});
+
+test("G13 (settled 2026-10-17): a place is lawful on a class under sited or post, and refused anywhere else", () => {
+  const rooted = (townExtends) => {
+    const t = tree();
+    cls(t.works, "postmark-node", undefined);
+    cls(t.works, "mark", "postmark-node");
+    cls(t.works, "sited", "mark");
+    cls(t.works, "post", "postmark-node");
+    cls(t.works, "idea", "post");
+    cls(t.works, "entity", "postmark-node");
+    cls(t.works, "town", townExtends);
+    node(join(t.root, "a-harbor-charter"), { kind: "sited", by: "the-town", tier: "constitution", date: "2026-08-18", at: "{ x: 10, y: 10 }", extent: "{ w: 5, h: 5 }", class: "town" }, "A harbor town's charter.");
+    node(join(t.root, "a-placed-idea"), { kind: "sited", by: "jetto", date: "2026-10-01", at: "{ x: 20, y: 20 }", extent: "{ w: 1, h: 1 }", class: "idea" }, "A thought planted in the ground it is of.");
+    return lint(t.dir);
+  };
+  const under = rooted("entity");
+  assert.match(under.out, /\[ERROR\][^\n]*a-harbor-charter: a town stands at a place, but town is not under sited \(its chain: town → entity → postmark-node\)/);
+  assert.doesNotMatch(under.out, /a-placed-idea: [^\n]*stands at a place/, "an idea may stand anywhere (founder-ruled 2026-09-01): post's chain is lawful");
+  const sited = rooted("sited");
+  assert.doesNotMatch(sited.out, /stands at a place, but/, "with town under sited, its charters stand lawfully");
 });

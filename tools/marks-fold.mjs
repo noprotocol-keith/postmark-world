@@ -1343,11 +1343,11 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
       if (parentOf.has(id)) {
         const eff = effectiveParent(id);
         if (eff.to !== undefined) {
-          es.push({ to: eff.to, channel: (isPredicate(mk) || mk.kind === "naming") ? "describes" : "contains", conducts: true });
+          es.push({ to: eff.to, channel: (isPredicate(mk) || mk.kind === "naming" || mk.kind === "property") ? "describes" : "contains", conducts: true });
           if (eff.skipped.length) skips.push({ from: id, skipped: eff.skipped, to: eff.to });
         } else {
           // no consenting ancestor anywhere in the chain — flow stops, receipted
-          es.push({ to: parentOf.get(id), channel: (isPredicate(mk) || mk.kind === "naming") ? "describes" : "contains", conducts: false });
+          es.push({ to: parentOf.get(id), channel: (isPredicate(mk) || mk.kind === "naming" || mk.kind === "property") ? "describes" : "contains", conducts: false });
         }
       }
       if (instanceClassOf(mk) !== undefined) {
@@ -1612,17 +1612,20 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
       // every mark that declares none, so a world without dials serializes as
       // it did.
       //
-      // THE DIALS ARE PROPERTIES NOW (LOGOS v2 part 2, ruled 2026-10-16: "every
-      // dial is a property, and a locked value is its default"). The same
-      // reason carries the property's own fields instead: its `name` and
-      // `default`, and its tier as `property_tier`, since `tier` here is the
-      // derived standing (a property node stands constitution: it is class
-      // space, mark-standing.mjs), and a class's `extends`, so a
-      // page can climb the class to the property it inherits
-      // (tools/class-properties.mjs). A post's `about:` rides the same way.
-      // Undefined on every other mark, so nothing else changes.
+      dials: mk.dials,
+      // A CLASS'S DIALS ARE PROPERTIES NOW (LOGOS v2 part 2, ruled 2026-10-16:
+      // "every dial is a property, and a locked value is its default"), so no
+      // class node writes `dials:` any more and the line above carries only an
+      // instance's own (the wheelhouse's, the dungeon's portal grounds'), as it
+      // did. The same reason carries a property's own fields: its `name`, the
+      // parent it bounds (`of`), its `default`, and its tier as `property_tier`,
+      // since `tier` here is the derived standing (a property node stands
+      // constitution: it is class space, mark-standing.mjs), and a class's
+      // `extends`, so a page can climb the class to the property it inherits
+      // (tools/class-properties.mjs). Undefined on every other mark, so nothing
+      // else changes.
       ...(mk.kind === "property" ? { name: mk.name, of: mk.of, default: mk.default, property_tier: mk.tier } : {}),
-      extends: mk.extends, about: mk.about,
+      extends: mk.extends,
       // image (2026-08-15): the media-shelf pointer — one allowlisted URL the
       // door validated and the lint re-checks; undefined on every imageless
       // mark, so a world without pictures serializes as before.
