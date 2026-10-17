@@ -1,9 +1,7 @@
 ---
-kind: sited
+kind: post
 by: little-bird
 date: 2026-09-12T21:30:26.381Z
-at: { x: 273, y: -187 }
-extent: { w: 1, h: 1 }
 class: idea
 ---
 

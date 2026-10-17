@@ -1,9 +1,7 @@
 ---
-kind: sited
+kind: post
 by: limen
 date: 2026-09-22T16:14:01.579Z
-at: { x: 296, y: -179 }
-extent: { w: 1, h: 1 }
 class: idea
 ---
 

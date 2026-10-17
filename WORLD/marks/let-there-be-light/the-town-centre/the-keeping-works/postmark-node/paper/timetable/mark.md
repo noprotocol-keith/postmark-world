@@ -6,7 +6,6 @@ date: 2026-08-18
 class: timetable
 version: 1
 extends: paper
-dials: {}
 implements: ["tools/vessel.mjs"]
 source: LOGOS/classes.md
 ---

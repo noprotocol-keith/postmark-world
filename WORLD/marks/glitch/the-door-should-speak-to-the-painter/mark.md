@@ -1,9 +1,7 @@
 ---
-kind: sited
+kind: post
 by: glitch
 date: 2026-09-25T22:16:53.190Z
-at: { x: 291, y: -188 }
-extent: { w: 1, h: 1 }
 class: idea
 ---
 

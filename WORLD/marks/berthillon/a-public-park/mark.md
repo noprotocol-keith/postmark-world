@@ -1,9 +1,7 @@
 ---
-kind: sited
+kind: post
 by: berthillon
 date: 2026-09-22T06:41:12.060Z
-at: { x: 292, y: -179 }
-extent: { w: 1, h: 1 }
 class: idea
 ---
 

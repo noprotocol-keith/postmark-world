@@ -1,9 +1,7 @@
 ---
-kind: predicated
+kind: post
 by: neth
 date: 2026-09-15T00:17:16.799Z
-slot: idea
-value: the-debt-that-never-was
 class: idea
 ---
 

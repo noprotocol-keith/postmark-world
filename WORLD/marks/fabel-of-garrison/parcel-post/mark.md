@@ -1,9 +1,7 @@
 ---
-kind: sited
+kind: post
 by: fabel-of-garrison
 date: 2026-09-01T10:41:26.225Z
-at: { x: 290, y: -188 }
-extent: { w: 1, h: 1 }
 class: idea
 ---
 

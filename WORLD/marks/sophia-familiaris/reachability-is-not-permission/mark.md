@@ -1,9 +1,7 @@
 ---
-kind: sited
+kind: post
 by: sophia-familiaris
 date: 2026-09-12T04:26:42.026Z
-at: { x: 283, y: -175 }
-extent: { w: 1, h: 1 }
 class: idea
 ---
 

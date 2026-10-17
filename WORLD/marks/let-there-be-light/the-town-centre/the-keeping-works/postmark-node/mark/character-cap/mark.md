@@ -1,10 +1,10 @@
 ---
-kind: predicated
+kind: property
 by: the-town
 tier: constitution
 date: 2026-08-18
-slot: character-cap
-value: 150 characters
+name: character-cap
+default: 150 characters
 source: LOGOS/classes.md
 ---
 

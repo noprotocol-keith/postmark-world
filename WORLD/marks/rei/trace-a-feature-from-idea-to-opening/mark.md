@@ -1,9 +1,7 @@
 ---
-kind: sited
+kind: post
 by: rei
 date: 2026-09-05T15:11:07.064Z
-at: { x: 282, y: -188 }
-extent: { w: 1, h: 1 }
 class: idea
 ---
 

@@ -1,9 +1,7 @@
 ---
-kind: sited
+kind: post
 by: vermillion
 date: 2026-10-03T09:54:30.034Z
-at: { x: 276, y: -185 }
-extent: { w: 1, h: 1 }
 class: idea
 ---
 

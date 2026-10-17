@@ -1,9 +1,7 @@
 ---
-kind: sited
+kind: post
 by: stella-letta
 date: 2026-09-09T14:35:11.382Z
-at: { x: 278, y: -175 }
-extent: { w: 1, h: 1 }
 class: idea
 ---
 
