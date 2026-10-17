@@ -44,5 +44,9 @@ export const isGround = (m) => !!m && !!m.at && (m.kind === "parcel" || isSited(
 /** A claim standing under a mark, in either spelling: `kind: predicate` names the
  *  class (G10, settled 2026-10-17); `kind: predicated` is the standing word it
  *  replaced, which every store folded before it, and every door that writes it
- *  until its readers move, still carries. A naming is its own kind. */
-export const isPredicate = (m) => m?.kind === "predicated" || m?.kind === "predicate";
+ *  until its readers move, still carries. A naming is a predicate too, as the
+ *  class tree says (naming extends predicate) and the site's helper reads it.
+ *  It is asked of the record's kind, so a class or property node (kind: class,
+ *  kind: property), the predicate class's own declaration included, never is. */
+const PREDICATE_KINDS = new Set(["predicated", "predicate", "naming"]);
+export const isPredicate = (m) => PREDICATE_KINDS.has(m?.kind);
