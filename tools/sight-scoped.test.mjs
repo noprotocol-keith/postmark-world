@@ -35,6 +35,9 @@ const IN_HALL = [
   M("s/hall-benches", -40, -50, 8, 2),
   M("s/hall-rug", -20, -40, 10, 6),
   M("s/the-red-stair", -5, -50, 6, 10, { class: "stairs" }),
+  // a door SET IN the hall's west wall (x = -50), straddling it, its anchor just inside:
+  // the Chapel front-door shape, the room's to see though not wholly inside it (review-233)
+  M("s/hall-west-door", -49.5, -30, 2, 2, { entry: { word: "neutral", into: "s/blue-room" } }),
 ];
 const ROSE = M("s/rose-hall", -5, -5, 40, 30);
 const BLUE = M("s/blue-room", -70, -45, 20, 20);
@@ -44,6 +47,8 @@ const COURTS = Array.from({ length: 10 }, (_, i) => M(`c${i}/court`, -140 + i * 
 const HOUSE = M("h/house", 1000, 0, 20, 20);
 const CHAIR = M("h/chair", 1002, 2, 1, 1);
 const STALL = M("n/stall", 1040, 0, 30, 30, { weight: 50 });
+// a far mountain on the horizon: told to the open world, never inside a room you entered
+const PEAK = M("p/the-far-peak", 4000, -4000, 900, 900, { far: true });
 
 function worldOf(marks) {
   const f = fold({ marks, terrain: { features: [] }, stakes: [], tick: 1, households: {} });
@@ -51,7 +56,7 @@ function worldOf(marks) {
   return { ...f, terrain: { far_features: [], features: [], elevation: {} }, heightfield: flatHF, light, fogCeilingM: 22 };
 }
 const shown = (fov) => fov.carried.map((c) => c.id);
-const W = () => worldOf([ROOT, GROUNDS, SPIRE, HALL, ...IN_HALL, ROSE, BLUE, ...COURTS, HOUSE, CHAIR, STALL]);
+const W = () => worldOf([ROOT, GROUNDS, SPIRE, HALL, ...IN_HALL, ROSE, BLUE, ...COURTS, HOUSE, CHAIR, STALL, PEAK]);
 const IN_THE_HALL = { x: -10, y: -35, name: "visitor" };
 
 test("in the Red Stair Hall, the room's doors, benches, rug and stair take the seats, and no container or outdoor court does", () => {
@@ -60,6 +65,21 @@ test("in the Red Stair Hall, the room's doors, benches, rug and stair take the s
   assert.deepEqual(new Set(shown(fov)), new Set(IN_HALL.map((m) => m.id)), "the room's interior, all of it, and nothing else");
   for (const id of ["s/grounds", "s/spire", "s/red-stair-hall", "s/rose-hall", "s/blue-room", "c0/court", "h/house"])
     assert.equal(shown(fov).includes(id), false, `${id} is the frame or outside it`);
+  assert.ok(shown(fov).includes("s/hall-west-door"), "the door set in the wall is the room's, by its anchor");
+});
+
+test("the horizon is the open world's: told unentered, never inside a room you entered", () => {
+  const w = W();
+  const far = (fov) => (fov.far ?? []).map((f) => f.id);
+  assert.ok(far(openYourEyes({ x: 0, y: 160, name: "spectator" }, w).fov).includes("p/the-far-peak"), "outside, the peak is on the horizon");
+  assert.deepEqual(far(openYourEyes(IN_THE_HALL, w, { entered: ["s/grounds", "s/spire", "s/red-stair-hall"] }).fov), [], "in the hall, no horizon");
+});
+
+test("the frame counts a mark by its anchor, as containerOf does, and never the room or what holds it", () => {
+  const w = W(), byId = new Map(w.marks.map((m) => [m.id, m]));
+  const frame = sightFrameOf(w, ["s/grounds", "s/spire", "s/red-stair-hall"], IN_THE_HALL);
+  assert.equal(frame(byId.get("s/hall-west-door")), true, "straddling the wall, anchored inside");
+  for (const id of ["s/red-stair-hall", "s/spire", "s/grounds", "the-town/let-there-be-light"]) assert.equal(frame(byId.get(id)), false, `${id} is the frame`);
 });
 
 test("before the fix the courts took the seats: unscoped, the far door loses to them (the finding, kept as a falsifier)", () => {
@@ -100,7 +120,7 @@ test("LAW STILL REACHES THROUGH `within`: inside the house, the containment spin
   assert.ok(spine.includes("the-town/let-there-be-light") && spine.includes("h/house"), `the spine: ${spine.join(" › ")}`);
 });
 
-test("an enter stack the body has stepped out of reads as nothing entered, as shelter's does", () => {
+test("the frame is the innermost entered mark the body stands in; a stack it has stepped out of entirely reads as nothing entered", () => {
   const w = W();
   const outside = { x: 200, y: 160, name: "ann" };
   assert.deepEqual(openYourEyes(outside, w, { entered: ["h/house"] }).fov, openYourEyes(outside, w).fov);
