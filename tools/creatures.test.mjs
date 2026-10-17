@@ -61,7 +61,7 @@ test("the law is read whole or not at all", () => {
   // the loader hands over: a record with its parent
   const props = (id, dials) => Object.entries(dials).map(([name, v]) =>
     ({ id: `${id}-${name}`, kind: "property", by: TOWN, tier: "constitution", parent: id, name, default: v === null ? "null" : v }));
-  const CREATURE_DIALS = { from_crossing: 270, band_from_m: 0, band_to_m: 400, keep_m: 440, apart_m: 150, span_h: 12 };
+  const CREATURE_DIALS = { from_crossing: 270, rotation: null, band_from_m: 0, band_to_m: 400, keep_m: 440, apart_m: 150, span_h: 12 };
   const cls = (over = {}, dials = CREATURE_DIALS) => [{ id: "the-town/creature", kind: "class", by: TOWN, class: "creature", ...over }, ...props("the-town/creature", dials)];
   const wolf = (over = {}, dials = { count_per_window: 2 }) => [{ id: "the-town/wolf", kind: "class", by: TOWN, class: "wolf", extends: "creature", kind_file: "WORLD/kinds/wolf.kind", ...over }, ...props("the-town/wolf", dials)];
   assert.equal(creatureLaw([]), null, "no class, no creatures");
@@ -194,7 +194,12 @@ test("the rotation dial is read whole: text naming the class's own kinds in turn
   const law = (rotation, ...ks) => creatureLaw([...cls(rotation), ...ks.flatMap(kind)]);
   assert.deepEqual(law("bat wolf", "bat", "wolf").dials.rotation, ["bat", "wolf"]);
   assert.deepEqual(law("  wolf   bat ", "bat", "wolf").dials.rotation, ["wolf", "bat"], "spaces are only separators");
-  assert.equal("rotation" in law(null, "bat").dials, false, "null: no rotation");
+  assert.equal("rotation" in law(null, "bat").dials, false, "written null: no rotation");
+  // an absent rotation mark is refused, never three creatures a window (review-239 N1)
+  const records = loadMarks(join(ROOT, "WORLD", "marks"));
+  const without = records.filter((m) => !(m.kind === "property" && m.name === "rotation"));
+  assert.equal(records.length - without.length, 1, "the world has one rotation mark, creature-rotation");
+  assert.throws(() => creatureLaw(without), /no rotation dial/, "the real law with creature-rotation filtered out is refused");
   for (const bad of ["", " ", "bat owl", 3, true, ["bat", "wolf"], {}])
     assert.throws(() => law(bad, "bat", "wolf"), /rotation dial/, `${JSON.stringify(bad)} is refused`);
 });

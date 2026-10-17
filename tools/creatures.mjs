@@ -35,14 +35,18 @@
 //
 // THE NUMBERS ARE LAW (D1, D2; Darko 2026-10-15 12:09, as recommended): the band
 // is the 400 m fringe on the clear side of the wall, open country only; per window
-// a wolf 2, a raven 4, a bat 3, each at its own seeded minute. They live on the
-// creature class's dials and each kind's `count_per_window` (WORLD/marks/…/entity/
-// creature/), read by `creatureLaw`; nothing here hard-codes a creature's numbers.
+// a wolf 2, a raven 4, a bat 3, each at its own seeded minute. *SUPERSEDED
+// 2026-10-17 13:58 (Darko, WLD-56): one creature a window, the kinds in turn, a
+// bat first; each count_per_window is 1, under the rotation below.* The numbers
+// live on the creature class's dials and each kind's `count_per_window`
+// (WORLD/marks/…/entity/creature/), read by `creatureLaw`; nothing here
+// hard-codes a creature's numbers.
 //
 // THE KINDS IN TURN (Darko 2026-10-17 13:58, WLD-56): one creature per window, a
-// bat first, then raven, then wolf, and round again. The class's `rotation` dial lists the kinds in turn; window N
-// brings only `rotation[(N - from_crossing) mod length]`, at that kind's
-// `count_per_window`. Absent or null, every kind comes at its own count.
+// bat first, then raven, then wolf, and round again. The class's `rotation` dial
+// names the kinds in turn; window N brings only `rotation[(N - from_crossing) mod
+// length]`, at that kind's `count_per_window`. Written null, every kind comes at
+// its own count; an absent rotation mark is refused, like any missing dial.
 //
 // ── THE FOLD (W4, W5) ──────────────────────────────────────────────────────────
 // A creature is a fold of the log's rows: `spawn` (the-town, object = its id),
@@ -122,7 +126,11 @@ export function creatureLaw(records) {
     dials.counts[kind] = n;
     kinds.push({ kind, kind_file: m.kind_file });
   }
-  const rotation = rotationOf(dial("creature", "rotation") ?? null, dials.counts);
+  // Read whole like every other dial (review-239 N1): an absent rotation mark is
+  // refused, never read as "every kind at its count". Only a written null is none.
+  const rot = propertyOf(idx, "creature", "rotation");
+  if (!rot) throw new Error("creatureLaw: the creature class has no rotation dial (write it null for no rotation)");
+  const rotation = rotationOf(rot.value, dials.counts);
   if (rotation) dials.rotation = rotation;
   return { fromCrossing: dial("creature", "from_crossing") ?? null, dials, kinds };
 }
