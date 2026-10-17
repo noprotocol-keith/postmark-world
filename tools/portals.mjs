@@ -276,17 +276,22 @@ export function insetInto(pt, mark, inset = LANDING_INSET_M) {
   const b = boundaryNearest(p, mark);
   if (b.inside && b.d >= inset) return { x: round2(p.x), y: round2(p.y), moved: false };
   // off the nearest wall by the inset, then by half of it (a narrow neck), then
-  // the ring's centroid, then the deepest of a sampled grid: always a point
-  // strictly inside, never a point on the wall (review-231, an L-shaped room)
+  // the ring's centroid, then a point nudged in off the nearest stretches of wall
+  // (interiorNear): always a point STRICTLY inside, never one on the wall, which
+  // pointInMark counts as inside (review-231: a corner, an L-shaped room)
   const tries = [
     { x: b.q.x + b.n.x * inset, y: b.q.y + b.n.y * inset },
     { x: b.q.x + b.n.x * inset / 2, y: b.q.y + b.n.y * inset / 2 },
     ringCentroid(polygonOf(mark)),
   ];
-  for (const t of tries) if (t && pointInMark(t, mark)) return { x: round2(t.x), y: round2(t.y), moved: true };
+  for (const t of tries) if (t && strictlyInside(t, mark)) return { x: round2(t.x), y: round2(t.y), moved: true };
   const deep = interiorNear(mark, b.q, inset);
   return deep ? { x: round2(deep.x), y: round2(deep.y), moved: true } : { x: round2(b.q.x), y: round2(b.q.y), moved: true };
 }
+
+/** Inside a mark and off its wall: pointInMark counts the boundary as inside, and a
+ *  landing must never stand on it. */
+export const strictlyInside = (t, mark) => pointInMark(t, mark) && boundaryNearest(t, mark).d > 0.01;
 
 /** The area centroid of a ring (null for a degenerate one). */
 function ringCentroid(ring) {
@@ -315,7 +320,7 @@ function interiorNear(mark, near, inset) {
     for (const step of [inset / 2, inset / 4, 0.05, 0.01])
       for (const sign of [1, -1]) {
         const t = { x: mid.x + sign * n.x * step, y: mid.y + sign * n.y * step };
-        if (pointInMark(t, mark)) return t;
+        if (strictlyInside(t, mark)) return t;
       }
   }
   return null;
@@ -583,7 +588,7 @@ export function portalFindings(marks) {
       const room = passageTargetOf(m, into, list) ?? into;
       if (!polygonOf(room)) continue;
       const l = landingOf(law, into, byId, { room, portal: m });
-      if (l.ok && !pointInMark(l, room))
+      if (l.ok && !strictlyInside(l, room))
         say(m.id, "landing-inside", `passing into ${id} would set you down at (${l.x}, ${l.y}), on or outside the ring of ${room.id} — a landing stands inside the room it enters`);
     }
   }
