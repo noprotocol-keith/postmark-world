@@ -38,6 +38,7 @@ import { consentMap, CONSENT_WORDS, CONSENT_FIELD, townOwnedMark, cameAfter, inC
 import { crossHouseholdRiders, householdResolver } from "./household-frames.mjs";
 import { portalFindings, applyPortalExceptions, PORTAL_RULES } from "./portals.mjs";
 import { classIndex, classChain, ownProperties, propertiesOf, propertyNames, propertyValue } from "./class-properties.mjs";
+import { instanceClassOf, isSited } from "./mark-kind.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -138,6 +139,27 @@ const isClassDeclaration = (m) =>
   m.by === "the-town" && m.tier === "constitution" && m.class !== undefined && standsInTheWorks(m);
 const CLASS_ROSTER = new Set(marks.filter(isClassDeclaration).map((m) => String(m.class)));
 
+// THE KIND NAMES THE CLASS (LOGOS v2 part 2, W2; ruled 2026-10-16 16:02: "The
+// `class:` field folds into `kind`"). A record's kind is either one of the
+// standing words the field carried until then (both forms are read, always: a
+// door or a fixture may still write `kind: sited` + `class: thing`), or a class
+// the works declare. How such a record stands is read off its class's chain:
+// under post it is a post, under predicate a predicate (naming a naming),
+// under parcel a parcel, and anything else that carries a place stands sited
+// (a thing, and the town, timetable and note instances whose classes are not
+// under sited, which is a gap of the tree's, not of the record's).
+const CLASS_IDX = classIndex(marks.filter((m) => !m._error));
+const standingOfRecord = (rec) => {
+  if (KINDS.has(rec.kind)) return rec.kind;
+  if (rec.kind == null || !CLASS_ROSTER.has(String(rec.kind))) return null;
+  const chain = classChain(CLASS_IDX, String(rec.kind)).map((c) => String(c.class));
+  if (chain.includes("post")) return "post";
+  if (chain.includes("naming")) return "naming";
+  if (chain.includes("predicate")) return "predicated";
+  if (chain.includes("parcel")) return "parcel";
+  return "sited";
+};
+
 // the gate quotes the law (rung 1, 2026-08-02): a refusal cites the clause of
 // the-town/logos it enforces — id + body verbatim, so the bounce hands the
 // writer an investigable handle and the exact law, never a paraphrase. The
@@ -180,7 +202,13 @@ for (const rec of marks) {
   if (rec._error) { err(rec, `unreadable mark.md: ${rec._error}`); continue; }
 
   // 1. identity: valid kind, authorship (by), path-safe slug unique per author, tier, date
-  if (!KINDS.has(rec.kind)) { err(rec, `kind must be one of ${[...KINDS].join(" | ")} (got ${JSON.stringify(rec.kind)})${cite("the-town/the-kinds")}`); }
+  // the kind names the class (W2), or is a standing word the field carried until then
+  const standing = standingOfRecord(rec);
+  const klass = instanceClassOf(rec);
+  if (standing == null) { err(rec, `kind must be one of ${[...KINDS].join(" | ")}, or name a class the works declare (got ${JSON.stringify(rec.kind)})${cite("the-town/the-kinds")}`); }
+  // the old form still reads, and is told what it is now: class: folds into kind
+  if (rec.class !== undefined && rec.kind !== "class" && rec.kind !== "property")
+    warn(rec, `class: ${rec.class} folds into kind: write kind: ${rec.class} and drop the class: line (ruled 2026-10-16: "The \`class:\` field folds into \`kind\`")`);
   if (rec.by == null) err(rec, `by: <author> is required — in the spatial tree (v2) authorship is frontmatter, not the path${cite("the-town/the-own-hand")}`);
   if (!SLUG_RE.test(rec.slug)) err(rec, `slug "${rec.slug}" must be lowercase-hyphenated (it is the directory name and the leaf of the id)`);
   if (byId.has(rec.id)) err(rec, `duplicate id "${rec.id}" — a leaf slug must be unique per author (by)${cite("the-town/the-own-hand")}`);
@@ -263,7 +291,7 @@ for (const rec of marks) {
   // the exact field. Scoped to notice-shaped records: the class TYPE mark in
   // the Keeping Works carries class: bounty with none of ask/reward/status,
   // and is a definition, not a notice.
-  if (rec.class !== undefined && !CLASS_ROSTER.has(String(rec.class)))
+  if (rec.class !== undefined && rec.kind !== "class" && !CLASS_ROSTER.has(String(rec.class)))
     err(rec, `class: ${JSON.stringify(rec.class)} names no class the law knows (the roster: ${[...CLASS_ROSTER].sort().join(", ")})`);
   // Scope by WHAT THE MARK IS, never by whether it bothered to carry the
   // fields (review W-1: a bare `class: bounty` on the board slipped the gate
@@ -275,13 +303,13 @@ for (const rec of marks) {
   // a definition nested under a class mark — household/human — is still of
   // the works); the old direct-parent test was this rule's per-bounty prototype
   const isClassDefinition = isClassDeclaration(rec);
-  if (rec.class === "bounty" && !isClassDefinition) {
+  if (klass === "bounty" && !isClassDefinition) {
     // A BOUNTY IS A POST (ruled 2026-10-16 15:12: "ideas are no longer marks.
     // They are posts … Same for bounties."). It stands nowhere, so the
     // off-the-board warning that stood here ("the board reads only notices
     // standing on the-town/the-bounty-board") has no ground to ask about: a
     // post is read by its class, and what it is about is its `about:`.
-    if (rec.kind !== "post") err(rec, `a bounty notice is a post — "ideas are no longer marks. They are posts … Same for bounties." (ruled 2026-10-16) (got kind: ${JSON.stringify(rec.kind)})`);
+    if (standing !== "post") err(rec, `a bounty notice is a post — "ideas are no longer marks. They are posts … Same for bounties." (ruled 2026-10-16) (got kind: ${JSON.stringify(rec.kind)})`);
     const askLen = [...String(rec.ask ?? "").trim()].length;
     if (askLen === 0) err(rec, `a bounty notice needs ask: — one claim, ≤${BODY_MAX} chars`);
     else if (askLen > BODY_MAX) err(rec, `ask is ${askLen} chars; the cap is ${BODY_MAX}${cite("the-town/the-one-claim")}`);
@@ -294,7 +322,7 @@ for (const rec of marks) {
     if (st !== "open" && st !== "done") err(rec, `status: is open or done (got ${JSON.stringify(rec.status)})`);
     if (rec.threshold !== undefined && rec.by !== TOWN)
       err(rec, `threshold: is the town's bar — a resident notice carries reward, never threshold`);
-  } else if (rec.class === undefined && (rec.ask !== undefined || rec.reward !== undefined || rec.status !== undefined)) {
+  } else if (klass === undefined && (rec.ask !== undefined || rec.reward !== undefined || rec.status !== undefined)) {
     warn(rec, `ask/reward/status without class: bounty — the board cannot read this as a notice`);
   }
 
@@ -333,17 +361,17 @@ for (const rec of marks) {
   // subclass of postmark-node."). It neither stands sited nor predicated; what
   // it is an idea OF is its sovereign `about:` (16:02 item 3). The body is still
   // the claim.
-  if (rec.class === "idea" && !isClassDeclaration(rec)) {
-    if (rec.kind !== "post")
+  if (klass === "idea" && !isClassDeclaration(rec)) {
+    if (standing !== "post")
       err(rec, `an idea is a post — "ideas are no longer marks. They are posts, which are a different subclass of postmark-node." (ruled 2026-10-16); what it is an idea of is its about: (got kind: ${JSON.stringify(rec.kind)})`);
     if ([...String(rec.body ?? "").trim()].length === 0)
       err(rec, `an idea needs its thought — the BODY is the claim${cite("the-town/the-one-claim")}`);
   }
 
   // 4. kind-specific shape
-  if (rec.kind === "sited" || rec.kind === "parcel") {
-    if (rec.kind === "sited" && !hasGeom(rec)) err(rec, `sited marks need at {x,y} and extent {w,h} in grid meters${cite("the-town/the-kinds")}`);
-    if (rec.kind === "parcel" && rec.at == null) err(rec, `parcel marks need at {x,y} (extent defaults to 25x25)${cite("the-town/the-kinds")}`);
+  if (standing === "sited" || standing === "parcel") {
+    if (standing === "sited" && !hasGeom(rec)) err(rec, `sited marks need at {x,y} and extent {w,h} in grid meters${cite("the-town/the-kinds")}`);
+    if (standing === "parcel" && rec.at == null) err(rec, `parcel marks need at {x,y} (extent defaults to 25x25)${cite("the-town/the-kinds")}`);
     if (rec.slot !== undefined || rec.value !== undefined) err(rec, `${rec.kind} marks carry no slot/value (those are for predicated/naming)`);
     if (rec._explicitParent) err(rec, `${rec.kind} marks never declare a parent — containment is computed from geometry, not authored`);
     // 4b. claim-honesty for a points: ring (SCHEMA v2): the ring must be a real
@@ -354,11 +382,11 @@ for (const rec of marks) {
       if (!polygonOf(rec)) err(rec, `points: must be a ring of ≥3 vertices ([[x,y],…] or "x1,y1 x2,y2 …")`);
       else if (!ringMatchesClaim(rec)) err(rec, `the points: ring's bounding box must equal the mark's at/extent claim — the claim IS the ring's bbox (SCHEMA v2)`);
     }
-  } else if (rec.kind === "predicated" || rec.kind === "naming") {
+  } else if (standing === "predicated" || standing === "naming") {
     if (rec.at !== undefined || rec.extent !== undefined) err(rec, `${rec.kind} marks carry no at/extent — they take their locus from their parent${cite("the-town/the-continuation")}`);
-    if (rec.kind === "predicated" && (rec.slot === undefined || rec.value === undefined)) err(rec, `predicated marks need slot and value${cite("the-town/the-kinds")}`);
-    if (rec.kind === "naming" && rec.value === undefined) err(rec, `naming marks need value (the name); slot is implicitly "name"`);
-    if (rec.kind === "naming" && rec.slot !== undefined && rec.slot !== "name") warn(rec, `naming marks use slot "name" (or omit it); got "${rec.slot}"`);
+    if (standing === "predicated" && (rec.slot === undefined || rec.value === undefined)) err(rec, `predicated marks need slot and value${cite("the-town/the-kinds")}`);
+    if (standing === "naming" && rec.value === undefined) err(rec, `naming marks need value (the name); slot is implicitly "name"`);
+    if (standing === "naming" && rec.slot !== undefined && rec.slot !== "name") warn(rec, `naming marks use slot "name" (or omit it); got "${rec.slot}"`);
     // parent source: nested (implicit) XOR explicit terrain — exactly one
     const nested = rec._parentMarkId != null;
     const explicit = rec._explicitParent != null;
@@ -392,13 +420,13 @@ for (const rec of marks) {
     if (rec.class !== undefined) err(rec, `a property names no class: — it stands under the class it belongs to`);
     if (rec._explicitParent) err(rec, `property marks never declare a parent — the class (or property) they stand under is the enclosing directory`);
     else if (!rec._parentMarkId) err(rec, `a property stands under the class (or the property) it belongs to — this one stands under nothing`);
-  } else if (rec.kind === "post") {
+  } else if (standing === "post") {
     // A POST IS NOT A MARK (ruled 2026-10-16 15:12): an idea or a bounty is a
     // post, a sibling of mark under postmark-node. It stands nowhere, and what
     // it is about is its sovereign `about:` (16:02 item 3).
     if (rec.at !== undefined || rec.extent !== undefined) err(rec, `a post carries no at/extent — "ideas are no longer marks. They are posts" (ruled 2026-10-16); what it is about is its about:`);
     if (rec.slot !== undefined || rec.value !== undefined) err(rec, `a post carries no slot/value — it is no predicate; its body is the claim`);
-    if (rec.class === undefined) err(rec, `a post names its class: (idea, bounty, …)`);
+    if (klass === undefined) err(rec, `a post names its class (kind: idea, kind: bounty, …)`);
     if (rec.about !== undefined && !standingIndex.has(String(rec.about)))
       err(rec, `about: ${JSON.stringify(rec.about)} names no mark in the record — a post's about: names the mark it is about`);
   }
@@ -449,7 +477,6 @@ for (const rec of marks) {
 //   - the locks: a subclass that redeclares a constitution property its
 //     ancestor declares (shadowing it) must be the town's own, since a
 //     constitution value is the town's word (18:44 item 7).
-const CLASS_IDX = classIndex(marks.filter((m) => !m._error));
 {
   const classNodes = marks.filter((m) => !m._error && isClassDeclaration(m));
   const byName = new Map();
@@ -501,14 +528,15 @@ const CLASS_IDX = classIndex(marks.filter((m) => !m._error));
   const undeclared = new Map(); // `${class}\u0000${field}` -> { first, count }
   for (const rec of marks) {
     if (rec._error || rec.kind === "class" || rec.kind === "property") continue;
-    const klass = rec.class !== undefined ? String(rec.class) : STANDING_CLASS[rec.kind];
+    const stands = standingOfRecord(rec);
+    const klass = instanceClassOf(rec) ?? STANDING_CLASS[stands];
     // a class the tree does not declare has no properties to check against (a
     // fixture world without the works): the question has no answer, so no word
     if (!klass || !classChain(CLASS_IDX, klass).length) continue;
     const declared = propertyNames(CLASS_IDX, klass);
     // while `kind:` still names how a mark stands, the fields that standing
     // requires (§4 above) are the record grammar's, whichever class it names
-    const standing = STANDING_FIELDS[rec.kind] ?? [];
+    const standing = STANDING_FIELDS[stands] ?? [];
     for (const k of Object.keys(rec)) {
       if (k.startsWith("_") || RESERVED.has(k) || declared.has(k) || standing.includes(k)) continue;
       const key = `${klass}\u0000${k}`;
@@ -653,7 +681,8 @@ const parentOf = (rec) => (rec._parentMarkId ? byId.get(rec._parentMarkId) : nul
     // mark must declare parent: terrain:<id>", so the two rules cannot both bind
     // it. ⚠ THIS IS THE GATE'S READING of a sentence the freeze states without
     // this qualification, and it is flagged for the founder rather than buried.
-    if (rec.kind !== "sited" && rec.kind !== "parcel") continue;
+    const stands = standingOfRecord(rec);
+    if (stands !== "sited" && stands !== "parcel") continue;
     //
     // ── ADVISORY, PENDING THE FOUNDER'S SEQUENCING WORD (2026-08-25) ────────
     //
@@ -782,7 +811,7 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
 // find out.
 {
   const DEPART_RE = /^([01]\d|2[0-3]):([0-5]\d)Z$/; // UTC times-of-day, on the crossing clock
-  const siteable = (m) => m && m.kind === "sited" && hasGeom(m);
+  const siteable = (m) => m && isSited(m) && hasGeom(m);
   for (const rec of marks) {
     if (rec._error) continue;
     const declared = rec.timetable !== undefined;

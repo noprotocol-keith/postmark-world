@@ -364,11 +364,14 @@ test("A BOUNTY NOTICE is a POST — judged by what it is, never by where its fil
   const works = { path: `${R}/the-keeping-works`, fm: {
     kind: "sited", by: "the-town", tier: "constitution", date: "2026-08-11", at: { x: 0, y: 0 }, extent: { w: 200, h: 200 } } };
   const bountyClass = { path: `${R}/the-keeping-works/bounty`, fm: {
-    kind: "class", by: "the-town", tier: "constitution", date: "2026-08-11", class: "bounty" } };
+    kind: "class", by: "the-town", tier: "constitution", date: "2026-08-11", class: "bounty", extends: "post" } };
+  const postClass = { path: `${R}/the-keeping-works/post`, fm: {
+    kind: "class", by: "the-town", tier: "constitution", date: "2026-10-17", class: "post" } };
   const board = { path: `${R}/the-bounty-board`, fm: {
     kind: "sited", by: "the-town", tier: "constitution", date: "2026-08-11", at: { x: 5000, y: 5000 }, extent: { w: 100, h: 100 } } };
-  const notice = { kind: "post", by: "jetto", date: "2026-08-25",
-    class: "bounty", ask: "find the thing", reward: 3, status: "open" };
+  // the kind names the class (W2): a bounty notice writes kind: bounty
+  const notice = { kind: "bounty", by: "jetto", date: "2026-08-25",
+    ask: "find the thing", reward: 3, status: "open" };
 
   // No --freeze manifest: this fixture is about the notice clause, and holding a
   // synthetic tree to this repo's fossil would refuse it for a different reason.
@@ -377,14 +380,14 @@ test("A BOUNTY NOTICE is a POST — judged by what it is, never by where its fil
 
   // (the flat-field inventory is §5c's and names ask/reward/status until the
   // bounty grammar is declared as properties; this test is about the filing)
-  assert.deepEqual(said([THE_ROOT, works, bountyClass, board, { path: "jetto/a-notice", fm: notice }]), [],
+  assert.deepEqual(said([THE_ROOT, works, bountyClass, postClass, board, { path: "jetto/a-notice", fm: notice }]), [],
     "filed at its id: a lawful notice, and nothing about where it stands");
-  assert.deepEqual(said([THE_ROOT, works, bountyClass, board, { path: `${R}/the-bounty-board/a-notice`, fm: notice }]), [],
+  assert.deepEqual(said([THE_ROOT, works, bountyClass, postClass, board, { path: `${R}/the-bounty-board/a-notice`, fm: notice }]), [],
     "and filed inside the board's directory: the same answer");
 
   // THE FLIP: a notice still written as a sited mark is refused, quoting the ruling.
-  const sited = said([THE_ROOT, works, bountyClass, board,
-    { path: "jetto/a-notice", fm: { ...notice, kind: "sited", at: { x: 5000, y: 5000 }, extent: { w: 2, h: 2 } } }]);
+  const sited = said([THE_ROOT, works, bountyClass, postClass, board,
+    { path: "jetto/a-notice", fm: { ...notice, kind: "sited", class: "bounty", at: { x: 5000, y: 5000 }, extent: { w: 2, h: 2 } } }]);
   assert.ok(sited.some((s) => /^ERROR a bounty notice is a post/.test(s)), `a sited notice is refused as no post: ${sited.join(" | ")}`);
 });
 

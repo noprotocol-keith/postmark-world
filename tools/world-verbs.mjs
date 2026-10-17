@@ -10,6 +10,7 @@
 //   { marks, terrain, heightfield, light, fogCeilingM, charter }
 // A `state` is the walker: { x, y, name, household? }.
 
+import { isSited, isGround } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 import {
   fieldOfView, radialSerialize, statusAt, lightLevelAt, fogModel,
   mistsAt, mistsHere, mistsBlock,
@@ -110,7 +111,7 @@ export function containmentChain(pos, marks) {
   // Marks whose TRUE footprint contains the point. A points: ring wins over its
   // at/extent bbox; otherwise a regular mark keeps the byte-identical rect path.
   const containing = marks
-    .filter((m) => m.at && (m.kind === "sited" || m.kind === "parcel") && pointWithinMark(pos, m))
+    .filter((m) => isGround(m) && pointWithinMark(pos, m))
     .sort((a, b) => extentArea(a) - extentArea(b)); // innermost (smallest) first
   // build the ANCESTRY nest from the innermost outward: a larger mark joins only
   // if its true shape CONTAINS the current nest tip — so sibling extents that
@@ -981,7 +982,7 @@ function admitsAsFurniture(outer, inner) {
 
 function childrenByGeometry(parent, world) {
   if (!parent.at || !parent.extent) return [];
-  return world.marks.filter((m) => m !== parent && m.at && m.extent && m.kind === "sited" && admitsAsFurniture(parent, m));
+  return world.marks.filter((m) => m !== parent && m.extent && isSited(m) && admitsAsFurniture(parent, m));
 }
 // ONE STEP DOWN ONLY (Keemin, 2026-08-04: parents and children should show their
 // direct relations, no grandchildren and no grandparents).
@@ -1034,7 +1035,7 @@ function ancestorsByGeometry(target, world, { kinds = CONTAINER_KINDS } = {}) {
   const tr = rect(target), ta = tr.w * tr.h;
   const containing = world.marks
     .filter((m) => {
-      if (m === target || !kinds.includes(m.kind) || !m.at || !m.extent) return false;
+      if (m === target || !kinds.includes(isSited(m) ? "sited" : m.kind) || !m.at || !m.extent) return false;
       const mr = rect(m);
       if (Math.max(mr.w, mr.h) >= DIALS.world_scale_extent_m) return false;
       return mr.w * mr.h > ta && marksContain(m, target); // strictly larger, as the fold requires of a parent

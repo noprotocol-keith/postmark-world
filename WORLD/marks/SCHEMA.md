@@ -128,6 +128,12 @@ body (LOGOS/classes.md § Property and predicate); an idea or a bounty is a
 `post`, standing nowhere, with an optional `about:` naming the mark it is about
 (§ Posts). The kind migration then folds `class:` into `kind:`, so `kind` names
 the node's own class (§ The LOGOS ladder).*
+**The kind migration (W2, 2026-10-17):** an instance of a declared class writes
+that class as its kind — `kind: thing`, `kind: idea`, `kind: portal-ground` —
+and no `class:` line. The standing words above stay the kind of a plain mark of
+each standing (an unclassed `sited` mark, a `parcel`, a `predicated` claim, a
+`naming`). Both forms are read (tools/mark-kind.mjs); the lint tells a record
+still written `kind: sited` + `class: thing` that `class:` folds into `kind:`.
 
 | field | sited | parcel | predicated | naming |
 |---|---|---|---|---|

@@ -32,6 +32,10 @@ after(() => { for (const d of SCRATCH) rmSync(d, { recursive: true, force: true 
 import { fileURLToPath } from "node:url";
 import { fold, loadMarks } from "./marks-fold.mjs";
 import { propertyOf } from "./class-properties.mjs";
+import { instanceClassOf } from "./mark-kind.mjs";
+// what a record IS, in either form (W2: `class:` folds into `kind:`); a class
+// node's own name is still its `class:`
+const classOf = (m) => (m.kind === "class" ? m.class : instanceClassOf(m));
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const LINT = join(HERE, "mark-lint.mjs");
@@ -142,7 +146,7 @@ const residentMay = (live, klass) => propertyOf(live, klass, "makers")?.value ==
 
 test("LIVE TREE: class law -- town marks define; residents instantiate only what makers allows", () => {
   const live = loadMarks(MARKS_DIR);
-  const classed = live.filter((m) => m.class !== undefined);
+  const classed = live.filter((m) => classOf(m) !== undefined);
 
   // ⚠ NARROWED 2026-08-26, and the narrowing is the LAW'S OWN LINE, not a
   // loosening to make a new mark fit.
@@ -186,7 +190,7 @@ test("LIVE TREE: class law -- town marks define; residents instantiate only what
   assert.ok(townInstanceIds.length > 0, "the town authors instances as well as definitions — a sweep finding none is a sweep that ran on nothing");
   const rosterFromWorks = new Set(defs.map((m) => m.class));
   for (const m of townInstances)
-    assert.ok(rosterFromWorks.has(m.class),
+    assert.ok(rosterFromWorks.has(classOf(m)),
       `${m.id}: an instance names a class the WORKS declares — the roster comes from the works alone, so a class known only by an instance is a class nothing defined`);
   assert.ok(defs.some((m) => m.class === "bounty"), "the bounty class stands in the roster");
   // ⚠ EXCEPTIONS BY RULING — the law's own line: the set grows by ruling,
@@ -213,8 +217,8 @@ test("LIVE TREE: class law -- town marks define; residents instantiate only what
   ]);
   for (const m of classed.filter((m) => m.by !== "the-town")) {
     if (INSTANCE_EXCEPTIONS_BY_RULING.has(m.id)) continue;
-    assert.ok(residentMay(live, String(m.class)),
-      `${m.id}: "${m.class}" answers makers: false -- it is the town's alone (the-town/nothing-you-control-mints)`);
+    assert.ok(residentMay(live, String(classOf(m))),
+      `${m.id}: "${classOf(m)}" answers makers: false -- it is the town's alone (the-town/nothing-you-control-mints)`);
   }
   // and the roots answer as ruled (18:44, 19:39): the false root, the true
   // roots, and the sited classes that would put a resident in control of
@@ -227,7 +231,7 @@ test("LIVE TREE: class law -- town marks define; residents instantiate only what
   // Notice fields ride only bounty-classed marks (the board grammar); anywhere
   // else they are strays to investigate.
   for (const m of live.filter((m) => m.ask !== undefined || m.reward !== undefined || m.status !== undefined || m.threshold !== undefined))
-    assert.equal(m.class, "bounty", `${m.id}: notice fields belong to the bounty grammar`);
+    assert.equal(classOf(m), "bounty", `${m.id}: notice fields belong to the bounty grammar`);
 });
 
 // ── the gate (mark-lint § 3d), run the way the fleet and the PR lane run it ──
@@ -254,7 +258,11 @@ function fixtureTree() {
   const type = join(works, "bounty");
   mkdirSync(type, { recursive: true });
   writeFileSync(join(type, "mark.md"),
-    "---\nkind: sited\nby: the-town\ntier: constitution\ndate: 2026-08-11\nat: { x: 0, y: 0 }\nextent: { w: 5, h: 5 }\nclass: bounty\n---\n\nA bounty is one ask, a reward in stamps, a status: open or done.\n");
+    "---\nkind: class\nby: the-town\ntier: constitution\ndate: 2026-08-11\nclass: bounty\nextends: post\n---\n\nA bounty is one ask, a reward in stamps, a status: open or done.\n");
+  // the post class it extends (15:12), so `kind: bounty` reads as a post (W2)
+  mkdirSync(join(works, "post"), { recursive: true });
+  writeFileSync(join(works, "post", "mark.md"),
+    "---\nkind: class\nby: the-town\ntier: constitution\ndate: 2026-10-17\nclass: post\n---\n\nA post is an ask the town reads, not a claim on the world.\n");
   return { dir, root, board };
 }
 
@@ -393,7 +401,7 @@ test("IDEA: a POST — \"ideas are no longer marks. They are posts\" (2026-10-16
   writeFileSync(join(tank, "mark.md"),
     "---\nkind: sited\nby: the-town\ntier: constitution\ndate: 2026-08-30\nat: { x: 300, y: -100 }\nextent: { w: 30, h: 20 }\n---\n\nThe Think Tank, in BETA.\n");
   const idea = (body, fields = "") =>
-    `---\nkind: post\nby: testerhh\ndate: 2026-08-30\nclass: idea\n${fields}---\n\n${body}`;
+    `---\nkind: idea\nby: testerhh\ndate: 2026-08-30\n${fields}---\n\n${body}`; // the kind names the class (W2)
 
   mkdirSync(join(tank, "a-town-calendar"), { recursive: true });
   writeFileSync(join(tank, "a-town-calendar", "mark.md"), idea("A calendar the town keeps together.\n"));
@@ -433,8 +441,8 @@ test("IDEA: a POST — \"ideas are no longer marks. They are posts\" (2026-10-16
   const folded = serialized(fold({ marks: loadMarks(dir), terrain, stakes: [] }));
   const row = folded.marks.find((m) => m.id === "testerhh/a-bench-at-the-quay");
   assert.ok(row, "the idea folds into the store at all");
-  assert.equal(row.class, "idea", "the class survives the fold — the Tank's join key");
-  assert.equal(row.kind, "post");
+  assert.equal(row.kind, "idea", "the kind is the class — the Tank's join key, in the form W2 writes (S1 reads either)");
+  assert.equal(row.class, undefined, "and no class: rides beside it");
   assert.equal(row.at, undefined, "a post publishes NO at: — it stands nowhere");
   assert.equal(row.about, "the-town/the-think-tank", "it publishes what it is an idea OF");
 
@@ -454,4 +462,18 @@ test("IDEA: a POST — \"ideas are no longer marks. They are posts\" (2026-10-16
     assert.match(out, new RegExp(`${slug}: an idea is a post — "ideas are no longer marks\\. They are posts`), `kind: ${kind} is refused, quoting the ruling`);
     assert.match(out, new RegExp(`${slug}: an idea is a post[^\\n]*got kind: "${kind}"`), "the refusal names the kind it got");
   }
+});
+
+// W2 (ruled 2026-10-16 16:02: "The `class:` field folds into `kind`"): a
+// notice written the old way — a standing word beside `class:` — is still read
+// as what it is, and is told the form it has now. Advisory, never a refusal:
+// a door may still write the old form until its own readers move (O1).
+test("THE OLD FORM still reads as what it is, and is told that class: folds into kind", () => {
+  const out = lintWithNotice({});
+  assert.doesNotMatch(out, /ERROR[^\n]*a-notice/, "kind: post + class: bounty is still a lawful notice");
+  assert.match(out, /\[WARN\][^\n]*a-notice: class: bounty folds into kind: write kind: bounty/);
+  const newForm = lintWithNotice({ kind: "bounty", class: undefined });
+  assert.doesNotMatch(newForm, /(ERROR|WARN)[^\n]*a-notice: (?!flat field)/, `kind: bounty is the notice in the form it has now: ${newForm}`);
+  assert.match(lintWithNotice({ kind: "quest", class: undefined }), /a-notice: kind must be one of [^\n]*or name a class the works declare \(got "quest"\)/,
+    "a kind that names no class is refused by name");
 });

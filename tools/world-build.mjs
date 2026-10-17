@@ -18,6 +18,7 @@
 // Browser-purity: this imports ONLY world-engine.mjs (pure). No node:*, no
 // marks-fold. All numeric leans are dials, movable by ruling.
 
+import { isSited } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 import { buildHeightfield } from "./world-engine.mjs";
 
 // ───────────────────────── dials (moved from world-poc, verbatim) ───────────
@@ -96,7 +97,7 @@ export function waterControlPoints(skeleton) {
 export function deriveHomeControlPoints(marks) {
   const pts = [];
   for (const m of marks) {
-    if (m.kind !== "sited" || !m.at) continue;
+    if (!isSited(m)) continue;
     let best = null, bd = Infinity;
     for (const r of REGION_ANCHORS) {
       const d = (m.at.x - r.at.x) ** 2 + (m.at.y - r.at.y) ** 2;

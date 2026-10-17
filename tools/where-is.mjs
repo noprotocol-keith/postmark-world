@@ -28,6 +28,7 @@
 // what lets the office, the spectator, and any clone all recompute the same
 // answer without a second copy of the reasoning.
 
+import { isSited } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 import { currentDeparture, positionAt, fractionalCrossing } from "./walk.mjs";
 
 // The honest nowhere. A resident the record cannot place is NOT PLACED, and
@@ -172,7 +173,7 @@ export function readHomeDeclaration(pred, world) {
   const value = String(pred.value ?? "").trim();
   if (value === pred.by) return { parcel, mark: null };
   const mark = (world?.marks ?? []).find((m) => m.id === value) ?? null;
-  if (!mark || mark.by !== pred.by || mark.kind !== "sited")
+  if (!mark || mark.by !== pred.by || !isSited(mark))
     return { refused: `its value names neither ${pred.by} nor a sited mark of ${pred.by}'s` };
   if (!standsOn(mark, parcel)) return { refused: `${mark.id} does not stand on ${parcel.id}` };
   return { parcel, mark };

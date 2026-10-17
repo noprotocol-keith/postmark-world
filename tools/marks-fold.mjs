@@ -28,6 +28,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSy
 import { dirname, join, basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { markStanding } from "./mark-standing.mjs";   // the ONE standing rule (see § what the rank is READ FROM)
+import { isSited, isGround, instanceClassOf } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -570,7 +571,7 @@ export function placementParent(claim, marks, { worldScaleM = 50000 } = {}) {
   const claimArea = rect(claim).w * rect(claim).h;
   let best = null, bestArea = Infinity;
   for (const m of marks) {
-    if ((m.kind !== "sited" && m.kind !== "parcel") || !m.at) continue;
+    if (!isGround(m)) continue;
     const mr = rect(m), area = mr.w * mr.h;
     if (Math.max(mr.w, mr.h) >= worldScaleM) continue; // the world-root is the frame, never a parent → null means root
     if (area <= claimArea) continue;                    // a parent is strictly larger than its child (the fold's rule)
@@ -632,7 +633,7 @@ export const worldRootOf = (marks) => marks.find((m) => leafSlugOf(m) === WORLD_
 export function containmentParentOf(mark, marks, root = worldRootOf(marks)) {
   const rootId = root?.id ?? null;
   if (rootId != null && mark.id === rootId) return null;
-  const geometric = (mark.kind === "sited" || mark.kind === "parcel") && mark.at;
+  const geometric = isGround(mark);
   // No self-exclusion needed and none paid for: `placementParent` requires a
   // parent to be STRICTLY larger than the claim, so a mark can never be its own
   // container, and neither can a twin sharing its rect. Filtering the array per
@@ -1165,7 +1166,7 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
   // person with two handles was a stranger on their own ground: their own mark
   // standing in their own parcel folded as a commons mark, exposed to rivalry.
   for (const mk of byId.values()) {
-    if (mk.kind === "sited") {
+    if (isSited(mk)) {
       const held = parcelRectsByCred.get(mk._cred) ?? [];
       mk._sovereign = held.some((pr) => contains(pr, rect(mk)));
     }
@@ -1185,7 +1186,7 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
 
   // containment edges (computed, never authored): sited-in-sited by geometry; predicated/naming by parent ref
   const children = new Map(); const parentOf = new Map();
-  const sited = [...byId.values()].filter(mk => mk.kind === "sited");
+  const sited = [...byId.values()].filter(mk => isSited(mk));
   for (const a of sited) for (const b of sited) {
     if (a === b) continue;
     const ra = rect(a), rb = rect(b);
@@ -1245,7 +1246,7 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
   // parent. A law return's ground is not touched: it took its subtree.
   if (consent.alone?.size) {
     const standing = [...byId.values()].filter((mk) => !gone.has(mk.id));
-    const standingSited = standing.filter((mk) => mk.kind === "sited");
+    const standingSited = standing.filter((mk) => isSited(mk));
     const root = worldRootOf([...byId.values()]);
     const smallestSitedAround = (b) => {
       const rb = rect(b);
@@ -1258,11 +1259,11 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
       return best ? best.id : null;
     };
     for (const mk of standing) {
-      if (mk.kind === "sited" && consent.alone.has(parentOf.get(mk.id))) {
+      if (isSited(mk) && consent.alone.has(parentOf.get(mk.id))) {
         const up = smallestSitedAround(mk);
         if (up) parentOf.set(mk.id, up); else parentOf.delete(mk.id);
       }
-      if ((mk.kind === "sited" || mk.kind === "parcel") && mk.at && consent.alone.has(containedBy.get(mk.id))) {
+      if (isGround(mk) && consent.alone.has(containedBy.get(mk.id))) {
         const up = containmentParentOf(mk, standing, root);
         containedBy.set(mk.id, up);
         mk._containedBy = up ?? null;
@@ -1349,8 +1350,8 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
           es.push({ to: parentOf.get(id), channel: (mk.kind === "predicated" || mk.kind === "naming") ? "describes" : "contains", conducts: false });
         }
       }
-      if (mk.class !== undefined) {
-        const decl = declByClass.get(String(mk.class));
+      if (instanceClassOf(mk) !== undefined) {
+        const decl = declByClass.get(instanceClassOf(mk));
         // an instance flows to its class; a declaration is not its own instance
         if (decl && decl !== id)
           es.push({ to: decl, channel: "instance-of", conducts: !gone.has(id) && !gone.has(decl) });
@@ -1996,7 +1997,7 @@ const sameRect = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y && a.w === b
  * be a second vocabulary for one fact.
  */
 function deltaView(mk, cred, rectsByCred, world = null) {
-  const held = mk.kind === "sited" ? (rectsByCred.get(cred) ?? []) : [];
+  const held = isSited(mk) ? (rectsByCred.get(cred) ?? []) : [];
   // The containment answer, asked of the WHOLE folded world plus this delta's
   // own candidates — the same question `fold` asks, so a mark's standing does
   // not depend on which of the two paths judged it. Published `placementParent`
@@ -2008,7 +2009,7 @@ function deltaView(mk, cred, rectsByCred, world = null) {
     id: mk.id, kind: mk.kind, by: mk.by ?? mk.household, household: mk.household ?? mk.by,
     declared_household: cred, date: mk.date,
     at: mk.at, extent: mk.extent, parent: mk.parent, slot: mk.slot, value: mk.value,
-    sovereign: mk.kind === "sited" ? held.some((pr) => contains(pr, rect(mk))) : false,
+    sovereign: isSited(mk) ? held.some((pr) => contains(pr, rect(mk))) : false,
     body: mk.body,
     ...(contained ? { placementParent: contained } : {}),
     // a ground's consent word, which the standing walk reads (mark-standing.mjs
@@ -2057,7 +2058,7 @@ export function sovereignInResult(views, world, { dials = DIALS } = {}) {
     rectsByCred.get(cred).push(r);
   }
   for (const view of views.values()) {
-    if (view.kind !== "sited") continue;
+    if (!isSited(view)) continue;
     view.sovereign = (rectsByCred.get(view.declared_household ?? view.household) ?? []).some((pr) => contains(pr, rect(view)));
   }
 }

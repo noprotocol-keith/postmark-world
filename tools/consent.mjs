@@ -165,6 +165,7 @@
 //              holder's opposition on their own parcel stands whatever the town
 //              declared neutral.
 
+import { isGround } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 import { claimInstant } from "./claim-instant.mjs";
 import { marksOverlapArea } from "./geometry.mjs";
 
@@ -389,7 +390,7 @@ export function resolveConsent({ byId, credOf, parcels, ownStamps, parentOf, rec
   // ---- returns, with the subtree and the escrow guard ----
   const children = new Map();
   for (const [c, p] of parentOf) { if (!children.has(p)) children.set(p, []); children.get(p).push(c); }
-  const positioned = (mk) => !!mk?.at && (mk.kind === "sited" || mk.kind === "parcel");
+  const positioned = (mk) => isGround(mk);
   // A SUBTREE IS THE OPPOSED HOUSEHOLD'S OWN (POS-477). `parentOf` holds the
   // geometric containment edge (the smallest sited mark around a mark, the edge
   // published as `placementParent`), so an opposed mark's descendants include

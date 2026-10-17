@@ -21,6 +21,7 @@
 // One engine, imported the clone's way (relative into the package): the browser
 // runs the exact library anyone can `node`. If this page and a clone disagree,
 // the office has explaining to do.
+import { isGround, instanceClassOf } from "../tools/mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 import { orient, openYourEyes, investigate, containmentChain, mistsSentence, veilSentence, standpointSight } from "../tools/world-verbs.mjs";
 import { assembleWorld } from "../tools/world-build.mjs";
 import { DIALS, bearingDeg, quantizeBearing, mistsAt, mistsRoad } from "../tools/world-engine.mjs";
@@ -81,7 +82,7 @@ const markIndex = (marks) => marks instanceof Map
 
 export function isEmbodiedMark(mark) {
   const w = Number(mark?.extent?.w), h = Number(mark?.extent?.h);
-  return (mark?.kind === "sited" || mark?.kind === "parcel")
+  return isGround(mark)
     && [mark?.at?.x, mark?.at?.y, w, h].every(Number.isFinite)
     && w > 0 && h > 0;
 }
@@ -379,7 +380,7 @@ const classToken = (raw) => String(raw ?? "").trim().toLowerCase()
 
 export function markStateClasses({ tier = "market", draft = false, mark = null } = {}) {
   const accent = tier === "home" || tier === "constitution" ? tier : "market";
-  const cls = classToken(mark?.class);
+  const cls = classToken(instanceClassOf(mark));
   return `t-${accent}${draft ? " is-draft" : ""}${cls ? ` c-${cls}` : ""}`;
 }
 
@@ -1386,7 +1387,7 @@ export function placeholderExtentSVG(mark, px, { ignoreArt = false } = {}) {
   // the record's OWN word for what this is, through the same mint every other
   // coloured surface reads — so the floor, the pips and the stylesheet cannot
   // hold three private notions of what counts as a door
-  const portal = classToken(mark?.class) === "portal-ground";
+  const portal = classToken(instanceClassOf(mark)) === "portal-ground";
   const fill = `hsl(${hue} 22% 76%)`, edge = `hsl(${hue} 26% 58%)`;
   const attrs = `class="wv-ph-extent${portal ? " c-portal-ground" : ""}" data-id="${esc(mark.id)}" fill="${fill}" stroke="${edge}"`;
   const ring = polygonOf(mark);
@@ -4221,7 +4222,7 @@ export function paintingMarkIds({ radialIds = [], mineIds = [] } = {}) {
 export const WALK_TARGET_MAX_EXTENT_M = 2000;
 export function isWalkableTarget(mark) {
   if (!mark?.at) return false;
-  if (mark.kind !== "sited" && mark.kind !== "parcel") return false;
+  if (!isGround(mark)) return false;
   if (mark.tier === "constitution") return false;
   const span = Math.max(Number(mark.extent?.w ?? 0), Number(mark.extent?.h ?? 0));
   return span < WALK_TARGET_MAX_EXTENT_M;
@@ -4501,7 +4502,7 @@ export function containmentIndex(marks = [], { insideRoomId = null } = {}) {
   const encloses = (mark) => !!insideRoomId
     && (mark?.id === insideRoomId || (room && mark?.at && mark?.extent ? marksContain(mark, room) : false));
   const ground = (marks ?? [])
-    .filter((mark) => mark?.class !== "thing" && !encloses(mark) && isEmbodiedMark(mark) && !isAmbientMark(mark, byMarkId))
+    .filter((mark) => instanceClassOf(mark) !== "thing" && !encloses(mark) && isEmbodiedMark(mark) && !isAmbientMark(mark, byMarkId))
     .map((mark) => ({ mark, area: Number(mark.extent.w) * Number(mark.extent.h) }))
     .sort((a, b) => a.area - b.area || String(a.mark.id).localeCompare(String(b.mark.id)));
   return { byMarkId, ground, insideRoomId: insideRoomId ?? null };
