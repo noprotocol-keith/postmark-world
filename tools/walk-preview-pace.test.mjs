@@ -32,7 +32,11 @@ test("THE LIVE STORE CARRIES THE STRIDE: the resident class is in world-state.js
   assert.ok(mover, `${STRIDE_CLASS_ID} is not in the published store — a rename would land exactly here`);
   assert.equal(mover.kind, "class");
   assert.equal(mover.class, "resident");
-  assert.equal(mover.dials?.pace_km_per_crossing, 60,
+  // the dial is a property of the class now (LOGOS v2 part 2), a row of its own
+  // under the class; a store folded before the change carries it as the class
+  // row's `dials`, and the store is always the last crossing's fold
+  const property = STORE.marks.find((m) => m.kind === "property" && m.parent === STRIDE_CLASS_ID && m.name === "pace_km_per_crossing");
+  assert.equal(property ? Number(property.default) : mover.dials?.pace_km_per_crossing, 60,
     "the store must carry the dial, not just the class — reading `class` and not `dials` is what left the preview guessing");
   assert.equal(departPaceKm(STORE.marks), 60);
 });

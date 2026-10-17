@@ -37,6 +37,7 @@ import { markStanding } from "./mark-standing.mjs";
 import { consentMap, CONSENT_WORDS, CONSENT_FIELD, townOwnedMark, cameAfter, inContact, seniorAtContact } from "./consent.mjs";
 import { crossHouseholdRiders, householdResolver } from "./household-frames.mjs";
 import { portalFindings, applyPortalExceptions, PORTAL_RULES } from "./portals.mjs";
+import { classIndex, classChain, ownProperties, propertiesOf, propertyNames, propertyValue } from "./class-properties.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -68,8 +69,19 @@ const FREEZE_PATH = opt("--freeze", OWN_TREE ? join(REPO, "WORLD/filing-freeze.j
 // Same findings, same exit code; only the rendering differs.
 const JSON_OUT = args.includes("--json");
 
-const KINDS = new Set(["sited", "predicated", "naming", "parcel", "class"]);
+// `property` and `post` join with LOGOS v2 part 2 (ruled 2026-10-16): a class's
+// property is a node of its own (§ Property and predicate), and an idea or a
+// bounty is a post, a sibling of mark (§ Posts). The instances' `kind:` still
+// names how a mark stands until the kind migration (W2) folds `class:` into it.
+const KINDS = new Set(["sited", "predicated", "naming", "parcel", "class", "property", "post"]);
 const TIERS = new Set(["constitution", "sovereignty", "market", "draft"]); // v2 protection tiers + draft (gray, 2026-08-09)
+// A property's `tier:` is a different line: whose word decides its value on each
+// instance (18:44 item 7) — the town's, locked, or the maker's.
+const PROPERTY_TIERS = new Set(["constitution", "sovereign"]);
+// The property naming grammar (the meta-class's rails): town-defined and
+// identifier-safe, lowercase words joined by `_` or `-`. Names keep the spelling
+// their readers already use (a dial's key, a predicate's slot).
+const PROPERTY_NAME_RE = /^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$/;
 const TOWN = "the-town"; // the town-tier author; only it may claim constitution
 // The world root, kept as a name rather than as a check: the freeze repealed the
 // containment question this gate used to ask of the tree (§6), so nothing here
@@ -173,8 +185,12 @@ for (const rec of marks) {
   if (!SLUG_RE.test(rec.slug)) err(rec, `slug "${rec.slug}" must be lowercase-hyphenated (it is the directory name and the leaf of the id)`);
   if (byId.has(rec.id)) err(rec, `duplicate id "${rec.id}" — a leaf slug must be unique per author (by)${cite("the-town/the-own-hand")}`);
   byId.set(rec.id, rec);
-  // tier: valid, and constitution belongs to the town alone
-  if (!TIERS.has(rec.tier)) err(rec, `tier must be one of ${[...TIERS].join(" | ")} (got ${JSON.stringify(rec.tier)})`);
+  // tier: valid, and constitution belongs to the town alone. On a property node
+  // the line says whose word decides the value (constitution | sovereign).
+  const isProperty = rec.kind === "property";
+  if (isProperty) {
+    if (!PROPERTY_TIERS.has(rec.tier)) err(rec, `a property's tier is whose word decides its value: ${[...PROPERTY_TIERS].join(" | ")} (got ${JSON.stringify(rec.tier)})`);
+  } else if (!TIERS.has(rec.tier)) err(rec, `tier must be one of ${[...TIERS].join(" | ")} (got ${JSON.stringify(rec.tier)})`);
   if (rec.tier === "constitution" && rec.by !== TOWN) err(rec, `tier: constitution is the town's — only by: ${TOWN} may claim it (a market mark cannot bind without stamps)${cite("the-town/the-tiers")}`);
   // B's rule, made structural (residue stripped 2026-08-13): standing is the
   // one walk's verdict, so an AUTHORED tier: is residue the moment it lands —
@@ -186,7 +202,7 @@ for (const rec of marks) {
     let raw = null;
     try { raw = readFileSync(join(rec._dir, "mark.md"), "utf8"); } catch { /* unreadable file already erred above */ }
     const rawTier = raw == null ? null : ((raw.match(/^---\r?\n[\s\S]*?\r?\n---/) || [""])[0].match(/^tier:\s*(\S+)/m) || [])[1] ?? null;
-    if (rawTier && rawTier !== "draft" && !(rec.by === TOWN && rawTier === "constitution"))
+    if (rawTier && rawTier !== "draft" && !(rec.by === TOWN && rawTier === "constitution") && !(rec.by === TOWN && isProperty))
       err(rec, `tier: is not a field — standing is derived by the one walk, never asserted (drop the line; the ground decides)${cite("the-town/the-tiers")}`);
     // 1.5 a value the parser would silently lose (WLD-41): the record above was
     // read already diminished, so this reads the file. A snapshot's records
@@ -214,7 +230,9 @@ for (const rec of marks) {
   // 3. body: present, present-tense, and short (the ruling's 150-char cap)
   const bodyLen = [...String(rec.body ?? "").trim()].length;
   if (bodyLen === 0) warn(rec, `empty body — a mark is an observation; give it one line`);
-  else if (bodyLen > BODY_MAX) err(rec, `body is ${bodyLen} chars; the cap is ${BODY_MAX} (MARKS.md 07-22 ruling)${cite("the-town/the-one-claim")}`);
+  // Class and property nodes take their body from the meta-class, uncapped; the
+  // cap is on residents' marks (LOGOS v2 part 2, ruled 2026-10-16 18:44 item 1).
+  else if (bodyLen > BODY_MAX && rec.kind !== "class" && rec.kind !== "property") err(rec, `body is ${bodyLen} chars; the cap is ${BODY_MAX} (MARKS.md 07-22 ruling)${cite("the-town/the-one-claim")}`);
 
   // 3b. provenance: office/fleet pre-marks translate a resident's OWN words, so
   // they must cite the source and quote it (MARKS.md membrane; fleet contract).
@@ -258,14 +276,12 @@ for (const rec of marks) {
   // the works); the old direct-parent test was this rule's per-bounty prototype
   const isClassDefinition = isClassDeclaration(rec);
   if (rec.class === "bounty" && !isClassDefinition) {
-    // ON THE BOARD means standing on the board's GROUND, not filed in its
-    // directory (re-keyed 2026-08-25). A notice filed at its id — which is where
-    // every notice written after the freeze goes — has no directory parent at
-    // all, and under the old test every one of them read as "off the board" and
-    // was told it could never render, while sitting squarely on it.
-    if (containedBy.get(rec.id) !== "the-town/the-bounty-board")
-      warn(rec, `class: bounty off the board — the board reads only notices standing on the-town/the-bounty-board; this mark can never render there`);
-    if (rec.kind !== "sited") err(rec, `a bounty notice is a sited mark (got kind: ${JSON.stringify(rec.kind)})`);
+    // A BOUNTY IS A POST (ruled 2026-10-16 15:12: "ideas are no longer marks.
+    // They are posts … Same for bounties."). It stands nowhere, so the
+    // off-the-board warning that stood here ("the board reads only notices
+    // standing on the-town/the-bounty-board") has no ground to ask about: a
+    // post is read by its class, and what it is about is its `about:`.
+    if (rec.kind !== "post") err(rec, `a bounty notice is a post — "ideas are no longer marks. They are posts … Same for bounties." (ruled 2026-10-16) (got kind: ${JSON.stringify(rec.kind)})`);
     const askLen = [...String(rec.ask ?? "").trim()].length;
     if (askLen === 0) err(rec, `a bounty notice needs ask: — one claim, ≤${BODY_MAX} chars`);
     else if (askLen > BODY_MAX) err(rec, `ask is ${askLen} chars; the cap is ${BODY_MAX}${cite("the-town/the-one-claim")}`);
@@ -311,9 +327,15 @@ for (const rec of marks) {
   // (§3's ≤150 cap is kind-agnostic; the empty-body WARN is raised to an ERROR
   // here because for an idea the body is not description, it is the thing).
   // Every other kind is still refused, and the refusal now quotes the ruling.
+  //
+  // AN IDEA IS A POST (ruled 2026-10-16 15:12, SUPERSEDING the 09-01 anchor law
+  // above: "ideas are no longer marks. They are posts, which are a different
+  // subclass of postmark-node."). It neither stands sited nor predicated; what
+  // it is an idea OF is its sovereign `about:` (16:02 item 3). The body is still
+  // the claim.
   if (rec.class === "idea" && !isClassDeclaration(rec)) {
-    if (rec.kind !== "sited" && rec.kind !== "predicated")
-      err(rec, `an idea is a sited or a predicated mark — "Ideas can be predicates." (founder-ruled 2026-09-01); sited stands in the ground it is an idea of, predicated stands under the mark it is an idea of (got kind: ${JSON.stringify(rec.kind)})`);
+    if (rec.kind !== "post")
+      err(rec, `an idea is a post — "ideas are no longer marks. They are posts, which are a different subclass of postmark-node." (ruled 2026-10-16); what it is an idea of is its about: (got kind: ${JSON.stringify(rec.kind)})`);
     if ([...String(rec.body ?? "").trim()].length === 0)
       err(rec, `an idea needs its thought — the BODY is the claim${cite("the-town/the-one-claim")}`);
   }
@@ -357,6 +379,28 @@ for (const rec of marks) {
     if (rec.slot !== undefined || rec.value !== undefined) err(rec, `class marks carry no slot/value (those are for predicated/naming)`);
     if (rec.class === undefined) err(rec, `a class mark declares its class: — kind: class with no class: names nothing`);
     if (rec._explicitParent) err(rec, `class marks never declare a parent — their registry standing is the enclosing directory`);
+  } else if (rec.kind === "property") {
+    // A PROPERTY IS THE CLASS SIDE (LOGOS/classes.md § Property and predicate,
+    // ruled 2026-10-16): a node under the class it belongs to, with four fixed
+    // fields, name, tier, default and body. It is class space: the town's, with
+    // no where, and no slot/value (those are an instance predicate's).
+    if (rec.by !== TOWN) err(rec, `a property is class space — only by: ${TOWN} declares one (a resident's claim about a mark is a predicate)`);
+    if (rec.name === undefined) err(rec, `a property needs name: — the field an instance fills`);
+    else if (!PROPERTY_NAME_RE.test(String(rec.name))) err(rec, `property name ${JSON.stringify(rec.name)} breaks the naming grammar: lowercase words joined by _ or - (the meta-class's rails)`);
+    if (rec.at !== undefined || rec.extent !== undefined) err(rec, `property marks carry no at/extent — a property is class space, not ground`);
+    if (rec.slot !== undefined || rec.value !== undefined) err(rec, `property marks carry name/default, never slot/value (those are an instance predicate's)`);
+    if (rec.class !== undefined) err(rec, `a property names no class: — it stands under the class it belongs to`);
+    if (rec._explicitParent) err(rec, `property marks never declare a parent — the class (or property) they stand under is the enclosing directory`);
+    else if (!rec._parentMarkId) err(rec, `a property stands under the class (or the property) it belongs to — this one stands under nothing`);
+  } else if (rec.kind === "post") {
+    // A POST IS NOT A MARK (ruled 2026-10-16 15:12): an idea or a bounty is a
+    // post, a sibling of mark under postmark-node. It stands nowhere, and what
+    // it is about is its sovereign `about:` (16:02 item 3).
+    if (rec.at !== undefined || rec.extent !== undefined) err(rec, `a post carries no at/extent — "ideas are no longer marks. They are posts" (ruled 2026-10-16); what it is about is its about:`);
+    if (rec.slot !== undefined || rec.value !== undefined) err(rec, `a post carries no slot/value — it is no predicate; its body is the claim`);
+    if (rec.class === undefined) err(rec, `a post names its class: (idea, bounty, …)`);
+    if (rec.about !== undefined && !standingIndex.has(String(rec.about)))
+      err(rec, `about: ${JSON.stringify(rec.about)} names no mark in the record — a post's about: names the mark it is about`);
   }
 
 }
@@ -373,8 +417,12 @@ for (const rec of marks) {
     if (pk === "naming") err(rec, `a naming mark cannot contain child marks (move this out)${cite("the-town/the-continuation")}`);
     else if (pk === "predicated" && rec.kind !== "predicated" && rec.kind !== "naming")
       err(rec, `a ${rec.kind} mark cannot nest under a predicate — a predicate's children must be predicates (the continuation law); geometry needs a geometric parent${cite("the-town/the-continuation")}`);
-    else if (pk === "class" && rec.kind !== "class" && rec.kind !== "predicated" && rec.kind !== "naming")
-      err(rec, `a ${rec.kind} mark cannot nest under a class-node — class-space holds classes and their predicates; geometry needs a geometric parent`);
+    else if (pk === "class" && rec.kind !== "class" && rec.kind !== "property" && rec.kind !== "predicated" && rec.kind !== "naming")
+      err(rec, `a ${rec.kind} mark cannot nest under a class-node — class-space holds classes and their properties; geometry needs a geometric parent`);
+    else if (pk === "property" && rec.kind !== "property")
+      err(rec, `a ${rec.kind} mark cannot nest under a property — a property's children are its child properties (its caps and bounds)`);
+    else if (rec.kind === "property" && pk !== "class" && pk !== "property")
+      err(rec, `a property stands under the class (or the property) it belongs to — this one stands under a ${pk ?? "nothing"}`);
     // A predicate that outranks its parent is the one shape the tier binding
     // REFUSES rather than repairs. Everywhere else an outranking child simply
     // stops being framed by its parent and stands on its own world numbers —
@@ -385,6 +433,92 @@ for (const rec of marks) {
     const parent = byId.get(rec._parentMarkId);
     if ((rec.kind === "predicated" || rec.kind === "naming") && parent && rankOf(rec) > rankOf(parent))
       err(rec, `${standingOf(rec)} standing over a parent standing as ${standingOf(parent)} (${parent.id}) — a predicate cannot outrank what it predicates: it is its parent continued${cite("the-town/the-continuation")}`);
+  }
+}
+
+// 5b. THE PROPERTY RAILS AND THE CLASS NAMES (LOGOS v2 part 2; LOGOS/classes.md
+// § The meta-class: "admissible param bounds …, slot naming grammar, collision
+// rules, and the locks"). Asked of the class space as a whole, so after every
+// record has had its own shape checked above.
+//   - no two kinds share a name: a class's name is its own slug (`kind: candy`
+//     names the-town/candy, ruled 16:02), so no two class nodes may declare one
+//     name, and a class node's `class:` is its slug;
+//   - no two properties of one node share a name;
+//   - a default stands within its own child bounds (`min` ≤ default ≤ `max`),
+//     and the bounds are in order;
+//   - the locks: a subclass that redeclares a constitution property its
+//     ancestor declares (shadowing it) must be the town's own, since a
+//     constitution value is the town's word (18:44 item 7).
+const CLASS_IDX = classIndex(marks.filter((m) => !m._error));
+{
+  const classNodes = marks.filter((m) => !m._error && isClassDeclaration(m));
+  const byName = new Map();
+  for (const c of classNodes) {
+    const name = String(c.class);
+    if (name !== c.slug) err(c, `class: ${JSON.stringify(name)} is not its own slug "${c.slug}" — a class's name is its slug, so kind: ${name} would name the-town/${name} (ruled 2026-10-16)`);
+    if (byName.has(name)) err(c, `two kinds share the name "${name}": ${byName.get(name).id} declares it too — kind: ${name} must name one class`);
+    else byName.set(name, c);
+  }
+  const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+  for (const node of marks.filter((m) => !m._error && (isClassDeclaration(m) || m.kind === "property"))) {
+    const props = ownProperties(CLASS_IDX, node.id);
+    const seen = new Map();
+    for (const p of props) {
+      if (seen.has(p.name)) err(p, `two properties of ${node.id} share the name "${p.name}" (${seen.get(p.name).id} and this one) — a node's properties are named once`);
+      else seen.set(p.name, p);
+    }
+    if (node.kind !== "property") continue;
+    const lo = num(propertyValue(seen.get("min")?.default)), hi = num(propertyValue(seen.get("max")?.default));
+    const d = num(propertyValue(node.default));
+    if (lo != null && hi != null && lo > hi) err(node, `${node.name}'s bounds are out of order: min ${lo} > max ${hi}`);
+    if (d != null && lo != null && d < lo) err(node, `${node.name}'s default ${d} is below its own min ${lo}`);
+    if (d != null && hi != null && d > hi) err(node, `${node.name}'s default ${d} is above its own max ${hi}`);
+  }
+  for (const c of classNodes) {
+    const chain = classChain(CLASS_IDX, String(c.class));
+    const inherited = chain.length > 1 ? propertiesOf(CLASS_IDX, String(chain[1].class)) : new Map();
+    for (const p of ownProperties(CLASS_IDX, c.id)) {
+      const up = inherited.get(p.name);
+      if (up && up.tier === "constitution" && c.by !== TOWN)
+        err(p, `${c.id} redeclares ${up.from}'s ${p.name}, a constitution property — a constitution value is the town's word, and only the town's own subclass may set it`);
+    }
+  }
+}
+
+// 5c. A FLAT FIELD MUST BE A DECLARED PROPERTY (ruled 2026-10-16 12:42,
+// confirmed: "the field namespace stays closed"). WARN first, as briefed, while
+// the fields the record already carries are declared: an instance's flat field
+// is checked against its class's properties, up `extends`, beside the record's
+// own reserved fields (16:02: id, by, date, household, declared_household,
+// parent, placementParent, stamps, weight, sovereign) and the record grammar's
+// own lines (kind, class, tier, body). One warning per class and field, with a
+// count, so the inventory reads as an inventory.
+{
+  const RESERVED = new Set(["id", "by", "date", "household", "declared_household", "parent", "placementParent", "stamps", "weight", "sovereign", "kind", "class", "tier", "body", "slug"]);
+  // how a mark stands names its class until W2 folds `class:` into `kind:`
+  const STANDING_CLASS = { sited: "sited", parcel: "parcel", predicated: "predicate", naming: "naming", post: "post" };
+  const STANDING_FIELDS = { sited: ["at", "extent"], parcel: ["at", "extent"], predicated: ["slot", "value"], naming: ["slot", "value"] };
+  const undeclared = new Map(); // `${class}\u0000${field}` -> { first, count }
+  for (const rec of marks) {
+    if (rec._error || rec.kind === "class" || rec.kind === "property") continue;
+    const klass = rec.class !== undefined ? String(rec.class) : STANDING_CLASS[rec.kind];
+    // a class the tree does not declare has no properties to check against (a
+    // fixture world without the works): the question has no answer, so no word
+    if (!klass || !classChain(CLASS_IDX, klass).length) continue;
+    const declared = propertyNames(CLASS_IDX, klass);
+    // while `kind:` still names how a mark stands, the fields that standing
+    // requires (§4 above) are the record grammar's, whichever class it names
+    const standing = STANDING_FIELDS[rec.kind] ?? [];
+    for (const k of Object.keys(rec)) {
+      if (k.startsWith("_") || RESERVED.has(k) || declared.has(k) || standing.includes(k)) continue;
+      const key = `${klass}\u0000${k}`;
+      const u = undeclared.get(key);
+      if (u) u.count++; else undeclared.set(key, { first: rec, count: 1 });
+    }
+  }
+  for (const [key, { first, count }] of undeclared) {
+    const [klass, field] = key.split("\u0000");
+    warn(first, `flat field ${field}: is no declared property of ${klass} (${count} mark(s) of ${klass} carry it; this is the first) — a flat field on an instance must be a declared property (ruled 2026-10-16); declare it, or say it as a predicate`);
   }
 }
 

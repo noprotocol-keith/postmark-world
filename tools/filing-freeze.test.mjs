@@ -354,30 +354,38 @@ test("CONFERRAL survives id filing: a guest welcomed onto a neighbour's ground i
   }
 });
 
-test("A BOUNTY NOTICE filed at its id is ON the board — the board is ground, not a directory", () => {
+// ⚠ SUPERSEDED 2026-10-16 (LOGOS v2 part 2): this test held that a bounty
+// notice is ON the board by the ground it stands on, wherever it is filed. A
+// bounty is a post now ("ideas are no longer marks. They are posts … Same for
+// bounties."), and a post stands nowhere, so the off-the-board word it guarded
+// is retired with it. What stays true of the filing is asserted instead: a post
+// is judged by what it is, never by where its file sits.
+test("A BOUNTY NOTICE is a POST — judged by what it is, never by where its file sits", () => {
   const works = { path: `${R}/the-keeping-works`, fm: {
     kind: "sited", by: "the-town", tier: "constitution", date: "2026-08-11", at: { x: 0, y: 0 }, extent: { w: 200, h: 200 } } };
   const bountyClass = { path: `${R}/the-keeping-works/bounty`, fm: {
     kind: "class", by: "the-town", tier: "constitution", date: "2026-08-11", class: "bounty" } };
   const board = { path: `${R}/the-bounty-board`, fm: {
     kind: "sited", by: "the-town", tier: "constitution", date: "2026-08-11", at: { x: 5000, y: 5000 }, extent: { w: 100, h: 100 } } };
-  const notice = { kind: "sited", by: "jetto", date: "2026-08-25", at: { x: 5000, y: 5000 }, extent: { w: 2, h: 2 },
+  const notice = { kind: "post", by: "jetto", date: "2026-08-25",
     class: "bounty", ask: "find the thing", reward: 3, status: "open" };
 
-  // No --freeze manifest: this fixture is about the board clause, and holding a
+  // No --freeze manifest: this fixture is about the notice clause, and holding a
   // synthetic tree to this repo's fossil would refuse it for a different reason.
-  const offBoard = (records) => withWorld(records, null, ({ marks }) =>
-    runLint(marks).findings.filter((f) => /off the board/.test(f.msg)));
+  const said = (records) => withWorld(records, null, ({ marks }) =>
+    runLint(marks).findings.filter((f) => /a-notice/.test(f.file) && !/^flat field /.test(f.msg)).map((f) => `${f.sev} ${f.msg}`));
 
-  assert.deepEqual(offBoard([THE_ROOT, works, bountyClass, board, { path: "jetto/a-notice", fm: notice }]), [],
-    "filed at its id and standing on the board's ground: on the board");
-  assert.deepEqual(offBoard([THE_ROOT, works, bountyClass, board, { path: `${R}/the-bounty-board/a-notice`, fm: notice }]), [],
-    "and filed inside the board's directory: still on the board, same answer");
+  // (the flat-field inventory is §5c's and names ask/reward/status until the
+  // bounty grammar is declared as properties; this test is about the filing)
+  assert.deepEqual(said([THE_ROOT, works, bountyClass, board, { path: "jetto/a-notice", fm: notice }]), [],
+    "filed at its id: a lawful notice, and nothing about where it stands");
+  assert.deepEqual(said([THE_ROOT, works, bountyClass, board, { path: `${R}/the-bounty-board/a-notice`, fm: notice }]), [],
+    "and filed inside the board's directory: the same answer");
 
-  // THE FLIP: a notice that genuinely stands somewhere else is still told so.
-  const elsewhere = offBoard([THE_ROOT, works, bountyClass, board,
-    { path: "jetto/a-notice", fm: { ...notice, at: { x: 9000, y: 9000 } } }]);
-  assert.equal(elsewhere.length, 1, "a notice standing off the board is warned, wherever it is filed");
+  // THE FLIP: a notice still written as a sited mark is refused, quoting the ruling.
+  const sited = said([THE_ROOT, works, bountyClass, board,
+    { path: "jetto/a-notice", fm: { ...notice, kind: "sited", at: { x: 5000, y: 5000 }, extent: { w: 2, h: 2 } } }]);
+  assert.ok(sited.some((s) => /^ERROR a bounty notice is a post/.test(s)), `a sited notice is refused as no post: ${sited.join(" | ")}`);
 });
 
 test("CONSENT speaks for what stands inside your mark — by ground, not by directory", () => {
