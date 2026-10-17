@@ -233,6 +233,11 @@ const MAKERS = [
   // 18:44 item 2 ("Identities, households, parcels, stakes, money, crossings …
   // stay town-only"); a home stays false from the root (the home act makes it)
   [cls("funding-quest"), false, "Only the town makes a funding quest: it is money (the-town/nothing-you-control-mints)."],
+  // G13, settled 2026-10-17 (WLD-73): the town charters and the Post Office
+  // timetable stand at a place, so their classes go under sited; both are the
+  // town's alone (a town is a standing, a timetable is the boat others board)
+  [cls("town"), false, "Only the town makes a town: it confers standing (the-town/nothing-you-control-mints)."],
+  [cls("timetable"), false, "Only the town makes a timetable: the schedule others board (the-town/nothing-you-control-mints)."],
   [cls("stakeable"), false, "Only the town makes a stakeable predicate: it publishes a staking menu (the-town/nothing-you-control-mints)."],
 ];
 const dirOfName = { post: POST, sited: SITED };
@@ -244,8 +249,9 @@ for (const [c, v, body] of MAKERS) {
 }
 
 // the tree's extends edges (13:56, 15:12, 15:43, 19:39; G1 for thing/parcel/portal-ground
-// and note, settled 2026-10-17: note carries at and extent, the promotion test)
-const REPARENT = { note: "sited", thing: "sited", parcel: "sited", "portal-ground": "sited", adversary: "sited", dungeon: "sited", "home-mark": "sited", stairs: "sited", predicate: "mark", idea: "post", bounty: "post" };
+// and note, settled 2026-10-17: note carries at and extent, the promotion test;
+// G13 for town and timetable, settled the same night: their instances stand at a place)
+const REPARENT = { town: "sited", timetable: "sited", note: "sited", thing: "sited", parcel: "sited", "portal-ground": "sited", adversary: "sited", dungeon: "sited", "home-mark": "sited", stairs: "sited", predicate: "mark", idea: "post", bounty: "post" };
 for (const [name, ext] of Object.entries(REPARENT)) {
   const c = cls(name);
   edit(c, (lines) => setLine(lines, "extends", ext, "version"), `extends: ${c.extends ?? "(none)"} → ${ext}`);
