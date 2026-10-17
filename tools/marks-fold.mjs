@@ -1653,6 +1653,14 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
       // Undefined on every ordinary mark, so a world with no prizes in it
       // serializes exactly as before.
       loot: mk.loot,
+      // A THING'S OWN HOLDING WORD (LOGOS v2 part 2; the playground's QA, PART2-MCP-QA fail 2):
+      // `holder`, `capacity`, `open` and `portable` are sovereign on thing (ruled 16:03), so a
+      // resident writes them on the thing they make, and the office's door reads them off THIS
+      // fold (world.mjs § worldMarkById). Dropped here, a resident's pouch made with `holder: true`
+      // published and then "held nothing" at every make, give and take. Carried as the record says
+      // them, the way `loot` is: undefined on every mark that wrote none, so a world with no such
+      // thing serializes exactly as before.
+      holder: mk.holder, capacity: mk.capacity, open: mk.open, portable: mk.portable,
       // A mark's PLACEMENT — the mark it stands inside. Disclosed for classed
       // marks since the bounty grammar (a notice is a notice because it stands
       // ON the board), and for EVERY mark since the conferred-sovereignty
