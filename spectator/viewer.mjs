@@ -1292,6 +1292,29 @@ export function sceneArtSVG(mark, px) {
   if (!isEmbodiedMark(mark)) return "";
   const href = markImagePath(mark);
   if (!href || !mark.extent) return "";
+  // A RINGED MARK WEARS ITS PICTURE IN ITS RING (POS-662, Darko 2026-10-16 on prod:
+  // "ringed marks like errant/black-water-pool don't draw cropped to their ring").
+  // The far and mid tiers hang a picture through placedArtSVG, whose caller hands
+  // it the ring; this street-zoom pass painted the whole extent rectangle, so the
+  // Unfinished Margin's 14-point shore became a 1300 × 255 m box over the sea. The
+  // ring is read by the ONE ring reader (geometry.mjs § polygonOf, after the fold
+  // has parsed both written forms), the picture fills the ring's box and is clipped
+  // to it, and the frame is the ring's own line. A mark with no ring is untouched.
+  const ring = polygonOf(mark);
+  if (ring) {
+    const pts = ring.map(px);
+    const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    if (x1 - x0 > 0 && y1 - y0 > 0) {
+      const points = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+      const clip = `wv-scene-art-clip-${String(mark.id).replace(/[^a-z0-9-]/gi, "")}`;
+      return `<g class="wv-scene-mark-art wv-scene-mark-art-ringed" data-id="${esc(mark.id)}" pointer-events="none">`
+        + `<clipPath id="${clip}"><polygon points="${points}"/></clipPath>`
+        + `<image href="${esc(href)}" x="${x0.toFixed(1)}" y="${y0.toFixed(1)}" width="${(x1 - x0).toFixed(1)}" height="${(y1 - y0).toFixed(1)}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clip})"/>`
+        + `<polygon points="${points}" fill="none" class="wv-scene-art-frame"/>`
+        + `</g>`;
+    }
+  }
   const r = rect(mark);
   const a = px({ x: r.x - r.w / 2, y: r.y - r.h / 2 });
   const b = px({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
