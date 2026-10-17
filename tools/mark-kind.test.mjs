@@ -64,3 +64,24 @@ test("THE FOUR keep their containment in the new form: town and timetable stand 
     assert.equal(parent.get(id), container, `${id} is contained by ${container}, as on main`);
   }
 });
+
+test("G12: where the chain and the place disagree, the fold follows the chain", async () => {
+  const { containmentParentOf } = await import("./marks-fold.mjs");
+  const { standingOf, kindIndexOf } = await import("./mark-kind.mjs");
+  const cls = (name, ext) => ({ id: `the-town/${name}`, kind: "class", by: "the-town", tier: "constitution", class: name, ...(ext ? { extends: ext } : {}) });
+  const world = (townExtends) => [
+    cls("postmark-node"), cls("mark", "postmark-node"), cls("sited", "mark"), cls("entity", "postmark-node"), cls("town", townExtends),
+    { id: "the-town/a-harbor", kind: "sited", by: "the-town", at: { x: 0, y: 0 }, extent: { w: 100, h: 100 } },
+    // a placed town under a class that is NOT under sited: the lint refuses it
+    // (G13); here the lint is bypassed, so only the fold's own reading decides
+    { id: "the-town/a-charter", kind: "town", by: "the-town", at: { x: 0, y: 0 }, extent: { w: 5, h: 5 } },
+  ];
+  const astray = world("entity");
+  const charter = astray.find((m) => m.id === "the-town/a-charter");
+  assert.equal(isGround(charter), true, "the place-proxy says ground: it has a place");
+  assert.equal(standingOf(charter, kindIndexOf(astray)), null, "the chain says town has no standing instance");
+  assert.notEqual(containmentParentOf(charter, astray), "the-town/a-harbor", "the fold follows the chain: no ground, so no geometric container");
+  const lawful = world("sited");
+  assert.equal(containmentParentOf(lawful.find((m) => m.id === "the-town/a-charter"), lawful), "the-town/a-harbor",
+    "with town under sited, the chain and the place agree, and the harbor contains it");
+});

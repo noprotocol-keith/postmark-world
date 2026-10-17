@@ -28,7 +28,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSy
 import { dirname, join, basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { markStanding } from "./mark-standing.mjs";   // the ONE standing rule (see § what the rank is READ FROM)
-import { isSited, isGround, instanceClassOf, isPredicate } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
+import { instanceClassOf, isPredicate, kindIndexOf, isSitedIn, isGroundIn } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -570,8 +570,11 @@ import { resolveConsent, consentMap, CONSENT_FIELD } from "./consent.mjs";
 export function placementParent(claim, marks, { worldScaleM = 50000 } = {}) {
   const claimArea = rect(claim).w * rect(claim).h;
   let best = null, bestArea = Infinity;
+  // ground by the class chain (G12): the fold is the record, so it asks the
+  // lineage of the marks it holds, never the place as a proxy for it
+  const kidx = kindIndexOf(marks);
   for (const m of marks) {
-    if (!isGround(m)) continue;
+    if (!isGroundIn(m, kidx)) continue;
     const mr = rect(m), area = mr.w * mr.h;
     if (Math.max(mr.w, mr.h) >= worldScaleM) continue; // the world-root is the frame, never a parent → null means root
     if (area <= claimArea) continue;                    // a parent is strictly larger than its child (the fold's rule)
@@ -633,7 +636,7 @@ export const worldRootOf = (marks) => marks.find((m) => leafSlugOf(m) === WORLD_
 export function containmentParentOf(mark, marks, root = worldRootOf(marks)) {
   const rootId = root?.id ?? null;
   if (rootId != null && mark.id === rootId) return null;
-  const geometric = isGround(mark);
+  const geometric = isGroundIn(mark, kindIndexOf(marks));
   // No self-exclusion needed and none paid for: `placementParent` requires a
   // parent to be STRICTLY larger than the claim, so a mark can never be its own
   // container, and neither can a twin sharing its rect. Filtering the array per
@@ -1045,6 +1048,11 @@ export function fold({ marks, terrain, stakes, prev = null, tick = 0, dials = DI
     if (byId.has(mk.id)) { errors.push({ mark: mk.id, error: "duplicate id" }); continue; }
     byId.set(mk.id, mk);
   }
+  // how each record stands is its class chain's answer (G12, settled
+  // 2026-10-17): one index over the marks this fold holds, asked by every
+  // geometric question below, never the place as a proxy for the lineage
+  const KIDX = kindIndexOf(marks);
+  const isSited = (m) => isSitedIn(m, KIDX), isGround = (m) => isGroundIn(m, KIDX);
 
   // ---------- the household grain (Keemin's rulings, 2026-08-07 + 2026-08-10) ----------
   // A mark's `by:` is a resident HANDLE. A household is the HUMAN behind it:
@@ -2000,6 +2008,8 @@ const sameRect = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y && a.w === b
  * be a second vocabulary for one fact.
  */
 function deltaView(mk, cred, rectsByCred, world = null) {
+  const kidx = kindIndexOf(world ?? [mk]);
+  const isSited = (m) => isSitedIn(m, kidx);
   const held = isSited(mk) ? (rectsByCred.get(cred) ?? []) : [];
   // The containment answer, asked of the WHOLE folded world plus this delta's
   // own candidates — the same question `fold` asks, so a mark's standing does
@@ -2060,8 +2070,9 @@ export function sovereignInResult(views, world, { dials = DIALS } = {}) {
     if (!rectsByCred.has(cred)) rectsByCred.set(cred, []);
     rectsByCred.get(cred).push(r);
   }
+  const kidx = kindIndexOf(world);
   for (const view of views.values()) {
-    if (!isSited(view)) continue;
+    if (!isSitedIn(view, kidx)) continue;
     view.sovereign = (rectsByCred.get(view.declared_household ?? view.household) ?? []).some((pr) => contains(pr, rect(view)));
   }
 }
