@@ -9,7 +9,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { creatureGlyphSVG, chooserLeadLine, tokenPileAtPoint, walkerHoverId } from "../spectator/viewer.mjs";
+import { creatureGlyphSVG, chooserLeadLine, contestedMarksAtPoint, MARK_SNAP_RADIUS_PX, walkerHoverId } from "../spectator/viewer.mjs";
 
 const SOURCE = readFileSync(new URL("../spectator/viewer.mjs", import.meta.url), "utf8");
 const layer = SOURCE.slice(SOURCE.indexOf("  function liveCreatureGlyphs(px, tier) {"), SOURCE.indexOf("  function creatureNameplateHTML(id) {"));
@@ -23,16 +23,14 @@ test("a stacked trio draws at its true points: one place, three tokens, nothing 
   assert.doesNotMatch(layer, /markerScale|walkState\.walkers/, "nothing on screen moves a creature");
 });
 
-test("a click on the pile offers every token in it, nearest first, even past the snap radius", () => {
-  // the encounter's three: wolf 8 m E, bat 8 m S, raven 8 m W of V, drawn as overlapping tokens
-  const V = { id: walkerHoverId("visitor"), x: 400, y: 300 };
-  const wolf = { id: "creature:wolf-1", x: 416, y: 300 }, bat = { id: "creature:bat-1", x: 400, y: 316 }, raven = { id: "creature:raven-1", x: 384, y: 300 };
-  const far = { id: "creature:wolf-2", x: 520, y: 300 };
-  const pile = tokenPileAtPoint({ x: 416, y: 300 }, [V, wolf, bat, raven, far], { touchPx: 24 });
-  assert.deepEqual(pile, ["creature:wolf-1", V.id, "creature:bat-1", "creature:raven-1"], "the raven, 32 px from the click, is in it");
-  assert.ok(!pile.includes(far.id), "a token that touches nothing in the pile is not in it");
-  assert.deepEqual(tokenPileAtPoint({ x: 0, y: 0 }, [V, wolf]), [], "a click on nothing is no pile");
-  assert.deepEqual(tokenPileAtPoint({ x: 520, y: 300 }, [V, wolf, far]), [far.id], "one token alone is just itself");
+test("the chooser offers every clickable under the cursor, no kind special-cased (Darko 17:37)", () => {
+  // the live trio stacked at one point beside darko: all three are under the cursor
+  const darko = { id: walkerHoverId("darko"), x: 752, y: 630 };
+  const trio = ["wolf", "raven", "bat"].map((k) => ({ id: `creature:${k}-253-play1`, x: 760, y: 630 }));
+  const away = { id: "creature:wolf-252-play2", x: 760 + MARK_SNAP_RADIUS_PX + 30, y: 630 };
+  const here = contestedMarksAtPoint({ x: 760, y: 630 }, [darko, ...trio, away]);
+  assert.deepEqual([...here].sort(), [darko.id, ...trio.map((t) => t.id)].sort(), "darko and all three");
+  assert.ok(!here.includes(away.id), "a token that is not under the cursor is not offered");
 });
 
 test("the chooser names creatures as creatures", () => {
@@ -42,8 +40,9 @@ test("the chooser names creatures as creatures", () => {
   assert.equal(chooserLeadLine(["the-town/a", "the-town/b"]), "2 marks are stacked here — which one?", "a pile of marks reads as it always did");
 });
 
-test("pins: the people click asks for the whole pile, one token's width read off a drawn token", () => {
-  assert.match(SOURCE, /const peopleHere = tokenPileAtPoint\(\{ x: e\.clientX, y: e\.clientY \}, \[\.\.\.screenWalkerCandidates\(\), \.\.\.screenCreatureCandidates\(\)\],\s*\{ touchPx: disc\?\.width > 0 \? disc\.width : 24 \}\);/);
+test("pins: the people click takes what is under the cursor, the same snap every mark uses", () => {
+  assert.match(SOURCE, /const peopleHere = contestedMarksAtPoint\(\{ x: e\.clientX, y: e\.clientY \}, \[\.\.\.screenWalkerCandidates\(\), \.\.\.screenCreatureCandidates\(\)\]\);/);
+  assert.doesNotMatch(SOURCE, /tokenPileAtPoint/, "no pile grown past the cursor");
 });
 
 test("pins: the chooser files creatures under their own label, never \"other marks\"", () => {

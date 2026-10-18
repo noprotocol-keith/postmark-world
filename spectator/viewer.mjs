@@ -4575,32 +4575,6 @@ export function chooserLeadLine(ids = []) {
   return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]} are here — which one?`;
 }
 
-/** THE PILE A CLICK LANDED ON (play row 55, Darko 2026-10-16 17:36: "we already
- *  have code … that asks you which one did you mean to click on"). Tokens (the
- *  residents and the creatures, screen points) stay where they stand, so three
- *  at one spot draw as one pile, and the chooser must offer every token in it.
- *  The snap radius around the click finds the first of them; any token whose
- *  centre is within one token's width (`touchPx`) of a token already in the
- *  pile is in it too, so a pile wider than the snap radius is offered whole
- *  (the encounter's raven, 16 m from the wolf, was left out). Ordered as the
- *  snap ranks: nearest the click first. Pure. */
-export function tokenPileAtPoint(point, tokens = [], { radiusPx = MARK_SNAP_RADIUS_PX, touchPx = 24 } = {}) {
-  const seeds = rankMarksAtPoint(point, tokens, radiusPx).map((t) => t.id);
-  if (!seeds.length) return [];
-  const byId = new Map((tokens ?? []).filter((t) => t?.id && Number.isFinite(Number(t.x)) && Number.isFinite(Number(t.y))).map((t) => [t.id, t]));
-  const pile = new Set(seeds);
-  for (let grew = true; grew;) {
-    grew = false;
-    for (const [id, t] of byId) {
-      if (pile.has(id)) continue;
-      if ([...pile].some((m) => { const o = byId.get(m); return o && Math.hypot(Number(o.x) - Number(t.x), Number(o.y) - Number(t.y)) <= touchPx; })) { pile.add(id); grew = true; }
-    }
-  }
-  const x = Number(point?.x), y = Number(point?.y);
-  const away = (id) => { const t = byId.get(id); return t ? Math.hypot(Number(t.x) - x, Number(t.y) - y) : Infinity; };
-  return [...pile].sort((a, b) => away(a) - away(b) || String(a).localeCompare(String(b)));
-}
-
 export function orderInnermostFirst(ids, byId) {
   const area = (id) => {
     const m = byId?.get?.(id);
@@ -10281,11 +10255,10 @@ export function mountViewer(appEl) {
       // is shown the stack and picks. One candidate in radius is exactly
       // today's behaviour, and the head of this list IS what the snap would
       // have returned, so the single-face case cannot have moved.
-      // the whole pile the click landed on, every token in it (row 55): one token's
-      // width on screen, read off a drawn creature token, else the walker's
-      const disc = creatureLayer.querySelector(".ov-creature-disc")?.getBoundingClientRect();
-      const peopleHere = tokenPileAtPoint({ x: e.clientX, y: e.clientY }, [...screenWalkerCandidates(), ...screenCreatureCandidates()],
-        { touchPx: disc?.width > 0 ? disc.width : 24 });
+      // EVERY CLICKABLE UNDER THE CURSOR, no kind special-cased (Darko 2026-10-16
+      // 17:37, row 55: "If it's … there under the cursor when you click it, then
+      // it should be included in the chooser. Simple as that.")
+      const peopleHere = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, [...screenWalkerCandidates(), ...screenCreatureCandidates()]);
       if (peopleHere.length) {
         const under = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, screenMarkCandidates());
         if (peopleHere.length + under.length > 1) { openChooser([...peopleHere, ...under]); return; }
