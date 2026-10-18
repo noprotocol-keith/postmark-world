@@ -55,8 +55,9 @@ test("shelter is the engine's: an entered mark that is not under the road shelte
 test("pins: the page builds the walker's shelter from their own enter stack through the engine's shelterOf", () => {
   assert.match(SOURCE, /import \{[^}]*\bshelterOf\b[^}]*\} from "\.\.\/tools\/world-verbs\.mjs";/);
   assert.match(SOURCE, /mistsRoad\(from, toward, at, skeleton\.mists, \{ shelter \}\)/);
-  assert.match(SOURCE, /function actorEnterStack\(\) \{[\s\S]*?standpointOccupancy\(\{ acts: enterExitLedger\.acts, at: occupancyClock\(\), handle: state\.handle \}\)\.entered/);
-  assert.match(SOURCE, /function actorShelter\(\) \{[\s\S]*?return shelterOf\(\{ marks \}, entered\);/);
+  assert.match(SOURCE, /function enterStackOf\(handle\) \{[\s\S]*?standpointOccupancy\(\{ acts: enterExitLedger\.acts, at: occupancyClock\(\), handle \}\)\.entered/);
+  assert.match(SOURCE, /function actorEnterStack\(\) \{[\s\S]*?return enterStackOf\(state\.handle\);/);
+  assert.match(SOURCE, /function actorShelter\(\) \{[\s\S]*?return shelterOf\(\{ marks \}, entered, actorOrigin\(\)\);/);
   // both of the page's walk previews (the armed chip and the hover chip) carry it
   assert.equal((SOURCE.match(/shelter: actorShelter\(\),/g) ?? []).length, 2);
   assert.doesNotMatch(SOURCE, /function (?:shelterFor|pointSheltered|roadShelter)\b/, "no shelter semantics of the page's own");

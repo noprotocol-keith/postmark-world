@@ -8710,12 +8710,19 @@ export function mountViewer(appEl) {
   // the last answer is kept against exactly those, and a render that asks
   // again gets it back. Part 1's profile: the telling was the load's longest
   // task, 1.3 s on the desk and 6.0 s at 4× CPU.
+  //
+  // …AND WHAT YOU HAVE ENTERED (play fix 42). The office's eyes take the
+  // reader's enter stack (world #226, office #585), so the resident's own read
+  // already lifts the Mists inside a mark they have entered; the eyes the page
+  // opens itself take the same stack (enterStackOf), or the page would draw a
+  // narrower world than the office answers for the same reader.
   let eyesMemo = null;
-  function eyesAt(standpoint, name) {
-    const q = { worldState: data.worldState, skeleton: data.skeleton, crossing: state.crossing, dials: state.dials, x: standpoint.x, y: standpoint.y, name };
+  function eyesAt(standpoint, name, key) {
+    const entered = enterStackOf(key);
+    const q = { worldState: data.worldState, skeleton: data.skeleton, crossing: state.crossing, dials: state.dials, x: standpoint.x, y: standpoint.y, name, entered: entered.join("\n") };
     const m = eyesMemo;
     if (m && Object.keys(q).every((k) => m.q[k] === q[k])) return m.e;
-    const e = openYourEyes({ x: standpoint.x, y: standpoint.y, name }, world, { crossing: state.crossing, dials: state.dials, budget: state.dials.context_budget });
+    const e = openYourEyes({ x: standpoint.x, y: standpoint.y, name }, world, { crossing: state.crossing, dials: state.dials, budget: state.dials.context_budget, entered });
     eyesMemo = { q, e };
     return e;
   }
@@ -8811,7 +8818,7 @@ export function mountViewer(appEl) {
       }
       return null;
     }
-    const e = eyesAt(standpoint, name);
+    const e = eyesAt(standpoint, name, key);
     const within = e.radial.within ?? [];
     const obs = e.radial.observer ?? {};
     const isNew = state.markFilter === "new";
@@ -11537,16 +11544,27 @@ export function mountViewer(appEl) {
   // room scene and the step-outside button use), and the shelter is the engine's
   // own shelterOf over it. No semantics of our own: what counts as shelter, and
   // which roads it covers, are the engine's, and change with it.
+  //
+  // ONE ENTER STACK (play fix 42): what a handle has entered, at the page's
+  // clock, is asked here and nowhere else, by the walk's shelter and by the eyes
+  // the page opens itself (eyesAt), so a crossing reveals the map and lets the
+  // walk go in the same render.
+  function enterStackOf(handle) {
+    if (!handle || handle === SPECTATOR_ACTOR) return [];
+    return standpointOccupancy({ acts: enterExitLedger.acts, at: occupancyClock(), handle }).entered ?? [];
+  }
   function actorEnterStack() {
     if (!canAct() || !state.handle) return [];
-    return standpointOccupancy({ acts: enterExitLedger.acts, at: occupancyClock(), handle: state.handle }).entered ?? [];
+    return enterStackOf(state.handle);
   }
   function actorShelter() {
     const entered = actorEnterStack();
     if (!entered.length) return null;
     // the entered marks themselves, from the read the page holds (full records by id first)
     const marks = entered.map((id) => byId.get(id) ?? allMarks().find((m) => m?.id === id)).filter(Boolean);
-    return shelterOf({ marks }, entered);
+    // where the walker stands, as the engine's eyes pass it: an entered mark
+    // they stand outside shelters nothing (review-shelter, world 1eef5d65)
+    return shelterOf({ marks }, entered, actorOrigin());
   }
 
   // WHICH RECORD A READING WAS TAKEN AGAINST (#2912 (2)). The marks the page
