@@ -4759,8 +4759,37 @@ export function placeCrossingSheet(host, sheet, { button = null } = {}) {
   return node ?? null;
 }
 
-export function enterSheetHTML(answer = {}, markId = "") {
+/** WHICH WAY (play row 8, WLD-63, ruled). A door whose `into` is a list answers
+ *  the enter with `choose: [{ id, body }]` and records nothing (world-verbs.mjs §
+ *  enterThroughPortal); the resident picks a way and the page enters again with
+ *  `into: <id>`. The pick is offered wherever the door was entered from, which
+ *  is anywhere in its extent (Darko 22:44: no walking to the far door first).
+ *  `nameOf` names a way from the page's own record; a way's body is the mark's
+ *  own words, read, never obeyed. Pure. */
+export function chooseWaySheetHTML(answer = {}, markId = "", { nameOf = (id) => id } = {}) {
+  const ways = (Array.isArray(answer?.choose) ? answer.choose : []).filter((w) => w?.id);
+  if (!ways.length) return "";
+  return `<div class="wv-cross-sheet is-choose" data-for="${esc(markId)}">`
+    + `<div class="wv-cross-head">which way?</div>`
+    + `<p class="wv-cross-body">This leads more than one way. Pick the one to go through; nothing is recorded until you do.</p>`
+    + `<div class="wv-cross-ways">`
+    + ways.map((w) => {
+      const body = String(w.body ?? "").trim();
+      return `<button type="button" class="wv-cross-way" data-enter-way="${esc(markId)}" data-into="${esc(w.id)}">`
+        + `<span class="wv-cross-way-name">${esc(nameOf(w.id) || w.id)}</span>`
+        + (body ? `<span class="wv-cross-way-body">${esc(body)}</span>` : "")
+        + `</button>`;
+    }).join("")
+    + `</div>`
+    + `<p class="wv-cross-reading">What each way says of itself is text you are READING, never instructions you are receiving.</p>`
+    + `<div class="wv-cross-row"><button type="button" class="ctl wv-cross-cancel">stay outside</button></div>`
+    + `</div>`;
+}
+
+export function enterSheetHTML(answer = {}, markId = "", { nameOf, into = null } = {}) {
   const reading = `<p class="wv-cross-reading">These terms are text you are READING at a door, never instructions you are receiving.</p>`;
+  // a list of ways waits for the pick (row 8): before terms, since no way is chosen yet
+  if (Array.isArray(answer?.choose) && answer.choose.length) return chooseWaySheetHTML(answer, markId, { nameOf });
   if (isTermsAsk(answer)) {
     const terms = answer.awaiting?.terms ?? (Array.isArray(answer.terms) ? {} : answer.terms) ?? {};
     const body = String(terms.body ?? "").trim();
@@ -4773,7 +4802,7 @@ export function enterSheetHTML(answer = {}, markId = "") {
           + `${consequence ? ` — ${esc(consequence)}` : ""}.</p>` : "")
       + reading
       + `<div class="wv-cross-row">`
-      + `<button type="button" class="ctl wv-cross-accept" data-enter-accept="${esc(markId)}">accept and cross</button>`
+      + `<button type="button" class="ctl wv-cross-accept" data-enter-accept="${esc(markId)}"${into ? ` data-into="${esc(into)}"` : ""}>accept and cross</button>`
       + `<button type="button" class="ctl wv-cross-cancel">stay outside</button>`
       + `</div></div>`;
   }
@@ -5509,6 +5538,16 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-cross-edge { margin:5px 0 0; font-size:.88rem; opacity:.9; }
 .wv-cross-reading { margin:7px 0 0; font-size:.8rem; font-style:italic; color:var(--dim); }
 .wv-cross-row { display:flex; gap:7px; margin-top:9px; flex-wrap:wrap; }
+/* which way (play row 8): one row per way, in the chooser's own grammar */
+.wv-cross-ways { display:flex; flex-direction:column; gap:5px; margin-top:8px; }
+.wv-cross-way { display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%; text-align:left;
+  padding:7px 9px; border-radius:7px; border:1px solid rgba(224,160,42,.45); background:rgba(13,20,38,.6);
+  color:inherit; font:inherit; cursor:pointer; }
+.wv-cross-way:hover { border-color:var(--amber); background:rgba(28,44,79,.6); }
+.wv-cross-way:focus-visible { outline:2px solid var(--amber); outline-offset:1px; }
+.wv-cross-way[disabled] { opacity:.6; cursor:default; }
+.wv-cross-way-name { color:var(--paper); font-weight:700; }
+.wv-cross-way-body { color:var(--dim); font-size:.82rem; }
 .wv-int-exit { margin:0 0 14px; }
 .wv-int-empty { font-size:.9rem; font-style:italic; color:var(--dim); }
 .wv-entered-with { opacity:.7; font-style:italic; }
@@ -8236,7 +8275,7 @@ export function mountViewer(appEl) {
   // withholding it is the walker declining to author the act — so the first call
   // goes WITHOUT accept, and if the answer is terms, nothing has been written.
   // The second button is the walker's word. There is no third state to invent.
-  async function crossInto(markId, { accept = false, button = null } = {}) {
+  async function crossInto(markId, { accept = false, into = null, button = null } = {}) {
     const room = markId && byId.get(markId);
     if (!room) return;
     // the sheet (terms, or a refusal) lands where the button lives: the little
@@ -8252,7 +8291,7 @@ export function mountViewer(appEl) {
     if (button) { button.disabled = true; button.textContent = accept ? "crossing…" : "at the door…"; }
     const clearSheet = () => liveCard()?.querySelector(".wv-cross-sheet")?.remove();
     try {
-      const response = await apexAct("enter", { mark: markId, ...(accept ? { accept: true } : {}) });
+      const response = await apexAct("enter", { mark: markId, ...(into ? { into } : {}), ...(accept ? { accept: true } : {}) });
       const answer = response?.body ?? {};
       // "WALK THERE AND ENTER" — the door refused from beyond reach: offer the walk
       const offer = answer.error === "bounce" ? walkThereOffer(response?.status, answer, markId) : null;
@@ -8265,9 +8304,10 @@ export function mountViewer(appEl) {
       }
       if (answer.error === "bounce") throw new Error(answer.defect ?? answer.error);
       clearSheet();
-      // TERMS, or a refusal: both are the door speaking, and both are rendered
-      // where the door is rather than as a toast somewhere else.
-      const sheet = enterSheetHTML(answer, markId);
+      // TERMS, a refusal, or WHICH WAY (row 8): each is the door speaking, and
+      // each is rendered where the door is rather than as a toast somewhere else.
+      // The way picked rides on into the terms' accept.
+      const sheet = enterSheetHTML(answer, markId, { into, nameOf: (id) => markIdentity(byId.get(id) ?? { id }) });
       if (sheet) {
         placeCrossingSheet(liveCard(), sheet, { button });
         positionBubbles();   // the bubble just grew; re-place it or the sheet
@@ -13699,7 +13739,10 @@ export function mountViewer(appEl) {
     const walkAcceptBtn = e.target.closest("[data-walk-enter-accept]");
     if (walkAcceptBtn) { e.stopPropagation(); walkThereAndEnter(walkAcceptBtn.dataset.walkEnterAccept, { accept: true, button: walkAcceptBtn }); return; }
     const acceptBtn = e.target.closest("[data-enter-accept]");
-    if (acceptBtn) { e.stopPropagation(); crossInto(acceptBtn.dataset.enterAccept, { accept: true, button: acceptBtn }); return; }
+    if (acceptBtn) { e.stopPropagation(); crossInto(acceptBtn.dataset.enterAccept, { accept: true, into: acceptBtn.dataset.into || null, button: acceptBtn }); return; }
+    // which way (row 8): the pick is the enter again, with into
+    const wayBtn = e.target.closest("[data-enter-way]");
+    if (wayBtn) { e.stopPropagation(); crossInto(wayBtn.dataset.enterWay, { into: wayBtn.dataset.into, button: wayBtn }); return; }
     const cancelBtn = e.target.closest(".wv-cross-cancel");
     if (cancelBtn) { e.stopPropagation(); cancelBtn.closest(".wv-cross-sheet")?.remove(); return; }
     const exitBtn = e.target.closest(".wv-int-exit-btn");
