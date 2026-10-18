@@ -58,7 +58,7 @@ import { homeOf, homesOnParcel } from "../tools/where-is.mjs";
 import { markIcons, iconSVG, iconsHTML, creatureClassesOf, thingClassesOf, MARK_ICON_CSS } from "./mark-icons.mjs";
 // LOGOS v2 part 2 on the page (POS-678): what a holder holds, who carries what,
 // and the say card's numbers, each from the office's own reads.
-import { holderLines, residentHoldLines, residentList, handsLines, handsList, holdingParts, carriersFrom, carriedAt, carriedWords, sayCardNote, isThingKind } from "./holdings.mjs";
+import { holderLines, residentHoldLines, residentList, handsLines, handsList, holdingParts, carriersFrom, carriedAt, carriedWords, sayCardNote, thingKindLedger } from "./holdings.mjs";
 
 const $ = (root, s) => root.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -7905,11 +7905,10 @@ export function mountViewer(appEl) {
   // LOGOS v2 part 2 (POS-678): the close looks, your hands and who carries what — § WHAT A HOLDER HOLDS
   const CLOSE_LOOK_MS = 30000, HANDS_MS = 30000;
   const closeLooks = new Map();      // `${who}|${param}|${id}` -> { at, read, pending? }
-  const thingKinds = new Map();      // class token -> whether the office's class pointer says it is a thing
+  const thingKinds = thingKindLedger();   // what the office's reads have said each kind IS (holdings.mjs)
   let hands = { for: null, at: 0, holdings: null, ground: null, pending: false };
   let carriersEpoch = 0, carriersMemo = { epoch: -1, until: 0, known: { holders: new Map(), placed: new Map() } };
   let closeLookGen = 0, handsSeq = 0;   // an act's line in time, and the newest ask for your hands
-  const lineageAsked = new Set();      // kinds whose class chain has been asked of the class layer
   let recordClassMemo = { epoch: -1, set: null };
   // the threshold ledger's acts, and their own epoch. Occupancy is derived from
   // these the way position is derived from the walk ledger, so what is held is
@@ -8163,7 +8162,7 @@ export function mountViewer(appEl) {
   function thingClasses() {
     if (thingClassMemo.epoch !== worldEpoch || thingClassMemo.size !== thingKinds.size || !thingClassMemo.set) {
       const set = thingClassesOf(allMarks(), classToken);
-      for (const [cls, isThing] of thingKinds) if (isThing) set.add(cls);
+      for (const cls of thingKinds.things()) set.add(cls);
       thingClassMemo = { epoch: worldEpoch, size: thingKinds.size, set };
     }
     return thingClassMemo.set;
@@ -14186,16 +14185,8 @@ export function mountViewer(appEl) {
   /** The close look in hand for a mark, or null while it is being asked. */
   function markCloseLook(id) { return loadCloseLook("mark", id)?.read ?? null; }
   function residentCloseLook(handle) { return loadCloseLook("investigate", handle)?.read ?? null; }
-  // WHAT A CLOSE LOOK SAYS A KIND IS. Only a yes is kept: the class pointer is two
-  // ancestors deep, and an old-form record (kind: sited, class: <kind>) can come
-  // back pointed at "sited", so a pointer that names no thing never blocks the
-  // chain's own answer (askLineage). A look with a `holder` is a thing's: holder
-  // is a property of thing (and of resident, who is no mark), LOGOS § The transfer edge.
-  function noteThingKind(mark, focus) {
-    const cls = classToken(instanceClassOf(mark));
-    if (!cls || thingKinds.get(cls) === true || !focus) return;
-    if (focus.holder || isThingKind(cls, { pointer: focus.class_pointer ?? null })) thingKinds.set(cls, true);
-  }
+  // what a close look says a kind IS: only a yes is kept (holdings.mjs § thingKindLedger)
+  function noteThingKind(mark, focus) { thingKinds.fromLook(classToken(instanceClassOf(mark)), focus); }
   // A KIND THE PAGE HOLDS NO CLASS MARK FOR is asked of the class layer once, at
   // draw time: explain: "<kind>" answers its whole extends chain (office
   // class-read.mjs § explainClass), the read any resident has. The resident
@@ -14207,14 +14198,14 @@ export function mountViewer(appEl) {
     return recordClassMemo.set;
   }
   function askLineage(cls) {
-    if (!cls || cls === "thing" || thingKinds.get(cls) === true || lineageAsked.has(cls)) return;
+    if (!thingKinds.shouldAsk(cls)) return;
     if (creatureClasses().has(cls) || recordClasses().has(cls)) return;   // the record answers
-    lineageAsked.add(cls);
+    thingKinds.asking(cls);
     fetch(officeUrl(`/world/apex?explain=${encodeURIComponent(cls)}`), { headers: { accept: "application/json" }, credentials: "same-origin" })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
         if (!Array.isArray(j?.extends)) return;
-        if (thingKinds.get(cls) !== true) thingKinds.set(cls, isThingKind(cls, { chain: j.extends.map((c) => classToken(c?.class)) }));
+        thingKinds.fromChain(cls, j.extends.map((c) => classToken(c?.class)));
         if (lastRadial && mapCtx) drawOverlay(lastRadial);
         syncMarkInteractionViews();
       })

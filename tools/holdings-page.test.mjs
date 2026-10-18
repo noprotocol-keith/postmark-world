@@ -192,3 +192,26 @@ test("8. a kind of thing is a thing, by the class chain or the office's class po
   assert.equal(isThingKind("portal-ground", { pointer: 'kind: portal-ground · a sited — explain: "portal-ground"' }), false);
   assert.equal(isThingKind("halloween-candy-bowl"), false, "with no lineage in hand, nothing is guessed");
 });
+
+test("9. ONLY A YES IS KEPT: a close look whose pointer names no thing never blocks the chain's answer (review-243 F2)", async () => {
+  const { thingKindLedger } = await import("../spectator/holdings.mjs");
+  const kinds = thingKindLedger();
+  // the old-form Candy Bag's look, pointed at "sited", with no holder: not an answer
+  kinds.fromLook("halloween-candy-bag", { class_pointer: 'kind: sited · a mark — explain: "sited"' });
+  assert.equal(kinds.shouldAsk("halloween-candy-bag"), true, "the class chain is still asked");
+  kinds.asking("halloween-candy-bag");
+  assert.equal(kinds.shouldAsk("halloween-candy-bag"), false, "once");
+  // explain: "halloween-candy-bag", as the office answers it
+  kinds.fromChain("halloween-candy-bag", ["thing", "sited", "mark", "postmark-node"]);
+  assert.deepEqual(kinds.things(), ["halloween-candy-bag"], "the chain decides: a thing");
+  // a yes from a look stands, and a later chain cannot undo it
+  const other = thingKindLedger();
+  other.fromLook("a-satchel", { holder: { capacity: 5, open: false } });
+  other.fromChain("a-satchel", ["sited", "mark"]);
+  assert.deepEqual(other.things(), ["a-satchel"], "a holder is a thing's");
+  // a chain that names no thing is the one "no" kept
+  const plain = thingKindLedger();
+  plain.fromChain("portal-ground", ["sited", "mark"]);
+  assert.deepEqual(plain.things(), []);
+  assert.equal(plain.shouldAsk("thing"), false, "thing itself is never asked");
+});

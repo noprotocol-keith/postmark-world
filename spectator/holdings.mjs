@@ -293,3 +293,32 @@ export function isThingKind(cls, { chain = null, pointer = null } = {}) {
   }
   return false;
 }
+
+/**
+ * WHAT THE PAGE HAS LEARNED A KIND IS, from the office's reads. Only a YES is
+ * kept from a close look: its class pointer is two ancestors deep, and an
+ * old-form record (kind: sited, class: <kind>) can come back pointed at
+ * "sited", so a pointer that names no thing never stands in for the class
+ * chain's own answer (explain: "<kind>"), which is asked once per kind and
+ * decides. A look with a `holder` is a thing's: holder is a property of thing
+ * (and of resident, who is no mark), LOGOS § The transfer edge.
+ */
+export function thingKindLedger() {
+  const known = new Map();   // kind -> true | false (false only from the chain itself)
+  const asked = new Set();
+  return {
+    /** the kinds known to be things */
+    things: () => [...known].filter(([, v]) => v === true).map(([k]) => k),
+    get size() { return known.size; },
+    /** a close look's word: a holder, or a pointer naming thing; anything else is not an answer */
+    fromLook(kind, focus) {
+      if (!kind || known.get(kind) === true || !focus) return;
+      if (focus.holder || isThingKind(kind, { pointer: focus.class_pointer ?? null })) known.set(kind, true);
+    },
+    /** whether the class chain should be asked for this kind, now */
+    shouldAsk(kind) { return !!kind && kind !== "thing" && known.get(kind) !== true && !asked.has(kind); },
+    asking(kind) { asked.add(kind); },
+    /** the chain's answer: the whole extends list, as explain gives it */
+    fromChain(kind, chain) { if (kind && known.get(kind) !== true) known.set(kind, isThingKind(kind, { chain })); },
+  };
+}
