@@ -457,3 +457,51 @@ test("THE BYLINE SAYS WHERE THE WORDS CAME FROM — and a parcel's is unchanged"
   // ⚑ THE FLIP: drop the `byline` parameter from homeColumnModel and the region
   //   line falls back to "in limen's own words", which is the claim being fixed.
 });
+
+// ── EVERY MARK'S COLUMN (Darko, playground sitting 2026-10-15) ──────────────
+
+test("a mark's column carries its facts, its relatives and the way back as plain data", () => {
+  const model = homeColumnModel({
+    handle: "darko",
+    title: "Spire Gilded Doors",
+    door: { description: "The Gilded Doors, the way into the Starforge Spire." },
+    enterId: "darko/spire-gilded-doors", canEnter: true,
+    facts: [{ label: "backing", value: "✦ 3" }, { label: "empty", value: "  " }, null],
+    relations: [
+      { label: "leads into", items: [{ id: "darko/spire-gilded-vestibule", name: "Spire Gilded Vestibule" }] },
+      { label: "holds", items: [] },
+      { label: "sits inside", items: [{ id: "darko/spire-forecourt" }], more: true },
+    ],
+    back: { id: "darko/the-starforge-spire", name: "The Starforge Spire" },
+  });
+  assert.deepEqual(model.enter, { parcelId: "darko/spire-gilded-doors" }, "a mark's door rides the parcel's one key");
+  assert.deepEqual(model.facts, [{ label: "backing", value: "✦ 3" }], "a fact with no value is not said");
+  assert.deepEqual(model.relations.map((r) => r.label), ["leads into", "sits inside"], "an empty relation is not said");
+  assert.equal(model.relations[1].items[0].name, "darko/spire-forecourt", "a relative with no name reads as its id");
+  assert.equal(model.relations[1].more, true);
+  assert.deepEqual(model.back, { id: "darko/the-starforge-spire", name: "The Starforge Spire" });
+  // a parcel's model is unchanged by any of it
+  const parcel = homeColumnModel({ handle: "nyx", parcelId: "nyx/the-night-room-parcel", canEnter: true });
+  assert.deepEqual([parcel.facts, parcel.relations, parcel.back], [[], [], null]);
+});
+
+test("a mark's relatives are buttons the viewer's root delegate reads, built without a string of markup", () => {
+  const host = render(homeColumnModel({
+    handle: "darko",
+    facts: [{ label: "class", value: "<img src=x onerror=alert(1)>" }],
+    relations: [{ label: "holds", items: [{ id: "darko/a", name: "<b>A</b>" }] }],
+    back: { id: "darko/b", name: "B" },
+  }));
+  const go = find(host, "button").filter((b) => b.attrs["data-homecol-go"]);
+  assert.equal(go.length, 1);
+  assert.equal(go[0].attrs["data-homecol-go"], "darko/a");
+  assert.equal(serialize(go[0]), "<b>A</b>", "a resident's name arrives as letters");
+  assert.equal(serialize(find(host, "dd")[0]), "<img src=x onerror=alert(1)>", "and so does a fact");
+  const back = find(host, "button").filter((b) => b.attrs["data-homecol-back"]);
+  assert.equal(back.length, 1, "the way back is in the nav");
+  assert.ok(byClass(host, "wv-homecol-nav")[0].children.includes(back[0]));
+  assert.equal(serialize(back[0]), "◂ B");
+  const VIEWER = readFileSync(new URL("../spectator/viewer.mjs", import.meta.url), "utf8");
+  assert.match(VIEWER, /closest\("\[data-homecol-go\]"\)/, "the viewer's root delegate reads the relative's attribute");
+  assert.match(VIEWER, /closest\("\.wv-bubble-back, \[data-homecol-back\]"\)/, "and the way back's");
+});

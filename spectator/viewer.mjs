@@ -33,7 +33,7 @@ import { crossingsOnSegment, waterFeatures, seaFeature } from "../tools/water.mj
 // the town's own roster of regions, stated once in the record's own view: a water
 // mark carries a ring too, and the sea is not a region anyone is filed under
 import { REGION_SLUGS } from "../tools/region-outsiders.mjs";
-import { parseEnterExitLedger, occupancyAt, occupantsOf, withinOf, isMark, isEntity } from "../tools/enter-exit.mjs";
+import { parseEnterExitLedger, occupancyAt, occupantsOf, withinOf, isMark, isEntity, entryLawOf } from "../tools/enter-exit.mjs";
 // WHERE A RECORD MAY BE READ FROM — one decision, in one place, with the
 // guardrail it answers to quoted in its header ("tags only, never main tip").
 // There is deliberately no constant here naming the world's main tip: this file
@@ -3105,7 +3105,7 @@ export const TOUR_SLIDES = [
     id: "marks",
     anchor: ".ov-pip",
     title: "A mark is one sentence the world keeps",
-    body: "Every dot is a mark. Point at one for a glance; click to open its cell — who wrote it, when, and what it nests inside.<br><br>"
+    body: "Every dot is a mark. Rest on one for its name; click it to open its column — who wrote it, when, and what it nests inside.<br><br>"
       + "One mark carries <b>one claim</b>, deliberately. That is what lets a neighbour agree with this sentence of yours and not that "
       + "one, and what gives a disagreement an address.",
   },
@@ -4165,11 +4165,18 @@ export function mistsPaintHTML(baked, { originPx, mPerPx, layers, creatures = ""
 // picks the side that clears the obstacles and, failing that, steps above or
 // below them. A LIST rather than a single rect because three bubbles can be up at
 // once, and dodging only the first one just moves the collision to the second.
-export function placeBubble({ anchor, size, box, gap = 14, edge = 8, avoid = null } = {}) {
+// `reach` is how far the thing at the anchor spreads to each side, in the same
+// pixels: a nameplate stands BESIDE a mark's drawn ground, never over its middle
+// (Darko, 2026-10-15: the old card "covers interest points in the art"). A
+// number reaches both ways; { left, right } each its own. Zero is the old rule.
+export function placeBubble({ anchor, size, box, gap = 14, edge = 8, avoid = null, reach = 0 } = {}) {
   const ax = Number(anchor?.x), ay = Number(anchor?.y);
   const w = Number(size?.w), h = Number(size?.h);
   const bw = Number(box?.w), bh = Number(box?.h);
   if (![ax, ay, w, h, bw, bh].every(Number.isFinite)) return null;
+  const reachOf = (v) => Math.max(0, Number(v) || 0);
+  const rl = reachOf(typeof reach === "object" ? reach?.left : reach);
+  const rr = reachOf(typeof reach === "object" ? reach?.right : reach);
   const obstacles = (Array.isArray(avoid) ? avoid : [avoid])
     .filter((r) => r && [r.x, r.y, r.w, r.h].every(Number.isFinite));
   const clampX = (want) => Math.max(edge, Math.min(bw - w - edge, want));
@@ -4179,8 +4186,8 @@ export function placeBubble({ anchor, size, box, gap = 14, edge = 8, avoid = nul
     * Math.max(0, Math.min(y + h, r.y + r.h) - Math.max(y, r.y)), 0);
   const y = clampY(ay - h / 2);
   const fitting = [
-    { side: "right", x: ax + gap, fits: ax + gap + w <= bw - edge },
-    { side: "left", x: ax - gap - w, fits: ax - gap - w >= edge },
+    { side: "right", x: ax + rr + gap, fits: ax + rr + gap + w <= bw - edge },
+    { side: "left", x: ax - rl - gap - w, fits: ax - rl - gap - w >= edge },
   ].filter((candidate) => candidate.fits);
   let chosen = fitting.length
     ? fitting.map((c) => ({ ...c, y, cost: overlap(c.x, y) })).sort((a, b) => a.cost - b.cost)[0]
@@ -6422,11 +6429,13 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-bubble .wv-card { border:0; border-radius:0; margin:0; max-width:none; padding:10px 13px; cursor:pointer; }
 .wv-bubble .wv-card:hover { border-color:transparent; }
 .wv-bubble .wv-card.is-mark-selected { outline:none; }
-.wv-bubble.is-hover .wv-card { cursor:default; }
-.wv-bubble.is-hover .cbody { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;
-  overflow:hidden; font-size:.92rem; }
-.wv-bubble-hint { padding:0 13px 9px; margin:0; color:var(--dim); font-size:.68rem;
-  letter-spacing:.05em; text-transform:uppercase; opacity:.75; }
+/* THE NAMEPLATE (Darko, 2026-10-15): the glance is a name and nothing to read,
+   so it is one line, small, and narrow enough to stand beside a mark */
+.wv-bubble.is-nameplate { max-width:min(19rem,60%); border-radius:5px; box-shadow:0 4px 14px rgba(0,0,0,.45); }
+.wv-nameplate { display:flex; align-items:center; gap:7px; padding:3px 9px 3px 8px; min-width:0; }
+.wv-np-name { color:var(--paper); font-size:.82rem; font-weight:700; line-height:1.35;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.wv-np-name.is-determined { color:var(--amber); }
 /* the contested-click chooser: a compact stack list in the bubble's own chrome,
    innermost first. Rows are the page's ordinary cell title, so a row looks like
    the thing it opens. */
@@ -12727,6 +12736,99 @@ export function mountViewer(appEl) {
     };
   }
 
+  // ── EVERY OTHER MARK'S COLUMN (Darko, playground sitting 2026-10-15) ──────
+  //
+  // "on click, the side panel … already exists for parcels and regions … it's
+  // actually feedback I've already gotten from residents that they would love
+  // for that to just be generalized … it just pops up that same column …
+  // regardless of what kind of mark it is, containing the image, if there is
+  // one, you know, all of the kind of information that they would want about
+  // it." So the pinned bubble stands down for a mark, as it already had for a
+  // parcel, and the click's answer is the column: the picture, the name, where
+  // it is, who made it and when, its words, its backing, its attributes, who is
+  // inside it, what it sits inside and what it holds, and the one door the card
+  // offered (enter). Nothing floats over the art.
+  //
+  // Walk-here is not a button: selecting a mark already previews the walk on
+  // the desk (Keemin 2026-08-04), so the column's only action is the door.
+  //
+  // PAINTING-ONLY, like the bubble it replaces. With the Telling beside the map,
+  // a click scrolls the mark's own cell into view and the cell opens in place;
+  // a column over the map as well would tell the same mark twice.
+  //
+  // The relatives come from the same `investigate` the card's expansion runs,
+  // asked ONCE per mark per record (the view is rebuilt on every pointer move,
+  // and the frame's own reading is the world): the fold's when the page holds
+  // one, the office's otherwise, which lands later and repaints by changing the
+  // view's key.
+  const columnReadings = new Map();   // `${worldEpoch}|${id}` -> investigate reading | null
+  function columnReading(id) {
+    const key = `${worldEpoch}|${id}`;
+    if (columnReadings.has(key)) return columnReadings.get(key);
+    let d = null;
+    try {
+      if (id === WORLD_ROOT_ID) d = worldFrameReading(byId.get(id), allMarks());
+      else if (world) d = investigate(id, world);
+      else if (investigateCache.has(id)) d = investigateCache.get(id);
+      else { loadInvestigate(id).then(() => syncMarkInteractionViews()); return null; }
+    } catch { d = null; }
+    columnReadings.set(key, d);
+    return d;
+  }
+  function markColumnView(id) {
+    if (!state.paintingOnly || !id || id === sceneRoomId) return null;
+    if (walkerHandleFromHoverId(id) || chooserIdsFrom(id)) return null;
+    const mark = byId.get(id);
+    if (!mark || isParcelMark(mark) || isRegionMark(mark)) return null;
+    const identity = markName(mark);
+    const where = radialWhere(mark);
+    const reading = columnReading(id);
+    const d = reading && !reading.error ? reading : null;
+    const nameOf = (relative) => markIdentity(byId.get(relative?.id) ?? relative);
+    const rel = (list) => (list ?? []).filter((r) => r?.id).map((r) => ({ id: r.id, name: nameOf(r) }));
+    // THE DOOR, gated exactly as the card's was (enterAffordance owns all four)
+    const key = standpointKey();
+    const crossing = enterAffordance({
+      mark, palette: state.palette?.entries ?? [], actingAs: key,
+      insideOf: standpointOccupancy({ acts: enterExitLedger.acts, at: occupancyClock(), handle: key }).insideOf,
+    });
+    const weight = effectiveWeight(mark), own = Math.max(0, Number(mark.stamps ?? 0) || 0);
+    const inside = (occupantsOf(liveOccupancy()).get(id) ?? []).map((h) => faceOf(h).name);
+    const law = entryLawOf(mark);
+    const e = mark.extent;
+    const facts = [
+      { label: "backing", value: `✦ ${weight.toLocaleString()}${own !== weight ? ` (✦ ${own.toLocaleString()} its own)` : ""}` },
+      e && (e.w || e.h) && !isAmbientMark(mark, byId) ? { label: "size", value: `${e.w ?? 0}×${e.h ?? 0} m` } : null,
+      mark.class ? { label: "class", value: String(mark.class) } : null,
+      ...((d?.predicates ?? []).map((p) => ({ label: p.slot ?? "property", value: String(p.value ?? "") }))),
+      inside.length ? { label: "inside now", value: inside.join(", ") } : null,
+      law?.consequence ? { label: "at the door", value: law.consequence } : null,
+    ].filter(Boolean);
+    const relations = [
+      { label: "leads into", items: (law?.into ?? []).map((into) => ({ id: into, name: markIdentity(byId.get(into) ?? { id: into }) })) },
+      { label: "sits inside", items: rel(d?.parents) },
+      { label: "holds", items: rel(d?.children), more: (d?.more?.children ?? 0) > 0 },
+    ];
+    const cameFrom = bubbleTrail.length > 1 ? bubbleTrail[bubbleTrail.length - 2] : null;
+    const backTo = cameFrom && byId.get(cameFrom) ? { id: cameFrom, name: markIdentity(byId.get(cameFrom)) } : null;
+    const enter = crossing.show ? id : null;
+    return {
+      // the key carries everything that changes what the column says, so a
+      // repaint happens exactly when one is owed (the column's own law)
+      key: [id, d ? "read" : "-", worldEpoch, enterExitEpoch, cameFrom ?? "", enter ?? "", inside.join(",")].join("|"),
+      handle: String(mark.by ?? mark.household ?? "the town"),
+      residentLink: false,
+      kicker: String(mark.household ?? mark.by ?? "the town"),
+      title: identity.name || String(mark.id),
+      region: where.detail,
+      leadImage: markImagePath(mark),
+      door: { description: typeof mark.body === "string" ? mark.body : "" },
+      byline: markByline(mark),
+      enterId: enter, canEnter: !!enter,
+      facts, relations, back: backTo,
+    };
+  }
+
   const bubbleEls = { hover: null, pinned: null };
   let bubbleResize = null;
   let pinnedBuiltId = null;   // which mark the pinned bubble currently holds
@@ -12813,10 +12915,10 @@ export function mountViewer(appEl) {
     // the placeless hang off the card (POS-206) — a hidden dot measures 0,0
     return elementBoxPoint($(root, sceneRoomId ? ".wv-room-card" : ".wv-root-mark"));
   }
-  function placeBubbleAt(el, at, avoid = null) {
+  function placeBubbleAt(el, at, avoid = null, reach = 0) {
     if (!el || el.hidden) return;
     if (!at) { el.hidden = true; return; }
-    const spot = placeBubble({ anchor: at, size: { w: el.offsetWidth, h: el.offsetHeight }, box: at.box, avoid });
+    const spot = placeBubble({ anchor: at, size: { w: el.offsetWidth, h: el.offsetHeight }, box: at.box, avoid, reach });
     if (!spot) return;
     el.style.transform = `translate3d(${Math.round(spot.x)}px, ${Math.round(spot.y)}px, 0)`;
     el.classList.toggle("side-over", spot.side === "over");
@@ -12909,7 +13011,7 @@ export function mountViewer(appEl) {
   // called, their handle, the house they keep, and where they are right now.
   //
   // `pressable` is not a style choice, it is this layer's own law (see the note
-  // over markPreviewHTML): the HOVER layer takes no pointer events, so a link
+  // over markNameplateHTML): the HOVER layer takes no pointer events, so a link
   // drawn there is a button you cannot press — worse than no button. The glance
   // therefore carries no link and the PINNED card does, which is also what makes
   // this reachable on a touch screen, where hover never happens at all.
@@ -12947,32 +13049,96 @@ export function mountViewer(appEl) {
       + (pressable && href ? `<p class="wv-face-go"><a href="${href}">their page →</a></p>` : "")
       + `</div>`;
   }
-  // The glance. Deliberately NOT a live cell: it carries no data-id and no
-  // pressable action, because the layer it sits in takes no pointer events and a
-  // button you cannot press is worse than no button. Backing reads as the chip
-  // it is everywhere else; pressing it is what the pinned bubble is for.
-  function markPreviewHTML(id) {
+  // ── THE NAMEPLATE (Darko, playground sitting 2026-10-15) ─────────────────
+  //
+  // The glance used to be the mark's whole card — its body, its byline, its
+  // backing and "click to open" — and Darko's two complaints about it were
+  // exact: "very obnoxious and in your face and oftentimes covers interest
+  // points in the art", and "a card doesn't even tell you if something is a
+  // thing or not". So the glance is now the smallest of the three levels he
+  // approved ("each shown only when asked for"): the mark's NAME, set BESIDE its
+  // drawn ground (positionBubbles passes the footprint as `reach`), raised only
+  // after the pointer has rested (GLANCE_DELAY_MS) so a sweep across the map
+  // flashes nothing. No body: the words are the click's, in the column.
+  //
+  // Still deliberately NOT a live cell: no data-id, nothing to press.
+  function markNameplateHTML(id) {
     const full = byId.get(id);
     if (!full) return "";
-    const tier = tierOf(full), identity = markName(full), where = radialWhere(full);
-    const draft = isDraft(full);
-    const backing = effectiveWeight(full);
-    return `<article class="wv-card fov ${markClasses(full)}">`
-      + markCellTitle({ name: identity.name, determined: identity.determined, bearing: where.bearing, tier, draft })
-      + `<div class="cbody">${esc(full.body ?? full.id)}</div>`
-      + markCellBylineRow(full, `<span class="wv-cell-actions"><span class="wv-chip stamps">✦ ${backing.toLocaleString()}</span></span>`)
-      + (where.detail ? `<div class="cmeta"><div class="wv-details" style="display:flex">${extentTag(full)}<span class="wv-detail-where">${esc(where.detail)}</span></div></div>` : "")
-      + `</article><p class="wv-bubble-hint">click to open</p>`;
+    const identity = markName(full);
+    return `<div class="wv-nameplate">`
+      + `<span class="wv-np-name${identity.determined ? " is-determined" : ""}">${esc(identity.name || full.id)}</span>`
+      + `</div>`;
+  }
+  // A RESTING POINTER, NOT A PASSING ONE. The glance waits this long on one mark
+  // before it is raised, and moving to another mark puts it down at once.
+  const GLANCE_DELAY_MS = 250;
+  let glanceShown = null;     // the id the hover bubble is showing, or null
+  let glancePending = null;   // the id waiting out the delay, or null
+  let glanceTimer = null;
+  function paintGlance(el, id) {
+    const handle = walkerHandleFromHoverId(id);
+    const html = handle ? walkerBubbleHTML(handle) : markNameplateHTML(id);
+    if (!html) { el.hidden = true; glanceShown = null; return; }
+    el.className = `wv-bubble is-hover${handle ? "" : ` is-nameplate ${markClasses(byId.get(id))}`}`;
+    if (el._pmHtml !== html) { el._pmHtml = html; el.innerHTML = html; }
+    el.hidden = false;
   }
   function renderHoverBubble(id) {
     const el = bubbleEl("hover");
     if (!el) return;
-    const handle = id && walkerHandleFromHoverId(id);
-    const html = !id ? "" : (handle ? walkerBubbleHTML(handle) : markPreviewHTML(id));
-    if (!html) { el.hidden = true; return; }
-    el.className = `wv-bubble is-hover${handle ? "" : ` ${markClasses(byId.get(id))}`}`;
-    el.innerHTML = html;
-    el.hidden = false;
+    if (!id) {
+      clearTimeout(glanceTimer);
+      glanceTimer = null; glancePending = null; glanceShown = null;
+      el.hidden = true;
+      return;
+    }
+    if (id === glanceShown) { paintGlance(el, id); return; }
+    if (id === glancePending) return;
+    el.hidden = true;
+    glanceShown = null;
+    glancePending = id;
+    clearTimeout(glanceTimer);
+    glanceTimer = setTimeout(() => {
+      glanceTimer = null;
+      if (glancePending !== id) return;
+      glancePending = null;
+      glanceShown = id;
+      paintGlance(el, id);
+      positionBubbles();
+    }, GLANCE_DELAY_MS);
+  }
+  // A MARK'S DRAWN GROUND, in the bubble layer's pixels: the card or glyph a
+  // parcel is drawn as, else the mark's own extent (the box its ring or its
+  // picture covers), widened to its pip. Null for ground too big to stand beside
+  // — the district the reader is looking across — where the nameplate keeps the
+  // old rule and hangs off the middle.
+  function footprintBoxFor(id) {
+    const host = bubbleHost();
+    if (!id || !host || !mapCtx?.overlay) return null;
+    const b = host.getBoundingClientRect();
+    if (!b.width || !b.height) return null;
+    const rects = [];
+    const sel = CSS.escape(id);
+    for (const drawn of mapCtx.overlay.querySelectorAll(`.ov-home[data-id="${sel}"], .ov-glyph[data-id="${sel}"], .ov-pip[data-id="${sel}"]`)) {
+      const r = drawn.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) rects.push({ x0: r.left - b.left, y0: r.top - b.top, x1: r.right - b.left, y1: r.bottom - b.top });
+    }
+    const mark = byId.get(id);
+    const target = mark && mark.kind !== "parcel" ? nearestEmbodiedAncestor(mark, byId) : null;
+    if (target?.at && target.extent) {
+      const ring = polygonOf(target);
+      const bb = ring ? polygonBBox(ring) : null;
+      const r = rect(target);
+      const lo = paintingPointToBox(bb ? { x: bb.minx, y: bb.miny } : { x: r.x - r.w / 2, y: r.y - r.h / 2 });
+      const hi = paintingPointToBox(bb ? { x: bb.maxx, y: bb.maxy } : { x: r.x + r.w / 2, y: r.y + r.h / 2 });
+      if (lo && hi) rects.push({ x0: Math.min(lo.x, hi.x), y0: Math.min(lo.y, hi.y), x1: Math.max(lo.x, hi.x), y1: Math.max(lo.y, hi.y) });
+    }
+    if (!rects.length) return null;
+    const x0 = Math.min(...rects.map((r) => r.x0)), y0 = Math.min(...rects.map((r) => r.y0));
+    const x1 = Math.max(...rects.map((r) => r.x1)), y1 = Math.max(...rects.map((r) => r.y1));
+    if (x1 - x0 > b.width * 0.6 || y1 - y0 > b.height * 0.6) return null;
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
   }
   // BUILT ONCE PER SELECTION, and that is the whole point. Pointing at anything
   // inside this bubble raises a hover, a hover re-renders the bubbles, and a
@@ -13055,7 +13221,7 @@ export function mountViewer(appEl) {
     // to swap either: the click scrolls the mark's cell up in the Telling, and
     // it still does.)
     const selected = markInteraction.getState().selectedId;
-    const column = parcelColumnView(selected) ?? regionColumnView(selected);
+    const column = parcelColumnView(selected) ?? regionColumnView(selected) ?? markColumnView(selected);
     if (column) homeColumn.open(column); else homeColumn.close();
     // ── AND THE MAP HAS TO HEAR ABOUT IT (2026-09-12) ─────────────────────
     //
@@ -13092,8 +13258,9 @@ export function mountViewer(appEl) {
       const onPane = (id) => (id && id === sceneRoomId ? null : id);
       const state_ = markInteraction.getState();
       const hoveredId = onPane(state_.hoveredId), selectedId = onPane(state_.selectedId);
-      // THE ONE SWAP. A parcel's selection is held by the column; every other
-      // selection is held by the pinned bubble exactly as before. The pinned
+      // THE ONE SWAP. A mark's selection is held by the column (every mark's
+      // since 2026-10-15); a person and the chooser's stack are still held by
+      // the pinned bubble, which has links and rows to press. The pinned
       // bubble is told the truth about what IT holds, which is nothing — so it
       // hides itself, and positionBubbles steps the glance around a box that is
       // not there, both by paths that already existed.
@@ -13126,9 +13293,20 @@ export function mountViewer(appEl) {
     // …and so does the room card indoors: it is open by law (POS-206), so a
     // bubble that lands on it would be covering the room's own name and its door
     const roomCard = sceneRoomId ? bubbleRect($(root, ".wv-room-card")) : null;
-    placeBubbleAt(bubbleEls.pinned, anchorBoxFor(selectedId), [desk, roomCard]);
+    // …and so does a column, which stands over the map's right-hand side
+    const column = bubbleRect($(root, ".wv-homecol"));
+    placeBubbleAt(bubbleEls.pinned, anchorBoxFor(selectedId), [desk, roomCard, column]);
     const pinned = bubbleRect(bubbleEls.pinned);
-    placeBubbleAt(bubbleEls.hover, anchorBoxFor(hoveredId), [pinned, desk, roomCard]);
+    // THE NAMEPLATE STANDS BESIDE THE MARK'S GROUND (Darko, 2026-10-15). It
+    // hangs off the mark it is SHOWING, which after the rest delay may trail the
+    // pointer by a beat; its ground is both the reach it clears sideways and an
+    // obstacle, so a mark with no room either side gets it above or below
+    // rather than over the art.
+    const glanceId = glanceShown ?? hoveredId;
+    const at = anchorBoxFor(glanceId);
+    const foot = footprintBoxFor(glanceId);
+    const reach = at && foot ? { left: Math.max(0, at.x - foot.x), right: Math.max(0, foot.x + foot.w - at.x) } : 0;
+    placeBubbleAt(bubbleEls.hover, at, [pinned, desk, roomCard, column, foot], reach);
   }
   // ───────── the tour ─────────
   // Opened by the ? on the painting, never on arrival: a page that seizes the
@@ -13699,7 +13877,11 @@ export function mountViewer(appEl) {
     // the ✕ on the parcel's column is the same act for the same reason — one
     // selection, and the column is what it looks like for a parcel
     if (e.target.closest(".wv-bubble-close, .wv-homecol-close")) { clearSelectionAndDestination(); return; }
-    if (e.target.closest(".wv-bubble-back")) { bubbleBack(); return; }
+    if (e.target.closest(".wv-bubble-back, [data-homecol-back]")) { bubbleBack(); return; }
+    // a relative named in a mark's column opens that mark's column, and the
+    // trail remembers the way back exactly as the pinned bubble's did
+    const colGo = e.target.closest("[data-homecol-go]");
+    if (colGo) { if (byId.has(colGo.dataset.homecolGo)) followInBubble(colGo.dataset.homecolGo); return; }
     const filterChip = e.target.closest("[data-mark-filter]");
     if (filterChip && !filterChip.disabled) {
       state.markFilter = filterChip.dataset.markFilter;

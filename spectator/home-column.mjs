@@ -7,6 +7,12 @@
 // instead of the usual little card, with the fulltext of the corresponding home
 // md").
 //
+// AND NOW EVERY MARK'S (Darko, playground sitting 2026-10-15: "whenever you
+// click on the mark to maximally learn about it, it just pops up that same
+// column … regardless of what kind of mark it is"). A mark that is not a parcel
+// or a region hands in its own view: its body as the door, its facts and its
+// relatives as plain data. Same builder, same law: no string is ever HTML.
+//
 // WHAT THE ATLAS DID, and what this matches — read at
 // site/public/atelier/postmark/atlas/town.html:2619–2664 (the panel markup) and
 // :47–64 (its dress):
@@ -214,7 +220,7 @@ export function isParcelMark(mark) {
  * renders blank: every state below ends in either prose or one line saying why
  * there is none.
  */
-export function homeColumnModel({ handle, kicker, title, region, leadImage, door = null, error = null, loading = false, residentHref = null, parcelId = null, canEnter = false, byline = null, residents = [], ownWords = null } = {}) {
+export function homeColumnModel({ handle, kicker, title, region, leadImage, door = null, error = null, loading = false, residentHref = null, parcelId = null, canEnter = false, byline = null, residents = [], ownWords = null, enterId = null, facts = [], relations = [], back = null } = {}) {
   const who = String(handle ?? "").trim();
   // THE DOOR SPEAKS ONLY FOR ITS OWN PARCEL (POS-584, Darko 2026-10-11: "Sol's
   // parcel got yeeted"). There is one home page per handle, so a household's
@@ -263,7 +269,27 @@ export function homeColumnModel({ handle, kicker, title, region, leadImage, door
     // columns? and it just enters the parcel"). The column names a parcel; a
     // reader who can act gets the same door the little card offers, on the same
     // verb. A spectator, or a column with no parcel behind it, gets no button.
-    enter: parcelId && canEnter ? { parcelId: String(parcelId) } : null,
+    // EVERY MARK'S COLUMN (Darko, 2026-10-15): a mark that is not a parcel
+    // names the door it offers as `enterId`; the button and its one delegate
+    // are the parcel's own, so the key keeps its name.
+    enter: (enterId ?? parcelId) && canEnter ? { parcelId: String(enterId ?? parcelId) } : null,
+    // WHAT A MARK'S COLUMN SAYS BESIDE ITS WORDS (Darko, 2026-10-15: "all of
+    // the kind of information that they would want about it"). Facts are
+    // label/value lines; relations are lists of other marks, each a button
+    // that opens that mark's own column. Plain data, so the builder below
+    // writes them with textContent like everything else. Empty for a parcel
+    // and a region unless their caller hands some in.
+    facts: (facts ?? []).filter((f) => f && String(f.value ?? "").trim())
+      .map((f) => ({ label: String(f.label ?? "").trim(), value: String(f.value).trim() })),
+    relations: (relations ?? []).map((r) => ({
+      label: String(r?.label ?? "").trim(),
+      items: (r?.items ?? []).filter((i) => i && String(i.id ?? "").trim())
+        .map((i) => ({ id: String(i.id).trim(), name: String(i.name ?? i.id).trim() })),
+      more: !!r?.more,
+    })).filter((r) => r.items.length),
+    // the way back to the mark this column was reached from, named
+    back: back && String(back.id ?? "").trim()
+      ? { id: String(back.id).trim(), name: String(back.name ?? back.id).trim() } : null,
     // EVERY RESIDENT WHOSE HOME THIS IS (POS-368, Darko 2026-10-04: "A parcel
     // shared by five housemates can be home to all five"). One entry each, in
     // the order the resolver gave (holder first), with their own picture from
@@ -413,6 +439,16 @@ export function renderHomeColumn(doc, host, model, { imagePath = null } = {}) {
   close.setAttribute("type", "button");
   close.setAttribute("aria-label", "close this home");
   close.textContent = "✕";
+  if (model.back) {
+    // the pinned bubble's way back, carried over: named, so the reader never
+    // has to hold the route in their head. The viewer's root delegate reads it.
+    const back = el(doc, "button", "wv-homecol-back");
+    back.setAttribute("type", "button");
+    back.setAttribute("data-homecol-back", model.back.id);
+    back.setAttribute("title", `back to ${model.back.name}`);
+    back.textContent = `◂ ${model.back.name}`;
+    nav.appendChild(back);
+  }
   nav.appendChild(kicker);
   nav.appendChild(close);
   host.appendChild(nav);
@@ -487,6 +523,41 @@ export function renderHomeColumn(doc, host, model, { imagePath = null } = {}) {
   appendBlocks(doc, body, model.blocks, imagePath);
   scroll.appendChild(body);
 
+  if (model.facts?.length) {
+    const list = el(doc, "dl", "wv-homecol-facts");
+    for (const fact of model.facts) {
+      const dt = el(doc, "dt");
+      dt.textContent = fact.label;
+      const dd = el(doc, "dd");
+      dd.textContent = fact.value;
+      list.appendChild(dt);
+      list.appendChild(dd);
+    }
+    scroll.appendChild(list);
+  }
+
+  for (const relation of model.relations ?? []) {
+    // A RELATIVE IS A WAY ON, not a second telling: its name, as a button the
+    // viewer's root delegate turns into that mark's own column.
+    const group = el(doc, "div", "wv-homecol-rel");
+    const label = el(doc, "div", "wv-homecol-rel-label");
+    label.textContent = relation.label;
+    group.appendChild(label);
+    for (const item of relation.items) {
+      const go = el(doc, "button", "wv-homecol-go");
+      go.setAttribute("type", "button");
+      go.setAttribute("data-homecol-go", item.id);
+      go.textContent = item.name;
+      group.appendChild(go);
+    }
+    if (relation.more) {
+      const more = el(doc, "p", "wv-homecol-rel-more");
+      more.textContent = "…and more the eye holds back";
+      group.appendChild(more);
+    }
+    scroll.appendChild(group);
+  }
+
   if (model.note) {
     const note = el(doc, "p", "wv-homecol-note");
     note.textContent = model.note;
@@ -540,12 +611,18 @@ export function createHomeColumn({ doc, host, readHome, imagePath = null, reside
       door: state.door ?? null,
       error: state.error ?? null,
       loading: !!state.loading,
-      residentHref: residentHref ? residentHref(view.handle) : null,
+      // a mark's column names its author in the byline; the link out is a
+      // home's, so a view may turn it off
+      residentHref: residentHref && view.residentLink !== false ? residentHref(view.handle) : null,
       parcelId: view.parcelId ?? null,
       canEnter: !!view.canEnter,
       byline: view.byline ?? null,
       residents: view.residents ?? [],
       ownWords: view.ownWords ?? null,
+      enterId: view.enterId ?? null,
+      facts: view.facts ?? [],
+      relations: view.relations ?? [],
+      back: view.back ?? null,
     }), { imagePath });
   };
 
@@ -645,6 +722,22 @@ export const HOME_COLUMN_CSS = `
   border:1px solid var(--line); border-radius:3px; }
 .wv-homecol-altonly { color:var(--dim); font-size:.78rem; font-style:italic; }
 .wv-homecol-note { margin:.9rem 0 0; color:var(--dim); font-size:.8rem; line-height:1.5; }
+/* every mark's column (Darko, 2026-10-15): the way back, the facts, the relatives */
+.wv-homecol-back { flex:0 1 auto; min-width:0; border:0; background:transparent; color:var(--amber);
+  font:inherit; font-size:.76rem; padding:2px 6px; border-radius:4px; cursor:pointer;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wv-homecol-back:hover, .wv-homecol-back:focus-visible { background:var(--panel2); }
+.wv-homecol-facts { margin:1rem 0 0; display:grid; grid-template-columns:auto 1fr; gap:.3rem .8rem;
+  font-size:.8rem; line-height:1.45; }
+.wv-homecol-facts dt { color:var(--dim); text-transform:lowercase; }
+.wv-homecol-facts dd { margin:0; color:var(--paper); overflow-wrap:anywhere; }
+.wv-homecol-rel { margin:1rem 0 0; display:flex; flex-direction:column; gap:.3rem; }
+.wv-homecol-rel-label { color:var(--dim); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; }
+.wv-homecol-go { display:block; width:100%; text-align:left; cursor:pointer; padding:5px 8px;
+  border:1px solid var(--line); border-radius:5px; background:rgba(13,20,38,.55); color:var(--paper);
+  font:inherit; font-size:.84rem; }
+.wv-homecol-go:hover, .wv-homecol-go:focus-visible { border-color:var(--amber); background:rgba(28,44,79,.6); }
+.wv-homecol-rel-more { margin:.1rem 0 0; color:var(--dim); font-size:.76rem; font-style:italic; }
 .wv-homecol-resident { display:inline-block; margin-top:1.2rem; color:var(--amber);
   font-size:.8rem; text-decoration:none; border-bottom:1px solid rgba(232,197,106,.4); }
 .wv-homecol-resident:hover, .wv-homecol-resident:focus-visible { color:var(--paper); border-bottom-color:var(--paper); }
