@@ -206,8 +206,8 @@ property(MARK._dir, "mark-body", { name: "body", tier: "sovereign", body: "What 
 // holder, capacity, open (16:03–16:05)
 const RH = property(RESIDENT._dir, "resident-holder", { name: "holder", tier: "constitution", dflt: true, body: "A resident is a holder: what they carry is held by them." });
 property(RESIDENT._dir, "resident-capacity", { of: RH, name: "capacity", tier: "constitution", dflt: 24, body: "The most a resident carries at once. A carried holder counts one, whatever it holds." });
-// one holder in hand (Darko, 2026-10-17 23:29: "yes, rule it, one holder and counts confer up")
-property(RESIDENT._dir, "resident-holders", { of: RH, name: "holders", tier: "constitution", dflt: 1, body: "The most holders a resident carries at once. A bag, a bowl or a chest in your hands is one holder, however full; set it down before you take up another." });
+// holders, unset: any number carried (Darko, 2026-10-18 12:17, WLD-76: "Yeah, I agree with your recommended shape")
+property(RESIDENT._dir, "resident-holders", { of: RH, name: "holders", tier: "constitution", body: "How many holders a resident carries at once. Unset: any number, as the 24 slots hold them (ruled 2026-10-18 12:17)." });
 const TH = property(THING._dir, "thing-holder", { name: "holder", tier: "sovereign", dflt: false, body: "Whether a thing holds other things: the maker says so, and a thing holds nothing unless they do." });
 const TC = property(THING._dir, "thing-capacity", { of: TH, name: "capacity", tier: "sovereign", dflt: 30, body: "How many marks a holding thing can hold: the maker sets it, within its bounds." });
 property(THING._dir, "thing-capacity-min", { of: TC, name: "min", tier: "constitution", dflt: 1, body: "The least a holding thing's capacity may be." });
