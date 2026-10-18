@@ -8,6 +8,7 @@ import {
   MARK_ICONS, markWhat, markStates, markIcons, creatureClassesOf, iconSVG, iconsHTML, MARK_ICON_CSS,
 } from "../spectator/mark-icons.mjs";
 import { overlayPipSVG, iconPillSVG } from "../spectator/viewer.mjs";
+import { instanceClassOf } from "./mark-kind.mjs"; // either form (LOGOS v2 W2)
 
 const sited = (extra = {}) => ({ id: "h/m", kind: "sited", at: { x: 0, y: 0 }, extent: { w: 4, h: 4 }, ...extra });
 const tok = (c) => String(c ?? "").trim().toLowerCase();
@@ -67,7 +68,7 @@ test("the real record: the Spire, its doors and stairs, and the Post Office", ()
   const byId = new Map(state.marks.map((m) => [m.id, m]));
   const creatures = creatureClassesOf(state.marks, tok);
   assert.ok(creatures.has("wolf") && creatures.has("raven") && creatures.has("bat"), "the record's creature classes");
-  const keys = (id) => markIcons(byId.get(id), { cls: tok(byId.get(id)?.class), creatureClasses: creatures }).map((i) => i.key);
+  const keys = (id) => markIcons(byId.get(id), { cls: tok(instanceClassOf(byId.get(id))), creatureClasses: creatures }).map((i) => i.key);
   for (const [id, want] of [
     ["the-town/the-post-office", ["vehicle", "consent"]],
     ["wright/the-cellar-door", ["door", "consent"]],

@@ -26,6 +26,7 @@
 // reader's, its ✦ figure and who is inside it. Pure.
 import { entryLawOf, isStairs, STAIRS_LINE } from "../tools/enter-exit.mjs";
 import { isDungeon } from "../tools/portals.mjs";
+import { isSited } from "../tools/mark-kind.mjs"; // LOGOS v2 W2: a thing is kind: thing, still sited
 
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 // THE TOKEN (play fix 43, Darko 20:16): a resident is drawn on the map as a round
@@ -107,7 +108,7 @@ export function creatureClassesOf(marks = [], token = (c) => String(c ?? "").tri
 export function markWhat(mark, { cls = "", creatureClasses = new Set(["creature"]) } = {}) {
   if (!mark) return null;
   if (mark.kind === "parcel") return "home";
-  if (mark.kind !== "sited") return null;
+  if (!isSited(mark)) return null; // either form (W2: kind names the class)
   if (cls === "idea" || cls === "bounty") return null;
   if (isDungeon(mark) || cls === "dungeon") return "dungeon";
   if (isStairs(mark) || cls === "stairs") return "stairs";

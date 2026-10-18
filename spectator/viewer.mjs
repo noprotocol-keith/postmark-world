@@ -7526,7 +7526,7 @@ export function agentWorldReadText({ who = null, at = null, crossing = null, whe
     const relName = (r) => String((nameOf && r?.id ? nameOf(r.id) : null) || r?.name || r?.id || "").trim() || null;
     const trimmed = {
       id, name: String(name ?? "").trim() || id,
-      ...(mark.class ? { class: String(mark.class) } : {}),
+      ...(instanceClassOf(mark) ? { class: String(instanceClassOf(mark)) } : {}),
       body: String(reading?.body ?? mark.body ?? "").trim() || null,
       ...((reading?.predicates ?? []).length ? { predicates: reading.predicates.map((q) => ({ slot: q.slot ?? null, value: q.value ?? null, ...(q.body ? { description: q.body } : {}) })) } : {}),
       ...((reading?.parents ?? []).length ? { sits_inside: reading.parents.map(relName).filter(Boolean) } : {}),
@@ -8079,7 +8079,7 @@ export function mountViewer(appEl) {
     if (!full) return [];
     const occupants = inside ?? occupantsOf(liveOccupancy());
     return markIcons(full, {
-      cls: classToken(full.class), creatureClasses: creatureClasses(),
+      cls: classToken(instanceClassOf(full)), creatureClasses: creatureClasses(),
       yours: isOwnMark(full), weight: effectiveWeight(full), inside: (occupants.get(full.id) ?? []).length,
     });
   }
@@ -13883,7 +13883,7 @@ export function mountViewer(appEl) {
     // size its own outline, who is inside their tokens; what stays a line is
     // what only words can say
     const facts = [
-      mark.class && !classSaid ? { label: "class", value: String(mark.class) } : null,
+      instanceClassOf(mark) && !classSaid ? { label: "class", value: String(instanceClassOf(mark)) } : null,
       ...((d?.predicates ?? []).map((p) => ({ label: p.slot ?? "property", value: String(p.value ?? ""),
         // its full description, which the short line opens to (row 70)
         detail: typeof p.body === "string" ? p.body : null }))),
