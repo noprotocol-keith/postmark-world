@@ -6073,6 +6073,12 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-walk-chip-go:not(.is-still):hover rect { fill:var(--green); stroke:var(--green); }
 .wv-walk-chip-go:not(.is-still):hover .wv-chip-text { opacity:0; }
 .wv-walk-chip-go:not(.is-still):hover .wv-chip-check { opacity:1; }
+.wv-chip-tab { fill:rgba(13,15,19,.94); stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
+.wv-chip-walker-head { fill:var(--green); }
+.wv-chip-walker-body { fill:none; stroke:var(--green); stroke-width:1.15; stroke-linecap:round; stroke-linejoin:round; }
+.wv-walk-chip-go:not(.is-still):hover .wv-chip-tab { fill:var(--green); stroke:var(--green); }
+.wv-walk-chip-go:not(.is-still):hover .wv-chip-walker-head { fill:#0d0f13; }
+.wv-walk-chip-go:not(.is-still):hover .wv-chip-walker-body { stroke:#0d0f13; }
 .wv-walk-chip-no circle { fill:#2a2f38; stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
 .wv-walk-chip-no text { fill:var(--paper, #e8e2d2); font-weight:700; }
 .wv-walk-chip-no:hover circle { fill:#5a2a2a; }
@@ -11870,15 +11876,22 @@ export function mountViewer(appEl) {
     const h = (lines.length * lineH + 10) * unit;
     const x = Math.max(mapCtx.view.x + 4 * unit, Math.min(mapCtx.view.x + mapCtx.view.w - w - 12 * unit, toward.x + 9 * unit));
     const y = Math.max(mapCtx.view.y + 12 * unit, Math.min(mapCtx.view.y + mapCtx.view.h - h - 4 * unit, toward.y - h / 2));
+    // A WALKER ON THE CARD'S TOP EDGE (Darko 17:55: "a little semicircle … at the
+    // top that has like a walk icon/silhouette"), so the card says what it is.
+    const cx = x + w / 2, u = 1.3 * unit;
+    const walker = `<g class="wv-chip-walker" transform="translate(${cx} ${y - 3.2 * u + 5 * unit}) scale(${u})">`
+      + `<path d="M -${9} 3.2 A 9 9 0 0 1 9 3.2 Z" class="wv-chip-tab"/>`
+      + `<circle cx="0.4" cy="-4.6" r="1.35" class="wv-chip-walker-head"/>`
+      + `<path d="M 0.2 -2.8 L -0.3 1 M -0.3 1 L -2.2 3.6 M -0.3 1 L 1.6 3.4 M 0 -1.8 L -2.1 -0.3 M 0 -1.8 L 2.1 -1" class="wv-chip-walker-body"/></g>`;
     const text = lines.map((l, i) => `<text class="wv-chip-text" x="${x + w / 2}" y="${y + (5 + lineH * (i + 1) - 3) * unit}" font-size="${fontPx * unit}" text-anchor="middle">${esc(l)}</text>`).join("");
     const card = confirmable
       ? `<g class="wv-walk-chip-go" data-walk-chip="go" style="pointer-events:auto;cursor:pointer"><title>walk there (Enter)</title>`
         + `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${5 * unit}"/>${text}`
-        + `<text class="wv-chip-check" x="${x + w / 2}" y="${y + h / 2 + 7 * unit}" font-size="${20 * unit}" text-anchor="middle">✓</text></g>`
+        + `<text class="wv-chip-check" x="${x + w / 2}" y="${y + h / 2 + 7 * unit}" font-size="${20 * unit}" text-anchor="middle">✓</text>${walker}</g>`
         + `<g class="wv-walk-chip-no" data-walk-chip="no" style="pointer-events:auto;cursor:pointer"><title>cancel (Esc)</title>`
         + `<circle cx="${x + w}" cy="${y}" r="${7.5 * unit}"/>`
         + `<text x="${x + w}" y="${y + 3.6 * unit}" font-size="${10 * unit}" text-anchor="middle">✕</text></g>`
-      : `<g class="wv-walk-chip-go is-still"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${5 * unit}"/>${text}</g>`;
+      : `<g class="wv-walk-chip-go is-still"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${5 * unit}"/>${text}${walker}</g>`;
     layer.innerHTML = `<line x1="${from.x}" y1="${from.y}" x2="${toward.x}" y2="${toward.y}" class="wv-walk-preview-leg"/>`
       + `<circle cx="${toward.x}" cy="${toward.y}" r="${6 / k}" class="wv-walk-preview-dest"/>`
       + `<g class="wv-walk-preview-label wv-walk-chip">${card}</g>`;
