@@ -1862,6 +1862,26 @@ export function distanceBandLabel(name, bands = DIALS.distance_bands) {
     : `${title} (~${number(lower)} m+)`;
 }
 
+// ── A CLICK INSIDE A MARK SELECTS IT AND STILL WALKS (play fix 38) ─────────
+//
+// Ruled 18:03 as BOTH halves, and fix 22 let the second slip (Darko 19:55: "you
+// can't walk anywhere in a mark anymore"). An open-ground click — one no pip,
+// card or face answered — inside a mark's ground SELECTS the innermost mark
+// there (its column opens) AND, for a resident who can act, arms the walk to
+// the EXACT point clicked: never the mark's centre, never swallowed, Walk armed
+// or not. A spectator only selects. A half-begun stake or unstake keeps its own
+// question, so nothing is selected under it. A big mark's hung picture is its
+// ground too: a click inside one is an area, not a pip. Pure.
+export function mapClickPlan({ point, ground = null, area = null, acting = false, arming = null } = {}) {
+  const x = Number(point?.x), y = Number(point?.y);
+  if (![x, y].every(Number.isFinite)) return { select: null, walkTo: null };
+  const asking = !!arming && arming !== "walk";
+  return {
+    select: asking ? null : (ground ?? area ?? null),
+    walkTo: acting ? { x: Math.round(x), y: Math.round(y) } : null,
+  };
+}
+
 export function pointWalkDestination(point, marks = []) {
   const x = Number(point?.x), y = Number(point?.y);
   if (![x, y].every(Number.isFinite)) return null;
@@ -9844,7 +9864,7 @@ export function mountViewer(appEl) {
             return el.isPointInFill(pt.matrixTransform(ctm.inverse()));
           } catch { return pointInBox(sx, sy, box); }
         };
-        return [{ id, x: b.left + b.width / 2, y: b.top + b.height / 2, box, ...(ringed ? { contains } : {}) }];
+        return [{ id, x: b.left + b.width / 2, y: b.top + b.height / 2, box, area: true, ...(ringed ? { contains } : {}) }];
       });
       return hung.length ? [...fromGlyphs, ...hung] : fromGlyphs;
     }
@@ -9996,10 +10016,15 @@ export function mountViewer(appEl) {
       // any zoom. When more than one is under the cursor we do not guess: the
       // reader is shown the stack and picks. Exactly one in radius is the
       // behaviour this map has always had, down to the scrollCell.
-      const contested = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, screenMarkCandidates());
+      const candidates = screenMarkCandidates();
+      const contested = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, candidates);
       if (contested.length > 1) { openChooser(contested); return; }
       const markId = contested[0] ?? null;
-      if (markId) {
+      // A PIP OR A CARD names its mark outright, and aims at it, as always. A hung
+      // picture is the mark's GROUND (play fix 38): for a resident who can act it
+      // is answered like the open ground below, select and walk to the point.
+      const areaHit = markId && canAct() && candidates.find((c) => c.id === markId)?.area ? markId : null;
+      if (markId && !areaHit) {
         selectMark(markId, { scrollCell: true });
         return;
       }
@@ -10015,11 +10040,14 @@ export function mountViewer(appEl) {
       // centre — which is why this selects directly rather than through
       // selectMark, whose walk preview aims at a named mark's middle. A
       // half-begun act (state.arming) keeps today's open-ground click.
-      const ground = state.arming ? null
-        : smallestContainingMark(worldPoint, toldHere(), { insideRoomId: sceneRoomId });
-      bubbleTrail = ground ? [ground] : [];
-      markInteraction.select(ground);
-      if (canAct()) chooseWalkPoint(point.x, point.y);
+      // …AND STILL WALKS THERE (play fix 38): mapClickPlan says both halves.
+      const plan = mapClickPlan({
+        point, acting: canAct(), arming: state.arming, area: areaHit,
+        ground: smallestContainingMark(worldPoint, toldHere(), { insideRoomId: sceneRoomId }),
+      });
+      bubbleTrail = plan.select ? [plan.select] : [];
+      markInteraction.select(plan.select);
+      if (plan.walkTo) { chooseWalkPoint(plan.walkTo.x, plan.walkTo.y); keepDestinationClear(); }
       else {
         state.cam = point;
         renderCurrent();
@@ -11968,7 +11996,13 @@ export function mountViewer(appEl) {
     const fontPx = 12, lineH = 15;
     const w = Math.max(64, Math.max(...lines.map((l) => l.length), 4) * 7.4 + 16) * unit;
     const h = (lines.length * lineH + 10) * unit;
-    const x = Math.max(mapCtx.view.x + 4 * unit, Math.min(mapCtx.view.x + mapCtx.view.w - w - 12 * unit, toward.x + 9 * unit));
+    // beside the point on its right, unless that runs under the column or off
+    // the view: then on its left (play fix 38), never over the point itself
+    const ctm = mapCtx.svg?.getScreenCTM?.(), col = $(root, ".wv-homecol");
+    const colX = col && !col.hidden && ctm && ctm.a > 0 ? (col.getBoundingClientRect().left - ctm.e) / ctm.a : Infinity;
+    const rightEdge = Math.min(mapCtx.view.x + mapCtx.view.w, colX) - 12 * unit;
+    const x = toward.x + 9 * unit + w <= rightEdge ? toward.x + 9 * unit
+      : Math.max(mapCtx.view.x + 4 * unit, toward.x - 9 * unit - w);
     const y = Math.max(mapCtx.view.y + 12 * unit, Math.min(mapCtx.view.y + mapCtx.view.h - h - 4 * unit, toward.y - h / 2));
     // A WALKER ON THE CARD'S TOP EDGE (Darko 17:55: "a little semicircle … at the
     // top that has like a walk icon/silhouette"), so the card says what it is.
@@ -12395,7 +12429,7 @@ export function mountViewer(appEl) {
     return isRealDeparture(walkPreviewTo(mark.at));
   }
 
-  function selectMark(id, { scrollCell = false, trail = null } = {}) {
+  function selectMark(id, { scrollCell = false, trail = null, keepWalk = false } = {}) {
     // choosing anything else ends the finding — two things cannot both be the
     // one the reader just asked for — and it puts the query down with it, which
     // is what "a click on the painting clears it" comes to: the map's own
@@ -12445,7 +12479,8 @@ export function mountViewer(appEl) {
     // whole block is behind canAct, so they simply preview nothing); an
     // unwalkable mark still selects, just without a preview; and CONFIRMING is
     // untouched — it remains its own deliberate press on the walk desk.
-    if (canAct()) {
+    // a relative followed inside the column reads it and leaves the walk alone (play fix 38)
+    if (canAct() && !keepWalk) {
       walkState.destination = null;
       if (viewerJourneyState(actorWalker()).kind === "journey") walkState.changingCourse = true;
       clearWalkFeedback();
@@ -12472,6 +12507,20 @@ export function mountViewer(appEl) {
     renderActions(); // the rail carries the armed act, which the selection store never sees
   }
 
+  // THE POINT YOU SET OUT FOR STAYS IN SIGHT (play fix 38). The click that arms
+  // the walk also opens the column, which stands over the map's right side; a
+  // point it would cover, or crowd the chip against, is panned clear of it.
+  function keepDestinationClear() {
+    requestAnimationFrame(() => {
+      const d = walkState.destination, col = $(root, ".wv-homecol");
+      const m = mapCtx?.svg?.getScreenCTM?.();
+      if (!d || !col || col.hidden || !m || !(m.a > 0) || !mapCtx.setView) return;
+      const sx = m.a * (mapCtx.originPx.x + d.x / mapCtx.mPerPx) + m.e;
+      const clearTo = col.getBoundingClientRect().left - 180;   // the chip's width beside the point, and a margin
+      if (sx <= clearTo) return;
+      mapCtx.setView({ ...mapCtx.view, x: mapCtx.view.x + (sx - clearTo) / m.a }, true);
+    });
+  }
   function chooseWalkMark(id) {
     if (!canAct()) return;
     const mark = byId.get(id);
@@ -13105,12 +13154,12 @@ export function mountViewer(appEl) {
   // follow a relation or an attribute from inside the bubble: the bubble moves to
   // that mark and remembers the one it left
   function followInBubble(id) {
-    return selectMark(id, { trail: bubbleTrailStep(bubbleTrail, "follow", id) });
+    return selectMark(id, { trail: bubbleTrailStep(bubbleTrail, "follow", id), keepWalk: true });
   }
   function bubbleBack() {
     if (bubbleTrail.length < 2) return;
     const stepped = bubbleTrailStep(bubbleTrail, "back");
-    selectMark(stepped[stepped.length - 1], { trail: stepped });
+    selectMark(stepped[stepped.length - 1], { trail: stepped, keepWalk: true });
   }
   const localStore = (() => { try { return window.localStorage; } catch { return null; } })();
   // WHO THE TOUR IS REMEMBERED AGAINST: the credential household, falling back to
@@ -14190,7 +14239,10 @@ export function mountViewer(appEl) {
     // there is one selection, and the bubble is what it looks like here
     // the ✕ on the parcel's column is the same act for the same reason — one
     // selection, and the column is what it looks like for a parcel
-    if (e.target.closest(".wv-bubble-close, .wv-homecol-close")) { clearSelectionAndDestination(); return; }
+    if (e.target.closest(".wv-bubble-close")) { clearSelectionAndDestination(); return; }
+    // …but the column's ✕ puts the COLUMN away and leaves an armed walk standing
+    // (play fix 38): reading about the ground you set out for is not cancelling
+    if (e.target.closest(".wv-homecol-close")) { bubbleTrail = []; markInteraction.select(null); return; }
     if (e.target.closest(".wv-bubble-back, [data-homecol-back]")) { bubbleBack(); return; }
     // A PRESS ON A NAMEPLATE IS A PRESS ON ITS MARK. The room's own plate,
     // indoors, opens and shuts the room's column and proposes no walk: you are

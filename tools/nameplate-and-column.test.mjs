@@ -24,11 +24,12 @@ test("[pin] a hovered mark is its outline and a faint fill in its own colour, wi
 test("[pin] a click on open ground inside a mark selects that ground and still walks to the exact spot", () => {
   const at = SOURCE.indexOf("…AND THE GROUND YOU CLICKED IS SELECTED");
   assert.ok(at > 0);
-  const block = SOURCE.slice(at, at + 1600);
+  const block = SOURCE.slice(at, at + 2200);
   assert.match(block, /smallestContainingMark\(worldPoint, toldHere\(\), \{ insideRoomId: sceneRoomId \}\)/, "the hover's own containment rule picks the ground");
-  assert.match(block, /markInteraction\.select\(ground\);\s*if \(canAct\(\)\) chooseWalkPoint\(point\.x, point\.y\);/,
+  // CHANGED by play fix 38: both halves now ride one pure rule (mapClickPlan),
+  // tested in click-in-extent-still-walks.test.mjs
+  assert.match(block, /markInteraction\.select\(plan\.select\);\s*if \(plan\.walkTo\) \{ chooseWalkPoint\(plan\.walkTo\.x, plan\.walkTo\.y\);/,
     "selected directly (never selectMark's walk to a mark's centre), then the walk to the clicked point");
-  assert.match(block, /state\.arming \? null/, "a half-begun act keeps today's open-ground click");
   // the precedence before it is untouched: faces first, then the contested chooser, then a pip
   const up = SOURCE.slice(SOURCE.indexOf('svg.addEventListener("pointerup"'), at);
   assert.ok(up.indexOf("peopleHere") < up.indexOf("openChooser(contested)") && up.indexOf("openChooser(contested)") < up.indexOf("selectMark(markId"),
