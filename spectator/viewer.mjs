@@ -53,6 +53,9 @@ import { createHomeColumn, homeHandleForParcel, isParcelMark, HOME_COLUMN_CSS } 
 // (tools/dwelling.mjs) is deleted: "a guess with a good score is still a guess;
 // the parcel is a fact".
 import { homeOf, homesOnParcel } from "../tools/where-is.mjs";
+// WHAT A MARK IS, AS ICONS (Darko, playground sitting 2026-10-15): the closed
+// vocabulary, its one-line meanings and its three renderings live in one file.
+import { markIcons, iconSVG, iconsHTML, creatureClassesOf, MARK_ICON_CSS } from "./mark-icons.mjs";
 
 const $ = (root, s) => root.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -2164,7 +2167,11 @@ export const OVERLAY_HALO_R = 36;
 const PIP_DOOR = `M -3.4 5 L -3.4 -0.6 A 3.4 3.4 0 0 1 3.4 -0.6 L 3.4 5 Z`;
 const isPortalGround = (classes) => /(?:^|\s)c-portal-ground(?:\s|$)/.test(String(classes ?? ""));
 
-export function overlayPipSVG({ at, id, classes = "", fan = null, title = null } = {}) {
+// …AND AT STREET ZOOM THE DOT SAYS WHAT IT IS (Darko, 2026-10-15). `inner` is
+// a glyph centred on the dot (mark-icons.mjs § iconSVG), drawn the same way the
+// doorway is — over the circle, never instead of it — and it replaces the
+// doorway, which is the door glyph's older, smaller self.
+export function overlayPipSVG({ at, id, classes = "", fan = null, title = null, inner = "" } = {}) {
   const x = Number(at?.x), y = Number(at?.y);
   if (![x, y].every(Number.isFinite)) return "";
   const dx = Number(fan?.dx) || 0, dy = Number(fan?.dy) || 0;
@@ -2172,9 +2179,26 @@ export function overlayPipSVG({ at, id, classes = "", fan = null, title = null }
     + `<circle cx="${dx}" cy="${dy}" r="${OVERLAY_PIP_R}" class="ov-pip ${classes}" data-id="${esc(id)}">`
     + (title ? `<title>${esc(title)}</title>` : "")
     + `</circle>`
-    + (isPortalGround(classes)
+    + (inner ? `<g class="ov-ic-in" transform="translate(${dx} ${dy})">${inner}</g>`
+      : isPortalGround(classes)
       ? `<path class="ov-pip-door" transform="translate(${dx} ${dy})" d="${PIP_DOOR}" pointer-events="none"/>` : "")
     + `</g></g>`;
+}
+
+/** THE STATE PILL: a mark's icons in a small dark pill, in the overlay's scaled
+ *  units (so it holds its size on screen the way a pip does), its top-left at
+ *  (dx, dy) from `at`. Empty for no icons. Pure. */
+export const ICON_PILL = Object.freeze({ size: 9, gap: 1.5, pad: 2 });
+export function iconPillSVG(icons = [], { at, dx = 0, dy = 0, mine = false } = {}) {
+  const x = Number(at?.x), y = Number(at?.y);
+  if (!icons?.length || ![x, y].every(Number.isFinite)) return "";
+  const { size, gap, pad } = ICON_PILL;
+  const w = icons.length * size + (icons.length - 1) * gap + pad * 2, h = size + pad * 2;
+  return `<g transform="translate(${x} ${y})"><g class="ov-s${mine ? " ov-mine" : ""}">`
+    + `<g class="ov-icons" transform="translate(${dx} ${dy})">`
+    + `<rect class="ov-icons-bg" width="${w}" height="${h}" rx="${h / 2}"/>`
+    + icons.map((icon, i) => iconSVG(icon, { x: pad + i * (size + gap), y: pad, size })).join("")
+    + `</g></g></g>`;
 }
 
 /** Where the reader is standing: the dot and its halo, counter-scaled together. */
@@ -6431,7 +6455,9 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-bubble .wv-card.is-mark-selected { outline:none; }
 /* THE NAMEPLATE (Darko, 2026-10-15): the glance is a name and nothing to read,
    so it is one line, small, and narrow enough to stand beside a mark */
-.wv-bubble.is-nameplate { max-width:min(19rem,60%); border-radius:5px; box-shadow:0 4px 14px rgba(0,0,0,.45); }
+.wv-bubble.is-nameplate { max-width:min(19rem,60%); border-radius:5px; box-shadow:0 4px 14px rgba(0,0,0,.45);
+  pointer-events:auto; cursor:pointer; }
+.wv-np-icons { display:inline-flex; align-items:center; gap:5px; flex:none; }
 .wv-nameplate { display:flex; align-items:center; gap:7px; padding:3px 9px 3px 8px; min-width:0; }
 .wv-np-name { color:var(--paper); font-size:.82rem; font-weight:700; line-height:1.35;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
@@ -6500,6 +6526,12 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-bubble.is-draft { --wv-mark-accent:var(--draft); }
 .wv-bubble-back.is-draft { color:var(--draft); }
 ${HOME_COLUMN_CSS}
+${MARK_ICON_CSS}
+/* the map's icons (mark-icons.mjs): the pill a state rides in, and the glyph
+   cut into a pip, in the page's own dark like the doorway it replaces */
+.ov-icons-bg { fill:rgba(13,20,38,.88); stroke:rgba(232,224,207,.28); stroke-width:.6; }
+.ov-icons .ov-ic, .ov-ic-in .ov-ic { pointer-events:visiblePainted; }
+.ov-ic rect { pointer-events:all; }
 `;
 
 const MARKUP = `
@@ -7570,6 +7602,30 @@ export function mountViewer(appEl) {
   // no handles. Nothing on that path changes.
   const isOwnMark = (m) => !!m?.id && state.ownIds.has(m.id);
   const isOwnHandle = (h) => !!h && (state.whoami?.handles ?? []).includes(h);
+  // ── WHAT A MARK IS, AS ICONS (Darko, playground sitting 2026-10-15) ──────
+  //
+  // Every surface asks this one function, so the map, the nameplate and the
+  // column cannot disagree about a mark. It reads the page's existing notions
+  // and makes none of its own: the minted class token, `isOwnMark` for yours,
+  // the one ✦ figure, and the crossings' own occupancy for who is inside. The
+  // creature classes are the record's (`extends: creature`), read once per
+  // record. `inside` may be handed in, so a draw over many marks folds the
+  // crossings once rather than once a mark.
+  let creatureClassMemo = { epoch: -1, set: null };
+  function creatureClasses() {
+    if (creatureClassMemo.epoch !== worldEpoch || !creatureClassMemo.set)
+      creatureClassMemo = { epoch: worldEpoch, set: creatureClassesOf(allMarks(), classToken) };
+    return creatureClassMemo.set;
+  }
+  function iconsOf(m, inside = null) {
+    const full = byId.get(m?.id) ?? m;
+    if (!full) return [];
+    const occupants = inside ?? occupantsOf(liveOccupancy());
+    return markIcons(full, {
+      cls: classToken(full.class), creatureClasses: creatureClasses(),
+      yours: isOwnMark(full), weight: effectiveWeight(full), inside: (occupants.get(full.id) ?? []).length,
+    });
+  }
   // ───────── the telling view ─────────
   function chips(m) {
     const c = [];
@@ -10696,6 +10752,58 @@ export function mountViewer(appEl) {
     const named = tier !== "far" && !state.paintingOnly;
     const nameOf = (m) => (named ? markIdentity(m) : null);
     const fanned = mapCtx?.zoomK >= FAN_MIN_ZOOM ? coLocatedMarkIds(drawn) : new Set();
+    // ── THE ICONS, AT STREET ZOOM ONLY (Darko, playground sitting 2026-10-15) ──
+    //
+    // "a small icon per mark saying WHAT it is, plus tiny STATE badges. No
+    // text." At `far` and `mid` they would be confetti over a town, so they
+    // are drawn at `near` and nowhere else. The dot IS the marker: what a mark
+    // is goes inside its pip, the way the doorway already did, and its states
+    // ride in a small pill beside it. A mark wearing its picture keeps its
+    // picture clear — its pill hangs off the top-right corner of its ground.
+    // A parcel's card already says "home", so it carries only its states.
+    const iconsHere = tier === "near";
+    const insideNow = iconsHere ? occupantsOf(liveOccupancy()) : null;
+    const PIP_GLYPH = 14;   // the glyph across, inside a pip OVERLAY_PIP_R * 2 across
+    const cornerOf = (mark) => {
+      const ring = polygonOf(mark), bb = ring ? polygonBBox(ring) : null, r = rect(mark);
+      return px(bb ? { x: bb.maxx, y: bb.miny } : { x: r.x + r.w / 2, y: r.y - r.h / 2 });
+    };
+    // TWO PILLS NEVER SIT ON EACH OTHER. A house mark wider than its parcel
+    // puts its corner pill on the card's own; the later one steps down a row.
+    // Measured in painting pixels at this draw's marker scale — a zoom inside
+    // the tier moves things apart, never together, until the next draw.
+    const unit = 1 / markerScale(mapCtx.zoomK);
+    const pillBoxes = [];
+    const placePill = (icons, at, dx, dy, mine = false) => {
+      if (!icons.length) return "";
+      const k = unit * (mine ? MINE_GLYPH_SCALE : 1);
+      const { size, gap, pad } = ICON_PILL;
+      const w = icons.length * size + (icons.length - 1) * gap + pad * 2, h = size + pad * 2;
+      let y = dy;
+      for (let tries = 0; tries < 4; tries++, y += h + 1) {
+        const box = { x0: at.x + dx * k, y0: at.y + y * k, x1: at.x + (dx + w) * k, y1: at.y + (y + h) * k };
+        if (pillBoxes.some((b) => b.x0 < box.x1 && box.x0 < b.x1 && b.y0 < box.y1 && box.y0 < b.y1)) continue;
+        pillBoxes.push(box);
+        break;
+      }
+      return iconPillSVG(icons, { at, dx, dy: y, mine });
+    };
+    // THE PILLS GO ON TOP, in one string written after every card and pip, so a
+    // card drawn later in the pass never hides one. And a mark standing under a
+    // parcel's card wears none: from outside, the card is the house, and what
+    // stands on its ground is reached through it (the chooser, the column).
+    let pills = "";
+    const carded = iconsHere
+      ? allMarks().filter((pc) => pc?.kind === "parcel" && pc.at && pc.extent && !underfoot.has(pc.id) && markInDrawnBounds(pc, bounds))
+      : [];
+    const underCard = (mark) => !!mark?.at && carded.some((pc) => {
+      const r = rect(pc);
+      return pointInRect(Number(mark.at.x), Number(mark.at.y), r);
+    });
+    const parcelPill = (parcel, at, fan) => {
+      const states = iconsOf(parcel, insideNow).filter((icon) => icon.kind === "state");
+      return placePill(states, at, (Number(fan?.dx) || 0) + 18, (Number(fan?.dy) || 0) - 37, isOwnMark(parcel));
+    };
     for (const m of drawn) {
       const p = px(m.at);
       // THE FULL MARK BY ID: the radial's thin entry carries no `kind`, and a
@@ -10711,15 +10819,25 @@ export function mountViewer(appEl) {
       glyphIds.add(m.id);
       if (full.kind === "parcel") {
         s += homeCard(full, p, fanned.has(m.id) ? fanOffsetPx(m.id) : null, nameOf(m), tier);
+        if (iconsHere) pills += parcelPill(full, p, fanned.has(m.id) ? fanOffsetPx(m.id) : null);
         continue;
       }
+      const fan = fanned.has(m.id) ? fanOffsetPx(m.id) : null;
+      const icons = iconsHere && !underCard(full) ? iconsOf(full, insideNow) : [];
+      const what = icons[0]?.kind === "what" ? icons[0] : null;
+      const isPictured = pictured.has(m.id);
       s += overlayPipSVG({
         at: p, id: m.id, classes: markClasses(m) + (pictured.has(m.id) ? " ov-pip-pictured" : ""),
-        fan: fanned.has(m.id) ? fanOffsetPx(m.id) : null,
+        fan,
         // the OS tooltip stands down in painting-only for the same reason the SVG
         // label does: the bubble is already saying this word, sooner and better
         title: nameOf(m),
+        inner: what && !isPictured ? iconSVG(what, { x: -PIP_GLYPH / 2, y: -PIP_GLYPH / 2, size: PIP_GLYPH, ink: "var(--night)" }) : "",
       });
+      if (isPictured && icons.length && full.at && full.extent)
+        pills += placePill(icons, cornerOf(full), 2, -15);
+      else if (!isPictured && icons.length > (what ? 1 : 0))
+        pills += placePill(what ? icons.slice(1) : icons, p, (Number(fan?.dx) || 0) + OVERLAY_PIP_R + 2, (Number(fan?.dy) || 0) - 6.5);
     }
     // THE TOWN'S HOUSES ARE ALWAYS ON THE MAP. The atlas drew every home on its
     // sheet, whoever was looking; the field-of-view rule above is right for the
@@ -10744,7 +10862,9 @@ export function mountViewer(appEl) {
       if (!markInDrawnBounds(m, bounds)) continue;
       glyphIds.add(m.id);
       s += homeCard(m, px(m.at), null, nameOf(m), tier);
+      if (iconsHere) pills += parcelPill(m, px(m.at), null);
     }
+    s += pills;
     // one body, one marker (POS-93): the dot is set down on every draw and the
     // walker pass this draw ends in keeps or removes it, judged on the bodies it
     // actually DREW — see syncStandpointDot (#2848 (a)). Deciding it here, off
@@ -12634,6 +12754,8 @@ export function mountViewer(appEl) {
         picture: housePicture(faceOf(h.handle).home, h.home_mark),
         house: h.home_mark ? markIdentity(h.home_mark) : null,
       })),
+      // what it is and its state, each with its one line (mark-icons.mjs)
+      icons: iconsOf(mark),
     };
   }
   // WHAT THE COLUMN SHOWS FOR A REGION (Keemin, 2026-09-13: "we should be able
@@ -12733,6 +12855,7 @@ export function mountViewer(appEl) {
       // mark's words stand and are labelled as the mark's, exactly as #52 left
       // them. A failure paints no error: the reader gets prose either way.
       byline: page ? `in ${founder}'s own words` : `from the mark, in ${handle}'s own words`,
+      icons: iconsOf(mark),
     };
   }
 
@@ -12796,10 +12919,14 @@ export function mountViewer(appEl) {
     const inside = (occupantsOf(liveOccupancy()).get(id) ?? []).map((h) => faceOf(h).name);
     const law = entryLawOf(mark);
     const e = mark.extent;
+    const icons = iconsOf(mark);
+    // the record's class word, unless an icon already says it in its own line
+    const what = icons.find((i) => i.kind === "what")?.key;
+    const classSaid = !!what && what !== "place";
     const facts = [
       { label: "backing", value: `✦ ${weight.toLocaleString()}${own !== weight ? ` (✦ ${own.toLocaleString()} its own)` : ""}` },
       e && (e.w || e.h) && !isAmbientMark(mark, byId) ? { label: "size", value: `${e.w ?? 0}×${e.h ?? 0} m` } : null,
-      mark.class ? { label: "class", value: String(mark.class) } : null,
+      mark.class && !classSaid ? { label: "class", value: String(mark.class) } : null,
       ...((d?.predicates ?? []).map((p) => ({ label: p.slot ?? "property", value: String(p.value ?? "") }))),
       inside.length ? { label: "inside now", value: inside.join(", ") } : null,
       law?.consequence ? { label: "at the door", value: law.consequence } : null,
@@ -12815,7 +12942,8 @@ export function mountViewer(appEl) {
     return {
       // the key carries everything that changes what the column says, so a
       // repaint happens exactly when one is owed (the column's own law)
-      key: [id, d ? "read" : "-", worldEpoch, enterExitEpoch, cameFrom ?? "", enter ?? "", inside.join(",")].join("|"),
+      key: [id, d ? "read" : "-", worldEpoch, enterExitEpoch, cameFrom ?? "", enter ?? "", inside.join(","),
+        icons.map((i) => `${i.key}${i.count ?? ""}`).join(",")].join("|"),
       handle: String(mark.by ?? mark.household ?? "the town"),
       residentLink: false,
       kicker: String(mark.household ?? mark.by ?? "the town"),
@@ -12825,7 +12953,7 @@ export function mountViewer(appEl) {
       door: { description: typeof mark.body === "string" ? mark.body : "" },
       byline: markByline(mark),
       enterId: enter, canEnter: !!enter,
-      facts, relations, back: backTo,
+      facts, relations, back: backTo, icons,
     };
   }
 
@@ -12870,6 +12998,11 @@ export function mountViewer(appEl) {
     if (!bubbleResize && typeof ResizeObserver === "function")
       bubbleResize = new ResizeObserver(() => positionBubbles());
     bubbleResize?.observe(el);
+    if (kind === "hover") {
+      // the nameplate holds while it is being read (see markNameplateHTML)
+      el.addEventListener("pointerenter", () => { if (el.classList.contains("is-nameplate")) glanceHeld = true; });
+      el.addEventListener("pointerleave", () => { if (!glanceHeld) return; glanceHeld = false; renderBubbles(); });
+    }
     return el;
   }
 
@@ -13061,21 +13194,35 @@ export function mountViewer(appEl) {
   // after the pointer has rested (GLANCE_DELAY_MS) so a sweep across the map
   // flashes nothing. No body: the words are the click's, in the column.
   //
-  // Still deliberately NOT a live cell: no data-id, nothing to press.
+  // Still deliberately NOT a live cell: no data-id, no button. Beside the name
+  // ride the mark's icons (mark-icons.mjs), so the glance says what a mark IS —
+  // Darko's second complaint. The plate takes the pointer for exactly one
+  // reason: so its icons can say what they mean on hover; a pointer resting on
+  // it holds it up, and a press on it is the press on the mark.
   function markNameplateHTML(id) {
     const full = byId.get(id);
     if (!full) return "";
     const identity = markName(full);
-    return `<div class="wv-nameplate">`
+    const icons = iconsOf(full);
+    return `<div class="wv-nameplate" data-nameplate="${esc(full.id)}">`
       + `<span class="wv-np-name${identity.determined ? " is-determined" : ""}">${esc(identity.name || full.id)}</span>`
+      + (icons.length ? `<span class="wv-np-icons">${iconsHTML(icons)}</span>` : "")
       + `</div>`;
   }
   // A RESTING POINTER, NOT A PASSING ONE. The glance waits this long on one mark
-  // before it is raised, and moving to another mark puts it down at once.
+  // before it is raised.
   const GLANCE_DELAY_MS = 250;
+  // …AND A SHOWN PLATE GETS A BEAT BEFORE IT GOES. Nearly every mark stands
+  // inside some larger ground, so the pointer leaving a pip on its way to the
+  // plate's icons is, for a moment, pointing at the forecourt around it. For
+  // this long the plate stays put; a pointer that reaches it holds it.
+  const GLANCE_GRACE_MS = 220;
   let glanceShown = null;     // the id the hover bubble is showing, or null
   let glancePending = null;   // the id waiting out the delay, or null
   let glanceTimer = null;
+  let glanceNext = null;      // what the pointer is on while a shown plate takes its beat
+  let glanceLeaving = null;   // that beat's timer
+  let glanceHeld = false;     // the pointer is resting on the nameplate itself
   function paintGlance(el, id) {
     const handle = walkerHandleFromHoverId(id);
     const html = handle ? walkerBubbleHTML(handle) : markNameplateHTML(id);
@@ -13084,16 +13231,13 @@ export function mountViewer(appEl) {
     if (el._pmHtml !== html) { el._pmHtml = html; el.innerHTML = html; }
     el.hidden = false;
   }
-  function renderHoverBubble(id) {
-    const el = bubbleEl("hover");
-    if (!el) return;
+  function raiseGlance(el, id) {
     if (!id) {
       clearTimeout(glanceTimer);
       glanceTimer = null; glancePending = null; glanceShown = null;
       el.hidden = true;
       return;
     }
-    if (id === glanceShown) { paintGlance(el, id); return; }
     if (id === glancePending) return;
     el.hidden = true;
     glanceShown = null;
@@ -13107,6 +13251,28 @@ export function mountViewer(appEl) {
       paintGlance(el, id);
       positionBubbles();
     }, GLANCE_DELAY_MS);
+  }
+  function renderHoverBubble(id) {
+    const el = bubbleEl("hover");
+    if (!el) return;
+    // a plate the pointer is reading stays up until the pointer leaves it
+    if (glanceHeld && glanceShown) return;
+    if (id && id === glanceShown) {
+      clearTimeout(glanceLeaving); glanceLeaving = null; glanceNext = null;
+      paintGlance(el, id);
+      return;
+    }
+    if (glanceShown && !el.hidden) {
+      glanceNext = id;
+      if (!glanceLeaving) glanceLeaving = setTimeout(() => {
+        glanceLeaving = null;
+        if (glanceHeld) return;
+        raiseGlance(el, glanceNext);
+        glanceNext = null;
+      }, GLANCE_GRACE_MS);
+      return;
+    }
+    raiseGlance(el, id);
   }
   // A MARK'S DRAWN GROUND, in the bubble layer's pixels: the card or glyph a
   // parcel is drawn as, else the mark's own extent (the box its ring or its
@@ -13880,6 +14046,12 @@ export function mountViewer(appEl) {
     if (e.target.closest(".wv-bubble-back, [data-homecol-back]")) { bubbleBack(); return; }
     // a relative named in a mark's column opens that mark's column, and the
     // trail remembers the way back exactly as the pinned bubble's did
+    const plate = e.target.closest("[data-nameplate]");
+    if (plate) {
+      glanceHeld = false;
+      if (byId.has(plate.dataset.nameplate)) selectMark(plate.dataset.nameplate, { scrollCell: true });
+      return;
+    }
     const colGo = e.target.closest("[data-homecol-go]");
     if (colGo) { if (byId.has(colGo.dataset.homecolGo)) followInBubble(colGo.dataset.homecolGo); return; }
     const filterChip = e.target.closest("[data-mark-filter]");

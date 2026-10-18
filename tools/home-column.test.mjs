@@ -505,3 +505,22 @@ test("a mark's relatives are buttons the viewer's root delegate reads, built wit
   assert.match(VIEWER, /closest\("\[data-homecol-go\]"\)/, "the viewer's root delegate reads the relative's attribute");
   assert.match(VIEWER, /closest\("\.wv-bubble-back, \[data-homecol-back\]"\)/, "and the way back's");
 });
+
+test("a column spells out each icon's meaning beside it, and a key can only ever be a class name", () => {
+  const model = homeColumnModel({
+    handle: "darko",
+    icons: [
+      { key: "door", label: "door", meaning: "A door: entering it takes you somewhere else." },
+      { key: "staked", label: "staked", meaning: "Staked: ✦ 3 behind it.", count: 3 },
+      { key: "x\" onclick=\"y", label: "bad", meaning: "never" },
+    ],
+  });
+  assert.deepEqual(model.icons.map((i) => i.key), ["door", "staked"], "a key that is not [a-z-] is dropped, not cleaned");
+  const host = render(model);
+  const rows = byClass(host, "wv-homecol-icon");
+  assert.equal(rows.length, 2);
+  assert.equal(rows[0].attrs.title, "A door: entering it takes you somewhere else.", "the hover says it too");
+  assert.equal(byClass(rows[0], "wv-ic")[0].className, "wv-ic ic-door", "the glyph is the page's masked span");
+  assert.equal(serialize(rows[1]), "Staked: ✦ 3 behind it.");
+  assert.deepEqual(homeColumnModel({ handle: "nyx" }).icons, [], "no icons handed in, none drawn");
+});

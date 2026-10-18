@@ -220,7 +220,7 @@ export function isParcelMark(mark) {
  * renders blank: every state below ends in either prose or one line saying why
  * there is none.
  */
-export function homeColumnModel({ handle, kicker, title, region, leadImage, door = null, error = null, loading = false, residentHref = null, parcelId = null, canEnter = false, byline = null, residents = [], ownWords = null, enterId = null, facts = [], relations = [], back = null } = {}) {
+export function homeColumnModel({ handle, kicker, title, region, leadImage, door = null, error = null, loading = false, residentHref = null, parcelId = null, canEnter = false, byline = null, residents = [], ownWords = null, enterId = null, facts = [], relations = [], back = null, icons = [] } = {}) {
   const who = String(handle ?? "").trim();
   // THE DOOR SPEAKS ONLY FOR ITS OWN PARCEL (POS-584, Darko 2026-10-11: "Sol's
   // parcel got yeeted"). There is one home page per handle, so a household's
@@ -290,6 +290,13 @@ export function homeColumnModel({ handle, kicker, title, region, leadImage, door
     // the way back to the mark this column was reached from, named
     back: back && String(back.id ?? "").trim()
       ? { id: String(back.id).trim(), name: String(back.name ?? back.id).trim() } : null,
+    // WHAT IT IS AND WHAT STATE IT IS IN (mark-icons.mjs): each icon with its
+    // one line, spelled out here because the column is where a reader asked
+    // for everything. The key becomes a class, so it is held to [a-z-].
+    icons: (icons ?? []).filter((i) => i && /^[a-z-]+$/.test(String(i.key ?? ""))).map((i) => ({
+      key: String(i.key), label: String(i.label ?? i.key), meaning: String(i.meaning ?? i.label ?? i.key),
+      count: Number(i.count) > 0 ? Number(i.count) : null,
+    })),
     // EVERY RESIDENT WHOSE HOME THIS IS (POS-368, Darko 2026-10-04: "A parcel
     // shared by five housemates can be home to all five"). One entry each, in
     // the order the resolver gave (holder first), with their own picture from
@@ -471,6 +478,24 @@ export function renderHomeColumn(doc, host, model, { imagePath = null } = {}) {
     scroll.appendChild(meta);
   }
 
+  if (model.icons?.length) {
+    // one row per icon: the glyph (an empty span the page's CSS mask draws) and
+    // its meaning in words — the same line its hover says everywhere else
+    const list = el(doc, "ul", "wv-homecol-icons");
+    for (const icon of model.icons) {
+      const row = el(doc, "li", "wv-homecol-icon");
+      row.setAttribute("title", icon.meaning);
+      const glyph = el(doc, "span", `wv-ic ic-${icon.key}`);
+      glyph.setAttribute("aria-hidden", "true");
+      const words = el(doc, "span", "wv-homecol-icon-meaning");
+      words.textContent = icon.meaning;
+      row.appendChild(glyph);
+      row.appendChild(words);
+      list.appendChild(row);
+    }
+    scroll.appendChild(list);
+  }
+
   if (model.leadImage) {
     const figure = el(doc, "figure", "wv-homecol-lead");
     const img = el(doc, "img");
@@ -623,6 +648,7 @@ export function createHomeColumn({ doc, host, readHome, imagePath = null, reside
       facts: view.facts ?? [],
       relations: view.relations ?? [],
       back: view.back ?? null,
+      icons: view.icons ?? [],
     }), { imagePath });
   };
 
@@ -737,6 +763,10 @@ export const HOME_COLUMN_CSS = `
   border:1px solid var(--line); border-radius:5px; background:rgba(13,20,38,.55); color:var(--paper);
   font:inherit; font-size:.84rem; }
 .wv-homecol-go:hover, .wv-homecol-go:focus-visible { border-color:var(--amber); background:rgba(28,44,79,.6); }
+.wv-homecol-icons { list-style:none; margin:.7rem 0 0; padding:0; display:flex; flex-direction:column; gap:.3rem; }
+.wv-homecol-icon { display:flex; align-items:flex-start; gap:.5rem; font-size:.8rem; line-height:1.35; color:var(--paper); }
+.wv-homecol-icon .wv-ic { margin-top:1px; }
+.wv-homecol-icon-meaning { min-width:0; }
 .wv-homecol-rel-more { margin:.1rem 0 0; color:var(--dim); font-size:.76rem; font-style:italic; }
 .wv-homecol-resident { display:inline-block; margin-top:1.2rem; color:var(--amber);
   font-size:.8rem; text-decoration:none; border-bottom:1px solid rgba(232,197,106,.4); }
