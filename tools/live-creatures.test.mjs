@@ -43,13 +43,17 @@ test("an act's answer carries the creatures' lines, wherever the office put them
   assert.deepEqual(creatureReactionLines({ did: "say", result: { spoke: true } }), [], "no creature answered, no note");
 });
 
-test("a creature's column: its kind, what it is doing, its moods, when it came out and fades, and what it did lately", () => {
+test("a creature's column: its kind, what it is doing, its moods as bars, when it came out and fades, and what it did lately", () => {
   const [wolf] = liveCreaturesFrom(FOUND);
-  const { facts, lately } = creatureColumnFacts(wolf, INVESTIGATED);
+  const { facts, lately, bars } = creatureColumnFacts(wolf, INVESTIGATED);
   const by = Object.fromEntries(facts.map((f) => [f.label, f.value]));
   assert.equal(by.kind, "wolf");
   assert.equal(by.doing, "out of the Mists");
-  assert.equal(by.moods, "fear 1 of 3, curiosity 1 of 3, hunger 2 of 3");
+  // CHANGED by play fix 41: the moods are BARS, one per mood, and the bare
+  // "remembers" count (which repeated the lately rows) is gone
+  assert.deepEqual(bars, [{ label: "fear", value: 1, max: 3 }, { label: "curiosity", value: 1, max: 3 }, { label: "hunger", value: 2, max: 3 }]);
+  assert.equal(by.moods, undefined, "no moods line");
+  assert.equal(by.remembers, undefined, "no bare count");
   assert.equal(by["out since"], "2026-10-15 23:06 UTC");
   assert.equal(by.fades, "in 11h 55m (2026-10-16 11:06 UTC)");
   assert.deepEqual(lately, [{ label: "lately", value: "At the edge of the Mists a grey wolf stands perfectly still, watching visitor. (2026-10-15 23:06 UTC)" }]);

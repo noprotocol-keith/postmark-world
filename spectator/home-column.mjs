@@ -220,7 +220,7 @@ export function isParcelMark(mark) {
  * renders blank: every state below ends in either prose or one line saying why
  * there is none.
  */
-export function homeColumnModel({ handle, kicker, title, region, leadImage, door = null, error = null, loading = false, residentHref = null, parcelId = null, canEnter = false, byline = null, residents = [], ownWords = null, enterId = null, facts = [], relations = [], back = null, icons = [] } = {}) {
+export function homeColumnModel({ handle, kicker, title, region, leadImage, door = null, error = null, loading = false, residentHref = null, parcelId = null, canEnter = false, byline = null, residents = [], ownWords = null, enterId = null, facts = [], relations = [], back = null, icons = [], stamps = null, footprint = null, bars = [], tokens = [] } = {}) {
   const who = String(handle ?? "").trim();
   // THE DOOR SPEAKS ONLY FOR ITS OWN PARCEL (POS-584, Darko 2026-10-11: "Sol's
   // parcel got yeeted"). There is one home page per handle, so a household's
@@ -296,6 +296,25 @@ export function homeColumnModel({ handle, kicker, title, region, leadImage, door
     icons: (icons ?? []).filter((i) => i && /^[a-z-]+$/.test(String(i.key ?? ""))).map((i) => ({
       key: String(i.key), label: String(i.label ?? i.key), meaning: String(i.meaning ?? i.label ?? i.key),
       count: Number(i.count) > 0 ? Number(i.count) : null,
+    })),
+    // SHOW, DON'T LIST (play fix 41, Darko 20:14: "let's try to make things as
+    // visually intuitive as possible"). Each of these is a shape, not a line:
+    //   stamps     the ✦ and its number, in the stamps' purple (purple = stamps)
+    //   footprint  the mark's own outline, in the cards' gray, its size on it
+    //   bars       one labelled bar per measure (a creature's moods)
+    //   tokens     who is inside, as their tokens (green resident, red creature)
+    stamps: Number.isFinite(Number(stamps)) && stamps !== null ? Math.max(0, Number(stamps)) : null,
+    footprint: footprint && Number(footprint.w) > 0 && Number(footprint.h) > 0
+      ? { w: Number(footprint.w), h: Number(footprint.h),
+          ring: Array.isArray(footprint.ring) && footprint.ring.length >= 3
+            ? footprint.ring.map((pt) => [Number(pt[0]), Number(pt[1])]).filter((pt) => pt.every(Number.isFinite)) : null }
+      : null,
+    bars: (bars ?? []).filter((b) => b && Number(b.max) > 0 && Number.isFinite(Number(b.value)))
+      .map((b) => ({ label: String(b.label ?? ""), value: Math.max(0, Math.min(Number(b.max), Number(b.value))), max: Number(b.max) })),
+    tokens: (tokens ?? []).filter((t) => t && String(t.id ?? "").trim()).map((t) => ({
+      id: String(t.id).trim(), kind: t.kind === "creature" ? "creature" : "resident",
+      name: String(t.name ?? t.id), monogram: String(t.monogram ?? "").slice(0, 2), color: /^#[0-9a-f]{3,6}$/i.test(String(t.color ?? "")) ? String(t.color) : null,
+      picture: t.picture ?? null, silhouette: typeof t.silhouette === "string" ? t.silhouette : null,
     })),
     // EVERY RESIDENT WHOSE HOME THIS IS (POS-368, Darko 2026-10-04: "A parcel
     // shared by five housemates can be home to all five"). One entry each, in
@@ -548,6 +567,71 @@ export function renderHomeColumn(doc, host, model, { imagePath = null } = {}) {
   appendBlocks(doc, body, model.blocks, imagePath);
   scroll.appendChild(body);
 
+  // ✦ AND THE FOOTPRINT, side by side: what backs it and how big it is, as shapes
+  const fp = model.footprint && typeof doc.createElementNS === "function" ? model.footprint : null;
+  if (model.stamps !== null && model.stamps !== undefined || fp) {
+    const row = el(doc, "div", "wv-homecol-glance");
+    if (model.stamps !== null && model.stamps !== undefined) {
+      const st = el(doc, "span", "wv-homecol-stamps");
+      st.setAttribute("title", `✦ ${model.stamps.toLocaleString()} stamps staked behind it`);
+      const ic = el(doc, "span", "wv-homecol-stamp-ic");
+      ic.textContent = "✦";
+      const n = el(doc, "span", "wv-homecol-stamp-n");
+      n.textContent = model.stamps.toLocaleString();
+      st.appendChild(ic);
+      st.appendChild(n);
+      row.appendChild(st);
+    }
+    if (fp) {
+      // the cards' own footprint (viewer.mjs § extentTag), drawn larger: the
+      // mark's ring when it has one, its box otherwise, in a 64-unit square
+      const NS = "http://www.w3.org/2000/svg", box = 64, pad = 3;
+      const wrap = el(doc, "span", "wv-extent wv-homecol-footprint");
+      wrap.setAttribute("title", `its footprint, ${fp.w}×${fp.h} m`);
+      const svg = doc.createElementNS(NS, "svg");
+      svg.setAttribute("viewBox", `0 0 ${box} ${box}`);
+      svg.setAttribute("width", String(box));
+      svg.setAttribute("height", String(box));
+      svg.setAttribute("aria-hidden", "true");
+      const scale = (box - 2 * pad) / Math.max(fp.w, fp.h);
+      const ox = (box - fp.w * scale) / 2, oy = (box - fp.h * scale) / 2;
+      let shape;
+      if (fp.ring) {
+        shape = doc.createElementNS(NS, "polygon");
+        shape.setAttribute("points", fp.ring.map(([x, y]) => `${(ox + x * scale).toFixed(1)},${(oy + y * scale).toFixed(1)}`).join(" "));
+      } else {
+        shape = doc.createElementNS(NS, "rect");
+        shape.setAttribute("x", ox.toFixed(1)); shape.setAttribute("y", oy.toFixed(1));
+        shape.setAttribute("width", (fp.w * scale).toFixed(1)); shape.setAttribute("height", (fp.h * scale).toFixed(1));
+        shape.setAttribute("rx", "1");
+      }
+      svg.appendChild(shape);
+      wrap.appendChild(svg);
+      const t = el(doc, "span", "wv-extent-t");
+      const fmt = (v) => (v >= 1000 ? `${(v / 1000).toFixed(v % 1000 ? 1 : 0)}k` : `${Math.round(v * 10) / 10}`);
+      t.textContent = `${fmt(fp.w)}×${fmt(fp.h)} m`;
+      wrap.appendChild(t);
+      row.appendChild(wrap);
+    }
+    scroll.appendChild(row);
+  }
+
+  if (model.bars?.length) {
+    const list = el(doc, "div", "wv-homecol-bars");
+    for (const bar of model.bars) {
+      const line = el(doc, "div", "wv-homecol-bar");
+      line.setAttribute("title", `${bar.label}: ${bar.value} of ${bar.max}`);
+      const label = el(doc, "span", "wv-homecol-bar-label");
+      label.textContent = bar.label;
+      const track = el(doc, "span", "wv-homecol-bar-track");
+      for (let i = 0; i < bar.max; i++) track.appendChild(el(doc, "span", i < bar.value ? "wv-homecol-bar-cell is-on" : "wv-homecol-bar-cell"));
+      line.appendChild(label);
+      line.appendChild(track);
+      list.appendChild(line);
+    }
+    scroll.appendChild(list);
+  }
+
   if (model.facts?.length) {
     const list = el(doc, "dl", "wv-homecol-facts");
     for (const fact of model.facts) {
@@ -559,6 +643,47 @@ export function renderHomeColumn(doc, host, model, { imagePath = null } = {}) {
       list.appendChild(dd);
     }
     scroll.appendChild(list);
+  }
+
+  if (model.tokens?.length) {
+    // WHO IS INSIDE, as their tokens: a press on one opens it (the viewer's root
+    // delegate reads `data-choose`), and pointing at one lights it on the map
+    const group = el(doc, "div", "wv-homecol-rel wv-homecol-inside");
+    const label = el(doc, "div", "wv-homecol-rel-label");
+    label.textContent = "inside now";
+    group.appendChild(label);
+    const row = el(doc, "div", "wv-homecol-tokens");
+    for (const tok of model.tokens) {
+      const b = el(doc, "button", `wv-tok is-${tok.kind}`);
+      b.setAttribute("type", "button");
+      b.setAttribute("data-choose", tok.id);
+      b.setAttribute("title", tok.name);
+      const face = el(doc, "span", "wv-tok-face");
+      if (tok.color && tok.kind === "resident") face.setAttribute("style", `background:${tok.color}`);
+      const src = tok.picture && imagePath ? imagePath(tok.picture) : null;
+      if (src) {
+        const img = el(doc, "img", "wv-tok-img");
+        img.setAttribute("alt", "");
+        img.addEventListener?.("error", () => img.remove());
+        img.src = src;
+        face.appendChild(img);
+      } else if (tok.silhouette) {
+        const sil = el(doc, "span", "wv-tok-sil");
+        sil.setAttribute("style", `--wv-sil:${tok.silhouette}`);
+        face.appendChild(sil);
+      } else {
+        face.textContent = tok.monogram || tok.name.charAt(0).toUpperCase();
+      }
+      b.appendChild(face);
+      b.appendChild(el(doc, "span", "wv-tok-leg l"));
+      b.appendChild(el(doc, "span", "wv-tok-leg r"));
+      const name = el(doc, "span", "wv-tok-name");
+      name.textContent = tok.name;
+      b.appendChild(name);
+      row.appendChild(b);
+    }
+    group.appendChild(row);
+    scroll.appendChild(group);
   }
 
   for (const relation of model.relations ?? []) {
@@ -649,6 +774,10 @@ export function createHomeColumn({ doc, host, readHome, imagePath = null, reside
       relations: view.relations ?? [],
       back: view.back ?? null,
       icons: view.icons ?? [],
+      stamps: view.stamps ?? null,
+      footprint: view.footprint ?? null,
+      bars: view.bars ?? [],
+      tokens: view.tokens ?? [],
     }), { imagePath });
   };
 
@@ -767,6 +896,35 @@ export const HOME_COLUMN_CSS = `
 .wv-homecol-icon { display:flex; align-items:flex-start; gap:.5rem; font-size:.8rem; line-height:1.35; color:var(--paper); }
 .wv-homecol-icon .wv-ic { margin-top:1px; }
 .wv-homecol-icon-meaning { min-width:0; }
+/* show, don't list (play fix 41) */
+.wv-homecol-glance { margin:.9rem 0 0; display:flex; align-items:center; gap:1.1rem; flex-wrap:wrap; }
+.wv-homecol-stamps { display:inline-flex; align-items:baseline; gap:.3rem; color:var(--stamp-violet, #aa8fd8);
+  font-variant-numeric:tabular-nums; }
+.wv-homecol-stamp-ic { font-size:1.15rem; line-height:1; }
+.wv-homecol-stamp-n { font-size:1.05rem; font-weight:700; }
+.wv-homecol-footprint { gap:.45rem; opacity:1; }
+.wv-homecol-footprint .wv-extent-t { font-size:.76rem; }
+.wv-homecol-bars { margin:.8rem 0 0; display:flex; flex-direction:column; gap:.35rem; }
+.wv-homecol-bar { display:flex; align-items:center; gap:.6rem; font-size:.8rem; }
+.wv-homecol-bar-label { flex:0 0 5.5rem; color:var(--dim); text-transform:lowercase; }
+.wv-homecol-bar-track { display:inline-flex; gap:3px; }
+.wv-homecol-bar-cell { width:1.6rem; height:.55rem; border-radius:3px; background:rgba(232,224,207,.12); border:1px solid rgba(232,224,207,.18); }
+.wv-homecol-bar-cell.is-on { background:#e6948c; border-color:#e6948c; }
+.wv-homecol-tokens { display:flex; flex-wrap:wrap; gap:.6rem .9rem; }
+/* a token, the walker's body in miniature: a round face, two stubby legs */
+.wv-tok { position:relative; display:inline-flex; flex-direction:column; align-items:center; gap:7px; padding:0 0 2px;
+  border:0; background:transparent; color:var(--paper); font:inherit; cursor:pointer; }
+.wv-tok-face { position:relative; z-index:1; width:28px; height:28px; border-radius:50%; overflow:hidden; display:grid; place-items:center;
+  font-weight:700; font-size:.8rem; color:#101b31; background:#bfe4c6; box-shadow:0 0 0 2px var(--green); }
+.wv-tok.is-creature .wv-tok-face { background:#f4b4ad; box-shadow:0 0 0 2px #d8706a; }
+.wv-tok-img { width:100%; height:100%; object-fit:cover; display:block; }
+.wv-tok-sil { width:86%; height:86%; background:#4a2326; -webkit-mask:var(--wv-sil) center/contain no-repeat; mask:var(--wv-sil) center/contain no-repeat; }
+.wv-tok-leg { position:absolute; top:25px; width:2px; height:7px; border-radius:1px; background:var(--green); }
+.wv-tok-leg.l { left:calc(50% - 5px); transform:rotate(14deg); }
+.wv-tok-leg.r { left:calc(50% + 3px); transform:rotate(-14deg); }
+.wv-tok.is-creature .wv-tok-leg { background:#d8706a; }
+.wv-tok-name { font-size:.7rem; color:var(--dim); max-width:6rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wv-tok:hover .wv-tok-name, .wv-tok:focus-visible .wv-tok-name { color:var(--paper); }
 .wv-homecol-rel-more { margin:.1rem 0 0; color:var(--dim); font-size:.76rem; font-style:italic; }
 .wv-homecol-resident { display:inline-block; margin-top:1.2rem; color:var(--amber);
   font-size:.8rem; text-decoration:none; border-bottom:1px solid rgba(232,197,106,.4); }

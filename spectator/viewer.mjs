@@ -4367,20 +4367,25 @@ export function creatureReactionLines(raw) {
  *  find row and its investigate answer (either may be missing). Pure. */
 export function creatureColumnFacts(row = null, inv = null) {
   const now = inv?.presence?.now ?? null;
-  const moods = now?.moods && typeof now.moods === "object"
-    ? Object.entries(now.moods).map(([k, v]) => `${k} ${v}`).join(", ") : "";
+  // A MOOD IS A BAR (play fix 41): "1 of 3" is a value on a scale, so it is
+  // drawn as one, labelled; a mood whose words do not read as "N of M" is left
+  // out rather than guessed at
+  const bars = now?.moods && typeof now.moods === "object"
+    ? Object.entries(now.moods).flatMap(([label, v]) => {
+      const m = /^\s*(\d+)\s+of\s+(\d+)\s*$/.exec(String(v ?? ""));
+      return m && Number(m[2]) > 0 ? [{ label, value: Number(m[1]), max: Number(m[2]) }] : [];
+    }) : [];
   const when = (iso) => { const t = Date.parse(iso ?? ""); return Number.isFinite(t) ? new Date(t).toISOString().slice(0, 16).replace("T", " ") + " UTC" : ""; };
   const facts = [
     { label: "kind", value: row?.kind ?? inv?.id?.slice(CREATURE_PREFIX.length).replace(/-\d.*$/, "") ?? "" },
     { label: "doing", value: now?.state ?? "" },
-    { label: "moods", value: moods },
     { label: "out since", value: when(now?.out_since) },
     { label: "fades", value: [row?.fades_in ? `in ${row.fades_in}` : "", when(now?.fades_at) ? `(${when(now?.fades_at)})` : ""].filter(Boolean).join(" ") },
-    { label: "remembers", value: now?.remembers != null ? String(now.remembers) : "" },
   ].filter((f) => String(f.value ?? "").trim());
   const lately = (inv?.reactions?.rows ?? []).filter((r) => String(r?.line ?? "").trim()).slice(0, 4)
     .map((r) => ({ label: "lately", value: String(r.line).trim() + (when(r.at) ? " (" + when(r.at) + ")" : "") }));
-  return { facts, lately };
+  // (what it remembers is its lately rows below; the bare count repeated them)
+  return { facts, lately, bars };
 }
 
 /** One live creature on the painting, as a TOKEN (play fix 40, Darko 20:09:
@@ -13085,6 +13090,22 @@ export function mountViewer(appEl) {
     if (!response.ok) throw new Error(`the door answered ${response.status}`);
     return response.json();
   }
+  // POINTING IN THE COLUMN LIGHTS THE MAP (play fix 41): a relative or a token
+  // pointed at in the column is lit on the painting the way pointing at it there
+  // would light it (its outline and fill, its pip opened), and let go on leaving
+  {
+    const host = $(root, ".wv-homecol");
+    const idOf = (t) => t?.dataset?.homecolGo || t?.dataset?.choose || null;
+    host?.addEventListener("pointerover", (e) => {
+      const t = e.target.closest?.("[data-homecol-go], [data-choose]");
+      const id = idOf(t);
+      if (id && markInteraction.getState().hoveredId !== id) hoverMark(id, true);
+    });
+    host?.addEventListener("pointerout", (e) => {
+      const t = e.target.closest?.("[data-homecol-go], [data-choose]");
+      if (t && !t.contains(e.relatedTarget)) hoverMark(null);
+    });
+  }
   const homeColumn = createHomeColumn({
     doc: document,
     host: $(root, ".wv-homecol"),
@@ -13314,7 +13335,7 @@ export function mountViewer(appEl) {
       mark, palette: state.palette?.entries ?? [], actingAs: key,
       insideOf: standpointOccupancy({ acts: enterExitLedger.acts, at: occupancyClock(), handle: key }).insideOf,
     });
-    const weight = effectiveWeight(mark), own = Math.max(0, Number(mark.stamps ?? 0) || 0);
+    const weight = effectiveWeight(mark);
     const inside = (occupantsOf(liveOccupancy()).get(id) ?? []).map((h) => faceOf(h).name);
     const law = entryLawOf(mark);
     const e = mark.extent;
@@ -13322,14 +13343,25 @@ export function mountViewer(appEl) {
     // the record's class word, unless an icon already says it in its own line
     const what = icons.find((i) => i.kind === "what")?.key;
     const classSaid = !!what && what !== "place";
+    // SHOW, DON'T LIST (play fix 41): its backing is the ✦ and a number, its
+    // size its own outline, who is inside their tokens; what stays a line is
+    // what only words can say
     const facts = [
-      { label: "backing", value: `✦ ${weight.toLocaleString()}${own !== weight ? ` (✦ ${own.toLocaleString()} its own)` : ""}` },
-      e && (e.w || e.h) && !isAmbientMark(mark, byId) ? { label: "size", value: `${e.w ?? 0}×${e.h ?? 0} m` } : null,
       mark.class && !classSaid ? { label: "class", value: String(mark.class) } : null,
       ...((d?.predicates ?? []).map((p) => ({ label: p.slot ?? "property", value: String(p.value ?? "") }))),
-      inside.length ? { label: "inside now", value: inside.join(", ") } : null,
       law?.consequence ? { label: "at the door", value: law.consequence } : null,
     ].filter(Boolean);
+    const ring = polygonOf(mark), bb = ring ? polygonBBox(ring) : null;
+    const footprint = e && e.w > 0 && e.h > 0 && !isAmbientMark(mark, byId)
+      ? { w: e.w, h: e.h, ring: bb ? ring.map((pt) => [pt.x - bb.minx, pt.y - bb.miny]) : null } : null;
+    const tokens = [
+      ...(occupantsOf(liveOccupancy()).get(id) ?? []).map((h) => {
+        const f = faceOf(h);
+        return { kind: "resident", id: walkerHoverId(h), name: f.name, monogram: f.monogram, color: f.color, picture: f.avatar ?? null };
+      }),
+      ...[...liveCreatures.values()].filter((c) => pointInsideMark({ x: c.x, y: c.y }, mark))
+        .map((c) => ({ kind: "creature", id: c.id, name: c.name, silhouette: silhouetteURL(c.kind) })),
+    ];
     const relations = [
       { label: "leads into", items: (law?.into ?? []).map((into) => ({ id: into, name: markIdentity(byId.get(into) ?? { id: into }) })) },
       { label: "sits inside", items: rel(d?.parents) },
@@ -13354,6 +13386,7 @@ export function mountViewer(appEl) {
       byline: markByline(mark),
       enterId: enter, canEnter: !!enter,
       facts, relations, back: backTo, icons,
+      stamps: weight, footprint, tokens,
     };
   }
 
@@ -13392,6 +13425,9 @@ export function mountViewer(appEl) {
       .catch(() => { creatureReads.set(id, { at: Date.now(), inv: null }); })
       .finally(() => syncMarkInteractionViews());
   }
+  // a kind's silhouette (the Mists' own art) as a CSS mask, for its token in the column
+  const silhouetteURL = (kind) => "url(\"data:image/svg+xml," + encodeURIComponent(
+    "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='" + creatureSilhouette(kind).d + "'/></svg>") + "\")";
   // fix 13's creature icon, the one the record's creature classes wear
   const creatureIcon = () => markIcons({ kind: "sited", id: "creature:" }, { cls: "creature" })[0];
   function liveCreatureGlyphs(px, tier) {
@@ -13427,7 +13463,7 @@ export function mountViewer(appEl) {
     const read = creatureReads.get(id) ?? null;
     if (!read) loadCreatureReading(id);
     if (!c && !read?.inv) return null;
-    const { facts, lately } = creatureColumnFacts(c, read?.inv ?? null);
+    const { facts, lately, bars } = creatureColumnFacts(c, read?.inv ?? null);
     const name = String(c?.name ?? read?.inv?.name ?? id);
     // where it is, said from where the reader stands: the room it is in, or
     // its distance from the acting resident's body (the camera, for a spectator)
@@ -13446,6 +13482,7 @@ export function mountViewer(appEl) {
       door: { description: read?.inv?.what_it_is ?? (read?.at ? "" : "reading the creature…") },
       byline: "out of the Mists, alive in the record",
       facts: [...facts, ...lately],
+      bars,
       icons: [creatureIcon()],
     };
   }

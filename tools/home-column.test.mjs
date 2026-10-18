@@ -524,3 +524,37 @@ test("a column spells out each icon's meaning beside it, and a key can only ever
   assert.equal(serialize(rows[1]), "Staked: ✦ 3 behind it.");
   assert.deepEqual(homeColumnModel({ handle: "nyx" }).icons, [], "no icons handed in, none drawn");
 });
+
+// ── SHOW, DON'T LIST (play fix 41, Darko 20:14) ────────────────────────────
+
+test("a mark's backing, size, moods and company are shapes: the ✦ and a number, its outline, bars, tokens", () => {
+  const model = homeColumnModel({
+    handle: "darko",
+    stamps: 12,
+    footprint: { w: 152.5, h: 280, ring: [[0, 0], [152.5, 0], [152.5, 280], [0, 280]] },
+    bars: [{ label: "fear", value: 1, max: 3 }, { label: "bad", value: 1, max: 0 }],
+    tokens: [
+      { kind: "resident", id: "walker:visitor", name: "visitor", monogram: "V", color: "#88aaff" },
+      { kind: "creature", id: "creature:wolf-251-play1", name: "a grey wolf", silhouette: "url(\"data:image/svg+xml,x\")" },
+      { kind: "resident", id: "", name: "nobody" },
+    ],
+  });
+  assert.equal(model.stamps, 12);
+  assert.deepEqual(model.bars, [{ label: "fear", value: 1, max: 3 }], "a bar with no scale is not drawn");
+  assert.deepEqual(model.tokens.map((t) => [t.kind, t.id]), [["resident", "walker:visitor"], ["creature", "creature:wolf-251-play1"]]);
+  // a document that can build SVG draws the footprint; the stand-in grows the one call it needs
+  const svgDoc = { ...doc, createElementNS: (_ns, tag) => element(tag) };
+  const host = renderHomeColumn(svgDoc, element("aside"), model, { imagePath: shelfGate });
+  const stamps = byClass(host, "wv-homecol-stamps")[0];
+  assert.equal(serialize(stamps), "✦12", "the stamp and its number, nothing else");
+  assert.equal(find(host, "polygon").length, 1, "the mark's own outline");
+  assert.equal(serialize(byClass(host, "wv-extent-t")[0]), "152.5×280 m", "its size on it");
+  assert.equal(byClass(host, "wv-homecol-bar-cell").filter((c) => c.className.includes("is-on")).length, 1, "one of three, lit");
+  const toks = byClass(host, "wv-tok");
+  assert.deepEqual(toks.map((t) => t.attrs["data-choose"]), ["walker:visitor", "creature:wolf-251-play1"], "a press opens it");
+  assert.equal(toks[1].className, "wv-tok is-creature");
+  assert.equal(byClass(toks[0], "wv-tok-leg").length, 2, "two stubby legs");
+  // without SVG the outline is left out, never drawn as a string
+  const plain = render(model);
+  assert.equal(find(plain, "polygon").length, 0);
+});
