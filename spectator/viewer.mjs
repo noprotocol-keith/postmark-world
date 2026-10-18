@@ -13968,8 +13968,8 @@ export function mountViewer(appEl) {
       residentLink: false,
       kicker: String(mark.household ?? mark.by ?? "the town"),
       title: identity.name || String(mark.id),
-      // the room you are in is not somewhere at a distance, and a carried thing is in someone's hands
-      region: id === sceneRoomId ? "you are inside" : carriedBy ?? where.detail,
+      // the room you are in is not somewhere at a distance (and radialWhere says a carried thing is in someone's hands)
+      region: id === sceneRoomId ? "you are inside" : where.detail,
       leadImage: markImagePath(mark),
       door: { description: typeof mark.body === "string" ? mark.body : "" },
       byline: markByline(mark),

@@ -19,7 +19,7 @@
 // ── THE CAN-FAIL FLIPS ─────────────────────────────────────────────────────
 //   drop `...holdingFacts(holding)` from markColumnView      → 1 reds
 //   drop the carried relocation in overlayMarks              → 2 reds (the pips part)
-//   radialWhere without the carried line                     → 2 reds (the column says metres)
+//   radialWhere without the carried line                     → 2 reds (the column says "11 m · southeast of you")
 //   markWhat without thingClasses                            → 4 reds
 //   sayNote() back to the old sentence                       → 5 reds
 //
