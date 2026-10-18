@@ -40,7 +40,7 @@ import { parseEnterExitLedger, occupancyAt, occupantsOf, withinOf, isMark, isEnt
 // is not allowed to hold one, and `tools/record-sources.test.mjs` reads these
 // bytes to prove it.
 import { recordSources, recordAbsenceMessage } from "../tools/record-sources.mjs";
-import { MISTS_PAINT, bakeSheetFeather, mistsBakePlan, mistsBaker, mistsKeepRasterBuilder, mistsCoreHex, mistsKeepRects, mistsKeepAt, mistsCreatures, mistsCreatureHTML, bellFor, ringBell } from "./mists-render.mjs";
+import { roomInMists, bakeRoomSurround, MISTS_PAINT, bakeSheetFeather, mistsBakePlan, mistsBaker, mistsKeepRasterBuilder, mistsCoreHex, mistsKeepRects, mistsKeepAt, mistsCreatures, mistsCreatureHTML, bellFor, ringBell } from "./mists-render.mjs";
 // THE PARCEL'S COLUMN — the atlas's right-hand panel, back (Keemin 2026-09-11).
 // It owns its own markdown reader, its own builder and its own dress, and it
 // takes no viewer internals: the door read, the shelf gate and the handle rule
@@ -10317,7 +10317,8 @@ export function mountViewer(appEl) {
   // costs nothing here.
   function drawMists() {
     if (!mapCtx?.mistsLayer) return;
-    const m = sceneRoomId ? null : mistsAt(state.crossing, data?.skeleton?.mists);
+    if (sceneRoomId) { drawRoomMists(); return; }
+    const m = mistsAt(state.crossing, data?.skeleton?.mists);
     const key = m ? JSON.stringify(m) : "";
     if (mapCtx.mistsKey === key) return;
     mapCtx.mistsKey = key;
@@ -10325,6 +10326,38 @@ export function mountViewer(appEl) {
     mapCtx.mistsLayer.innerHTML = mistsWallSVG(m, { ...mapCtx, painted: true });
     mapCtx.mistsCam?.replaceChildren();   // the moving paint, on the stage (WLD-43)
     paintMists(m);
+  }
+
+  // A ROOM IN THE MISTS SHOWS THE FOG AROUND IT, NEVER OVER IT (play fix 31,
+  // Darko 2026-10-15 18:37: "we can still have that mist effect around, but the
+  // actual area itself is visible"). Indoors the town's wall and paint stand
+  // down as before (a room scene never gets the sheet's feather, WLD-21); what a
+  // room in the Mists gets instead is its breathing room (roomGround's pad)
+  // fogged in the Mists' own colour, on the veil layer (over the ground and its
+  // art, under the record), with the room's own extent clear to its edge. A
+  // room standing clear of the Mists is drawn exactly as before.
+  function drawRoomMists() {
+    const room = byId.get(sceneRoomId) ?? allMarks().find((mk) => mk?.id === sceneRoomId) ?? null;
+    const m = mistsAt(state.crossing, data?.skeleton?.mists);
+    const box = room?.at && room.extent ? rect(room) : null;
+    const r = box ? { minX: box.x - box.w / 2, minY: box.y - box.h / 2, maxX: box.x + box.w / 2, maxY: box.y + box.h / 2 } : null;
+    const fog = m && r ? roomInMists(m, r) : null;
+    const key = `room|${sceneRoomId}|${fog ? `${m.crossing}|${fog.inWall ? 1 : fog.thickness.toFixed(3)}|${m.veil ?? ""}` : ""}`;
+    if (mapCtx.mistsKey === key) return;
+    mapCtx.mistsKey = key;
+    mapCtx.mistsLayer.innerHTML = "";
+    mapCtx.mistsCam?.replaceChildren();
+    paintMists(null);   // no wall, no paint, no feather, no bell indoors
+    if (!fog) { mapCtx.veilLayer.innerHTML = ""; return; }
+    let baked = null;
+    try { baked = bakeRoomSurround(m, r, Math.max(box.w, box.h) * ROOM_GROUND_PAD, fog); } catch { baked = null; }
+    if (!baked) { mapCtx.veilLayer.innerHTML = ""; return; }
+    const { originPx, mPerPx } = mapCtx;
+    const b = baked.box;
+    const x = originPx.x + b.minX / mPerPx, y = originPx.y + b.minY / mPerPx;
+    const w = (b.maxX - b.minX) / mPerPx, h = (b.maxY - b.minY) / mPerPx;
+    mapCtx.veilLayer.innerHTML = `<image class="wv-room-mists" href="${baked.canvas.toDataURL()}" x="${x.toFixed(1)}" y="${y.toFixed(1)}"`
+      + ` width="${w.toFixed(1)}" height="${h.toFixed(1)}" preserveAspectRatio="none" pointer-events="none"/>`;
   }
 
   // THE MISTS, PAINTED (POS-553). Over the vector wall: the baked banks and

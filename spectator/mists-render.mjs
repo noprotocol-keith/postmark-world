@@ -18,6 +18,7 @@
 // density, so the page and the walk's slowdown agree.
 
 import { MISTS_KEEP } from "../tools/mists-keep.mjs";
+import { mistsHere } from "../tools/world-engine.mjs";
 
 // The fog's colour, ONE variable: the skin's variant 2 (Darko 2026-10-10 10:56),
 // its plum-grey between the base and the quiet. The face takes it; depth and the
@@ -599,4 +600,68 @@ export function bakeSheetFeather(frame, colour, { canvas = null, pxM = MISTS_SHE
   }
   ctx.putImageData(img, 0, 0);
   return { canvas: cv, box, w: w * pxM, h: h * pxM };
+}
+
+// ── a room in the Mists: the fog around it, never over it (play fix 31) ─────
+// Darko, playground 2026-10-15 18:37: "we can have the mist only touch like the
+// exterior parts of the interior view … we can still have that mist effect
+// around, but the actual area itself is visible." A mounted room's scene is the
+// room's own extent plus its breathing room (roomGround's pad). When the room
+// stands in the Mists at this crossing, the breathing room fogs over in the
+// Mists' own colour, ragged by the Mists' own noise, and the extent itself stays
+// clear to its edge: the soft edge lies wholly OUTSIDE the extent.
+export const MISTS_ROOM = { softFrac: 0.55, wobbleFrac: 0.18, scaleFrac: 0.3, clearAlpha: 0.38, wallAlpha: 0.9 };
+
+/** Whether a room stands in the Mists at this crossing, and how thickly: the
+ *  engine's own `mistsHere` at the room's centre and corners, the thickest
+ *  answer winning (behind the wall reads as 1). Null when it stands clear, or
+ *  when there are no Mists. `r` is { minX, minY, maxX, maxY } in metres. Pure. */
+export function roomInMists(m, r) {
+  if (!m?.clear || !r || ![r.minX, r.minY, r.maxX, r.maxY].every(Number.isFinite)) return null;
+  const cx = (r.minX + r.maxX) / 2, cy = (r.minY + r.maxY) / 2;
+  let thickness = 0, inWall = false;
+  for (const pt of [{ x: cx, y: cy }, { x: r.minX, y: r.minY }, { x: r.maxX, y: r.minY }, { x: r.minX, y: r.maxY }, { x: r.maxX, y: r.maxY }]) {
+    const h = mistsHere(pt, m);
+    if (h.inWall) { inWall = true; thickness = 1; }
+    else thickness = Math.max(thickness, h.thickness);
+  }
+  return inWall || thickness > 0 ? { inWall, thickness } : null;
+}
+
+/** How much fog covers a point of a room's scene, 0..1: exactly 0 anywhere on
+ *  the room's own box `r`, rising over the breathing room `padM` wide around
+ *  it to full at its outer reach. The Mists' fbm moves the rise outward only,
+ *  so the fog never reaches into the room. Pure. */
+export function mistsRoomSurroundAt(r, x, y, padM) {
+  const dx = Math.max(r.minX - x, 0, x - r.maxX), dy = Math.max(r.minY - y, 0, y - r.maxY);
+  const d = Math.hypot(dx, dy);
+  if (!(d > 0) || !(padM > 0)) return 0;
+  const sc = Math.max(1, padM * MISTS_ROOM.scaleFrac);
+  const start = padM * MISTS_ROOM.wobbleFrac * mistsFbm(x / sc, y / sc, 211, 3);
+  return smooth(start, start + padM * MISTS_ROOM.softFrac, d);
+}
+
+/** The surround baked over the scene's box (the room's box plus `padM` each
+ *  side), in the fog's colour darkening outward, at the fog's own thickness:
+ *  the fringe's haze is thinner than the wall. Browser only (a canvas). */
+export function bakeRoomSurround(m, r, padM, fog, { canvas = null, px = 220 } = {}) {
+  const box = { minX: r.minX - padM, minY: r.minY - padM, maxX: r.maxX + padM, maxY: r.maxY + padM };
+  const pxM = Math.max(box.maxX - box.minX, box.maxY - box.minY) / px;
+  const w = Math.max(1, Math.ceil((box.maxX - box.minX) / pxM)), h = Math.max(1, Math.ceil((box.maxY - box.minY) / pxM));
+  const cv = canvas ?? Object.assign(document.createElement("canvas"), { width: w, height: h });
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext("2d"), img = ctx.createImageData(w, h), data = img.data;
+  const alpha = fog?.inWall ? MISTS_ROOM.wallAlpha
+    : MISTS_ROOM.clearAlpha + (MISTS_ROOM.wallAlpha - MISTS_ROOM.clearAlpha) * Math.max(0, Math.min(1, fog?.thickness ?? 0));
+  for (let j = 0; j < h; j++) {
+    const y = box.minY + (j + 0.5) * pxM;
+    for (let i = 0; i < w; i++) {
+      const x = box.minX + (i + 0.5) * pxM, f = mistsRoomSurroundAt(r, x, y, padM);
+      if (!f) continue;
+      const [cr, cg, cb] = mistsColourAt(m, 0.35 * f), o = (j * w + i) * 4;
+      data[o] = cr; data[o + 1] = cg; data[o + 2] = cb; data[o + 3] = Math.round(255 * alpha * f);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  return { canvas: cv, box };
 }
