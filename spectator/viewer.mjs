@@ -58,7 +58,7 @@ import { homeOf, homesOnParcel } from "../tools/where-is.mjs";
 import { markIcons, iconSVG, iconsHTML, creatureClassesOf, thingClassesOf, MARK_ICON_CSS } from "./mark-icons.mjs";
 // LOGOS v2 part 2 on the page (POS-678): what a holder holds, who carries what,
 // and the say card's numbers, each from the office's own reads.
-import { holderLines, residentHoldLines, residentList, handsLines, handsList, holdingParts, carriersFrom, carriedAt, carriedWords, sayCardNote, thingKindLedger } from "./holdings.mjs";
+import { holderLines, residentHoldLines, residentList, handsLines, handsList, holdingParts, carriersFrom, carriedAt, carriedWords, sayCardNote, thingKindLedger, isThingId } from "./holdings.mjs";
 
 const $ = (root, s) => root.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -14106,7 +14106,10 @@ export function mountViewer(appEl) {
     if (look) noteThingKind(mark, look);
     const holding = holderLines(look);
     const carriedBy = carriedLine(id);
-    const holderOfIt = carriers().holders.get(String(id)) ?? null;
+    // its holder: a resident's hands from the reads that place it (carriers), else what its own
+    // close look says stands holding it, `stands: { source: "holder", holder }` (a bowl, a bag)
+    const heldIn = look?.stands?.source === "holder" && look.stands.holder ? String(look.stands.holder) : null;
+    const holderOfIt = carriers().holders.get(String(id)) ?? heldIn;
     const icons = iconsOf(mark);
     // the record's class word, unless an icon already says it in its own line
     const what = icons.find((i) => i.kind === "what")?.key;
@@ -14135,7 +14138,9 @@ export function mountViewer(appEl) {
     ];
     const relations = [
       // its holder, a way into the holder's own column: a bag, or a resident's hands
-      { label: "held by", items: holderOfIt ? [{ id: walkerHoverId(holderOfIt), name: faceOf(holderOfIt).name || holderOfIt }] : [] },
+      { label: "held by", items: holderOfIt ? [isThingId(holderOfIt)
+        ? { id: holderOfIt, name: markIdentity(byId.get(holderOfIt) ?? { id: holderOfIt }) }
+        : { id: walkerHoverId(holderOfIt), name: faceOf(holderOfIt).name || holderOfIt }] : [] },
       { label: "leads into", items: (law?.into ?? []).map((into) => ({ id: into, name: markIdentity(byId.get(into) ?? { id: into }) })) },
       { label: "sits inside", items: rel(d?.parents) },
       { label: "holds", items: rel(d?.children), more: (d?.more?.children ?? 0) > 0 },
@@ -14150,13 +14155,15 @@ export function mountViewer(appEl) {
       // repaint happens exactly when one is owed (the column's own law)
       key: [id, d ? "read" : "-", worldEpoch, enterExitEpoch, cameFrom ?? "", enter ?? "", inside.join(","),
         icons.map((i) => `${i.key}${i.count ?? ""}`).join(","),
-        holding ? `${holding.count}/${holding.capacity}/${holding.open}/${holding.kinds.map((k) => k.shows).join(",")}` : "-", carriedBy ?? ""].join("|"),
+        holding ? `${holding.count}/${holding.capacity}/${holding.open}/${holding.kinds.map((k) => k.shows).join(",")}` : "-", carriedBy ?? "", heldIn ?? ""].join("|"),
       handle: String(mark.by ?? mark.household ?? "the town"),
       residentLink: false,
       kicker: kickerOf(mark),
       title: identity.name || String(mark.id),
       // the room you are in is not somewhere at a distance (and radialWhere says a carried thing is in someone's hands)
-      region: id === sceneRoomId ? "you are inside" : where.detail,
+      // held inside a holder: said so, never at the spot it stood before (page fix 4)
+      region: id === sceneRoomId ? "you are inside"
+        : heldIn && isThingId(heldIn) && !carriedBy ? `inside ${markIdentity(byId.get(heldIn) ?? { id: heldIn })}` : where.detail,
       leadImage: markImagePath(mark),
       door: { description: typeof mark.body === "string" ? mark.body : "" },
       byline: markByline(mark),
@@ -14199,6 +14206,8 @@ export function mountViewer(appEl) {
         closeLooks.set(key, { at: Date.now(), read: got && !got.error ? got : null });
         // a resident's whole things are carried by them: the map moves them to their body
         if (param === "investigate" && got && !got.error) { carriersEpoch += 1; if (lastRadial && mapCtx) drawOverlay(lastRadial); }
+        // a thing its close look says a holder holds is drawn at that holder (carriedPlace)
+        if (param === "mark" && got?.stands?.source === "holder" && lastRadial && mapCtx) drawOverlay(lastRadial);
       })
       .catch(() => { if (gen === closeLookGen) closeLooks.set(key, { at: Date.now(), read: null }); })
       .finally(() => syncMarkInteractionViews());
@@ -14297,7 +14306,16 @@ export function mountViewer(appEl) {
     return w && [w.x, w.y].every(Number.isFinite) ? { x: Number(w.x), y: Number(w.y) } : null;
   }
   /** Where a read says a thing is now (held, or set down), or null when none has said. */
-  function carriedPlace(id) { return carriedAt(id, carriers(), { bodyAt: bodyAtFor }); }
+  function carriedPlace(id) {
+    const at = carriedAt(id, carriers(), { bodyAt: bodyAtFor });
+    if (at) return at;
+    // a thing whose own close look says a holder (a bowl) holds it is drawn at that holder
+    const look = closeLooks.get(`${asWho()}|mark|${id}`);
+    const holder = look && Date.now() - look.at < CLOSE_LOOK_MS && look.read?.stands?.source === "holder" ? String(look.read.stands.holder ?? "") : "";
+    if (!isThingId(holder)) return null;
+    const m = byId.get(holder);
+    return m?.at && Number.isFinite(Number(m.at.x)) && Number.isFinite(Number(m.at.y)) ? { x: Number(m.at.x), y: Number(m.at.y), holder } : null;
+  }
   /** "in your hands", "in sb-ash's hands", or null. */
   function carriedLine(id) { return carriedWords(id, carriers(), { self: hands.for }); }
 

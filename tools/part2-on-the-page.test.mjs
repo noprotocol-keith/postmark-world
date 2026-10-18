@@ -25,6 +25,7 @@
 //   radialWhere without the carried line                     → 2 reds (the column says "11 m · southeast of you")
 //   a ground row with no holder that only sets (carriersFrom) → 2b reds
 //   the kicker read raw off `household` (page fix 1)           → 1c reds ("hh:rig-house")
+//   the column ignoring its close look's stands.holder (fix 4) → 4d reds (no "held by", the old spot)
 //   ownIds without the docket (page fix 1)                     → 1c reds (no "Yours")
 //   markWhat without thingClasses                            → 4 reds
 //   iconsOf without askLineage                               → 4's draw-time row reds
@@ -123,7 +124,9 @@ const FOCUS = {
   // from an office whose class layer cannot explain the kind: its `holder` is the only word
   [CANDY_BAG]: { id: CANDY_BAG, body: "A bag for gathering candy.", holder: { capacity: 200, open: true },
     holds: { holder: CANDY_BAG, count: 8, class: "candy", shows: "8 candies", kinds: [{ kind: "candy", count: 8, shows: "8 candies" }] },
-    can: ["take", "give"], class_pointer: 'kind: sited · a mark — explain: "sited"' },
+    can: ["take", "give"], class_pointer: 'kind: sited · a mark — explain: "sited"',
+    // given into the bowl: its own close look says the bowl holds it (world.mjs § whereThingStands, as MCP gave it)
+    stands: { where: null, source: "holder", holder: BOWL, says: `${BOWL} is holding it, and a held thing rides its holder (the-town/the-anchor)` } },
   [STOOL]: { id: STOOL, body: "A stool.", can: [], class_pointer: 'kind: sited · a mark — explain: "sited"' },
 };
 // world-hold.mjs § world_holdings, and the ground within reach (groundRow)
@@ -366,6 +369,17 @@ test("4b. the Candy Bag (old form, kind: sited + class) reads as a thing and off
   assert.ok(col.icons.includes("ic-thing"), "a thing: " + JSON.stringify(col.icons));
   assert.ok(!col.meanings.some((m) => /^A place/.test(m)), "never \"A place\": " + JSON.stringify(col.meanings));
   assert.equal(col.enter, false, "a thing is not ground to stand on: no enter");
+});
+
+test("4d. a thing held inside a holder names that holder, and is drawn at it (page fix 4)", async (t) => {
+  if (!chromium) return t.skip(skipReason);
+  const col = await columnFor(CANDY_BAG, { until: "8 of 200" });
+  const heldBy = col.relations.find((r) => r.label === "held by");
+  assert.deepEqual(heldBy?.items, [BOWL], "held by the bowl, a way into its column: " + JSON.stringify(col.relations));
+  assert.equal(col.meta, "inside A Halloween Bowl", "never the spot it stood before: " + JSON.stringify(col.meta));
+  await page.waitForTimeout(400);
+  const bag = await pipAt(CANDY_BAG), bowl = await pipAt(BOWL);
+  assert.ok(bag && bowl && Math.hypot(bag.x - bowl.x, bag.y - bowl.y) < 0.01, `drawn at the bowl: bag ${JSON.stringify(bag)}, bowl ${JSON.stringify(bowl)}`);
 });
 
 test("5. the say card says the office's numbers", async (t) => {
