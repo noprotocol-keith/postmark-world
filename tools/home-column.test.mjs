@@ -475,7 +475,7 @@ test("a mark's column carries its facts, its relatives and the way back as plain
     back: { id: "darko/the-starforge-spire", name: "The Starforge Spire" },
   });
   assert.deepEqual(model.enter, { parcelId: "darko/spire-gilded-doors" }, "a mark's door rides the parcel's one key");
-  assert.deepEqual(model.facts, [{ label: "backing", value: "✦ 3" }], "a fact with no value is not said");
+  assert.deepEqual(model.facts, [{ label: "backing", value: "✦ 3", detail: null }], "a fact with no value is not said (and one with no description has none: row 70)");
   assert.deepEqual(model.relations.map((r) => r.label), ["leads into", "sits inside"], "an empty relation is not said");
   assert.equal(model.relations[1].items[0].name, "darko/spire-forecourt", "a relative with no name reads as its id");
   assert.equal(model.relations[1].more, true);

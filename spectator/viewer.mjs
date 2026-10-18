@@ -13783,7 +13783,9 @@ export function mountViewer(appEl) {
     // what only words can say
     const facts = [
       mark.class && !classSaid ? { label: "class", value: String(mark.class) } : null,
-      ...((d?.predicates ?? []).map((p) => ({ label: p.slot ?? "property", value: String(p.value ?? "") }))),
+      ...((d?.predicates ?? []).map((p) => ({ label: p.slot ?? "property", value: String(p.value ?? ""),
+        // its full description, which the short line opens to (row 70)
+        detail: typeof p.body === "string" ? p.body : null }))),
       law?.consequence ? { label: "at the door", value: law.consequence } : null,
     ].filter(Boolean);
     const ring = polygonOf(mark), bb = ring ? polygonBBox(ring) : null;

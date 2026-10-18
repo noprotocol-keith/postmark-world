@@ -280,7 +280,9 @@ export function homeColumnModel({ handle, kicker, title, region, leadImage, door
     // writes them with textContent like everything else. Empty for a parcel
     // and a region unless their caller hands some in.
     facts: (facts ?? []).filter((f) => f && String(f.value ?? "").trim())
-      .map((f) => ({ label: String(f.label ?? "").trim(), value: String(f.value).trim() })),
+      .map((f) => ({ label: String(f.label ?? "").trim(), value: String(f.value).trim(),
+        // the full description a short line opens to (play row 70); none, a plain line
+        detail: String(f.detail ?? "").trim() || null })),
     relations: (relations ?? []).map((r) => ({
       label: String(r?.label ?? "").trim(),
       items: (r?.items ?? []).filter((i) => i && String(i.id ?? "").trim())
@@ -642,7 +644,22 @@ export function renderHomeColumn(doc, host, model, { imagePath = null } = {}) {
       const dt = el(doc, "dt");
       dt.textContent = fact.label;
       const dd = el(doc, "dd");
-      dd.textContent = fact.value;
+      if (fact.detail) {
+        // CLICK THE SHORT LINE FOR THE FULL DESCRIPTION (play row 70, Darko 19:39:
+        // "Can we just make it so you can click the short line to see the full
+        // description?"). A native disclosure: a press or Enter/Space opens it and
+        // closes it again, the chevron says it opens, and no handler is needed.
+        const more = el(doc, "details", "wv-homecol-fact-more");
+        const line = el(doc, "summary", "wv-homecol-fact-line");
+        line.textContent = fact.value;
+        const body = el(doc, "p", "wv-homecol-fact-detail");
+        body.textContent = fact.detail;
+        more.appendChild(line);
+        more.appendChild(body);
+        dd.appendChild(more);
+      } else {
+        dd.textContent = fact.value;
+      }
       list.appendChild(dt);
       list.appendChild(dd);
     }
@@ -907,6 +924,13 @@ export const HOME_COLUMN_CSS = `
   font-size:.8rem; line-height:1.45; }
 .wv-homecol-facts dt { color:var(--dim); text-transform:lowercase; }
 .wv-homecol-facts dd { margin:0; color:var(--paper); overflow-wrap:anywhere; }
+.wv-homecol-fact-line { cursor:pointer; list-style:none; display:inline; border-bottom:1px dotted transparent; }
+.wv-homecol-fact-line::-webkit-details-marker { display:none; }
+.wv-homecol-fact-line::after { content:"▸"; display:inline-block; margin-left:.35em; color:var(--dim); font-size:.8em; transition:transform .12s; }
+.wv-homecol-fact-more[open] > .wv-homecol-fact-line::after { transform:rotate(90deg); }
+.wv-homecol-fact-line:hover, .wv-homecol-fact-line:focus-visible { border-bottom-color:var(--dim); }
+.wv-homecol-fact-line:focus-visible { outline:2px solid var(--amber, #e8c56a); outline-offset:2px; }
+.wv-homecol-fact-detail { margin:.3rem 0 .2rem; color:var(--dim); font-size:.8rem; line-height:1.5; font-style:italic; }
 .wv-homecol-rel { margin:1rem 0 0; display:flex; flex-direction:column; gap:.3rem; }
 .wv-homecol-rel-label { color:var(--dim); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; }
 .wv-homecol-go { display:block; width:100%; text-align:left; cursor:pointer; padding:5px 8px;
