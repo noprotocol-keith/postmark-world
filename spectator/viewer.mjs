@@ -7517,6 +7517,15 @@ export function crossingsSignature(acts = []) {
   return `${list.length}|${last ? JSON.stringify(last) : ""}`;
 }
 
+/** The column's and the card's where-line, measured from `who` and saying so
+ *  (play row 72): "152 m · southeast of you", "6,719 m · northeast of the
+ *  camera", "you are inside". Pure. */
+export function whereLine({ distance, bearing = null, far = false, who = "the camera" } = {}) {
+  if (!bearing) return `${who === "you" ? "you are" : `${who} is`} inside`;
+  const dist = far ? `~${Math.round(distance / 1000).toLocaleString()} km` : `${Math.round(distance).toLocaleString()} m`;
+  return `${dist} · ${BEARING_LONG[bearing] ?? bearing} of ${who}`;
+}
+
 export function mountViewer(appEl) {
   if (!appEl) throw new Error("mountViewer needs a host element");
   const shadowHost = appEl;
@@ -7956,18 +7965,26 @@ export function mountViewer(appEl) {
     const full = byId.get(m?.id) ?? m;
     return resolveMarkName(full, data?.worldState?.determined ?? {});
   }
+  // FROM WHOM A DISTANCE IS MEASURED (play row 72: a room ~150 m from darko read
+  // "6,684 m · northeast", which is its distance from the camera's resting place).
+  // A resident's distances are from their own body, as their read is; a
+  // spectator's are from the camera. The line says which.
+  function whereFrom() {
+    if (canAct() && state.handle) {
+      const o = actorOrigin();
+      if (o && Number.isFinite(Number(o.x)) && Number.isFinite(Number(o.y))) return { at: { x: Number(o.x), y: Number(o.y) }, who: "you" };
+    }
+    return { at: { x: Number(state.cam.x), y: Number(state.cam.y) }, who: "the camera" };
+  }
   function radialWhere(m) {
     const full = byId.get(m?.id) ?? m;
     if (!isEmbodiedMark(full) || isAmbientMark(full, byId)) return { bearing: null, detail: "" };
-    const dx = Number(full.at.x) - Number(state.cam.x), dy = Number(full.at.y) - Number(state.cam.y);
+    const from = whereFrom();
+    const dx = Number(full.at.x) - from.at.x, dy = Number(full.at.y) - from.at.y;
     const distance = Number.isFinite(m?.distM) ? Number(m.distM) : Math.round(Math.hypot(dx, dy));
-    const inside = pointInsideMark(state.cam, full);
+    const inside = pointInsideMark(from.at, full);
     const bearing = inside ? null : (m?.bearing ?? quantizeBearing(bearingDeg(dx, dy), state.dials.bearing_points));
-    const dist = m?.far
-      ? `~${Math.round(distance / 1000).toLocaleString()} km`
-      : `${Math.round(distance).toLocaleString()} m`;
-    const direction = bearing ? BEARING_LONG[bearing] ?? bearing : "inside";
-    return { bearing, detail: `${dist} · ${direction}` };
+    return { bearing, detail: whereLine({ distance, bearing, far: !!m?.far, who: from.who }) };
   }
   // the FOOTPRINT indicator (Keemin 2026-07-23): coordinate dots say nothing about
   // how big a mark is — the-main-channel is 10^3× a bench. A log-scaled glyph rect
