@@ -6068,11 +6068,14 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-walk-preview-dest { fill:rgba(132,201,143,.18); stroke:var(--green); stroke-width:2.4; vector-effect:non-scaling-stroke; }
 .wv-walk-preview-label rect { fill:rgba(13,15,19,.94); stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
 .wv-walk-preview-label text { fill:var(--green); font-family:Consolas,Menlo,monospace; font-weight:700; }
-.wv-walk-chip-btn rect { fill:rgba(13,15,19,.94); stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
-.wv-walk-chip-btn.is-go rect { fill:var(--green); stroke:var(--green); }
-.wv-walk-chip-btn.is-go text { fill:#0d0f13; }
-.wv-walk-chip-btn.is-no text { fill:var(--paper, #e8e2d2); }
-.wv-walk-chip-btn:hover rect { filter:brightness(1.15); }
+.wv-walk-chip-go rect { fill:rgba(13,15,19,.94); stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
+.wv-walk-chip-go .wv-chip-check { fill:#0d0f13; font-weight:800; opacity:0; }
+.wv-walk-chip-go:not(.is-still):hover rect { fill:var(--green); stroke:var(--green); }
+.wv-walk-chip-go:not(.is-still):hover .wv-chip-text { opacity:0; }
+.wv-walk-chip-go:not(.is-still):hover .wv-chip-check { opacity:1; }
+.wv-walk-chip-no circle { fill:#2a2f38; stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
+.wv-walk-chip-no text { fill:var(--paper, #e8e2d2); font-weight:700; }
+.wv-walk-chip-no:hover circle { fill:#5a2a2a; }
 .wv-walkpanel { display:flex; align-items:center; gap:8px; font-size:12px; opacity:.9; margin:6px 0 0; flex-wrap:wrap; }
 .wv-walkpanel input[type=range] { width:130px; vertical-align:middle; }
 .wv-walkpanel button { font:inherit; padding:1px 7px; cursor:pointer; }
@@ -11852,31 +11855,33 @@ export function mountViewer(appEl) {
       y: mapCtx.originPx.y + point.y / mapCtx.mPerPx,
     });
     const from = px(preview.from), toward = px(preview.toward);
-    const label = formatWalkPreviewLabel(preview.leg);
-    const labelWidth = Math.max(152, label.length * 7 + 14) * unit;
-    const labelHeight = 24 * unit;
-    // THE CONFIRM SITS WHERE YOU CLICKED (Darko, playground 2026-10-15: "move the
-    // confirmation card near the walk destination … just have a little compact icon
-    // pop up right next to where you clicked"). The label rides beside the
-    // destination, with ✓ and ✕ when the walk can be confirmed; Enter and Escape
-    // do the same. The desk below keeps the answers and the details.
+    // THE CONFIRM SITS WHERE YOU CLICKED (Darko, playground 2026-10-15). First
+    // pass, 17:36: "just have a little compact icon pop up right next to where you
+    // clicked". Second, 17:46: the ✓ and ✕ sat far from the cursor in a row, so the
+    // chip is now a small stacked card beside the click, distance over time, and
+    // the whole card is the confirm: on hover its text gives way to a ✓, a click
+    // confirms, and a small ✕ sits on its upper-right corner. Enter and Escape do
+    // the same. The desk below keeps the answers and the details.
+    const parts = walkLegParts(preview.leg);
+    const lines = parts?.eta ? [parts.distance, parts.eta] : [formatWalkPreviewLabel(preview.leg)].filter(Boolean);
     const confirmable = (() => { const b = $(root, ".wv-walk-confirm"); return !!b && !b.disabled && !$(root, ".wv-walkdesk")?.hidden; })();
-    const btn = 22 * unit, gap = 4 * unit;
-    const chipWidth = labelWidth + (confirmable ? 2 * (btn + gap) : 0);
-    const labelX = Math.max(mapCtx.view.x + 4 * unit,
-      Math.min(mapCtx.view.x + mapCtx.view.w - chipWidth - 4 * unit, toward.x + 12 * unit));
-    const labelY = Math.max(mapCtx.view.y + 4 * unit,
-      Math.min(mapCtx.view.y + mapCtx.view.h - labelHeight - 4 * unit, toward.y - labelHeight / 2));
-    const button = (x, act, glyph, title) => `<g class="wv-walk-chip-btn is-${act}" data-walk-chip="${act}" style="pointer-events:auto;cursor:pointer">`
-      + `<title>${title}</title><rect x="${x}" y="${labelY + (labelHeight - btn) / 2}" width="${btn}" height="${btn}" rx="${4 * unit}"/>`
-      + `<text x="${x + btn / 2}" y="${labelY + labelHeight / 2 + 5 * unit}" font-size="${14 * unit}" text-anchor="middle">${glyph}</text></g>`;
-    const goX = labelX + labelWidth + gap, noX = goX + btn + gap;
+    const fontPx = 12, lineH = 15;
+    const w = Math.max(64, Math.max(...lines.map((l) => l.length), 4) * 7.4 + 16) * unit;
+    const h = (lines.length * lineH + 10) * unit;
+    const x = Math.max(mapCtx.view.x + 4 * unit, Math.min(mapCtx.view.x + mapCtx.view.w - w - 12 * unit, toward.x + 9 * unit));
+    const y = Math.max(mapCtx.view.y + 12 * unit, Math.min(mapCtx.view.y + mapCtx.view.h - h - 4 * unit, toward.y - h / 2));
+    const text = lines.map((l, i) => `<text class="wv-chip-text" x="${x + w / 2}" y="${y + (5 + lineH * (i + 1) - 3) * unit}" font-size="${fontPx * unit}" text-anchor="middle">${esc(l)}</text>`).join("");
+    const card = confirmable
+      ? `<g class="wv-walk-chip-go" data-walk-chip="go" style="pointer-events:auto;cursor:pointer"><title>walk there (Enter)</title>`
+        + `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${5 * unit}"/>${text}`
+        + `<text class="wv-chip-check" x="${x + w / 2}" y="${y + h / 2 + 7 * unit}" font-size="${20 * unit}" text-anchor="middle">✓</text></g>`
+        + `<g class="wv-walk-chip-no" data-walk-chip="no" style="pointer-events:auto;cursor:pointer"><title>cancel (Esc)</title>`
+        + `<circle cx="${x + w}" cy="${y}" r="${7.5 * unit}"/>`
+        + `<text x="${x + w}" y="${y + 3.6 * unit}" font-size="${10 * unit}" text-anchor="middle">✕</text></g>`
+      : `<g class="wv-walk-chip-go is-still"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${5 * unit}"/>${text}</g>`;
     layer.innerHTML = `<line x1="${from.x}" y1="${from.y}" x2="${toward.x}" y2="${toward.y}" class="wv-walk-preview-leg"/>`
       + `<circle cx="${toward.x}" cy="${toward.y}" r="${6 / k}" class="wv-walk-preview-dest"/>`
-      + `<g class="wv-walk-preview-label wv-walk-chip"><rect x="${labelX}" y="${labelY}" width="${labelWidth}" height="${labelHeight}" rx="${3 * unit}"/>`
-      + `<text x="${labelX + 7 * unit}" y="${labelY + 16 * unit}" font-size="${12 * unit}">${esc(label)}</text>`
-      + (confirmable ? button(goX, "go", "✓", "walk there (Enter)") + button(noX, "no", "✕", "cancel (Esc)") : "")
-      + `</g>`;
+      + `<g class="wv-walk-preview-label wv-walk-chip">${card}</g>`;
   }
 
   // ONE DRAW PER ANSWER THAT MOVED SOMEBODY (#2912 (4)). An answer that
