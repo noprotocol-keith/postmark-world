@@ -41,7 +41,7 @@ test("the chooser names creatures as creatures", () => {
 });
 
 test("pins: the people click takes what is under the cursor, the same snap every mark uses", () => {
-  assert.match(SOURCE, /const peopleHere = contestedMarksAtPoint\(\{ x: e\.clientX, y: e\.clientY \}, \[\.\.\.screenWalkerCandidates\(\), \.\.\.screenCreatureCandidates\(\)\]\);/);
+  assert.match(SOURCE, /clickablesAtPoint\(\{ x: e\.clientX, y: e\.clientY \},\s*\{ people: \[\.\.\.screenWalkerCandidates\(\), \.\.\.screenCreatureCandidates\(\)\], marks: screenMarkCandidates\(\) \}\)/);
   assert.doesNotMatch(SOURCE, /tokenPileAtPoint/, "no pile grown past the cursor");
 });
 

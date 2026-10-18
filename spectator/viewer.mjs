@@ -4575,6 +4575,22 @@ export function chooserLeadLine(ids = []) {
   return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]} are here — which one?`;
 }
 
+/** EVERY CLICKABLE UNDER THE POINT (play row 55, Darko 2026-10-16 17:37: "The
+ *  chooser just needs to cover any clickable. So whether it be a mark, a
+ *  resident, or a creature. If it's … there under the cursor when you click it,
+ *  then it should be included in the chooser. Simple as that."). One rule for
+ *  every kind: a clickable is under the point when the map's own hit test
+ *  reaches it there (the snap radius around its point, or its drawn shape),
+ *  the same test a single click uses, so the chooser lists exactly what the
+ *  click could have meant and nothing else. `people` are the residents and
+ *  the creatures, `marks` the pips, cards and shapes, all in screen space.
+ *  Pure. */
+export function clickablesAtPoint(point, { people = [], marks = [] } = {}) {
+  const who = contestedMarksAtPoint(point, people);
+  const what = contestedMarksAtPoint(point, marks);
+  return { people: who, marks: what, all: [...who, ...what] };
+}
+
 export function orderInnermostFirst(ids, byId) {
   const area = (id) => {
     const m = byId?.get?.(id);
@@ -10258,10 +10274,11 @@ export function mountViewer(appEl) {
       // EVERY CLICKABLE UNDER THE CURSOR, no kind special-cased (Darko 2026-10-16
       // 17:37, row 55: "If it's … there under the cursor when you click it, then
       // it should be included in the chooser. Simple as that.")
-      const peopleHere = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, [...screenWalkerCandidates(), ...screenCreatureCandidates()]);
+      const here = clickablesAtPoint({ x: e.clientX, y: e.clientY },
+        { people: [...screenWalkerCandidates(), ...screenCreatureCandidates()], marks: screenMarkCandidates() });
+      const peopleHere = here.people;
       if (peopleHere.length) {
-        const under = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, screenMarkCandidates());
-        if (peopleHere.length + under.length > 1) { openChooser([...peopleHere, ...under]); return; }
+        if (here.all.length > 1) { openChooser(here.all); return; }
         selectMark(peopleHere[0]);
         return;
       }
@@ -10286,7 +10303,8 @@ export function mountViewer(appEl) {
       // reader is shown the stack and picks. Exactly one in radius is the
       // behaviour this map has always had, down to the scrollCell.
       const candidates = screenMarkCandidates();
-      const contested = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, candidates);
+      // no one here: the same one rule over the marks (row 55)
+      const contested = clickablesAtPoint({ x: e.clientX, y: e.clientY }, { marks: candidates }).all;
       if (contested.length > 1) { openChooser(contested); return; }
       const markId = contested[0] ?? null;
       // A PIP OR A CARD names its mark outright, and aims at it, as always. A hung
