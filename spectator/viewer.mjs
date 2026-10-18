@@ -7577,8 +7577,20 @@ export function onRecordedWalk(row, record, polledCrossing) {
   const q = Number.isFinite(polledCrossing) ? positionAt(record, polledCrossing) : null;
   return !!q && !q.arrived && near(q, row, 5);
 }
-export function liveWalkerAt(row, { record = null, declaredMs = 0, polledMs = 0, nowCrossing, polledCrossing = NaN } = {}) {
+export function liveWalkerAt(row, { record = null, declaredMs = 0, polledMs = 0, nowCrossing, polledCrossing = NaN, own = false, crossedMs = 0 } = {}) {
   if (!row || !record) return row;
+  // a crossing after the walk was declared (an enter mid-walk, a passage) is a stop: the poll's place
+  if (crossedMs > declaredMs) return row;
+  // YOUR OWN WALK IS WHAT YOU DECLARED (fix 69's reload, Darko 19:18): after a
+  // reload the first rows are the read's, taken before this moment, so they
+  // never overrule your own record; only a crossing does, above
+  // never overrule your own record while it is under way; at rest, the poll is the truth again
+  if (own) {
+    const p = positionAt(record, nowCrossing);
+    // arrived while the last poll still saw it walking: the arrival, never that stale mid-walk point
+    if (p && (!p.arrived || declaredMs > polledMs || row.moving)) return { ...row, x: p.x, y: p.y, moving: !p.arrived, arrived: !!p.arrived, toward: record.toward, ...(p.arrived ? { standing: true } : {}) };
+    return row;
+  }
   const sameWalk = onRecordedWalk(row, record, polledCrossing);
   const declaredAfterPoll = declaredMs > polledMs;
   if (!declaredAfterPoll && !(row.moving && sameWalk)) return row;
@@ -12497,23 +12509,27 @@ export function mountViewer(appEl) {
   function recordsFromDepartures(list) {
     for (const d of list ?? []) noteWalkRecord(d.handle, d, Date.parse(d.iso) || 0);
   }
+  // the newest crossing a handle made, in ms: a walk declared before it has been stopped by it
+  const crossedMsOf = (handle) => {
+    let t = 0;
+    for (const a of enterExitLedger.acts ?? []) if (a.handle === handle) t = Math.max(t, Date.parse(a.iso) || 0);
+    return t;
+  };
   const liveBody = (w) => {
     const r = w?.handle ? walkRecords.get(w.handle) : null;
-    return r ? liveWalkerAt(w, { record: r.record, declaredMs: r.declaredMs, polledMs: walksPolledMs, nowCrossing: fractionalCrossing(), polledCrossing: fractionalCrossing(walksPolledMs) }) : w;
+    return r ? liveWalkerAt(w, { record: r.record, declaredMs: r.declaredMs, polledMs: walksPolledMs, nowCrossing: fractionalCrossing(),
+      polledCrossing: fractionalCrossing(walksPolledMs), own: !!state.handle && w.handle === state.handle && canAct(), crossedMs: crossedMsOf(w.handle) }) : w;
   };
   // a walk the poll shows that the page holds no record of: ask the record once
-  let walkRecordsAsking = null;
+  // never a new read and never a millisecond since (Darko 19:18; row 60): the
+  // page's own hour-floored walks read again, which the cache answers
+  let walkRecordsAsking = null, walkRecordsAskedMs = 0;
   function askNewWalkRecords(rows) {
     const at = fractionalCrossing();
     const unknown = (rows ?? []).some((w) => w?.moving && w.handle && !onRecordedWalk(w, walkRecords.get(w.handle)?.record, at));
-    if (!unknown || walkRecordsAsking) return;
-    const newest = Math.max(0, ...[...walkRecords.values()].map((r) => r.declaredMs));
-    const since = new Date((newest || Date.now() - 86_400_000) - 1000).toISOString();
-    walkRecordsAsking = fetch(officeUrl(`/world2/walks?since=${encodeURIComponent(since)}`), { credentials: "same-origin" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => { if (j) { recordsFromDepartures(walksFromOffice(j).departures); animateWalks(); } })
-      .catch(() => {})
-      .finally(() => { walkRecordsAsking = null; });
+    if (!unknown || walkRecordsAsking || Date.now() - walkRecordsAskedMs < 60_000) return;
+    walkRecordsAskedMs = Date.now();
+    walkRecordsAsking = loadWalkLedger().then(() => animateWalks()).catch(() => {}).finally(() => { walkRecordsAsking = null; });
   }
   let walkFrame = 0, walkFrameKey = "";
   function animateWalks() {
@@ -12669,7 +12685,9 @@ export function mountViewer(appEl) {
     const host = $(root, "#wv-walk-panel");
     if (!host) return;
     host.innerHTML = `<span id="wv-walk-readout">checking the walk ledger…</span>`;
-    pollWalkers().then((available) => { host.hidden = !available; });
+    // the walks under way first, so the first draw of every mover is its record's place (row 69)
+    Promise.resolve(walkLedgerOnce()).catch(() => {})
+      .then(() => pollWalkers()).then((available) => { host.hidden = !available; animateWalks(); });
     clearInterval(walkState.timer);
     // …and the creatures on screen, for what they did whoever acted (row 54)
     walkState.timer = setInterval(() => { pollWalkers(); pollCreatureReactions(); }, 15000);
@@ -16487,7 +16505,10 @@ export function mountViewer(appEl) {
   // down to the `since` in the URL. Only a reader who presses "more" past the
   // end of what a fortnight holds ever asks for an older one.
   let walkWindowDays = WALK_WINDOW_DAYS;
-  const walkWindowSince = () => new Date(Date.now() - walkWindowDays * 86_400_000).toISOString();
+  // FLOORED TO THE HOUR (play row 60, POS-620): the walks read is cached on its
+  // args (the w43 nginx conf), and a since to the millisecond missed it on every
+  // load (~18 s under party load). Every page in one hour asks the same thing.
+  const walkWindowSince = () => new Date(Math.floor((Date.now() - walkWindowDays * 86_400_000) / 3_600_000) * 3_600_000).toISOString();
   /**
    * The office's `walks[]` onto the ledger's own departure grammar.
    *
@@ -16521,6 +16542,9 @@ export function mountViewer(appEl) {
   const walkLedgerSources = (since) => recordSources("/WORLD/walk-ledger.md", {
     office: officeUrl(`/world2/walks?since=${encodeURIComponent(since)}`),
   });
+  // ONE load-time read, shared by the boot, the walkers' first poll and Lately
+  let walkLedgerFirst = null;
+  const walkLedgerOnce = () => (walkLedgerFirst ??= loadWalkLedger());
   async function loadWalkLedger() {
     const since = walkWindowSince();
     for (const { url, json } of walkLedgerSources(since)) {
@@ -16955,6 +16979,9 @@ export function mountViewer(appEl) {
 
   // ───────── boot ─────────
   (async () => {
+    // the walks under way, asked first (fix 69's reload, Darko 19:18): every mover
+    // is drawn from its record from the first frame, the reader's own included
+    walkLedgerOnce();
     // the mode is remembered, so lay the page out in it before the first paint
     applyPaintingOnly();
     // the ring is the same question, asked of whoever turns out to be signed in;
@@ -16990,7 +17017,7 @@ export function mountViewer(appEl) {
       // the settlement number and its chip are NOT downstream of the other two
       // and do not wait on them — only the rail does
       settlements.then(renderSettlementChip);
-      Promise.allSettled([loadWalkLedger(), settlements, loadStakeEvents()])
+      Promise.allSettled([walkLedgerOnce(), settlements, loadStakeEvents()])
         .then(() => { activityLanesSettled = true; renderActivity(); });
       // and the enter-exit acts, once THEY arrive. A full re-render rather than one
       // panel: the telling's own chip is downstream of this too, and the ledger

@@ -69,3 +69,39 @@ test("pins: drawn from the record each frame while something moves, never in a h
   assert.match(SOURCE, /recordsFromDepartures\(departures\);/);
   assert.match(SOURCE, /\/world2\/walks\?since=/);
 });
+
+// ── fix 69's reload (Darko 19:18): "Reloading during a walk breaks everything
+// until you could reach your destination." ──────────────────────────────────
+test("a page loaded mid-walk draws your own walker at positionAt(record, now) from its first render", () => {
+  // the page loaded 7 s into the walk: the first rows are the read's, which still say "standing at the start"
+  const stale = { handle: "visitor", x: record.from.x, y: record.from.y, moving: false, toward: null };
+  for (const n of [7, 8, 10]) {
+    const w = liveWalkerAt(stale, { record, declaredMs: t0, polledMs: t0 + 7000, nowCrossing: sec(n), own: true });
+    const p = positionAt(record, sec(n));
+    assert.deepEqual([w.x, w.y], [p.x, p.y], `at ${n} s, not frozen at the start`);
+    assert.equal(w.moving, true);
+  }
+  // at rest, the poll is the truth again; a crossing after the walk began stops it
+  assert.deepEqual(liveWalkerAt(stale, { record, declaredMs: t0, polledMs: t0 + 40000, nowCrossing: sec(40), own: true }), stale);
+  const entered = { handle: "visitor", x: 3817.5, y: -5536, moving: false };
+  assert.deepEqual(liveWalkerAt(entered, { record, declaredMs: t0, polledMs: t0 + 9000, nowCrossing: sec(9), own: true, crossedMs: t0 + 5000 }), entered);
+});
+
+test("pins: the one hour-floored walks read, asked first and awaited by the first poll; never a millisecond since", () => {
+  assert.match(SOURCE, /const walkWindowSince = \(\) => new Date\(Math\.floor\(\(Date\.now\(\) - walkWindowDays \* 86_400_000\) \/ 3_600_000\) \* 3_600_000\)\.toISOString\(\);/);
+  assert.match(SOURCE, /const walkLedgerOnce = \(\) => \(walkLedgerFirst \?\?= loadWalkLedger\(\)\);/);
+  assert.match(SOURCE, /\(async \(\) => \{\s*\/\/[^\n]*\n\s*\/\/[^\n]*\n\s*walkLedgerOnce\(\);/, "asked as the page boots");
+  assert.match(SOURCE, /Promise\.resolve\(walkLedgerOnce\(\)\)\.catch\(\(\) => \{\}\)\s*\.then\(\(\) => pollWalkers\(\)\)/, "the first poll waits for it");
+  assert.match(SOURCE, /Promise\.allSettled\(\[walkLedgerOnce\(\), settlements, loadStakeEvents\(\)\]\)/, "Lately shares it");
+  const ask = SOURCE.slice(SOURCE.indexOf("function askNewWalkRecords(rows) {"), SOURCE.indexOf("let walkFrame = 0"));
+  assert.match(ask, /loadWalkLedger\(\)/);
+  assert.doesNotMatch(ask, /fetch\(|toISOString/, "no read of its own, no millisecond since");
+  assert.doesNotMatch(SOURCE, /\/world2\/walks\?since=\$\{encodeURIComponent\(since\)\}`\), \{ credentials/, "the old per-walk read is gone");
+});
+
+test("arriving lands where the record says, even while the last poll still saw it walking", () => {
+  const midway = { handle: "visitor", ...positionAt(record, sec(6)), moving: true };   // polled at 6 s, the walk ends at ~14 s
+  const w = liveWalkerAt(midway, { record, declaredMs: t0, polledMs: t0 + 6000, nowCrossing: sec(20), own: true });
+  assert.equal(w.moving, false);
+  assert.ok(Math.abs(w.y - record.toward.y) < 1e-9, "at the walk's end, not snapped back to the poll's mid-walk point");
+});
