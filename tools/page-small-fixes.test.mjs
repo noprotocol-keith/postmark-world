@@ -6,10 +6,11 @@
 //
 // ── THE CAN-FAIL FLIPS ─────────────────────────────────────────────────────
 //   containmentIndex keying things on class === "thing" alone   → 2 reds
+//   kickerOf showing a registry key                             → 1 reds
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { smallestContainingMark, containmentIndex, bodyPlace, placeLabel } from "../spectator/viewer.mjs";
+import { smallestContainingMark, containmentIndex, bodyPlace, placeLabel, kickerOf } from "../spectator/viewer.mjs";
 
 const PARCEL = { id: "sb-ash/sb-lantern-ground", kind: "parcel", by: "sb-ash", household: "sb-ash", at: { x: 200, y: -350 }, extent: { w: 40, h: 40 } };
 // the W1 form the playground's bowl is still in: kind: sited + class
@@ -34,4 +35,12 @@ test("2. a resident at a bowl stands on the ground, never on the bowl: the place
   // a plain sited mark (a bench) is still ground: things are kept out by class, never by size
   const BENCH = { id: "sb-ash/a-bench", kind: "sited", by: "sb-ash", at: { x: 205, y: -345 }, extent: { w: 1, h: 1 } };
   assert.equal(smallestContainingMark({ x: 205, y: -345 }, [PARCEL, BENCH, ...CLASSES]), BENCH.id);
+});
+
+test("1. a column's kicker names the household as every card does, never the registry key a pending amend carries", () => {
+  // the set-down's re-site amend comes back on /world/my-marks' docket with the store's household key
+  assert.equal(kickerOf({ id: "sb-ash/a-tin-box", by: "sb-ash", household: "hh:sb-lantern" }), "sb-ash");
+  assert.equal(kickerOf({ id: "sb-ash/a-tin-box", by: "sb-ash", household: "sb-ash" }), "sb-ash", "a published mark: its household, as before");
+  assert.equal(kickerOf({ id: "keeminlee/x", by: "darko", household: "keeminlee" }), "keeminlee", "a household that is not its author's handle is kept");
+  assert.equal(kickerOf({ id: "the-town/x" }), "the town");
 });

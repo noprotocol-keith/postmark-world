@@ -5261,6 +5261,16 @@ export function actionPalette(entries = [], { renderers = [] } = {}) {
     }));
 }
 
+/** A column's kicker: the mark's household as every card names it. A pending
+ *  claim on /world/my-marks' docket (a set-down's re-site amend, office #613)
+ *  carries the store's registry key instead ("hh:sb-lantern"), which is no name
+ *  a resident goes by, so its author's handle stands in. */
+export function kickerOf(mark, fallback = "the town") {
+  const household = String(mark?.household ?? "").trim();
+  if (household && !/^hh:/i.test(household)) return household;
+  return String(mark?.by ?? (household || fallback));
+}
+
 export function markByline(mark) {
   if (!mark?.by || !mark?.date) return "";
   return `By ${mark.by} ${String(mark.date).slice(0, 10)}`;
@@ -7768,7 +7778,7 @@ export function mountViewer(appEl) {
     // paid attention to. So standing out reads this narrower set, and the two
     // questions stay apart: `mineIds` decides what is drawn, `ownIds` decides
     // what is drawn LOUDLY.
-    ownIds: new Set(),                  // published + drafts only — a stake is not ownership
+    ownIds: new Set(),                  // published + drafts + docket — a stake is not ownership
     handle: "",
     actAs: SPECTATOR_ACTOR,
     actorBalance: null,                 // liquid stamps from keyless /stamps/{handle}; null while loading
@@ -13899,7 +13909,7 @@ export function mountViewer(appEl) {
       key: mark.id,
       handle,
       parcelId, canEnter,
-      kicker: String(mark.household ?? mark.by ?? handle),
+      kicker: kickerOf(mark, handle),
       // THE SAME RULE AS THE CARD (Keemin, 2026-09-20): the ground's own name,
       // "parcel" stripped. This was `markIdentity(home ?? mark)` — the dwelling
       // `homeMarkOfParcel` picked, falling back to the parcel — so the column
@@ -14143,7 +14153,7 @@ export function mountViewer(appEl) {
         holding ? `${holding.count}/${holding.capacity}/${holding.open}/${holding.kinds.map((k) => k.shows).join(",")}` : "-", carriedBy ?? ""].join("|"),
       handle: String(mark.by ?? mark.household ?? "the town"),
       residentLink: false,
-      kicker: String(mark.household ?? mark.by ?? "the town"),
+      kicker: kickerOf(mark),
       title: identity.name || String(mark.id),
       // the room you are in is not somewhere at a distance (and radialWhere says a carried thing is in someone's hands)
       region: id === sceneRoomId ? "you are inside" : where.detail,
@@ -16459,7 +16469,9 @@ export function mountViewer(appEl) {
     state.mineIds = new Set(["drafts", "published", "backed"]
       .flatMap((category) => (portfolio[category] ?? []).map((mark) => mark.id ?? mark.mark))
       .filter(Boolean));
-    state.ownIds = new Set(["drafts", "published"]
+    // the docket too: your own marks put forward (a set-down's re-site amend among
+    // them) are yours; only a stake on another's mark is not ownership
+    state.ownIds = new Set(["drafts", "docket", "published"]
       .flatMap((category) => (portfolio[category] ?? []).map((mark) => mark.id ?? mark.mark))
       .filter(Boolean));
     state.draftIds = draftMarkIds(portfolio.drafts);

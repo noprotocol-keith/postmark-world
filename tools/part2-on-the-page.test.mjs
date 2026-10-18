@@ -24,6 +24,8 @@
 //   drop the carried relocation in overlayMarks              → 2 reds (the pips part)
 //   radialWhere without the carried line                     → 2 reds (the column says "11 m · southeast of you")
 //   a ground row with no holder that only sets (carriersFrom) → 2b reds
+//   the kicker read raw off `household` (page fix 1)           → 1c reds ("hh:rig-house")
+//   ownIds without the docket (page fix 1)                     → 1c reds (no "Yours")
 //   markWhat without thingClasses                            → 4 reds
 //   iconsOf without askLineage                               → 4's draw-time row reds
 //   containmentIndex keying things on class === "thing" alone → 2b reds (her place line names the bowl)
@@ -74,6 +76,11 @@ const STOOL_AT = { x: 205, y: 110 };
 // the Candy Bag in the OLD form (kind: sited, class: <kind>), as the playground's sb-ash wrote it
 const CANDY_BAG = "rig-ash/a-candy-bag";
 const CANDY_AT = { x: 236, y: 112 };
+// a tin box the actor set down: the office files its re-site as a pending amend (office #613),
+// which /world/my-marks lists on the DOCKET with the store's registry key for its household
+const TIN_BOX = "rig-ash/a-tin-box";
+const TIN_BOX_DOCKET = { id: TIN_BOX, by: ACTOR, kind: "thing", tier: "market", body: "A dented tin box with a hinged lid.",
+  date: "2026-10-18T15:46:00.000Z", at: { x: 214, y: 100 }, extent: { w: 1, h: 1 }, claim_status: "pending", household: "hh:rig-house" };
 const RECORDS = {
   [BOWL]: { id: BOWL, by: ACTOR, household: ACTOR, kind: "halloween-candy-bowl", tier: "market", at: { ...HERE }, extent: { w: 1, h: 1 },
     body: "A second pumpkin bowl." },
@@ -170,7 +177,7 @@ async function bootStubOffice() {
     if (url.pathname === "/world/walkers") return send({ at: 1000, walkers: [], standing: [{ handle: ACTOR, x: HERE.x, y: HERE.y, standing: true }, { handle: CLEO, x: HERE.x, y: HERE.y, standing: true }] });
     if (url.pathname === "/world/conversations") return send(CONVERSATIONS);
     // the resident's portfolio: nothing of theirs is published, so the read is the page's index
-    if (url.pathname === "/world/my-marks") return send({ handle: ACTOR, drafts: [], docket: [], published: [], backed: [], complete: true, counts: { drafts: 0, docket: 0, published: 0, backed: 0 } });
+    if (url.pathname === "/world/my-marks") return send({ handle: ACTOR, drafts: [], docket: [TIN_BOX_DOCKET], published: [], backed: [], complete: true, counts: { drafts: 0, docket: 1, published: 0, backed: 0 } });
     if (url.pathname === `/stamps/${ACTOR}`) return send({ handle: ACTOR, balance: 5 });
     res.writeHead(404, { "content-type": "application/json" });
     res.end(JSON.stringify({ error: "bounce", defect: "no such door in the rig" }));
@@ -241,6 +248,7 @@ async function columnFor(id, { until = null } = {}) {
     return {
       open: !!col && !col.hidden,
       title: col?.querySelector(".wv-homecol-title")?.textContent.trim() ?? "",
+      kicker: col?.querySelector(".wv-homecol-kicker")?.textContent.trim() ?? "",
       meta: col?.querySelector(".wv-homecol-meta")?.textContent.trim() ?? "",
       enter: !!col?.querySelector("[data-enter]"),
       icons: [...(col?.querySelectorAll(".wv-homecol-icon .wv-ic") ?? [])].map((e) => [...e.classList].find((c) => c.startsWith("ic-"))),
@@ -282,6 +290,14 @@ test("1. a holder's column says what it holds, by kind, its room and that it is 
   assert.equal(col.facts.open, "open: other households may give into it and take from it");
   assert.ok(office.asked.some((p) => p.startsWith(`/world/apex?mark=${encodeURIComponent(BOWL)}`) && p.includes(`handle=${ACTOR}`)),
     "asked as the resident, through the close look: " + JSON.stringify(office.asked.filter((p) => p.includes("mark="))));
+});
+
+test("1c. a thing you set down reads like every card: its household by name, and yours (page fix 1)", async (t) => {
+  if (!chromium) return t.skip(skipReason);
+  const col = await columnFor(TIN_BOX, { until: "A dented tin box" });
+  assert.ok(col.open, "the set-down tin box's column opened");
+  assert.equal(col.kicker, ACTOR, "never the registry key: " + JSON.stringify(col.kicker));
+  assert.ok(col.icons.includes("ic-yours"), "and it is still yours: " + JSON.stringify(col.icons));
 });
 
 test("1b. a resident's column says what is in their hands", async (t) => {
