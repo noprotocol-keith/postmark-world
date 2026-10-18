@@ -6037,6 +6037,11 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-walk-preview-dest { fill:rgba(132,201,143,.18); stroke:var(--green); stroke-width:2.4; vector-effect:non-scaling-stroke; }
 .wv-walk-preview-label rect { fill:rgba(13,15,19,.94); stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
 .wv-walk-preview-label text { fill:var(--green); font-family:Consolas,Menlo,monospace; font-weight:700; }
+.wv-walk-chip-btn rect { fill:rgba(13,15,19,.94); stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
+.wv-walk-chip-btn.is-go rect { fill:var(--green); stroke:var(--green); }
+.wv-walk-chip-btn.is-go text { fill:#0d0f13; }
+.wv-walk-chip-btn.is-no text { fill:var(--paper, #e8e2d2); }
+.wv-walk-chip-btn:hover rect { filter:brightness(1.15); }
 .wv-walkpanel { display:flex; align-items:center; gap:8px; font-size:12px; opacity:.9; margin:6px 0 0; flex-wrap:wrap; }
 .wv-walkpanel input[type=range] { width:130px; vertical-align:middle; }
 .wv-walkpanel button { font:inherit; padding:1px 7px; cursor:pointer; }
@@ -9800,6 +9805,7 @@ export function mountViewer(appEl) {
       snappedMarkAtPoint({ x: event.clientX, y: event.clientY }, screenWalkerCandidates())
       ?? paintingMarkForEvent(event);
     svg.addEventListener("pointerdown", (e) => {
+      if (e.target.closest?.("[data-walk-chip]")) { e.stopPropagation(); return; }
       stopTween();
       press = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
       svg.setPointerCapture(e.pointerId);
@@ -9841,6 +9847,8 @@ export function mountViewer(appEl) {
       applyView();
     });
     svg.addEventListener("pointerup", (e) => {
+      const chip = e.target.closest?.("[data-walk-chip]");
+      if (chip) { e.stopPropagation(); if (chip.dataset.walkChip === "go") confirmSelectedWalk(); else clearSelectionAndDestination(); return; }
       if (!press || e.pointerId !== press.id) return;
       const wasDrag = press.moved; press = null; boxEl.classList.remove("panning");
       endGesture();
@@ -11715,18 +11723,31 @@ export function mountViewer(appEl) {
       y: mapCtx.originPx.y + point.y / mapCtx.mPerPx,
     });
     const from = px(preview.from), toward = px(preview.toward);
-    const midpoint = { x: (from.x + toward.x) / 2, y: (from.y + toward.y) / 2 };
     const label = formatWalkPreviewLabel(preview.leg);
     const labelWidth = Math.max(152, label.length * 7 + 14) * unit;
     const labelHeight = 24 * unit;
+    // THE CONFIRM SITS WHERE YOU CLICKED (Darko, playground 2026-10-15: "move the
+    // confirmation card near the walk destination … just have a little compact icon
+    // pop up right next to where you clicked"). The label rides beside the
+    // destination, with ✓ and ✕ when the walk can be confirmed; Enter and Escape
+    // do the same. The desk below keeps the answers and the details.
+    const confirmable = (() => { const b = $(root, ".wv-walk-confirm"); return !!b && !b.disabled && !$(root, ".wv-walkdesk")?.hidden; })();
+    const btn = 22 * unit, gap = 4 * unit;
+    const chipWidth = labelWidth + (confirmable ? 2 * (btn + gap) : 0);
     const labelX = Math.max(mapCtx.view.x + 4 * unit,
-      Math.min(mapCtx.view.x + mapCtx.view.w - labelWidth - 4 * unit, midpoint.x - labelWidth / 2));
+      Math.min(mapCtx.view.x + mapCtx.view.w - chipWidth - 4 * unit, toward.x + 12 * unit));
     const labelY = Math.max(mapCtx.view.y + 4 * unit,
-      Math.min(mapCtx.view.y + mapCtx.view.h - labelHeight - 4 * unit, midpoint.y - labelHeight - 12 * unit));
+      Math.min(mapCtx.view.y + mapCtx.view.h - labelHeight - 4 * unit, toward.y - labelHeight / 2));
+    const button = (x, act, glyph, title) => `<g class="wv-walk-chip-btn is-${act}" data-walk-chip="${act}" style="pointer-events:auto;cursor:pointer">`
+      + `<title>${title}</title><rect x="${x}" y="${labelY + (labelHeight - btn) / 2}" width="${btn}" height="${btn}" rx="${4 * unit}"/>`
+      + `<text x="${x + btn / 2}" y="${labelY + labelHeight / 2 + 5 * unit}" font-size="${14 * unit}" text-anchor="middle">${glyph}</text></g>`;
+    const goX = labelX + labelWidth + gap, noX = goX + btn + gap;
     layer.innerHTML = `<line x1="${from.x}" y1="${from.y}" x2="${toward.x}" y2="${toward.y}" class="wv-walk-preview-leg"/>`
       + `<circle cx="${toward.x}" cy="${toward.y}" r="${6 / k}" class="wv-walk-preview-dest"/>`
-      + `<g class="wv-walk-preview-label"><rect x="${labelX}" y="${labelY}" width="${labelWidth}" height="${labelHeight}" rx="${3 * unit}"/>`
-      + `<text x="${labelX + 7 * unit}" y="${labelY + 16 * unit}" font-size="${12 * unit}">${esc(label)}</text></g>`;
+      + `<g class="wv-walk-preview-label wv-walk-chip"><rect x="${labelX}" y="${labelY}" width="${labelWidth}" height="${labelHeight}" rx="${3 * unit}"/>`
+      + `<text x="${labelX + 7 * unit}" y="${labelY + 16 * unit}" font-size="${12 * unit}">${esc(label)}</text>`
+      + (confirmable ? button(goX, "go", "✓", "walk there (Enter)") + button(noX, "no", "✕", "cancel (Esc)") : "")
+      + `</g>`;
   }
 
   // ONE DRAW PER ANSWER THAT MOVED SOMEBODY (#2912 (4)). An answer that
@@ -13953,6 +13974,12 @@ export function mountViewer(appEl) {
       const busy = !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA"
         || el.tagName === "SELECT" || el.isContentEditable);
       if (!busy && focusSearch()) { event.preventDefault(); return; }
+    }
+    if (event.key === "Enter" && walkState.destination) {
+      const el = document.activeElement;
+      const busy = !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.tagName === "BUTTON" || el.isContentEditable);
+      const b = $(root, ".wv-walk-confirm");
+      if (!busy && b && !b.disabled) { event.preventDefault(); confirmSelectedWalk(); return; }
     }
     if (event.key !== "Escape") return;
     // Escape puts down the query first, because that is the thing the reader most
