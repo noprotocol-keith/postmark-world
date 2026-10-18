@@ -454,6 +454,12 @@ const CREATURE_PATHS = {
 };
 const creaturePath = (cr) => (cr.kind === "wolf" ? CREATURE_PATHS.wolf : cr.kind === "bat" ? CREATURE_PATHS.bat
   : cr.pose === "lift" ? CREATURE_PATHS.ravenlift : CREATURE_PATHS.ravenperch);
+/** A kind's silhouette, the Mists' own art, for the page's LIVE creatures (play
+ *  fix 35): its path in the 100-unit box. A kind the art does not draw (anything but a
+ *  wolf or a bat) takes the perching raven's. Pure. */
+export function creatureSilhouette(kind) {
+  return { d: creaturePath({ kind: String(kind ?? ""), pose: null }).d };
+}
 /** The box a creature's silhouette is drawn in (metres, the engine's frame): its
  *  path's 100-unit box at its size, from its point. A flip mirrors it about the
  *  point, and every path is centred across (`at[0]` is -50), so the box holds. */

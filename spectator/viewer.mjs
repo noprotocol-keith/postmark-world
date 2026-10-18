@@ -24,7 +24,7 @@
 import { isGround, instanceClassOf, isPredicate } from "../tools/mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 import { orient, openYourEyes, investigate, containmentChain, mistsSentence, veilSentence, standpointSight } from "../tools/world-verbs.mjs";
 import { assembleWorld } from "../tools/world-build.mjs";
-import { DIALS, bearingDeg, quantizeBearing, mistsAt, mistsRoad } from "../tools/world-engine.mjs";
+import { DIALS, bearingDeg, quantizeBearing, mistsAt, mistsHere, mistsRoad } from "../tools/world-engine.mjs";
 import { marksContain, pointInPolygon, pointInRect, polygonBBox, polygonOf, rect } from "../tools/geometry.mjs"; // read-only: home color + point-destination labels
 import { propertyOf } from "../tools/class-properties.mjs"; // a class's properties, up extends (LOGOS v2 part 2)
 import { markStanding } from "../tools/mark-standing.mjs"; // the ONE standing rule: in a parcel's directory → home
@@ -40,7 +40,7 @@ import { parseEnterExitLedger, occupancyAt, occupantsOf, withinOf, isMark, isEnt
 // is not allowed to hold one, and `tools/record-sources.test.mjs` reads these
 // bytes to prove it.
 import { recordSources, recordAbsenceMessage } from "../tools/record-sources.mjs";
-import { roomInMists, bakeRoomSurround, MISTS_PAINT, bakeSheetFeather, mistsBakePlan, mistsBaker, mistsKeepRasterBuilder, mistsCoreHex, mistsKeepRects, mistsKeepAt, mistsCreatures, mistsCreatureHTML, bellFor, ringBell } from "./mists-render.mjs";
+import { creatureSilhouette, roomInMists, bakeRoomSurround, MISTS_PAINT, bakeSheetFeather, mistsBakePlan, mistsBaker, mistsKeepRasterBuilder, mistsCoreHex, mistsKeepRects, mistsKeepAt, mistsCreatures, mistsCreatureHTML, bellFor, ringBell } from "./mists-render.mjs";
 // THE PARCEL'S COLUMN — the atlas's right-hand panel, back (Keemin 2026-09-11).
 // It owns its own markdown reader, its own builder and its own dress, and it
 // takes no viewer internals: the door read, the shelf gate and the handle rule
@@ -4330,6 +4330,79 @@ export const walkerHandleFromHoverId = (id) =>
     ? id.slice(WALKER_HOVER_PREFIX.length) || null
     : null;
 
+// ── THE LIVE CREATURES (play fix 35) ────────────────────────────────────────
+//
+// Ruled in Sitting E (WLD-56 D5, Darko 2026-10-15 12:09): the painted creatures
+// stay wholly inside the wall as the Mists' own unreadable life, and the LIVE
+// ones — the office's living set, spawned in the fringe, each answering what a
+// resident does near it — are drawn where they stand. The page reads them from
+// the office's own keyless read, the apex's `find: "creature"` focus (its
+// `found.creatures`: id, kind, name, at, fades_in), and one creature whole from
+// its `investigate:` focus (`investigated`: what it is, its moods, when it
+// came out and fades, and its newest reactions). A creature is not a mark: its
+// id ("creature:<kind>-<crossing>-<i>") is its own kind of selection, as a
+// walker's is, and it joins the nameplate and the column the way a mark does.
+export const CREATURE_PREFIX = "creature:";
+export const isCreatureId = (id) => typeof id === "string" && id.startsWith(CREATURE_PREFIX) && id.length > CREATURE_PREFIX.length;
+
+/** The living creatures in an apex find answer: [{ id, kind, name, x, y, fades_in }]. Pure. */
+export function liveCreaturesFrom(answer) {
+  const rows = answer?.found?.creatures ?? answer?.creatures ?? [];
+  return (Array.isArray(rows) ? rows : []).flatMap((c) => {
+    const x = Number(c?.at?.x ?? c?.x), y = Number(c?.at?.y ?? c?.y);
+    if (!isCreatureId(c?.id) || ![x, y].every(Number.isFinite)) return [];
+    return [{ id: String(c.id), kind: String(c.kind ?? "creature"), name: String(c.name ?? c.kind ?? "a creature"), x, y,
+      fades_in: c.fades_in ? String(c.fades_in) : null }];
+  });
+}
+
+/** The lines the creatures answered an act with (the office's `creatures` on
+ *  the act's result: [{ id, kind, line, reaction }]), newest order kept. Pure. */
+export function creatureReactionLines(raw) {
+  const rows = raw?.result?.creatures ?? raw?.creatures ?? [];
+  return (Array.isArray(rows) ? rows : []).map((r) => String(r?.line ?? "").trim()).filter(Boolean);
+}
+
+/** What a creature's column says beside its words: { facts, lately } from its
+ *  find row and its investigate answer (either may be missing). Pure. */
+export function creatureColumnFacts(row = null, inv = null) {
+  const now = inv?.presence?.now ?? null;
+  const moods = now?.moods && typeof now.moods === "object"
+    ? Object.entries(now.moods).map(([k, v]) => `${k} ${v}`).join(", ") : "";
+  const when = (iso) => { const t = Date.parse(iso ?? ""); return Number.isFinite(t) ? new Date(t).toISOString().slice(0, 16).replace("T", " ") + " UTC" : ""; };
+  const facts = [
+    { label: "kind", value: row?.kind ?? inv?.id?.slice(CREATURE_PREFIX.length).replace(/-\d.*$/, "") ?? "" },
+    { label: "doing", value: now?.state ?? "" },
+    { label: "moods", value: moods },
+    { label: "out since", value: when(now?.out_since) },
+    { label: "fades", value: [row?.fades_in ? `in ${row.fades_in}` : "", when(now?.fades_at) ? `(${when(now?.fades_at)})` : ""].filter(Boolean).join(" ") },
+    { label: "remembers", value: now?.remembers != null ? String(now.remembers) : "" },
+  ].filter((f) => String(f.value ?? "").trim());
+  const lately = (inv?.reactions?.rows ?? []).filter((r) => String(r?.line ?? "").trim()).slice(0, 4)
+    .map((r) => ({ label: "lately", value: String(r.line).trim() + (when(r.at) ? " (" + when(r.at) + ")" : "") }));
+  return { facts, lately };
+}
+
+/** One live creature on the painting: its kind's silhouette (the Mists' own
+ *  art) at its point, held at a constant size on screen like a pip, a hit disc
+ *  carrying its id, and — at street zoom — fix 13's creature icon in a small
+ *  pip at its feet. `silhouette` is { d } in a 100-unit box. Pure. */
+export const CREATURE_GLYPH = Object.freeze({ size: 34, hit: 17, pip: 7.5 });
+export function creatureGlyphSVG({ creature, at, silhouette = null, icon = "", title = null } = {}) {
+  const x = Number(at?.x), y = Number(at?.y);
+  if (!creature?.id || ![x, y].every(Number.isFinite)) return "";
+  const k = CREATURE_GLYPH.size / 100;
+  const art = silhouette?.d
+    ? `<g transform="scale(${k}) translate(-50 -50)"><path d="${silhouette.d}" class="ov-creature-art"/></g>` : "";
+  return `<g transform="translate(${x} ${y})"><g class="ov-s">`
+    + `<g class="ov-creature ov-creature-${esc(String(creature.kind).toLowerCase().replace(/[^a-z0-9-]/g, ""))}" data-creature="${esc(creature.id)}">`
+    + `<circle r="${CREATURE_GLYPH.hit}" class="ov-creature-hit">${title ? `<title>${esc(title)}</title>` : ""}</circle>`
+    + art
+    + (icon ? `<g class="ov-creature-pip" transform="translate(${CREATURE_GLYPH.size * 0.36} ${CREATURE_GLYPH.size * 0.3})">`
+      + `<circle r="${CREATURE_GLYPH.pip}" class="ov-creature-pip-disc"/>${icon}</g>` : "")
+    + `</g></g></g>`;
+}
+
 // ── A MARK IS HIT BY WHAT WAS DRAWN FOR IT (Keemin, 2026-09-11: "make parcels
 // more clickable (match their drawn size)") ─────────────────────────────────
 //
@@ -6357,6 +6430,20 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
   font:600 .82rem/1.35 Consolas,Menlo,monospace; opacity:0; transition:opacity .25s; pointer-events:none; }
 .wv-walk-note.show { opacity:1; }
 .wv-walk-note.refusal { border-color:#b5524a; color:#f0b0a8; }
+/* THE LIVE CREATURES (play fix 35): the Mists' own silhouette, dark with a pale
+   rim so it reads on any ground, held at a pip's size; the creature icon at its
+   feet at street zoom; their answer to an act in a note like the walk's */
+.ov-creature-hit { fill:transparent; pointer-events:none; }   /* the map hit-tests the point; nothing on the stage takes the pointer */
+.ov-creature-art { fill:#241d22; stroke:#d8c6cf; stroke-width:5; paint-order:stroke; stroke-linejoin:round; pointer-events:none; }
+.ov-creature-pip-disc { fill:#3a2f36; stroke:#d8c6cf; stroke-width:1; pointer-events:none; }
+.ov-creature-pip .ov-ic { pointer-events:none; }
+.wv-hl-creature { fill:none; stroke:#d8c6cf; stroke-width:2; vector-effect:non-scaling-stroke; }
+.wv-bubble.is-nameplate.is-creature { --wv-mark-accent:#b9a3b1; }
+.wv-choose-row.is-creature { border-left:3px solid #b9a3b1; display:flex; align-items:baseline; gap:7px; flex-wrap:wrap; font-size:.78rem; }
+.wv-creature-note { position:absolute; z-index:9; left:50%; bottom:58px; transform:translateX(-50%); max-width:min(34rem,80%);
+  padding:6px 12px; border:1px solid #6b5a64; border-radius:8px; background:rgba(20,16,19,.94); color:#e6d8df;
+  font-size:.8rem; font-style:italic; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .25s; }
+.wv-creature-note.show { opacity:1; }
 .wv-walkdesk { position:absolute; z-index:8; right:10px; bottom:10px; width:min(19rem,42%);
   padding:11px 13px 13px; border:1px solid var(--line); border-left:3px solid var(--green);
   border-radius:6px; background:rgba(13,15,19,.97); box-shadow:0 10px 30px rgba(0,0,0,.55); }
@@ -9367,6 +9454,14 @@ export function mountViewer(appEl) {
     convoHoverLayer.style.pointerEvents = "none";
     convoHoverLayer.style.display = "none"; // rides the same toggle as its washes
     stageTop.appendChild(convoHoverLayer);
+    // THE LIVE CREATURES (play fix 35) ride the stage's top, over the Mists'
+    // paint: they stand in the fringe, which the paint's banks haze over, and a
+    // creature the ruling says is drawn there must be seen there. A reading for
+    // the eye only; the map hit-tests their points like faces.
+    const creatureLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    creatureLayer.setAttribute("id", "wv-creature-layer");
+    creatureLayer.style.pointerEvents = "none";
+    stageTop.appendChild(creatureLayer);
     // YOUR HOUSEMATES OFF THE SCREEN (POS-373): an edge chevron toward each,
     // on top of everything, because it sits on the frame's edge and says where
     // to look. A reading, never a target.
@@ -9444,7 +9539,7 @@ export function mountViewer(appEl) {
       svg.insertBefore(base, mistLayer);
     }
     const view = { ...full };
-    mapCtx = { svg, overlay, hlLayer, walkPreviewLayer, walkLayer, gridLayer, mistLayer, placedArtLayer, veilLayer, mistsLayer, convoLayer, convoHoverLayer, housemateEdgeLayer, stage, mistsCam, originPx, mPerPx, full, view, zoomK: 1, follow: false, glyphIds: new Set(), _tweening: false, zoomOutLimit, includeMine, placeholderExtents, groundMarkIds };
+    mapCtx = { svg, overlay, hlLayer, walkPreviewLayer, walkLayer, gridLayer, mistLayer, placedArtLayer, veilLayer, mistsLayer, convoLayer, convoHoverLayer, housemateEdgeLayer, creatureLayer, stage, mistsCam, originPx, mPerPx, full, view, zoomK: 1, follow: false, glyphIds: new Set(), _tweening: false, zoomOutLimit, includeMine, placeholderExtents, groundMarkIds };
     // THE STAGE FOLLOWS THE SVG (WLD-43): its box is the svg's box, its camera
     // is the viewBox the svg shows (not `view`, which leads it during a drag),
     // and while a drag slides the svg it slides the same way (applyView). The
@@ -9934,10 +10029,19 @@ export function mountViewer(appEl) {
         return [{ id: walkerHoverId(w.handle), x: screen.x, y: screen.y }];
       });
     }
+    // the live creatures, in the same shape: a creature is pointed at like a face (play fix 35)
+    function screenCreatureCandidates() {
+      const out = [];
+      for (const g of creatureLayer.querySelectorAll(".ov-creature[data-creature]")) {
+        const r = g.querySelector(".ov-creature-hit")?.getBoundingClientRect();
+        if (r && r.width > 0) out.push({ id: g.dataset.creature, x: r.x + r.width / 2, y: r.y + r.height / 2 });
+      }
+      return out;
+    }
     // A standing resident wins the hover over the ground they stand on — the
     // person is what you were pointing at. Same snap helper, same radius.
     const hoverTargetForEvent = (event) =>
-      snappedMarkAtPoint({ x: event.clientX, y: event.clientY }, screenWalkerCandidates())
+      snappedMarkAtPoint({ x: event.clientX, y: event.clientY }, [...screenWalkerCandidates(), ...screenCreatureCandidates()])
       ?? paintingMarkForEvent(event);
     svg.addEventListener("pointerdown", (e) => {
       if (e.target.closest?.("[data-walk-chip]")) { e.stopPropagation(); return; }
@@ -10006,7 +10110,7 @@ export function mountViewer(appEl) {
       // is shown the stack and picks. One candidate in radius is exactly
       // today's behaviour, and the head of this list IS what the snap would
       // have returned, so the single-face case cannot have moved.
-      const peopleHere = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, screenWalkerCandidates());
+      const peopleHere = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, [...screenWalkerCandidates(), ...screenCreatureCandidates()]);
       if (peopleHere.length) {
         const under = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, screenMarkCandidates());
         if (peopleHere.length + under.length > 1) { openChooser([...peopleHere, ...under]); return; }
@@ -10241,6 +10345,7 @@ export function mountViewer(appEl) {
     if (mapCtx._scaleKey === key && mapCtx._scaleOverlay === mapCtx.overlay) return k;
     mapCtx._scaleKey = key; mapCtx._scaleOverlay = mapCtx.overlay;
     mapCtx.overlay.style.setProperty("--wv-mk", overlayScale(k));
+    mapCtx.creatureLayer?.style.setProperty("--wv-mk", overlayScale(k));   // the live creatures (play fix 35)
     // THE WALK LAYER IS SIZED THE SAME WAY (#2912 (3)): the bodies through
     // `.ov-s`, the vessel through her own floor (see vesselGlyphSVG). Two
     // properties on one element per frame; no walker markup is touched.
@@ -10999,6 +11104,11 @@ export function mountViewer(appEl) {
     // walker pass this draw ends in keeps or removes it, judged on the bodies it
     // actually DREW — see syncStandpointDot (#2848 (a)). Deciding it here, off
     // the walker LIST, is what left a reader with no marker at all.
+    // THE LIVE CREATURES (play fix 35), where they stand, on their own layer
+    // over the Mists' paint: every living one outdoors that the wall does not
+    // hide, and indoors only those inside the room (the roof rule). Each wears
+    // its kind's silhouette, and at street zoom fix 13's creature icon.
+    if (mapCtx.creatureLayer) mapCtx.creatureLayer.innerHTML = liveCreatureGlyphs(px, tier);
     s += overlayStandpointSVG({ at: me });
     overlay.innerHTML = s;
     applyCameraScale();          // the markup is sizeless until the camera says
@@ -11067,6 +11177,13 @@ export function mountViewer(appEl) {
   function renderOneMarkHighlight(id, { hover = false } = {}) {
     const walkerHandle = walkerHandleFromHoverId(id);
     if (walkerHandle) return renderWalkerHighlight(walkerHandle);
+    // a selected creature is ringed where it stands; a hovered one asks nothing more of the map
+    if (isCreatureId(id)) {
+      const c = liveCreatures.get(id);
+      if (hover || !c || !mapCtx) return "";
+      const k = markerScale(mapCtx.zoomK);
+      return `<circle cx="${mapCtx.originPx.x + c.x / mapCtx.mPerPx}" cy="${mapCtx.originPx.y + c.y / mapCtx.mPerPx}" r="${24 / k}" class="wv-hl-creature"/>`;
+    }
     const m = id && byId.get(id);
     const target = nearestEmbodiedAncestor(m, byId);
     if (!m || !target) return "";
@@ -12229,6 +12346,14 @@ export function mountViewer(appEl) {
     const body = { do: action, ...(Object.keys(args).length ? { args } : {}), ...(handle ? { handle } : {}) };
     const response = await officeCall("/world/apex", { method: "POST", body });
     const raw = response.body ?? {};
+    // the creatures that answered this act (play fix 35): their lines, as a note,
+    // and the creatures read again, since their state just moved
+    const answered = creatureReactionLines(raw);
+    if (answered.length) {
+      creatureNote(answered);
+      liveCreaturesAt = 0;
+      for (const r of raw.result?.creatures ?? raw.creatures ?? []) creatureReads.delete(r?.id);
+    }
     const flat = raw.error === "bounce" ? raw : { ...(raw.result ?? {}), _apex: { did: raw.did, terms: raw.terms } };
     return { ...response, body: flat };
   }
@@ -12477,6 +12602,16 @@ export function mountViewer(appEl) {
     // (selecting a person is not choosing a destination — the ground under them
     // still is, and that is a different click), and no cell to scroll to. It
     // toggles, so a second click on the same face puts the card away.
+    // A LIVE CREATURE IS SELECTABLE (play fix 35), as a face is: no trail, no walk
+    // preview, a second press puts its column away. Its whole reading is asked
+    // for as it opens.
+    if (isCreatureId(id)) {
+      if (markInteraction.getState().selectedId === id) { markInteraction.select(null); return false; }
+      bubbleTrail = [];
+      markInteraction.select(id);
+      loadCreatureReading(id, { fresh: true });
+      return true;
+    }
     if (walkerHandleFromHoverId(id)) {
       if (markInteraction.getState().selectedId === id) { markInteraction.select(null); return false; }
       bubbleTrail = [];
@@ -13178,6 +13313,113 @@ export function mountViewer(appEl) {
     };
   }
 
+  // ── THE LIVE CREATURES, ON THE PAGE (play fix 35) ──────────────────────────
+  //
+  // The office's living set, read keyless from its own apex: `find: "creature"`
+  // names every living one with its point, and `investigate:` reads one whole.
+  // Read when a draw finds the list older than CREATURES_REFRESH_MS (never on a
+  // timer of its own), and again after any act the creatures answered.
+  const CREATURES_REFRESH_MS = 120000;
+  const liveCreatures = new Map();     // id -> { id, kind, name, x, y, fades_in }
+  let liveCreaturesAt = 0, liveCreaturesLoading = false;
+  function loadLiveCreatures() {
+    if (liveCreaturesLoading) return;
+    liveCreaturesLoading = true;
+    fetch(officeUrl("/world/apex?find=creature"), { headers: { accept: "application/json" }, credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        const rows = j ? liveCreaturesFrom(j) : [];
+        const before = [...liveCreatures.keys()].join("|");
+        liveCreatures.clear();
+        for (const c of rows) liveCreatures.set(c.id, c);
+        liveCreaturesAt = Date.now();
+        if ([...liveCreatures.keys()].join("|") !== before && lastRadial && mapCtx) drawOverlay(lastRadial);
+      })
+      .catch(() => {})
+      .finally(() => { liveCreaturesAt = Date.now(); liveCreaturesLoading = false; });
+  }
+  const creatureReads = new Map();     // id -> { at, inv }
+  function loadCreatureReading(id, { fresh = false } = {}) {
+    if (!isCreatureId(id) || (!fresh && creatureReads.has(id))) return;
+    if (!creatureReads.has(id)) creatureReads.set(id, { at: 0, inv: null, pending: true });
+    fetch(officeUrl(`/world/apex?investigate=${encodeURIComponent(id)}`), { headers: { accept: "application/json" }, credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { creatureReads.set(id, { at: Date.now(), inv: j?.investigated ?? null }); })
+      .catch(() => { creatureReads.set(id, { at: Date.now(), inv: null }); })
+      .finally(() => syncMarkInteractionViews());
+  }
+  // fix 13's creature icon, the one the record's creature classes wear
+  const creatureIcon = () => markIcons({ kind: "sited", id: "creature:" }, { cls: "creature" })[0];
+  function liveCreatureGlyphs(px, tier) {
+    if (Date.now() - liveCreaturesAt > CREATURES_REFRESH_MS) loadLiveCreatures();
+    if (!liveCreatures.size) return "";
+    // indoors, only the creatures inside the room (the roof rule)
+    const room = sceneRoomId ? byId.get(sceneRoomId) : null;
+    const box = room?.at && room.extent ? rect(room) : null;
+    const icon = tier === "near" ? iconSVG(creatureIcon(), { x: -5.5, y: -5.5, size: 11, ink: "#e8e0cf" }) : "";
+    // NOTHING BEHIND THE WALL IS SEEN (POS-466): outdoors, a creature the
+    // engine puts behind the wall's true face is the wall's, not the map's
+    const m = sceneRoomId ? null : mistsAt(state.crossing, data?.skeleton?.mists);
+    let out = "";
+    for (const c of liveCreatures.values()) {
+      if (sceneRoomId && !(box && pointInRect(c.x, c.y, box))) continue;
+      if (m && mistsHere({ x: c.x, y: c.y }, m).inWall) continue;
+      out += creatureGlyphSVG({ creature: c, at: px({ x: c.x, y: c.y }), silhouette: creatureSilhouette(c.kind), icon,
+        title: state.paintingOnly ? null : c.name });
+    }
+    return out;
+  }
+  function creatureNameplateHTML(id) {
+    const c = liveCreatures.get(id);
+    if (!c) return "";
+    return '<div class="wv-nameplate" data-nameplate="' + esc(id) + '">'
+      + '<span class="wv-np-what">' + iconsHTML([creatureIcon()]) + '</span>'
+      + '<span class="wv-np-name">' + esc(c.name) + '</span></div>';
+  }
+  // ITS COLUMN: what it is in its kind's own words, its kind, what it is doing,
+  // its moods, when it came out and when it fades, and what it did lately.
+  function creatureColumnView(id) {
+    if (!isCreatureId(id)) return null;
+    const c = liveCreatures.get(id) ?? null;
+    const read = creatureReads.get(id) ?? null;
+    if (!read) loadCreatureReading(id);
+    if (!c && !read?.inv) return null;
+    const { facts, lately } = creatureColumnFacts(c, read?.inv ?? null);
+    const name = String(c?.name ?? read?.inv?.name ?? id);
+    // where it is, said from where the reader stands: the room it is in, or
+    // its distance from the acting resident's body (the camera, for a spectator)
+    const room = sceneRoomId ? byId.get(sceneRoomId) : null;
+    const inRoom = !!(c && room?.at && room.extent && pointInRect(c.x, c.y, rect(room)));
+    const body = !isSpectating() ? (walkState.walkers ?? []).find((w) => w?.handle === state.handle) : null;
+    const from = body && [body.x, body.y].every(Number.isFinite) ? { x: Number(body.x), y: Number(body.y) } : state.cam;
+    const where = c && !inRoom ? Math.round(Math.hypot(c.x - Number(from.x), c.y - Number(from.y))) : null;
+    return {
+      key: [id, read?.at ?? 0, c?.fades_in ?? ""].join("|"),
+      handle: "the-town", residentLink: false,
+      kicker: "a creature",
+      title: name.charAt(0).toUpperCase() + name.slice(1),
+      region: inRoom ? "here, in " + markIdentity(room) : where != null ? where.toLocaleString() + " m away" : "",
+      leadImage: null,
+      door: { description: read?.inv?.what_it_is ?? (read?.at ? "" : "reading the creature…") },
+      byline: "out of the Mists, alive in the record",
+      facts: [...facts, ...lately],
+      icons: [creatureIcon()],
+    };
+  }
+  // THE CREATURES' ANSWER TO AN ACT, as a small note (fix 20's walk note's
+  // kind), never a sheet: the lines their kinds wrote, for a few seconds.
+  let creatureNoteTimer = null;
+  function creatureNote(lines) {
+    const host = $(root, ".wv-walkdesk")?.parentElement ?? $(root, ".wv-minimap");
+    if (!host || !lines?.length) return;
+    let el = host.querySelector(":scope > .wv-creature-note");
+    if (!el) { el = document.createElement("div"); el.className = "wv-creature-note"; host.appendChild(el); }
+    el.textContent = lines.slice(0, 3).join(" ");
+    el.classList.add("show");
+    clearTimeout(creatureNoteTimer);
+    creatureNoteTimer = setTimeout(() => el.classList.remove("show"), 9000);
+  }
+
   const bubbleEls = { hover: null, pinned: null };
   let bubbleResize = null;
   let pinnedBuiltId = null;   // which mark the pinned bubble currently holds
@@ -13294,8 +13536,8 @@ export function mountViewer(appEl) {
   // so the stack offers them at the top rather than sorting them by an extent
   // they do not have.
   function openChooser(ids) {
-    const people = ids.filter((id) => walkerHandleFromHoverId(id));
-    const marks = ids.filter((id) => !walkerHandleFromHoverId(id));
+    const people = ids.filter((id) => walkerHandleFromHoverId(id) || isCreatureId(id));
+    const marks = ids.filter((id) => !walkerHandleFromHoverId(id) && !isCreatureId(id));
     selectMark(chooserId([...people, ...orderInnermostFirst(marks, byId)]));
   }
 
@@ -13330,6 +13572,10 @@ export function mountViewer(appEl) {
     const ids = chooserIdsFrom(id) ?? [];
     const rowOf = (markId) => {
       if (walkerHandleFromHoverId(markId)) return chooserWalkerRow(markId);
+      if (isCreatureId(markId)) {
+        const c = liveCreatures.get(markId);
+        return c ? `<button type="button" class="wv-choose-row is-creature" data-choose="${esc(markId)}"><span class="wv-choose-who">${esc(c.name)}</span><span class="wv-choose-where">a creature out of the Mists</span></button>` : "";
+      }
       const full = byId.get(markId);
       if (!full) return "";
       const identity = markName(full), where = radialWhere(full);
@@ -13359,6 +13605,7 @@ export function mountViewer(appEl) {
       const w = (walkState.walkers ?? []).find((entry) => entry?.handle === handle);
       return w && [w.x, w.y].every(Number.isFinite) ? { x: Number(w.x), y: Number(w.y) } : null;
     }
+    if (isCreatureId(id)) { const c = liveCreatures.get(id); return c ? { x: c.x, y: c.y } : null; }
     return nearestEmbodiedAncestor(byId.get(id), byId)?.at ?? null;
   }
   // THE MINI CARD — who this face belongs to. Their picture, what they are
@@ -13455,9 +13702,10 @@ export function mountViewer(appEl) {
   let glanceHeld = false;     // the pointer is resting on the nameplate itself
   function paintGlance(el, id) {
     const handle = walkerHandleFromHoverId(id);
-    const html = handle ? walkerBubbleHTML(handle) : markNameplateHTML(id);
+    const creature = isCreatureId(id);
+    const html = handle ? walkerBubbleHTML(handle) : creature ? creatureNameplateHTML(id) : markNameplateHTML(id);
     if (!html) { el.hidden = true; glanceShown = null; return; }
-    el.className = `wv-bubble is-hover${handle ? "" : ` is-nameplate ${markClasses(byId.get(id))}`}`;
+    el.className = `wv-bubble is-hover${handle ? "" : ` is-nameplate ${creature ? "is-creature" : markClasses(byId.get(id))}`}`;
     if (el._pmHtml !== html) { el._pmHtml = html; el.innerHTML = html; }
     el.hidden = false;
   }
@@ -13516,7 +13764,10 @@ export function mountViewer(appEl) {
     if (!b.width || !b.height) return null;
     const rects = [];
     const sel = CSS.escape(id);
-    for (const drawn of mapCtx.overlay.querySelectorAll(`.ov-home[data-id="${sel}"], .ov-glyph[data-id="${sel}"], .ov-pip[data-id="${sel}"]`)) {
+    const drawnHere = [...mapCtx.overlay.querySelectorAll(`.ov-home[data-id="${sel}"], .ov-glyph[data-id="${sel}"], .ov-pip[data-id="${sel}"]`),
+      // a live creature's own drawing, so its nameplate stands beside it too (play fix 35)
+      ...(mapCtx.creatureLayer?.querySelectorAll(`.ov-creature[data-creature="${sel}"]`) ?? [])];
+    for (const drawn of drawnHere) {
       const r = drawn.getBoundingClientRect();
       if (r.width > 0 && r.height > 0) rects.push({ x0: r.left - b.left, y0: r.top - b.top, x1: r.right - b.left, y1: r.bottom - b.top });
     }
@@ -13617,7 +13868,7 @@ export function mountViewer(appEl) {
     // to swap either: the click scrolls the mark's cell up in the Telling, and
     // it still does.)
     const selected = markInteraction.getState().selectedId;
-    const column = parcelColumnView(selected) ?? regionColumnView(selected) ?? markColumnView(selected);
+    const column = parcelColumnView(selected) ?? regionColumnView(selected) ?? creatureColumnView(selected) ?? markColumnView(selected);
     if (column) homeColumn.open(column); else homeColumn.close();
     // ── AND THE MAP HAS TO HEAR ABOUT IT (2026-09-12) ─────────────────────
     //
@@ -14290,7 +14541,7 @@ export function mountViewer(appEl) {
         markInteraction.select(markInteraction.getState().selectedId === id ? null : id);
         return;
       }
-      if (byId.has(id)) selectMark(id, { scrollCell: true });
+      if (byId.has(id) || isCreatureId(id)) selectMark(id, { scrollCell: true });
       return;
     }
     // a relative named in a mark's column opens that mark's column, and the
