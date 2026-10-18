@@ -270,8 +270,21 @@ async function openAndRead({ signedIn }) {
 
 // The page's live creatures (play fix 35) are the town's own keyless read of its
 // apex, asked by every page, signed in or not; they are not the resident path.
-const residentDoor = (p) => (p.startsWith("/world/apex") && !/^\/world\/apex\?(find=creature|investigate=)/.test(p))
+// Exactly those two forms: `find=creature`, and `investigate=` of a creature's own
+// id (the viewer encodes "creature:" as creature%3A). Any other keyless apex read
+// (an investigate of a resident or a mark) is still the resident path.
+const residentDoor = (p) => (p.startsWith("/world/apex") && !/^\/world\/apex\?(find=creature(&|$)|investigate=creature%3A[^&]+$)/.test(p))
   || p.startsWith("/world/present");
+
+test("the keyless exemption is the creatures' two reads and nothing wider", () => {
+  assert.equal(residentDoor("/world/apex?find=creature"), false, "the living list");
+  assert.equal(residentDoor("/world/apex?investigate=creature%3Awolf-3"), false, "one creature read whole");
+  for (const p of ["/world/apex", "/world/apex?investigate=wright", "/world/apex?investigate=the-town%2Fthe-post-office",
+    "/world/apex?investigate=creature", "/world/apex?find=creatures", "/world/apex?find=creature-wright", "/world/present?x=10&y=10"]) {
+    assert.equal(residentDoor(p), true, `${p} is the resident path`);
+  }
+  // ⚑ THE FLIP: widen the exemption back to `investigate=` → the second loop row reds.
+});
 
 const skipReason = "playwright is absent, so the SIGNED-IN Lately pane goes unguarded: "
   + "no other test in this repo drives the resident path in a browser, and the unit tests of "

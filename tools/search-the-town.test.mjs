@@ -37,7 +37,7 @@ import { createServer as createHttp } from "node:http";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { searchTheTown, townRegionMarks } from "../spectator/viewer.mjs";
+import { searchTheTown, townRegionMarks, resolveMarkName } from "../spectator/viewer.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SERVED = JSON.parse(readFileSync(join(ROOT, "WORLD/world-state.json"), "utf8"));
@@ -515,8 +515,15 @@ test("A MARK WITH NOWHERE TO GO IS STILL FOUND, AND STILL SELECTABLE", async (t)
   // "regardless of what kind of mark it is"), a placeless one too; this replaced the
   // card the selection used to light, so the column is what says it was selected.
   assert.ok(after.columnOpen, "a placeless mark was found but could not be selected: no column opened");
-  assert.equal(after.kicker, String(PLACELESS.household ?? PLACELESS.by ?? "the town"),
-    "the column that opened is not the placeless mark's");
+  // whose column: the household's kicker and the mark's own title, which no other
+  // mark of that household shares (checked first, so the pair names one mark)
+  const household = String(PLACELESS.household ?? PLACELESS.by ?? "the town");
+  const titleOf = (m) => resolveMarkName(m, SERVED.determined ?? {}).name || String(m.id);
+  const siblings = SERVED.marks.filter((m) => m?.id !== PLACELESS_ID && String(m?.household ?? m?.by ?? "the town") === household);
+  assert.ok(!siblings.some((m) => titleOf(m) === titleOf(PLACELESS)),
+    `the fixture: another of ${household}'s marks is also titled "${titleOf(PLACELESS)}", so the title cannot name it`);
+  assert.equal(after.kicker, household, "the column that opened is not the placeless mark's household's");
+  assert.equal(after.title, titleOf(PLACELESS), `the column that opened is not ${PLACELESS_ID}'s`);
   assert.deepEqual(after.centre, before.centre, "selecting a placeless mark moved the camera to nowhere");
   await page.close();
   assert.deepEqual(errors, [], "the page threw: " + errors.join(" | "));
