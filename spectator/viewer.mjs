@@ -8227,7 +8227,7 @@ export function mountViewer(appEl) {
   function radialWhere(m) {
     const full = byId.get(m?.id) ?? m;
     // a carried thing is where its carrier is: said as whose hands, never as its old place (POS-678)
-    const carried = full?.id ? carriedLine(full.id) : null;
+    const carried = full?.id ? (carriedLine(full.id) ?? heldInLine(full.id)) : null;
     if (carried) return { bearing: null, detail: carried };
     if (!isEmbodiedMark(full) || isAmbientMark(full, byId)) return { bearing: null, detail: "" };
     const from = whereFrom();
@@ -14161,9 +14161,9 @@ export function mountViewer(appEl) {
       kicker: kickerOf(mark),
       title: identity.name || String(mark.id),
       // the room you are in is not somewhere at a distance (and radialWhere says a carried thing is in someone's hands)
-      // held inside a holder: said so, never at the spot it stood before (page fix 4)
-      region: id === sceneRoomId ? "you are inside"
-        : heldIn && isThingId(heldIn) && !carriedBy ? `inside ${markIdentity(byId.get(heldIn) ?? { id: heldIn })}` : where.detail,
+      // the room you are in is not somewhere at a distance (and radialWhere says a carried
+      // thing is in someone's hands, and a held one inside its holder)
+      region: id === sceneRoomId ? "you are inside" : where.detail,
       leadImage: markImagePath(mark),
       door: { description: typeof mark.body === "string" ? mark.body : "" },
       byline: markByline(mark),
@@ -14306,13 +14306,23 @@ export function mountViewer(appEl) {
     return w && [w.x, w.y].every(Number.isFinite) ? { x: Number(w.x), y: Number(w.y) } : null;
   }
   /** Where a read says a thing is now (held, or set down), or null when none has said. */
+  /** The thing holding this one, as its own fresh close look says (`stands.source: "holder"`), or null. */
+  function heldInThing(id) {
+    const look = closeLooks.get(`${asWho()}|mark|${id}`);
+    const holder = look && Date.now() - look.at < CLOSE_LOOK_MS && look.read?.stands?.source === "holder" ? String(look.read.stands.holder ?? "") : "";
+    return isThingId(holder) ? holder : null;
+  }
+  /** "inside A Halloween Bowl" (page fix 4), or null. */
+  function heldInLine(id) {
+    const holder = heldInThing(id);
+    return holder ? `inside ${markIdentity(byId.get(holder) ?? { id: holder })}` : null;
+  }
   function carriedPlace(id) {
     const at = carriedAt(id, carriers(), { bodyAt: bodyAtFor });
     if (at) return at;
     // a thing whose own close look says a holder (a bowl) holds it is drawn at that holder
-    const look = closeLooks.get(`${asWho()}|mark|${id}`);
-    const holder = look && Date.now() - look.at < CLOSE_LOOK_MS && look.read?.stands?.source === "holder" ? String(look.read.stands.holder ?? "") : "";
-    if (!isThingId(holder)) return null;
+    const holder = heldInThing(id);
+    if (!holder) return null;
     const m = byId.get(holder);
     return m?.at && Number.isFinite(Number(m.at.x)) && Number.isFinite(Number(m.at.y)) ? { x: Number(m.at.x), y: Number(m.at.y), holder } : null;
   }
