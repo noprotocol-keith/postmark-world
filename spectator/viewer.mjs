@@ -6654,6 +6654,8 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
   pointer-events:none; transition:max-width .16s ease-out; will-change:transform, max-width; }
 .wv-pill[hidden] { display:none; }
 .wv-pill.is-open { max-width:min(26rem, 80%); }
+/* selecting and unselecting never animate (play fix 46): hover owns the unfold */
+.wv-pill.is-still { transition:none; }
 .wv-pill.t-home { --wv-mark-accent:var(--green); }
 .wv-pill.t-constitution { --wv-mark-accent:var(--blue); }
 .wv-pill.is-draft { --wv-mark-accent:var(--draft); }
@@ -13549,6 +13551,15 @@ export function mountViewer(appEl) {
   // pointing along it keeps its mark lit and a press on it is a press on the
   // mark, while a drag that starts on it still pans. Only its icons take the
   // pointer, so each can say what it means; resting on one holds the pill.
+  //
+  // HOVER OWNS THE ANIMATION (play fix 46, Darko 20:36: "a weird effect of the
+  // icon expanding into the name on click and unclick, which we don't need
+  // because that already happens on hover"). Only pointing at a mark unfolds its
+  // pill and only leaving it folds it. A click selects the pill already open
+  // under the pointer, which just takes its ring; an unselect drops the ring
+  // and leaves the pill in whatever hover state it is really in: open if the
+  // pointer is still on the mark, or a dot at once if not. A mark changing role
+  // keeps its own pill element, and the selected role never unfolds or folds.
   const pillEls = new Map();   // "hover" | "selected" -> element
   let pillHeld = null;         // a pill whose icon the pointer is resting on
   const PILL_FOLD_MS = 160;
@@ -13602,11 +13613,12 @@ export function mountViewer(appEl) {
     pillEls.set(role, el);
     return el;
   }
-  function setPill(role, id) {
+  function setPill(role, id, { still = false } = {}) {
     const el = id ? pillEl(role) : pillEls.get(role);
     if (!el) return;
     if (!id) {
-      if (el.hidden || !el.classList.contains("is-open")) { el.hidden = true; el.dataset.pill = ""; return; }
+      if (still) clearTimeout(el._fold);
+      if (still || el.hidden || !el.classList.contains("is-open")) { el.classList.remove("is-open"); el.hidden = true; el.dataset.pill = ""; return; }
       el.classList.remove("is-open");
       clearTimeout(el._fold);
       el._fold = setTimeout(() => { if (!el.classList.contains("is-open")) { el.hidden = true; el.dataset.pill = ""; syncHiddenPips(pillPipIds()); } }, PILL_FOLD_MS);
@@ -13621,6 +13633,13 @@ export function mountViewer(appEl) {
     el.dataset.pill = id;
     el.hidden = false;
     positionPill(el);
+    if (still) {
+      // straight to open, with no unfold: the transition is off for this one style
+      el.classList.add("is-still", "is-open");
+      void el.offsetWidth;
+      el.classList.remove("is-still");
+      return;
+    }
     if (fresh) { el.classList.remove("is-open"); void el.offsetWidth; }
     el.classList.add("is-open");
   }
@@ -13633,8 +13652,16 @@ export function mountViewer(appEl) {
     const sel = onPane(selectedId) && visiblePip(selectedId) ? selectedId : null;
     let hov = onPane(pillHeld ?? hoveredId);
     if (!hov || hov === sel || !visiblePip(hov)) hov = null;
-    setPill("selected", sel);
-    setPill("hover", hov);
+    // a mark changing role keeps its pill: the open hover pill becomes the
+    // selected one on a click, and the selected one goes back to hover on an
+    // unselect while the pointer is on it. Neither replays the unfold.
+    const showing = (el) => (el && !el.hidden && el.dataset.pill) || null;
+    const selEl = pillEls.get("selected"), hovEl = pillEls.get("hover");
+    const swap = (!!sel && showing(hovEl) === sel) || (!!hov && showing(selEl) === hov);
+    if (swap) { pillEls.set("selected", hovEl); pillEls.set("hover", selEl); }
+    setPill("selected", sel, { still: true });
+    // after a swap the hover role holds the old selected pill: an unselect, so still
+    setPill("hover", hov, { still: swap });
     syncHiddenPips(pillPipIds());
   }
   function positionPill(el) {
