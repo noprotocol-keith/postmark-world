@@ -100,12 +100,31 @@ export function creatureClassesOf(marks = [], token = (c) => String(c ?? "").tri
   return out;
 }
 
+/** The thing classes, read from the record: `thing` and every class under it,
+ *  however deep (a halloween-candy-bowl extends thing; LOGOS v2 part 2). A
+ *  class names its parent by `extends` on the file and by `parent` in the
+ *  fold, so both are followed, to a fixed point. */
+export function thingClassesOf(marks = [], token = (c) => String(c ?? "").trim().toLowerCase()) {
+  const out = new Set(["thing"]);
+  const classes = (marks ?? []).filter((m) => m?.kind === "class" && token(m.class));
+  const ids = new Set(classes.filter((m) => token(m.class) === "thing").map((m) => m.id));
+  for (let grew = true; grew;) {
+    grew = false;
+    for (const m of classes) {
+      const c = token(m.class);
+      if (out.has(c)) continue;
+      if (out.has(token(m.extends)) || (m.parent && ids.has(m.parent))) { out.add(c); ids.add(m.id); grew = true; }
+    }
+  }
+  return out;
+}
+
 /** What a mark IS, as one icon key, or null. Order matters where a mark is two
  *  things: a dungeon or a stair is also a portal by its law, a door may be a
  *  thing. Only an instance on the ground or a parcel is anything here — a class
  *  declaration, a predicate or a naming carries no icon, and neither do an idea
  *  and a bounty (deprecating, Darko 2026-10-15). */
-export function markWhat(mark, { cls = "", creatureClasses = new Set(["creature"]) } = {}) {
+export function markWhat(mark, { cls = "", creatureClasses = new Set(["creature"]), thingClasses = new Set(["thing"]) } = {}) {
   if (!mark) return null;
   if (mark.kind === "parcel") return "home";
   if (!isSited(mark)) return null; // either form (W2: kind names the class)
@@ -115,7 +134,8 @@ export function markWhat(mark, { cls = "", creatureClasses = new Set(["creature"
   if (cls === "portal-ground" || entryLawOf(mark)?.into) return "door";
   if (cls === "vehicle") return "vehicle";
   if (creatureClasses.has(cls)) return "creature";
-  if (cls === "thing") return "thing";
+  // a kind of thing is a thing (QA 10-17: a halloween-candy-bowl read "A place")
+  if (cls === "thing" || thingClasses.has(cls)) return "thing";
   return "place";
 }
 

@@ -5,7 +5,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  MARK_ICONS, markWhat, markStates, markIcons, creatureClassesOf, iconSVG, iconsHTML, MARK_ICON_CSS,
+  MARK_ICONS, markWhat, markStates, markIcons, creatureClassesOf, thingClassesOf, iconSVG, iconsHTML, MARK_ICON_CSS,
 } from "../spectator/mark-icons.mjs";
 import { overlayPipSVG, iconPillSVG } from "../spectator/viewer.mjs";
 import { instanceClassOf } from "./mark-kind.mjs"; // either form (LOGOS v2 W2)
@@ -133,4 +133,21 @@ test("the door is a door (play row 71, Darko 19:00): upright, with a knob; never
   assert.doesNotMatch(d, /A 10 10/, "no swing arc");
   assert.notEqual(d, MARK_ICONS.dungeon.d);
   assert.notEqual(d, MARK_ICONS.stairs.d);
+});
+
+test("a kind of thing is a thing (LOGOS v2 part 2, POS-678): the Halloween bowl read 'A place'", () => {
+  const tok = (c) => String(c ?? "").trim().toLowerCase();
+  // the file's `extends`, and the fold's `parent` (which drops extends), each followed to a fixed point
+  const things = thingClassesOf([
+    { id: "the-town/thing", kind: "class", class: "thing" },
+    { id: "the-town/halloween-candy-bowl", kind: "class", class: "halloween-candy-bowl", extends: "thing" },
+    { id: "the-town/a-deep-bowl", kind: "class", class: "a-deep-bowl", parent: "the-town/halloween-candy-bowl" },
+    { id: "the-town/portal-ground", kind: "class", class: "portal-ground", extends: "sited" },
+  ], tok);
+  assert.deepEqual([...things].sort(), ["a-deep-bowl", "halloween-candy-bowl", "thing"]);
+  const bowl = { id: "h/a-bowl", kind: "halloween-candy-bowl", at: { x: 0, y: 0 }, extent: { w: 1, h: 1 } };
+  assert.equal(markWhat(bowl, { cls: "halloween-candy-bowl", thingClasses: things }), "thing");
+  assert.equal(markWhat(bowl, { cls: "halloween-candy-bowl" }), "place", "with no lineage in hand, the old answer stands");
+  assert.equal(markIcons(bowl, { cls: "halloween-candy-bowl", thingClasses: things })[0].meaning,
+    "A thing: an object in the world, not ground to stand on.");
 });
