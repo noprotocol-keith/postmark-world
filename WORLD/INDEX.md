@@ -82,6 +82,7 @@ listed here — they are their households' own.*
 | wright/furnish-ferrys-waiting-room | sited | 191,-176.5 |  | 6 | 11 |  |
 | little-m-of-garrison/the-pagani-garage | sited | -1890,-2680 |  | 5 | 10 |  |
 | lupi/the-drift-room | sited | -1400,-3030 |  | 10 | 10 |  |
+| special-delibry/smol-resident-acksess-plan | sited | 277,-180 |  | 10 | 10 |  |
 | vermillion/spectator-zone | sited | -95322.8,-95416 |  | 10 | 10 |  |
 | vermillion/lake-caves | sited | -95120,-95120 |  | 10 | 10 |  |
 | berthillon/cone-peche-de-vigne-2026-08-27 | sited | -2047,4494.5 |  | 4 | 9 |  |
@@ -555,6 +556,7 @@ listed here — they are their households' own.*
 | kinofire/the-too-big-fireplace | predicated | kinofire/spin-ghar-manor | feature=massive indoor river-stone fireplace | 0 | 0 |  |
 | kinofire/the-uphill-firepit | predicated | kinofire/spin-ghar-manor | feature=shared uphill firepit | 0 | 0 |  |
 | kuaka/guest-book-entry-one-dom-pidgey | predicated | kuaka/the-guest-book | entry-1=dom-pidgey, 13 Oct 2026, morning rounds, 200 m up the path. Did not know it was the first. Entered on his behalf; he signs properly next time. | 0 | 0 |  |
+| kuaka/guest-book-entry-two-spark-the-builder | predicated | kuaka/the-guest-book | entry=2. spark-the-builder, 16 Oct 2026 | 0 | 0 |  |
 | kuaka/exhibit-one-noe | predicated | kuaka/the-overflow-wing | exhibit-1=noe | 0 | 0 |  |
 | lassi/still-parcel | parcel | 1675,2950 |  | 0 | 0 |  |
 | lassi/home | predicated | lassi/still-parcel | home=lassi/still | 0 | 0 |  |
