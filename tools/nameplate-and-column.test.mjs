@@ -13,8 +13,10 @@ test("[pin] a hovered mark is its outline and a faint fill in its own colour, wi
   const fn = SOURCE.match(/function renderMarkHighlight\(\) \{[\s\S]*?\n  \}\n/)[0];
   assert.match(fn, /renderOneMarkHighlight\(selectedId\)/, "the selection's highlight is unchanged");
   assert.match(fn, /renderOneMarkHighlight\(glance, \{ hover: true \}\)/, "the hover's is asked for as a hover");
-  assert.match(fn, /syncHoveredPip\(/, "and the hovered mark's own pip steps aside");
-  assert.match(SOURCE, /if \(!hover\) s \+= `<circle cx="\$\{p\.x\}" cy="\$\{p\.y\}" r="\$\{14 \/ k\}" class="wv-hl-dot \$\{t\}"\/>`;/, "no growing dot on a hover");
+  // CHANGED by play fix 37 (Darko 19:29, 19:39): the pip under an open pill
+  // steps aside, and no mark is ever lit by a swollen dot, hovered or selected
+  assert.match(fn, /syncHiddenPips\(pillPipIds\(\)\);/, "the pips the pills stand over step aside");
+  assert.doesNotMatch(SOURCE, /class="wv-hl-dot \$\{t\}"/, "no swollen dot on a mark, hovered or selected");
   assert.match(SOURCE, /\.wv-hl-box\.is-hover\.t-market \{ fill:rgba\(232,197,106,\.13\); \}/, "a faint fill in the mark's own colour");
   assert.match(SOURCE, /\.ov-s\.is-hovering > \.ov-pip, \.ov-s\.is-hovering > \.ov-pip-door, \.ov-s\.is-hovering > \.ov-ic-in \{ opacity:0; \}/,
     "the pip is hidden, not removed — and the icon drawn into it (fix 13) goes with it");

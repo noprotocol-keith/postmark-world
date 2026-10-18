@@ -6621,6 +6621,29 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-np-dot.t-home { background:var(--green); }
 .wv-np-dot.t-constitution { background:var(--blue); }
 .wv-np-dot.is-draft { background:var(--draft); }
+/* THE PIP, OPENED (play fix 37): the pip's own dot as the pill's left cap, the
+   name and the badges after it, anchored where the pip stands. It folds open
+   sideways and back. Selected: the same pill, held open and ringed. */
+.wv-pill { position:absolute; top:0; left:0; z-index:4; --h:28px; --wv-mark-accent:var(--amber);
+  display:flex; align-items:center; gap:7px; height:var(--h); max-width:var(--h); overflow:hidden;
+  white-space:nowrap; border-radius:999px; background:rgba(13,15,19,.94);
+  box-shadow:0 0 0 1.5px var(--wv-mark-accent), 0 4px 14px rgba(0,0,0,.45);
+  pointer-events:none; transition:max-width .16s ease-out; will-change:transform, max-width; }
+.wv-pill[hidden] { display:none; }
+.wv-pill.is-open { max-width:min(26rem, 80%); }
+.wv-pill.t-home { --wv-mark-accent:var(--green); }
+.wv-pill.t-constitution { --wv-mark-accent:var(--blue); }
+.wv-pill.is-draft { --wv-mark-accent:var(--draft); }
+.wv-pill.is-selected { box-shadow:0 0 0 2px var(--wv-mark-accent), 0 0 0 4px rgba(255,255,255,.55), 0 4px 16px rgba(0,0,0,.5); }
+.wv-pill-cap { flex:none; width:var(--h); height:var(--h); border-radius:50%; background:var(--wv-mark-accent);
+  display:grid; place-items:center; }
+.wv-pill-cap .wv-ic { width:calc(var(--h) * .56); height:calc(var(--h) * .56); background:#14171d; }
+.wv-pill-name { flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; color:var(--paper);
+  font-size:max(.78rem, calc(var(--h) * .36)); font-weight:700; line-height:1; }
+.wv-pill-name.is-determined { color:var(--amber); }
+.wv-pill-badges { display:inline-flex; align-items:center; gap:5px; flex:none; padding-right:calc(var(--h) * .35); }
+.wv-pill.is-open .wv-pill-name:last-child { padding-right:calc(var(--h) * .4); }
+.wv-pill .wv-icw { pointer-events:auto; cursor:help; }
 /* the contested-click chooser: a compact stack list in the bubble's own chrome,
    innermost first. Rows are the page's ordinary cell title, so a row looks like
    the thing it opens. */
@@ -10041,7 +10064,8 @@ export function mountViewer(appEl) {
     // A standing resident wins the hover over the ground they stand on — the
     // person is what you were pointing at. Same snap helper, same radius.
     const hoverTargetForEvent = (event) =>
-      snappedMarkAtPoint({ x: event.clientX, y: event.clientY }, [...screenWalkerCandidates(), ...screenCreatureCandidates()])
+      pillAt(event.clientX, event.clientY)   // an open pill is its mark's own box (play fix 37)
+      ?? snappedMarkAtPoint({ x: event.clientX, y: event.clientY }, [...screenWalkerCandidates(), ...screenCreatureCandidates()])
       ?? paintingMarkForEvent(event);
     svg.addEventListener("pointerdown", (e) => {
       if (e.target.closest?.("[data-walk-chip]")) { e.stopPropagation(); return; }
@@ -10092,6 +10116,9 @@ export function mountViewer(appEl) {
       const wasDrag = press.moved; press = null; boxEl.classList.remove("panning");
       endGesture();
       if (wasDrag) return;
+      // a press on an open pill is a press on its mark (play fix 37)
+      const pillHit = pillAt(e.clientX, e.clientY);
+      if (pillHit) { selectMark(pillHit, { scrollCell: true }); return; }
       // ONLY A PIP NAMES A MARK. Containment is how the destination gets its
       // NAME, not how the click picks its target — so clicking inside the East
       // Window District sets out for the spot you clicked, in that district,
@@ -11147,21 +11174,22 @@ export function mountViewer(appEl) {
     const glance = hoveredId && hoveredId !== selectedId ? hoveredId : null;
     writeHighlight((selectedId ? renderOneMarkHighlight(selectedId) : "")
       + (glance ? renderOneMarkHighlight(glance, { hover: true }) : ""));
-    syncHoveredPip(glance && !walkerHandleFromHoverId(glance) ? glance : null);
+    // the pips under an open pill (play fix 37): the pill IS the pip, opened
+    syncHiddenPips(pillPipIds());
   }
   // The hovered mark's own pip steps out of sight (its group carries the class,
   // so the dot and anything drawn into it go together); everything else of a
   // parcel — its card — stays. Re-asserted after every overlay draw, which
   // rebuilds the pips; a no-op while nothing has changed.
-  let hoveredPipId = null;
-  function syncHoveredPip(id) {
+  let hiddenPipKey = "";
+  function syncHiddenPips(ids = []) {
     const overlay = mapCtx?.overlay;
     if (!overlay) return;
-    if (id === hoveredPipId && (!id || overlay.querySelector(".ov-s.is-hovering"))) return;
+    const key = ids.join("|");
+    if (key === hiddenPipKey && (!key || overlay.querySelector(".ov-s.is-hovering"))) return;
     for (const g of overlay.querySelectorAll(".ov-s.is-hovering")) g.classList.remove("is-hovering");
-    hoveredPipId = id;
-    if (!id) return;
-    for (const pip of overlay.querySelectorAll(`.ov-pip[data-id="${CSS.escape(id)}"]`)) pip.parentNode?.classList?.add("is-hovering");
+    hiddenPipKey = key;
+    for (const id of ids) for (const pip of overlay.querySelectorAll(`.ov-pip[data-id="${CSS.escape(id)}"]`)) pip.parentNode?.classList?.add("is-hovering");
   }
   // THE SAME HIGHLIGHT IS NOT WRITTEN TWICE (POS-228). This runs on every frame
   // of a drag, and an innerHTML write — even of the empty string over an empty
@@ -11230,7 +11258,8 @@ export function mountViewer(appEl) {
       const hlPx = (x, y) => ({ x: mapCtx.originPx.x + x / mapCtx.mPerPx, y: mapCtx.originPx.y + y / mapCtx.mPerPx });
       s += markShapeSVG(target, hlPx, `wv-hl-box ${t}${mech}${hover ? " is-hover" : ""}`);
     }
-    if (!hover) s += `<circle cx="${p.x}" cy="${p.y}" r="${14 / k}" class="wv-hl-dot ${t}"/>`;
+    // NO SWOLLEN DOT, hovered or selected (play fix 37, Darko 19:39): a mark is
+    // lit by its outline and fill, and its pip opens into its pill
     // In painting-only the bubble carries the name, so the SVG label stands down
     // — two boxes saying the same word over the same dot is one box too many.
     // The geometry (the wash, the dot, the edge arrow) is not a label and stays.
@@ -13420,6 +13449,144 @@ export function mountViewer(appEl) {
     creatureNoteTimer = setTimeout(() => el.classList.remove("show"), 9000);
   }
 
+  // ── THE PIP EXPANDS INTO ITS NAMEPLATE (play fix 37, Darko 19:29 and 19:39) ──
+  //
+  // "it is a little bit odd that the icon disappears and then there's this
+  // name card that appears that has the icon … the best implementation here is
+  // the one where the pip itself … goes from just a dot and then … expands
+  // horizontally to have the full name of the mark." So a mark that wears a
+  // visible pip is not given a nameplate beside it: its pip grows sideways into
+  // a pill — the pip itself as its left cap (the dot, or at street zoom the dot
+  // with its icon), then the name, then the state badges — anchored where the
+  // pip stands, in the same frame as the hover's highlight, with no timer.
+  // Leaving folds it back. The SELECTED mark wears the same pill, held open and
+  // ringed (19:39: "careful of the clicked state because it still shows the old
+  // pip"), so default, hover, selected, selected-and-hovered and selected with
+  // the column open are one family: a dot, or a dot opened into its pill.
+  //
+  // The pill draws over the map but takes no pointer of its own: the map keeps
+  // the pointer, and while a pill is open its own box is the mark's (pillAt), so
+  // pointing along it keeps its mark lit and a press on it is a press on the
+  // mark, while a drag that starts on it still pans. Only its icons take the
+  // pointer, so each can say what it means; resting on one holds the pill.
+  const pillEls = new Map();   // "hover" | "selected" -> element
+  let pillHeld = null;         // a pill whose icon the pointer is resting on
+  const PILL_FOLD_MS = 160;
+  function visiblePip(id) {
+    if (!id || !mapCtx?.overlay || !byId.has(id)) return null;
+    for (const c of mapCtx.overlay.querySelectorAll('.ov-pip[data-id="' + CSS.escape(id) + '"]')) {
+      if (c.classList.contains("ov-pip-home") || c.classList.contains("ov-pip-pictured")) continue;
+      const r = c.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) return c;
+    }
+    return null;
+  }
+  function markPillHTML(id) {
+    const full = byId.get(id);
+    if (!full) return "";
+    const identity = markName(full);
+    const icons = iconsOf(full);
+    const what = icons[0]?.kind === "what" ? icons[0] : null;
+    const states = what ? icons.slice(1) : icons;
+    // the cap is the pip: its icon only where the pip itself wears one
+    const near = mapCtx?.overlay?.getAttribute("data-tier") === "near";
+    return '<span class="wv-pill-cap" data-pill-cap>'
+      + (what && near ? '<span class="wv-icw" title="' + esc(what.meaning) + '"><span class="wv-ic ic-' + esc(what.key) + '" aria-label="' + esc(what.label) + '"></span></span>' : "")
+      + '</span>'
+      + '<span class="wv-pill-name' + (identity.determined ? " is-determined" : "") + '">' + esc(identity.name || full.id) + '</span>'
+      + (states.length ? '<span class="wv-pill-badges">' + iconsHTML(states) + '</span>' : "");
+  }
+  function pillEl(role) {
+    let el = pillEls.get(role);
+    if (el?.isConnected) return el;
+    const host = bubbleHost();
+    if (!host) return null;
+    el = document.createElement("div");
+    el.className = "wv-pill";
+    el.hidden = true;
+    host.appendChild(el);
+    // resting on one of its icons holds the pill open; leaving the pill lets it go
+    el.addEventListener("pointerover", () => {
+      if (pillHeld === (el.dataset.pill || null)) return;
+      pillHeld = el.dataset.pill || null;
+      // the map just let go of the pointer to the pill's icon: the mark stays
+      // the one pointed at, lit and open
+      if (pillHeld && markInteraction.getState().hoveredId !== pillHeld) hoverMark(pillHeld);
+      else renderPills();
+    });
+    el.addEventListener("pointerout", (e) => {
+      if (el.contains(e.relatedTarget)) return;
+      pillHeld = null;
+      renderPills();
+    });
+    pillEls.set(role, el);
+    return el;
+  }
+  function setPill(role, id) {
+    const el = id ? pillEl(role) : pillEls.get(role);
+    if (!el) return;
+    if (!id) {
+      if (el.hidden || !el.classList.contains("is-open")) { el.hidden = true; el.dataset.pill = ""; return; }
+      el.classList.remove("is-open");
+      clearTimeout(el._fold);
+      el._fold = setTimeout(() => { if (!el.classList.contains("is-open")) { el.hidden = true; el.dataset.pill = ""; syncHiddenPips(pillPipIds()); } }, PILL_FOLD_MS);
+      return;
+    }
+    clearTimeout(el._fold);
+    const html = markPillHTML(id);
+    const fresh = el.dataset.pill !== id || el.hidden;
+    el.className = "wv-pill " + markClasses(byId.get(id)) + (role === "selected" ? " is-selected" : "") + (el.classList.contains("is-open") && !fresh ? " is-open" : "");
+    el.setAttribute("data-nameplate", id);
+    if (el._pmHtml !== html) { el._pmHtml = html; el.innerHTML = html; }
+    el.dataset.pill = id;
+    el.hidden = false;
+    positionPill(el);
+    if (fresh) { el.classList.remove("is-open"); void el.offsetWidth; }
+    el.classList.add("is-open");
+  }
+  // Which pills are open: the selected mark's, if it wears a pip, and the
+  // hovered one's (or the one the pointer is resting on), unless it is the
+  // selected one. Called with the highlight, so both change in one frame.
+  function renderPills() {
+    const { selectedId, hoveredId } = markInteraction.getState();
+    const onPane = (id) => (id && id === sceneRoomId ? null : id);
+    const sel = onPane(selectedId) && visiblePip(selectedId) ? selectedId : null;
+    let hov = onPane(pillHeld ?? hoveredId);
+    if (!hov || hov === sel || !visiblePip(hov)) hov = null;
+    setPill("selected", sel);
+    setPill("hover", hov);
+    syncHiddenPips(pillPipIds());
+  }
+  function positionPill(el) {
+    const host = bubbleHost();
+    const pip = visiblePip(el.dataset.pill);
+    if (!host || !pip) { el.hidden = true; return; }
+    const r = pip.getBoundingClientRect(), b = host.getBoundingClientRect();
+    // the pill is as tall as the pip it opens from, within reason: a street-zoom
+    // pip is large, and a name in a 58 px band is a banner, not a nameplate
+    const h = Math.round(Math.max(24, Math.min(46, r.height)));
+    el.style.setProperty("--h", h + "px");
+    el.style.transform = "translate3d(" + Math.round(r.x + r.width / 2 - b.x - h / 2) + "px, " + Math.round(r.y + r.height / 2 - b.y - h / 2) + "px, 0)";
+  }
+  function positionPills() {
+    for (const el of pillEls.values()) if (el && !el.hidden) positionPill(el);
+  }
+  /** The mark whose open pill covers this screen point, or null. */
+  function pillAt(x, y) {
+    for (const el of pillEls.values()) {
+      if (!el || el.hidden || !el.dataset.pill || !el.classList.contains("is-open")) continue;
+      const r = el.getBoundingClientRect();
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return el.dataset.pill;
+    }
+    return null;
+  }
+  // the pips the pills stand over step out of sight; the pills ARE those pips
+  function pillPipIds() {
+    const out = [];
+    for (const el of pillEls.values()) if (el && !el.hidden && el.dataset.pill) out.push(el.dataset.pill);
+    return out;
+  }
+
   const bubbleEls = { hover: null, pinned: null };
   let bubbleResize = null;
   let pinnedBuiltId = null;   // which mark the pinned bubble currently holds
@@ -13688,7 +13855,9 @@ export function mountViewer(appEl) {
   }
   // A RESTING POINTER, NOT A PASSING ONE. The glance waits this long on one mark
   // before it is raised.
-  const GLANCE_DELAY_MS = 250;
+  // NO TIMER (play fix 37, Darko 19:29: "make it happen simultaneously as like
+  // the highlight on hover effect"): what a glance shows, it shows at once.
+  const GLANCE_DELAY_MS = 0;
   // …AND A SHOWN PLATE GETS A BEAT BEFORE IT GOES. Nearly every mark stands
   // inside some larger ground, so the pointer leaving a pip on its way to the
   // plate's icons is, for a moment, pointing at the forecourt around it. For
@@ -13717,6 +13886,13 @@ export function mountViewer(appEl) {
       return;
     }
     if (id === glancePending) return;
+    if (!GLANCE_DELAY_MS) {
+      clearTimeout(glanceTimer);
+      glanceTimer = null; glancePending = null; glanceShown = id;
+      paintGlance(el, id);
+      positionBubbles();
+      return;
+    }
     el.hidden = true;
     glanceShown = null;
     glancePending = id;
@@ -13893,6 +14069,8 @@ export function mountViewer(appEl) {
       pinnedColumnParcelId = pinnedNow;
       if (lastRadial) drawOverlay(lastRadial);
     }
+    // the pips that open into pills (play fix 37), in both view modes
+    renderPills();
     if (!state.paintingOnly) {
       for (const el of Object.values(bubbleEls)) if (el) el.hidden = true;
       return;
@@ -13920,8 +14098,9 @@ export function mountViewer(appEl) {
       // question about the pile under the cursor, so a preview of one of its
       // own rows would sit under it saying "click to open" — which is now the
       // wrong instruction, since a click there reopens the stack.
+      // …and a mark whose pip opened into its pill has its nameplate already
       const glance = hoveredId && hoveredId !== selectedId && !hoverFromBubble && !chooserIdsFrom(selectedId)
-        ? hoveredId : null;
+        && !visiblePip(hoveredId) ? hoveredId : null;
       renderHoverBubble(glance);
     } finally {
       renderingBubbles = false;
@@ -13932,6 +14111,7 @@ export function mountViewer(appEl) {
   // asked for and sits where it likes; the glance steps around it; the you-bubble
   // is always present and yields to both, since it is the one you did not ask for.
   function positionBubbles() {
+    positionPills();
     if (!state.paintingOnly) return;
     const { hoveredId, selectedId } = markInteraction.getState();
     // the walk desk holds its corner — it is a thing you are part way through, so
