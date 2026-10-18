@@ -4783,16 +4783,23 @@ export function smallestContainingMark(point, marks = [], { insideRoomId = null,
  *  bodyPlace → smallestContainingMark / placeLabel (#2912). Pure. */
 export function containmentIndex(marks = [], { insideRoomId = null, thingClasses = null } = {}) {
   const byMarkId = markIndex(marks);
-  // A KIND OF THING IS A THING (W2 final): a halloween-candy-bowl is no more ground
-  // than a class:thing top. The thing classes are the caller's (the page's, which
-  // knows the office's answers) or the record's own class marks.
-  const things = thingClasses ?? thingClassesOf(marks, classToken);
-  const isThingMark = (mark) => { const cls = classToken(instanceClassOf(mark)); return cls === "thing" || things.has(cls); };
   const room = insideRoomId ? (marks ?? []).find((mark) => mark?.id === insideRoomId) : null;
   const encloses = (mark) => !!insideRoomId
     && (mark?.id === insideRoomId || (room && mark?.at && mark?.extent ? marksContain(mark, room) : false));
-  const ground = (marks ?? [])
-    .filter((mark) => !isThingMark(mark) && !encloses(mark) && isEmbodiedMark(mark) && !isAmbientMark(mark, byMarkId))
+  // ONE PASS OVER THE RECORD (containment-index-once's pin): the ground's own
+  // filter also gathers the class marks, so the thing classes cost no second read.
+  const classMarks = [];
+  const candidates = (marks ?? []).filter((mark) => {
+    if (mark?.kind === "class") classMarks.push(mark);
+    return !encloses(mark) && isEmbodiedMark(mark) && !isAmbientMark(mark, byMarkId);
+  });
+  // A KIND OF THING IS A THING (W2 final): a halloween-candy-bowl is no more ground
+  // than a class:thing top. The thing classes are the caller's (the page's, which
+  // knows the office's answers) or the record's own class marks, gathered above.
+  const things = thingClasses ?? thingClassesOf(classMarks, classToken);
+  const isThingMark = (mark) => { const cls = classToken(instanceClassOf(mark)); return cls === "thing" || things.has(cls); };
+  const ground = candidates
+    .filter((mark) => !isThingMark(mark))
     .map((mark) => ({ mark, area: Number(mark.extent.w) * Number(mark.extent.h) }))
     .sort((a, b) => a.area - b.area || String(a.mark.id).localeCompare(String(b.mark.id)));
   return { byMarkId, ground, insideRoomId: insideRoomId ?? null };
