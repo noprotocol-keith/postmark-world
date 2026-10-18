@@ -1788,7 +1788,9 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   property with two child properties: `capacity`, how many it can hold, and
   `open`, whether other households may give and take.
   - **On `resident`:** `holder: true` and `capacity: 24`, both constitution
-    and locked (today's `carry_cap`). A resident has no `open`: a give to a
+    and locked (today's `carry_cap`), and `holders: 1`, constitution and
+    locked: **a resident carries at most one holder at a time** (ruled
+    2026-10-17 23:29, below). A resident has no `open`: a give to a
     resident follows the general consent law below.
   - **On `thing`:** `holder` is sovereign, default false, so a thing holds
     nothing unless its maker says so. When it is true, `capacity` (sovereign,
@@ -1827,8 +1829,19 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   taken by `take`, with the holder only as where they are. Only portable
   things show `take` (12:36, under the 12:38 `portable` ruling), so taking a
   thing that holds needs `portable: true`. **A carried
-  holder's contents travel inside it,** and it counts 1 toward its carrier's
-  `capacity`, whatever it holds (ruled 16:02).
+  holder's contents travel inside it.**
+- **One holder in hand, and counts confer up** (ruled 2026-10-17 23:29,
+  Darko: *"yes, rule it, one holder and counts confer up"*):
+  - **A resident carries at most one holder at a time** (the resident's
+    `holders`, 1, constitution and locked).
+  - **Counts confer up between holders:** a holder counts 1 plus everything
+    it holds, recursively, toward the room of whatever holds it.
+  - **In a resident's hands, each top-level thing counts 1.** The 24 is
+    unchanged, and the carried holder is 1 of the 24, however full.
+  - **The loop check is complete; there is no depth cap.**
+  *SUPERSEDED 2026-10-17 23:29 for a holder inside a holder (counts confer
+  up); it still stands for a resident's hands: "it counts 1 toward its
+  carrier's `capacity`, whatever it holds (ruled 16:02)."*
 - **Holders confer their state on what they hold** (ruled 16:02, Darko:
   *"Holders confer their state to the held, which is **why** these can be
   live. If a chest is published, anything you put in it is de facto
