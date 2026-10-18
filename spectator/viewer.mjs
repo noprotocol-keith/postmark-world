@@ -14158,7 +14158,6 @@ export function mountViewer(appEl) {
       residentLink: false,
       kicker: kickerOf(mark),
       title: identity.name || String(mark.id),
-      // the room you are in is not somewhere at a distance (and radialWhere says a carried thing is in someone's hands)
       // the room you are in is not somewhere at a distance (and radialWhere says a carried
       // thing is in someone's hands, and a held one inside its holder)
       region: id === sceneRoomId ? "you are inside" : where.detail,
