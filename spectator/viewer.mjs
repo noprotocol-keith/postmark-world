@@ -2659,14 +2659,15 @@ export function hiddenInsideParcel(mark, marks = [], underfoot = new Set(), chai
  *  CREATURES ARE THEIR OWN GROUP (play row 55: the chooser filed them under
  *  "other marks"); `isCreature` says which ids are creatures. Pure. */
 export function groupChooserIds(ids = [], { isWalker = () => false, kindOf = () => null, isCreature = () => false } = {}) {
-  const residents = [], creatures = [], parcels = [], others = [];
+  const residents = [], creatures = [], parcels = [], others = [], conversations = [];
   for (const id of ids ?? []) {
     if (isWalker(id)) residents.push(id);
     else if (isCreature(id)) creatures.push(id);
+    else if (isConvoChoiceId(id)) conversations.push(id);   // a wash under the 💬 lens (18:06)
     else if (kindOf(id) === "parcel") parcels.push(id);
     else others.push(id);
   }
-  return { residents, creatures, parcels, others };
+  return { residents, creatures, parcels, others, conversations };
 }
 
 /** THE PARCEL UNDERFOOT WEARS NO CARD (founder, 2026-09-11: "let's not display
@@ -4323,6 +4324,11 @@ export function bubbleTrailStep(trail = [], action = "select", id = null) {
 // card uses, so it inherits the bubble's anchoring, placement, Escape and
 // click-elsewhere dismissal without a second lifecycle to keep in step.
 export const CHOOSER_PREFIX = "choose:";
+// A TALK-LENS WASH IN THE CHOOSER (Darko 2026-10-16 18:06, call A): one more
+// clickable under the 17:37 rule, entered by its thread's id
+export const CONVO_CHOICE_PREFIX = "convo:";
+export const convoChoiceId = (threadId) => `${CONVO_CHOICE_PREFIX}${threadId}`;
+export const isConvoChoiceId = (id) => typeof id === "string" && id.startsWith(CONVO_CHOICE_PREFIX) && id.length > CONVO_CHOICE_PREFIX.length;
 export const chooserId = (ids) => `${CHOOSER_PREFIX}${ids.join(" ")}`;
 export const chooserIdsFrom = (id) =>
   typeof id === "string" && id.startsWith(CHOOSER_PREFIX)
@@ -4566,12 +4572,14 @@ export function chooserLeadLine(ids = []) {
   const people = list.filter((id) => walkerHandleFromHoverId(id)).length;
   // A CREATURE IS NOT A MARK (play row 55: "2 marks are stacked here" over a wolf and a bat)
   const creatures = list.filter((id) => isCreatureId(id)).length;
-  const marks = list.length - people - creatures;
+  const talks = list.filter((id) => isConvoChoiceId(id)).length;
+  const marks = list.length - people - creatures - talks;
   const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
-  if (!people && !creatures) return `${count(marks, "mark is", "marks are")} stacked here — which one?`;
-  if (!marks && !creatures) return `${count(people, "resident is", "residents are")} standing here — which one?`;
-  if (!marks && !people) return `${count(creatures, "creature is", "creatures are")} here — which one?`;
-  const parts = [people && count(people, "resident", "residents"), creatures && count(creatures, "creature", "creatures"), marks && count(marks, "mark", "marks")].filter(Boolean);
+  if (!people && !creatures && !talks) return `${count(marks, "mark is", "marks are")} stacked here — which one?`;
+  if (!marks && !creatures && !talks) return `${count(people, "resident is", "residents are")} standing here — which one?`;
+  if (!marks && !people && !talks) return `${count(creatures, "creature is", "creatures are")} here — which one?`;
+  const parts = [people && count(people, "resident", "residents"), creatures && count(creatures, "creature", "creatures"), marks && count(marks, "mark", "marks"), talks && count(talks, "conversation", "conversations")].filter(Boolean);
+  if (parts.length === 1) return `${count(talks, "conversation is", "conversations are")} here — which one?`;
   return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]} are here — which one?`;
 }
 
@@ -6521,6 +6529,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .ov-creature-leg { stroke:#d8706a; stroke-width:2; stroke-linecap:round; vector-effect:non-scaling-stroke; pointer-events:none; }
 .wv-hl-creature { fill:none; stroke:#d8c6cf; stroke-width:2; vector-effect:non-scaling-stroke; }
 .wv-bubble.is-nameplate.is-creature { --wv-mark-accent:#d8706a; }   /* red means a creature (play fix 43) */
+.wv-choose-row.is-convo { border-left:3px solid #7f93a6; display:flex; align-items:baseline; gap:7px; flex-wrap:wrap; font-size:.78rem; }
 .wv-choose-row.is-creature { border-left:3px solid #d8706a; display:flex; align-items:baseline; gap:7px; flex-wrap:wrap; font-size:.78rem; }
 .wv-creature-note { position:absolute; z-index:9; left:50%; bottom:58px; transform:translateX(-50%); max-width:min(34rem,80%);
   padding:6px 12px; border:1px solid #b8615b; border-radius:8px; background:rgba(20,16,19,.94); color:#f1dcd8;
@@ -10276,12 +10285,16 @@ export function mountViewer(appEl) {
       // it should be included in the chooser. Simple as that.")
       const here = clickablesAtPoint({ x: e.clientX, y: e.clientY },
         { people: [...screenWalkerCandidates(), ...screenCreatureCandidates()], marks: screenMarkCandidates() });
+      // …and with the 💬 lens up, every wash the point is in (Darko 18:06, call A):
+      // alone it opens its thread, as ever; with anything else it is one more entry
+      const washes = (() => { const wp = worldPointForEvent(e); return convosAt(wp.x, wp.y).map((h) => convoChoiceId(h.id)); })();
       const peopleHere = here.people;
       if (peopleHere.length) {
-        if (here.all.length > 1) { openChooser(here.all); return; }
+        if (here.all.length + washes.length > 1) { openChooser([...here.all, ...washes]); return; }
         selectMark(peopleHere[0]);
         return;
       }
+      if (washes.length && (here.all.length || washes.length > 1)) { openChooser([...here.all, ...washes]); return; }
       // THE TALK LENS WINS WHILE IT IS UP (Keemin, launch night: with washes
       // sharing ground with pips and parcels, "sometimes the click reached
       // the thread" read as broken). The layer is opt-in — switching 💬 on IS
@@ -11910,10 +11923,12 @@ export function mountViewer(appEl) {
   // hover pick the most specific room when circles nest (a garden thread sat
   // inside the party's wash on the night this shipped).
   let convoHits = [];
-  const convoAt = (wx, wy) => (!convoVisible ? null : convoHits.find((h) => {
+  const convoAt = (wx, wy) => convosAt(wx, wy)[0] ?? null;
+  // every wash holding the point, most specific first (row 63's rule counts them all)
+  const convosAt = (wx, wy) => (!convoVisible ? [] : convoHits.filter((h) => {
     const nx = (wx - h.cx) / h.rxM, ny = (wy - h.cy) / h.ryM;
     return nx * nx + ny * ny <= 1;
-  }) ?? null);
+  }));
   // the island serves /conversations/ same-origin; on the local spectator the
   // link 404s, which is the dev-server's honest shape (it has no site around it)
   const convoHref = (id) => `/conversations/#${encodeURIComponent(id)}`;
@@ -14051,8 +14066,9 @@ export function mountViewer(appEl) {
   // they do not have.
   function openChooser(ids) {
     const people = ids.filter((id) => walkerHandleFromHoverId(id) || isCreatureId(id));
-    const marks = ids.filter((id) => !walkerHandleFromHoverId(id) && !isCreatureId(id));
-    selectMark(chooserId([...people, ...orderInnermostFirst(marks, byId)]));
+    const talks = ids.filter((id) => isConvoChoiceId(id));
+    const marks = ids.filter((id) => !walkerHandleFromHoverId(id) && !isCreatureId(id) && !isConvoChoiceId(id));
+    selectMark(chooserId([...people, ...orderInnermostFirst(marks, byId), ...talks]));
   }
 
   // A RESIDENT ROW. The chooser is a disambiguator, not an Act-As switch and not
@@ -14086,6 +14102,12 @@ export function mountViewer(appEl) {
     const ids = chooserIdsFrom(id) ?? [];
     const rowOf = (markId) => {
       if (walkerHandleFromHoverId(markId)) return chooserWalkerRow(markId);
+      if (isConvoChoiceId(markId)) {
+        const tid = markId.slice(CONVO_CHOICE_PREFIX.length);
+        const h = convoHits.find((x) => x.id === tid);
+        return `<button type="button" class="wv-choose-row is-convo" data-choose="${esc(markId)}"><span class="wv-choose-who">a conversation</span>`
+          + (h?.words ? `<span class="wv-choose-where">${esc(h.words)}</span>` : "") + `</button>`;
+      }
       if (isCreatureId(markId)) {
         const c = liveCreatures.get(markId);
         return c ? `<button type="button" class="wv-choose-row is-creature" data-choose="${esc(markId)}"><span class="wv-choose-who">${esc(c.name)}</span><span class="wv-choose-where">a creature out of the Mists</span></button>` : "";
@@ -14101,7 +14123,7 @@ export function mountViewer(appEl) {
     // THREE GROUPS, LABELLED, EMPTY ONES SILENT (founder, 2026-09-11) — see groupChooserIds
     const groups = groupChooserIds(ids, { isWalker: (x) => !!walkerHandleFromHoverId(x), kindOf: (x) => byId.get(x)?.kind ?? null, isCreature: isCreatureId });
     const section = (label, list) => { const rows = list.map(rowOf).filter(Boolean).join(""); return rows ? `<p class="wv-choose-group">${label}</p>${rows}` : ""; };
-    const body = section("residents", groups.residents) + section("creatures", groups.creatures) + section("parcels", groups.parcels) + section("other marks", groups.others);
+    const body = section("residents", groups.residents) + section("creatures", groups.creatures) + section("parcels", groups.parcels) + section("other marks", groups.others) + section("conversations", groups.conversations);
     if (!body) return "";
     return `<div class="wv-chooser">`
       + `<p class="wv-choose-lead">${esc(chooserLeadLine(ids))}</p>`
@@ -14939,6 +14961,7 @@ export function mountViewer(appEl) {
     // picking one out of the stack: from here it is an ordinary selection, and
     // the mark opens in exactly the bubble it would have opened in alone
     const chosen = e.target.closest("[data-choose]");
+    if (chosen && isConvoChoiceId(chosen.dataset.choose)) { window.open(convoHref(chosen.dataset.choose.slice(CONVO_CHOICE_PREFIX.length)), "_blank", "noopener"); return; }
     if (chosen) { selectMark(chosen.dataset.choose, { scrollCell: true }); return; }
     const actor = e.target.closest("[data-act-as]");
     if (actor) { selectActor(actor.dataset.actAs); return; }

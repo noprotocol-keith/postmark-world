@@ -40,6 +40,7 @@ test("the lead line counts what is there in plain words", () => {
 
 test("pins: both click branches ask the one rule; one entry opens directly", () => {
   assert.match(SOURCE, /const here = clickablesAtPoint\(\{ x: e\.clientX, y: e\.clientY \},\s*\{ people: \[\.\.\.screenWalkerCandidates\(\), \.\.\.screenCreatureCandidates\(\)\], marks: screenMarkCandidates\(\) \}\);/);
-  assert.match(SOURCE, /if \(here\.all\.length > 1\) \{ openChooser\(here\.all\); return; \}\s*selectMark\(peopleHere\[0\]\);/);
+  // CHANGED by the 18:06 wash follow-up: the washes under the point are entries too
+  assert.match(SOURCE, /if \(here\.all\.length \+ washes\.length > 1\) \{ openChooser\(\[\.\.\.here\.all, \.\.\.washes\]\); return; \}\s*selectMark\(peopleHere\[0\]\);/);
   assert.match(SOURCE, /const contested = clickablesAtPoint\(\{ x: e\.clientX, y: e\.clientY \}, \{ marks: candidates \}\)\.all;\s*if \(contested\.length > 1\) \{ openChooser\(contested\); return; \}/);
 });

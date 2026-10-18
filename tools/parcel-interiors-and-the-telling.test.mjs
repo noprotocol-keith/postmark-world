@@ -62,10 +62,10 @@ test("[pin] THE CHOOSER IS SORTED — residents, parcels, then other marks, each
   const kinds = { "a/p": "parcel", "b/p": "parcel", "a/house": "sited", "the-town/x": "sited" };
   const g = groupChooserIds(["walker:rei", "a/house", "a/p", "walker:nyx", "the-town/x", "b/p"], { isWalker: (id) => id.startsWith("walker:"), kindOf: (id) => kinds[id] ?? null });
   // CHANGED by play row 55: creatures are a group of their own, between residents and parcels
-  assert.deepEqual(g, { residents: ["walker:rei", "walker:nyx"], creatures: [], parcels: ["a/p", "b/p"], others: ["a/house", "the-town/x"] }, "the groups, order within each as handed in");
+  assert.deepEqual(g, { residents: ["walker:rei", "walker:nyx"], creatures: [], parcels: ["a/p", "b/p"], others: ["a/house", "the-town/x"], conversations: [] }, "the groups, order within each as handed in");
   assert.deepEqual(groupChooserIds(["creature:bat-1", "a/house", "creature:wolf-1"], { isCreature: (id) => id.startsWith("creature:") }),
-    { residents: [], creatures: ["creature:bat-1", "creature:wolf-1"], parcels: [], others: ["a/house"] }, "a creature is never an other mark");
-  assert.deepEqual(groupChooserIds([]), { residents: [], creatures: [], parcels: [], others: [] });
+    { residents: [], creatures: ["creature:bat-1", "creature:wolf-1"], parcels: [], others: ["a/house"], conversations: [] }, "a creature is never an other mark");
+  assert.deepEqual(groupChooserIds([]), { residents: [], creatures: [], parcels: [], others: [], conversations: [] });
   assert.match(SOURCE, /section\("residents", groups\.residents\) \+ section\("creatures", groups\.creatures\) \+ section\("parcels", groups\.parcels\) \+ section\("other marks", groups\.others\)/, "the chooser renders the groups in that order");
   assert.match(SOURCE, /return rows \? `<p class="wv-choose-group">\$\{label\}<\/p>\$\{rows\}` : ""/, "an empty group draws no label");
   // ⚑ THE FLIP: swap the parcels and others sections → the order line reds.
