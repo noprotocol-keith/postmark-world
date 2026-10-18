@@ -4442,7 +4442,7 @@ export function creatureColumnFacts(row = null, inv = null, { timeZone = undefin
  *  which shows only where a resident's picture shows. Pure. */
 export const CREATURE_GLYPH = Object.freeze({ size: WALKER_FRAME.near, leg: WALKER_FRAME.legNear, hit: 17, art: 0.86,
   plainSize: WALKER_FRAME.far, plainLeg: WALKER_FRAME.legFar, plainHit: 12 });
-export function creatureGlyphSVG({ creature, at, silhouette = null, title = null, plain = false } = {}) {
+export function creatureGlyphSVG({ creature, at, silhouette = null, title = null, plain = false, jiggling = false } = {}) {
   const x = Number(at?.x), y = Number(at?.y);
   if (!creature?.id || ![x, y].every(Number.isFinite)) return "";
   const size = plain ? CREATURE_GLYPH.plainSize : CREATURE_GLYPH.size;
@@ -4458,7 +4458,7 @@ export function creatureGlyphSVG({ creature, at, silhouette = null, title = null
       + `<g clip-path="url(#wv-ct-${safe})"><g transform="scale(${k.toFixed(4)}) translate(-50 -52)"><path d="${silhouette.d}" class="ov-creature-art"/></g></g>`
     : "";
   return `<g transform="translate(${x} ${y})"><g class="ov-s">`
-    + `<g class="ov-creature${plain ? " is-plain" : ""} ov-creature-${esc(String(creature.kind).toLowerCase().replace(/[^a-z0-9-]/g, ""))}" data-creature="${esc(creature.id)}">`
+    + `<g class="ov-creature${plain ? " is-plain" : ""}${jiggling ? " is-jiggling" : ""} ov-creature-${esc(String(creature.kind).toLowerCase().replace(/[^a-z0-9-]/g, ""))}" data-creature="${esc(creature.id)}">`
     + `<circle r="${plain ? CREATURE_GLYPH.plainHit : CREATURE_GLYPH.hit}" class="ov-creature-hit">${title ? `<title>${esc(title)}</title>` : ""}</circle>`
     + `<circle cx="0" cy="0" r="${r}" class="ov-creature-disc"/>`
     + art
@@ -6542,10 +6542,20 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
   font-size:.8rem; font-style:italic; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .25s; }
 .wv-creature-note.show { opacity:1; }
 /* WHAT A CREATURE JUST DID, AT THE CREATURE (play row 54): whoever's act it answered */
+/* A REACTION IS A BUBBLE AT ITS CREATURE (play fix 86, Darko 19:59): above the token,
+   a tail pointing down at it, laid out so bubbles never cover each other or a
+   resident (positionCreatureSays sets left, top and --tail-x) */
 .wv-creature-say { position:absolute; top:0; left:0; z-index:5; max-width:15rem; padding:4px 9px; border:1px solid #b8615b;
   border-radius:8px; background:rgba(20,16,19,.94); color:#f1dcd8; font-size:.74rem; font-style:italic; line-height:1.35;
-  pointer-events:none; opacity:0; transition:opacity .3s; transform:translate(-50%, calc(-100% - 16px)); }
+  pointer-events:none; opacity:0; transition:opacity .3s; --tail-x:50%; }
+.wv-creature-say::after { content:""; position:absolute; top:100%; left:var(--tail-x); margin-left:-6px;
+  border:6px solid transparent; border-top-color:#b8615b; }
 .wv-creature-say.show { opacity:1; }
+/* the token's jiggle when its reaction lands, about 350 ms; none for reduced motion */
+@keyframes wv-creature-jiggle { 0% { transform:rotate(0) } 20% { transform:rotate(-12deg) } 40% { transform:rotate(10deg) }
+  60% { transform:rotate(-6deg) } 80% { transform:rotate(3deg) } 100% { transform:rotate(0) } }
+.ov-creature.is-jiggling { animation:wv-creature-jiggle 350ms ease-out; transform-box:fill-box; transform-origin:50% 100%; }
+@media (prefers-reduced-motion: reduce) { .ov-creature.is-jiggling { animation:none; } }
 .wv-walkdesk { position:absolute; z-index:8; right:10px; bottom:10px; width:min(19rem,42%);
   padding:11px 13px 13px; border:1px solid var(--line); border-left:3px solid var(--green);
   border-radius:6px; background:rgba(13,15,19,.97); box-shadow:0 10px 30px rgba(0,0,0,.55); }
@@ -7614,6 +7624,36 @@ export function roomGroundSignature(room) {
   if (!room?.id) return "";
   const e = room.extent ?? {}, a = room.at ?? {};
   return [room.id, markImagePath(room) ?? "", `${e.w ?? ""}x${e.h ?? ""}`, `${a.x ?? ""},${a.y ?? ""}`, room.points ? JSON.stringify(room.points) : ""].join("|");
+}
+
+/** WHERE EACH REACTION BUBBLE GOES (play fix 86): `bubbles` are
+ *  { el, anchor: {x, y} (the token's top centre), w, h } in the host's pixels,
+ *  oldest first; `avoid` the boxes it must not cover (the residents' tokens).
+ *  Each sits above its token with a gap for the tail. If that would cover a
+ *  bubble already placed or a box to avoid, it tries higher (a bubble's height
+ *  at a time) and to either side; the first spot clear of both wins, else the
+ *  first clear of the other bubbles (two bubbles never overlap; a crowd of
+ *  residents may have to be partly covered). It stays inside the host's width,
+ *  and its tail points back at the token wherever it lands. Pure. */
+export const REACTION_TAIL_PX = 10;
+export function layoutReactionBubbles(bubbles = [], avoid = [], { width = Infinity } = {}) {
+  const hit = (a, c) => a.x < c.x + c.w && c.x < a.x + a.w && a.y < c.y + c.h && c.y < a.y + a.h;
+  const clampX = (x, w) => (Number.isFinite(width) ? Math.max(4, Math.min(width - w - 4, x)) : x);
+  const placed = [];
+  const out = [];
+  for (const bub of bubbles) {
+    const w = Number(bub.w) || 0, h = Number(bub.h) || 0;
+    const x0 = bub.anchor.x - w / 2, y0 = bub.anchor.y - h - REACTION_TAIL_PX;
+    const spots = [];
+    for (let step = 0; step < 6; step++)
+      for (const dx of [0, w + 6, -(w + 6)]) spots.push({ x: clampX(x0 + dx, w), y: y0 - step * (h + 4), w, h });
+    const box = spots.find((c) => ![...placed, ...avoid].some((o) => hit(c, o)))
+      ?? spots.find((c) => !placed.some((o) => hit(c, o)))
+      ?? spots[spots.length - 1];
+    placed.push(box);
+    out.push({ el: bub.el, x: box.x, y: box.y, tailX: Math.max(8, Math.min(w - 8, bub.anchor.x - box.x)) });
+  }
+  return out;
 }
 
 export function mountViewer(appEl) {
@@ -12749,7 +12789,17 @@ export function mountViewer(appEl) {
     // and the creatures read again, since their state just moved
     const answered = creatureReactionLines(raw);
     if (answered.length) {
-      creatureNote(answered);
+      // A BUBBLE AT EACH CREATURE THAT ANSWERED (row 86), its token jiggling; the
+      // bottom note only for a creature whose token is not on the page
+      const offPage = [];
+      for (const r of raw.result?.creatures ?? raw.creatures ?? []) {
+        const line = String(r?.line ?? "").trim();
+        if (!line) continue;
+        const drawn = r?.id && mapCtx?.creatureLayer?.querySelector('.ov-creature[data-creature="' + CSS.escape(r.id) + '"]');
+        if (drawn) { creatureSay(r.id, line); reactionSeen.set(r.id, Date.now() + 2000); }   // the 15 s read will not say it twice
+        else offPage.push(line);
+      }
+      if (offPage.length) creatureNote(offPage);
       liveCreaturesAt = 0;
       for (const r of raw.result?.creatures ?? raw.creatures ?? []) creatureReads.delete(r?.id);
     }
@@ -13941,7 +13991,7 @@ export function mountViewer(appEl) {
       // far: the plain token, as a resident is the blank walker there (fix 49)
       const plain = tier === "far";
       out += creatureGlyphSVG({ creature: c, at: px({ x: c.x, y: c.y }), silhouette: plain ? null : creatureSilhouette(c.kind),
-        title: state.paintingOnly ? null : c.name, plain });
+        title: state.paintingOnly ? null : c.name, plain, jiggling: (creatureJiggleUntil.get(c.id) ?? 0) > Date.now() });
     }
     return out;
   }
@@ -13991,7 +14041,8 @@ export function mountViewer(appEl) {
   // is drawing on screen (at most CREATURE_SAY_MAX, through the same keyless
   // investigate the column uses), and a reaction newer than the last one shown
   // is said at the creature's token for a few seconds: its kind's own line.
-  const CREATURE_SAY_MAX = 6, CREATURE_SAY_MS = 8000;
+  const CREATURE_SAY_MAX = 6, CREATURE_SAY_MS = 5000, CREATURE_JIGGLE_MS = 350;
+  const creatureJiggleUntil = new Map();   // creature id -> ms its jiggle ends (row 86)
   const reactionSeen = new Map();   // creature id -> newest reaction moment shown (ms)
   const creatureSays = new Map();   // creature id -> { el, timer }
   function onScreenCreatures() {
@@ -14034,22 +14085,43 @@ export function mountViewer(appEl) {
       creatureSays.set(id, say);
     }
     say.el.textContent = line;
-    positionCreatureSay(id, say.el);
     say.el.classList.add("show");
+    say.shownAt = Date.now();
+    positionCreatureSays();
     clearTimeout(say.timer);
     say.timer = setTimeout(() => { say.el.classList.remove("show"); }, CREATURE_SAY_MS);
+    jiggleCreature(id);
   }
-  function positionCreatureSay(id, el) {
-    const host = bubbleHost();
+  // THE TOKEN JIGGLES as its reaction lands (row 86): the class is on the drawn
+  // token now, and on any redraw until the jiggle is over
+  function jiggleCreature(id) {
+    creatureJiggleUntil.set(id, Date.now() + CREATURE_JIGGLE_MS);
     const g = mapCtx?.creatureLayer?.querySelector('.ov-creature[data-creature="' + CSS.escape(id) + '"]');
-    const r = g?.getBoundingClientRect();
-    if (!host || !r?.width) { el.classList.remove("show"); return; }
-    const b = host.getBoundingClientRect();
-    el.style.left = Math.round(r.x + r.width / 2 - b.x) + "px";
-    el.style.top = Math.round(r.y - b.y) + "px";
+    if (g) { g.classList.remove("is-jiggling"); void g.getBoundingClientRect(); g.classList.add("is-jiggling"); }
+    setTimeout(() => { if ((creatureJiggleUntil.get(id) ?? 0) <= Date.now()) { creatureJiggleUntil.delete(id); g?.classList.remove("is-jiggling"); } }, CREATURE_JIGGLE_MS + 20);
   }
+  // Every bubble showing, laid out together: each above its own token, tail at
+  // it, and stepped up out of the way of a bubble already placed or a resident's
+  // token, so three answering one act stay three readable bubbles
   function positionCreatureSays() {
-    for (const [id, say] of creatureSays) if (say.el?.isConnected && say.el.classList.contains("show")) positionCreatureSay(id, say.el);
+    const host = bubbleHost();
+    if (!host) return;
+    const b = host.getBoundingClientRect();
+    const shown = [];
+    for (const [id, say] of creatureSays) {
+      if (!say.el?.isConnected || !say.el.classList.contains("show")) continue;
+      const g = mapCtx?.creatureLayer?.querySelector('.ov-creature[data-creature="' + CSS.escape(id) + '"]');
+      const r = g?.getBoundingClientRect();
+      if (!r?.width) { say.el.classList.remove("show"); continue; }
+      shown.push({ el: say.el, anchor: { x: r.x + r.width / 2 - b.x, y: r.y - b.y }, w: say.el.offsetWidth, h: say.el.offsetHeight, at: say.shownAt ?? 0 });
+    }
+    const avoid = [...root.querySelectorAll("[data-handle] > .wv-walker-frame")].map((f) => f.getBoundingClientRect())
+      .filter((r) => r.width).map((r) => ({ x: r.x - b.x, y: r.y - b.y, w: r.width, h: r.height }));
+    for (const { el, x, y, tailX } of layoutReactionBubbles(shown.sort((p, q) => p.at - q.at), avoid, { width: b.width })) {
+      el.style.left = Math.round(x) + "px";
+      el.style.top = Math.round(y) + "px";
+      el.style.setProperty("--tail-x", Math.round(tailX) + "px");
+    }
   }
 
   // THE CREATURES' ANSWER TO AN ACT, as a small note (fix 20's walk note's

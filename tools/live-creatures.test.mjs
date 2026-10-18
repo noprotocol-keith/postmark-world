@@ -93,7 +93,8 @@ test("[pin] the page reads the office's own keyless doors, draws over the paint,
   assert.match(SOURCE, /\.ov-creature-hit \{ fill:transparent; pointer-events:none; \}/, "the stage never takes the pointer from the map");
   assert.match(SOURCE, /if \(m && mistsHere\(\{ x: c\.x, y: c\.y \}, m\)\.inWall\) continue;/, "behind the wall stays the wall's (POS-466)");
   assert.match(SOURCE, /if \(sceneRoomId && !\(box && pointInRect\(c\.x, c\.y, box\)\)\) continue;/, "indoors, only the room's own");
-  assert.match(SOURCE, /const answered = creatureReactionLines\(raw\);\s*if \(answered\.length\) \{\s*creatureNote\(answered\);/, "every act's answer, through the one apex door");
+  // CHANGED by row 86: the answer is said at each creature's token; the note only for one off the page
+  assert.match(SOURCE, /const answered = creatureReactionLines\(raw\);\s*if \(answered\.length\) \{[\s\S]*?creatureSay\(r\.id, line\);[\s\S]*?if \(offPage\.length\) creatureNote\(offPage\);/, "every act's answer, through the one apex door");
   assert.match(SOURCE, /if \(isCreatureId\(id\)\) \{\s*if \(markInteraction\.getState\(\)\.selectedId === id\) \{ markInteraction\.select\(null\); return false; \}/, "selected like a face");
   assert.match(SOURCE, /regionColumnView\(selected\) \?\? creatureColumnView\(selected\) \?\? markColumnView\(selected\)/, "and opens the column");
 });
