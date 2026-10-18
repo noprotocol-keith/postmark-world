@@ -268,6 +268,11 @@ async function openAndRead({ signedIn }) {
   return { ...seen, errors, askedDuring: office.asked.slice(askedBefore) };
 }
 
+// The page's live creatures (play fix 35) are the town's own keyless read of its
+// apex, asked by every page, signed in or not; they are not the resident path.
+const residentDoor = (p) => (p.startsWith("/world/apex") && !/^\/world\/apex\?(find=creature|investigate=)/.test(p))
+  || p.startsWith("/world/present");
+
 const skipReason = "playwright is absent, so the SIGNED-IN Lately pane goes unguarded: "
   + "no other test in this repo drives the resident path in a browser, and the unit tests of "
   + "`recentActivity` stay green on the broken build.";
@@ -281,7 +286,7 @@ test("A SIGNED-IN READER'S LATELY SHOWS WHAT THEY WROTE — and every row comes 
   // `/world/present` at THIS FIXTURE'S standpoint proves it landed in the cache
   // and was consumed, because that is the only thing that puts those numbers in
   // that URL.
-  assert.ok(seen.askedDuring.some((p) => p.startsWith("/world/apex")),
+  assert.ok(seen.askedDuring.some((p) => p.startsWith("/world/apex") && residentDoor(p)),
     "the page never asked for a resident read at all, so it was not signed in: "
     + JSON.stringify(seen.askedDuring));
   assert.ok(seen.askedDuring.includes("/world/present?x=10&y=10"),
@@ -306,7 +311,7 @@ test("THE SPECTATOR'S LATELY IS UNTOUCHED — the same pane, no key, still the f
   if (!chromium) return t.skip(skipReason);
   const seen = await openAndRead({ signedIn: false });
   // A page with no key must never take the resident path at all…
-  assert.deepEqual(seen.askedDuring.filter((p) => p.startsWith("/world/apex") || p.startsWith("/world/present")), [],
+  assert.deepEqual(seen.askedDuring.filter(residentDoor), [],
     "a spectator asked the resident doors: " + JSON.stringify(seen.askedDuring));
   // …so none of the rig's invented marks can reach it. This is the half of the
   // fix that must NOT change, asserted from the other side.
