@@ -6299,6 +6299,15 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
    dark card, same rule down the left, in the amber a proposal is drawn in. It sits
    ABOVE the bubble layer, because it is the one thing on this page you are part
    way through doing. */
+/* THE WALK DESK IS OFF THE SCREEN (Darko, playground 2026-10-15 18:03: "the bottom
+   right walk panel … we can maybe just ditch it"). Its markup and state stay, since the
+   chip reads its confirm state; what it said lands in the small note (.wv-walk-note). */
+.wv-walkdesk { display:none !important; }
+.wv-walk-note { position:absolute; z-index:9; left:50%; bottom:14px; transform:translateX(-50%); max-width:min(34rem,80%);
+  padding:.45rem .8rem; border-radius:8px; background:rgba(13,15,19,.94); border:1px solid var(--green-dark); color:var(--green);
+  font:600 .82rem/1.35 Consolas,Menlo,monospace; opacity:0; transition:opacity .25s; pointer-events:none; }
+.wv-walk-note.show { opacity:1; }
+.wv-walk-note.refusal { border-color:#b5524a; color:#f0b0a8; }
 .wv-walkdesk { position:absolute; z-index:8; right:10px; bottom:10px; width:min(19rem,42%);
   padding:11px 13px 13px; border:1px solid var(--line); border-left:3px solid var(--green);
   border-radius:6px; background:rgba(13,15,19,.97); box-shadow:0 10px 30px rgba(0,0,0,.55); }
@@ -12479,6 +12488,19 @@ export function mountViewer(appEl) {
     else if (!selectedWalkPreview()) showWalkRefusal("Choose a destination with two finite coordinates.");
   }
 
+  let walkNoteTimer = null;
+  function walkNote(answer) {
+    const desk = $(root, ".wv-walkdesk");
+    const host = desk?.parentElement;
+    if (!host || !answer) return;
+    let el = host.querySelector(":scope > .wv-walk-note");
+    if (!el) { el = document.createElement("div"); el.className = "wv-walk-note"; host.appendChild(el); }
+    el.textContent = answer.textContent;
+    el.classList.toggle("refusal", answer.classList.contains("refusal"));
+    el.classList.add("show");
+    clearTimeout(walkNoteTimer);
+    walkNoteTimer = setTimeout(() => el.classList.remove("show"), answer.classList.contains("refusal") ? 9000 : 5000);
+  }
   async function confirmSelectedWalk() {
     const desk = $(root, ".wv-walkdesk");
     const confirm = $(desk, ".wv-walk-confirm");
@@ -12491,21 +12513,25 @@ export function mountViewer(appEl) {
     answer.hidden = false;
     answer.className = "wv-walk-answer";
     answer.textContent = "The office is recording the departure…";
+    walkNote(answer);
     try {
       const response = await apexAct("walk", { x: preview.toward.x, y: preview.toward.y }, handle);
       if (!response.ok || response.body?.error === "bounce") {
         answer.classList.add("refusal");
         answer.textContent = [response.body?.defect || `the door answered ${response.status}`, response.body?.hint].filter(Boolean).join(" — ");
+        walkNote(answer);
         confirm.disabled = false;
         return;
       }
       answer.classList.add("success");
       answer.textContent = `${handle} departed: ${Number(response.body.leg_m ?? 0).toLocaleString()} m, ETA ${formatEtaCrossings(response.body.eta_crossings ?? 0)}.`;
+      walkNote(answer);
       await pollWalkers();
       if (sameWalkDestination(walkState.destination, armedDestination)) clearSelectionAndDestination();
     } catch (error) {
       answer.classList.add("refusal");
       answer.textContent = `The walk door could not be reached — ${error.message}`;
+      walkNote(answer);
       confirm.disabled = false;
     }
   }
