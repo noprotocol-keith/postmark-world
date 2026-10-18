@@ -1391,8 +1391,13 @@ export function placeholderExtentSVG(mark, px, { ignoreArt = false } = {}) {
   // coloured surface reads — so the floor, the pips and the stylesheet cannot
   // hold three private notions of what counts as a door
   const portal = classToken(instanceClassOf(mark)) === "portal-ground";
+  // TRANSPARENT BY DEFAULT (Darko, playground 2026-10-15: "make marks transparent by
+  // default without an image. And reserve the slight opacity to things"). An
+  // image-less mark is its outline; only a thing keeps the tinted fill, so a thing
+  // reads as an object and a place reads as ground, and art underneath shows through.
+  const thing = classToken(instanceClassOf(mark)) === "thing";
   const fill = `hsl(${hue} 22% 76%)`, edge = `hsl(${hue} 26% 58%)`;
-  const attrs = `class="wv-ph-extent${portal ? " c-portal-ground" : ""}" data-id="${esc(mark.id)}" fill="${fill}" stroke="${edge}"`;
+  const attrs = `class="wv-ph-extent${portal ? " c-portal-ground" : ""}${thing ? " is-thing" : ""}" data-id="${esc(mark.id)}" fill="${fill}" stroke="${edge}"`;
   const ring = polygonOf(mark);
   if (ring) {
     const pts = ring.map((p) => { const q = px(p); return `${q.x.toFixed(1)},${q.y.toFixed(1)}`; }).join(" ");
@@ -5792,7 +5797,8 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
    is now screen-pixel ink, exactly as the walkers, the highlight box and the
    placed-art frame already were. Strokes that are physical widths on the record
    (a centreline's w_m) are set inline and untouched. */
-.wv-ph-extent { stroke-width:1.2; opacity:.5; pointer-events:none; vector-effect:non-scaling-stroke; }
+.wv-ph-extent { stroke-width:1.4; opacity:.9; fill-opacity:0; pointer-events:none; vector-effect:non-scaling-stroke; }
+.wv-ph-extent.is-thing { opacity:.5; fill-opacity:1; stroke-width:1.2; }
 /* A DOOR DRAWS AS A DOOR (founder, 2026-08-27). A portal-ground is a way
    through, and on a plan a way through is drawn the way an architect draws
    one: the opening's edge in the WALL's own ink rather than the block's hash
