@@ -107,7 +107,7 @@ export function residentHoldLines(investigated) {
   const byKind = investigated.holds_by_kind ?? null;
   if (rows == null && byKind == null) return null;
   const names = new Map((rows ?? []).filter((h) => heldNameOf(h)).map((h) => [heldIdOf(h), heldNameOf(h)]));
-  return { ...handsShape({ things: (rows ?? []).map(heldIdOf), byKind }), names };
+  return { ...handsShape({ things: (rows ?? []).map(heldIdOf), byKind, hands: byKind?.hands ?? null }), names };
 }
 
 /**
@@ -119,17 +119,27 @@ export function residentHoldLines(investigated) {
 export function handsLines(holdings) {
   if (!holdings || holdings.error || !Array.isArray(holdings.holding)) return null;
   const things = holdings.holding.map((h) => String(h?.thing ?? h)).filter(Boolean);
-  return handsShape({ things, total: countOf(holdings.count) ?? things.length, byKind: holdings.kinds ?? null });
+  return handsShape({ things, total: countOf(holdings.count) ?? things.length, byKind: holdings.kinds ?? null,
+    hands: holdings.hands ?? holdings.kinds?.hands ?? null });
 }
 
-function handsShape({ things, total = things.length, byKind }) {
+/**
+ * HANDS IN THE OFFICE'S OWN WORDS (Darko 2026-10-18 12:17: "7 of 24 slots · 21
+ * things in all"; office #623 fix D). The hands read carries `hands: { slots:
+ * { used, of }, in_all, shows }` beside `kinds` (and as `kinds.hands`, so a
+ * resident's close look carries it in `holds_by_kind`). Its `shows` is the
+ * column's "carrying" line, verbatim; the page computes neither number. A read
+ * without it keeps the line the page has said until now.
+ */
+function handsShape({ things, total = things.length, byKind, hands = null }) {
   const kinds = kindsOf(byKind);
   const whole = Math.max(0, total - things.length);
   const count = things.length + whole + kinds.reduce((s, k) => s + k.count, 0);
   // the office's own blur when it is the whole holding; with whole things beside
   // the kinds it gave none, and every kind and every holder is a thing
   const shows = count && !things.length && !whole && byKind?.shows ? String(byKind.shows) : null;
-  return { count, shows, kinds, whole, things, names: new Map(), capacity: null, open: null };
+  const said = typeof hands?.shows === "string" && hands.shows.trim() ? hands.shows.trim() : null;
+  return { count, shows, kinds, whole, things, names: new Map(), capacity: null, open: null, ...(said ? { said } : {}) };
 }
 
 const OPEN_WORDS = {
@@ -145,7 +155,8 @@ const OPEN_WORDS = {
  */
 export function holdingParts(lines, { nameOf = (id) => id } = {}) {
   if (!lines) return null;
-  const head = !lines.count ? "nothing" : lines.shows ?? `${lines.count} ${plural(lines.count, "thing")}`;
+  // the office's own sentence for a resident's hands wins whole (handsShape § hands)
+  const head = lines.said ?? (!lines.count ? "nothing" : lines.shows ?? `${lines.count} ${plural(lines.count, "thing")}`);
   return {
     head: lines.capacity != null ? `${head} · ${lines.count} of ${lines.capacity}` : head,
     items: lines.count ? [

@@ -25,6 +25,7 @@
 //   a close look's holds read as bare ids         → 3 and 6b red (review-241 H3)
 //   carriersFrom ignoring `expires`               → 6c reds (review-241 N9)
 //   holderLines re-counting past a `whole` list    → 10 reds ("9 whole things" beside the office's 17)
+//   holdingParts ignoring the hands read's `shows`  → 11 reds
 //   sayCardNote with the old "five minutes"      → 7 reds
 //   isThingKind reading only cls === "thing"     → 8 reds
 
@@ -232,4 +233,21 @@ test("10. counts confer up: the column reads the office's 17 and its whole thing
     holds: { holder: "sb-ash/a-halloween-bowl", count: 9, class: "thing", shows: "9 things", kinds: [{ kind: "candy", count: 8, shows: "8 candies" }] } }));
   assert.equal(before.head, "9 things · 9 of 30");
   assert.deepEqual(before.items, ["8 candies", "1 whole thing"]);
+});
+
+test("11. your hands in the office's own words: \"7 of 24 slots · 21 things in all\", printed verbatim (office #623 fix D)", () => {
+  const hands = { slots: { used: 7, of: 24 }, in_all: 21, shows: "7 of 24 slots · 21 things in all" };
+  const holding = [{ thing: "sb-ash/a-candy-bag" }, { thing: "sb-ash/a-lantern" }];
+  const kinds = { holder: "sb-ash", count: 5, class: "candy", shows: "5 candies", kinds: [{ kind: "candy", count: 5, shows: "5 candies" }] };
+  const read = handsLines({ handle: "sb-ash", count: 2, complete: true, holding, kinds: { ...kinds, hands }, hands });
+  assert.equal(holdingParts(read).head, "7 of 24 slots · 21 things in all", "the office's sentence, whole");
+  assert.deepEqual(holdingParts(read).items, ["5 candies", "sb-ash/a-candy-bag", "sb-ash/a-lantern"], "the kinds and whole things beside it, as before");
+  // carried on kinds alone (a resident's close look rides it in holds_by_kind)
+  const looked = residentHoldLines({ handle: "sb-ash", holds: holding.map((h) => ({ id: h.thing, name: h.thing, body: "" })), holds_by_kind: { ...kinds, hands } });
+  assert.equal(holdingParts(looked).head, "7 of 24 slots · 21 things in all");
+  // without it, today's line stands: the page counts nothing new
+  const before = handsLines({ handle: "sb-ash", count: 2, complete: true, holding, kinds });
+  assert.equal(holdingParts(before).head, "7 things");
+  assert.equal(holdingParts(handsLines({ handle: "sb-ash", count: 0, holding: [], kinds: { count: 0, shows: "empty", hands: { shows: "  " } } })).head, "nothing",
+    "a blank sentence is no sentence");
 });
