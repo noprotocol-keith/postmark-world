@@ -41,11 +41,12 @@ test("THE UNKNOWN STAYS HONEST ON THE DESK: no stride → the legacy 15 and its 
   assert.equal(leg(departPaceKm([], { [STRIDE_CLASS_ID]: { pace_km_per_crossing: 77 } })).paceNote, "");
 });
 
-test("[pin] EVERY LIVE PREVIEW ASKS THE SAME ANSWER: the three call sites pass the /world/dials table", () => {
+test("[pin] EVERY LIVE PREVIEW ASKS THE SAME ANSWER: the four call sites pass the /world/dials table", () => {
   const all = SOURCE.split("departPaceKm(").length - 1;
   const live = SOURCE.split("departPaceKm(byId, currentReadDials())").length - 1;
-  assert.equal(live, 3, "the three preview call sites pass the /world/dials table");
-  assert.equal(all, 4, "and there is no fourth caller (the fourth is the definition)");
+  // the fourth is play fix 69's own walk drawn from its record (ownWalkDeclared), W2 final
+  assert.equal(live, 4, "the three preview call sites and your own declared walk pass the /world/dials table");
+  assert.equal(all, 5, "and there is no fifth caller (the fifth is the definition)");
 });
 
 // ── THE GUARD, AT THE SOURCE: one accessor for every record dial ─────────────

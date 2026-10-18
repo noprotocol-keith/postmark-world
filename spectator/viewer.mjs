@@ -749,6 +749,7 @@ function settlementChip(at) {
 // this edge for ANYTHING that departs. it should sit under resident") — the
 // vessel precedent already said so: the post-office sails at its own 405.
 export const STRIDE_CLASS_ID = "the-town/resident";
+export const SAY_CLASS_ID = "the-town/say";   // the say card's numbers (POS-678)
 //
 // WHERE THE STRIDE IS READ (WLD-29, the pointer model). The page asks its own
 // door for dials — GET /world/dials, every published mark of the office's
@@ -13508,7 +13509,7 @@ export function mountViewer(appEl) {
     const target = body.mark_id ? (byId.get(body.mark_id) ?? null) : null;
     noteWalkRecord(handle, {
       handle, from: body.from, toward: body.toward, at: Number(body.departed_at_crossing),
-      pace: Number(body.mists?.stride_km) > 0 ? Number(body.mists.stride_km) : (departPaceKm(byId) ?? null),
+      pace: Number(body.mists?.stride_km) > 0 ? Number(body.mists.stride_km) : (departPaceKm(byId, currentReadDials()) ?? null),
       // THE RECORD'S OWN EXTENT, NEVER THE MARK'S (play fix 85, Darko 19:55, "it stayed
       // completely still and then jumped to the edge"): a walk to a mark is recorded
       // to the point on its rim with no `within` (the walks read says so), so the
@@ -14119,7 +14120,9 @@ export function mountViewer(appEl) {
     ];
     const cameFrom = bubbleTrail.length > 1 ? bubbleTrail[bubbleTrail.length - 2] : null;
     const backTo = cameFrom && byId.get(cameFrom) ? { id: cameFrom, name: markIdentity(byId.get(cameFrom)) } : null;
-    const enter = crossing.show ? id : null;
+    // A THING IS NOT GROUND TO STAND ON: it offers no "enter" unless its law makes it a door
+    // (the door icon outranks the thing's), the Candy Bag's card (W2 final)
+    const enter = crossing.show && what !== "thing" ? id : null;
     return {
       // the key carries everything that changes what the column says, so a
       // repaint happens exactly when one is owed (the column's own law)
@@ -14183,10 +14186,15 @@ export function mountViewer(appEl) {
   /** The close look in hand for a mark, or null while it is being asked. */
   function markCloseLook(id) { return loadCloseLook("mark", id)?.read ?? null; }
   function residentCloseLook(handle) { return loadCloseLook("investigate", handle)?.read ?? null; }
-  // what the class pointer of a close look says a kind IS (two ancestors deep: a fallback)
+  // WHAT A CLOSE LOOK SAYS A KIND IS. Only a yes is kept: the class pointer is two
+  // ancestors deep, and an old-form record (kind: sited, class: <kind>) can come
+  // back pointed at "sited", so a pointer that names no thing never blocks the
+  // chain's own answer (askLineage). A look with a `holder` is a thing's: holder
+  // is a property of thing (and of resident, who is no mark), LOGOS § The transfer edge.
   function noteThingKind(mark, focus) {
     const cls = classToken(instanceClassOf(mark));
-    if (cls && focus?.class_pointer && !thingKinds.has(cls)) thingKinds.set(cls, isThingKind(cls, { pointer: focus.class_pointer }));
+    if (!cls || thingKinds.get(cls) === true || !focus) return;
+    if (focus.holder || isThingKind(cls, { pointer: focus.class_pointer ?? null })) thingKinds.set(cls, true);
   }
   // A KIND THE PAGE HOLDS NO CLASS MARK FOR is asked of the class layer once, at
   // draw time: explain: "<kind>" answers its whole extends chain (office
@@ -14199,14 +14207,14 @@ export function mountViewer(appEl) {
     return recordClassMemo.set;
   }
   function askLineage(cls) {
-    if (!cls || cls === "thing" || thingKinds.has(cls) || lineageAsked.has(cls)) return;
+    if (!cls || cls === "thing" || thingKinds.get(cls) === true || lineageAsked.has(cls)) return;
     if (creatureClasses().has(cls) || recordClasses().has(cls)) return;   // the record answers
     lineageAsked.add(cls);
     fetch(officeUrl(`/world/apex?explain=${encodeURIComponent(cls)}`), { headers: { accept: "application/json" }, credentials: "same-origin" })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
         if (!Array.isArray(j?.extends)) return;
-        thingKinds.set(cls, isThingKind(cls, { chain: j.extends.map((c) => classToken(c?.class)) }));
+        if (thingKinds.get(cls) !== true) thingKinds.set(cls, isThingKind(cls, { chain: j.extends.map((c) => classToken(c?.class)) }));
         if (lastRadial && mapCtx) drawOverlay(lastRadial);
         syncMarkInteractionViews();
       })
@@ -16877,9 +16885,11 @@ export function mountViewer(appEl) {
   // like every other act — no second road to speech — and what lands shows up
   // in the conversations layer this map already draws and on the town's
   // conversations page, which is the lane the say has always ridden.
+  // the say class's dials as every record dial is read (dialOf): the office's
+  // GET /world/dials table first, the record second; then the conversations read
   function sayNote() {
-    const entry = (state.palette?.entries ?? []).find((e) => e?.action === "say");
-    return sayCardNote({ dials: entry?.dials ?? null, conversations: convoMeta });
+    const { dials: sayDials } = dialOf({ dials: currentReadDials(), marks: byId }, SAY_CLASS_ID);
+    return sayCardNote({ dials: sayDials, conversations: convoMeta });
   }
   function openSayBox() {
     const host = $(root, ".wv-actions-host");
@@ -16898,8 +16908,8 @@ export function mountViewer(appEl) {
       // Said BEFORE the box, not after: the town's own habit is to disclose at
       // the door, and the door's tool description says exactly this to an agent.
       // A resident typing into a browser is owed the same sentence.
-      // THE NUMBERS ARE THE OFFICE'S (POS-678): the say card's dials where the palette
-      // carries them, else the conversations read's; never the page's own constants
+      // THE NUMBERS ARE THE OFFICE'S (POS-678): the say class's dials (dialOf, the
+      // /world/dials table first), else the conversations read's; never the page's own
       + `<p class="wv-act-note wv-say-note">${esc(sayNote())}</p>`
       + `<div class="wv-act-row"><textarea class="wv-say-text" rows="3" maxlength="500" placeholder="say something where you stand…"></textarea></div>`
       + `<div class="wv-act-row"><span class="wv-say-count wv-quiet">0 / 500</span>`

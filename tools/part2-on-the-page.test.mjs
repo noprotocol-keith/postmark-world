@@ -26,6 +26,8 @@
 //   a ground row with no holder that only sets (carriersFrom) → 2b reds
 //   markWhat without thingClasses                            → 4 reds
 //   iconsOf without askLineage                               → 4's draw-time row reds
+//   noteThingKind ignoring a close look's holder             → 4b reds (the old-form bag is "A place")
+//   the column offering enter to a thing                     → 4b reds
 //   sayNote() back to the old sentence                       → 5 reds
 //
 // The browser is CI's (suite.yml installs playwright); the box skips by name.
@@ -68,6 +70,9 @@ const KITE = "rig-cleo/a-kite";
 const KITE_CANON = { x: 240, y: 80 };
 const STOOL = "rig-ash/a-stool";       // where the kite is set down: its pip is the reference
 const STOOL_AT = { x: 205, y: 110 };
+// the Candy Bag in the OLD form (kind: sited, class: <kind>), as the playground's sb-ash wrote it
+const CANDY_BAG = "rig-ash/a-candy-bag";
+const CANDY_AT = { x: 236, y: 112 };
 const RECORDS = {
   [BOWL]: { id: BOWL, by: ACTOR, household: ACTOR, kind: "halloween-candy-bowl", tier: "market", at: { ...HERE }, extent: { w: 1, h: 1 },
     body: "A second pumpkin bowl." },
@@ -75,6 +80,8 @@ const RECORDS = {
   [BAG]: { id: BAG, by: ACTOR, household: ACTOR, kind: "thing", holder: true, capacity: 3, tier: "market", at: { x: 229, y: 103.5 }, extent: { w: 1, h: 1 },
     body: "A cloth bag." },
   [KITE]: { id: KITE, by: CLEO, household: CLEO, kind: "thing", tier: "market", at: { ...KITE_CANON }, extent: { w: 1, h: 1 }, body: "A paper kite." },
+  [CANDY_BAG]: { id: CANDY_BAG, by: ACTOR, household: ACTOR, kind: "sited", class: "halloween-candy-bag", tier: "market", at: { ...CANDY_AT }, extent: { w: 1, h: 1 },
+    body: "A bag for gathering candy." },
   [STOOL]: { id: STOOL, by: ACTOR, household: ACTOR, kind: "sited", tier: "market", at: { ...STOOL_AT }, extent: { w: 1, h: 1 }, body: "A stool." },
 };
 const READ = {
@@ -86,12 +93,14 @@ const READ = {
     { id: BAG, at: { x: 229, y: 103.5 }, bearing: "SE", distance_m: 11, kind: "thing", tier: "market" },
     { id: KITE, at: { ...KITE_CANON }, bearing: "NE", distance_m: 24, kind: "thing", tier: "market" },
     { id: STOOL, at: { ...STOOL_AT }, bearing: "SW", distance_m: 21, kind: "sited", tier: "market" },
+    { id: CANDY_BAG, at: { ...CANDY_AT }, bearing: "SE", distance_m: 22, kind: "sited", tier: "market" },
   ],
   // the ground set, as a real read carries it: townGround refuses a set with no region rings
   records: { ...Object.fromEntries(townRegionMarks(SERVED.marks).map((m) => [m.id, m])), ...RECORDS },
   present: { radius_m: 120, residents: [] },
   actions: [{ action: "say", blurb: "Speak where you stand.", from: "the-town/resident", class: "resident", grant: "yours",
-    fields: { text: "string" }, dispatches_to: "world_say" }],
+    fields: { text: "string" }, dispatches_to: "world_say" },
+    { action: "enter", blurb: "Go inside a place.", from: "the-town/resident", class: "resident", grant: "yours", fields: { mark: "string" }, dispatches_to: "world_enter" }],
   telling: "The rig's yard is quiet.",
 };
 // world-kinds.mjs § investigateMark, merged into the apex focus
@@ -102,6 +111,12 @@ const FOCUS = {
   [BAG]: { id: BAG, body: "A cloth bag.", holder: { capacity: 3, open: true },
     holds: { holder: BAG, count: 2, class: "candy", shows: "2 candies", kinds: [{ kind: "candy", count: 2, shows: "2 candies" }] },
     can: [], class_pointer: 'kind: thing · a sited · a mark — explain: "thing"' },
+  // a holder's close look whose pointer names no thing (an old-form row pointed at "sited"),
+  // from an office whose class layer cannot explain the kind: its `holder` is the only word
+  [CANDY_BAG]: { id: CANDY_BAG, body: "A bag for gathering candy.", holder: { capacity: 200, open: true },
+    holds: { holder: CANDY_BAG, count: 8, class: "candy", shows: "8 candies", kinds: [{ kind: "candy", count: 8, shows: "8 candies" }] },
+    can: ["take", "give"], class_pointer: 'kind: sited · a mark — explain: "sited"' },
+  [STOOL]: { id: STOOL, body: "A stool.", can: [], class_pointer: 'kind: sited · a mark — explain: "sited"' },
 };
 // world-hold.mjs § world_holdings, and the ground within reach (groundRow)
 const TAKE = {
@@ -226,6 +241,7 @@ async function columnFor(id, { until = null } = {}) {
       open: !!col && !col.hidden,
       title: col?.querySelector(".wv-homecol-title")?.textContent.trim() ?? "",
       meta: col?.querySelector(".wv-homecol-meta")?.textContent.trim() ?? "",
+      enter: !!col?.querySelector("[data-enter]"),
       icons: [...(col?.querySelectorAll(".wv-homecol-icon .wv-ic") ?? [])].map((e) => [...e.classList].find((c) => c.startsWith("ic-"))),
       meanings: [...(col?.querySelectorAll(".wv-homecol-icon-meaning") ?? [])].map((e) => e.textContent.trim()),
       facts,
@@ -252,7 +268,7 @@ test("4a. on the map, before any column is opened, the bowl wears the thing icon
   assert.ok(!icons.includes("place"));
   assert.ok(office.asked.some((p) => p === "/world/apex?explain=halloween-candy-bowl"), "the chain was asked of the class layer, once");
   assert.ok(!office.asked.some((p) => p.includes("mark=")), "and no column had been opened");
-  assert.equal(office.asked.filter((p) => p.startsWith("/world/apex?explain=")).length, 1, "once, however often the map draws");
+  assert.equal(office.asked.filter((p) => p === "/world/apex?explain=halloween-candy-bowl").length, 1, "once, however often the map draws");
 });
 
 test("1. a holder's column says what it holds, by kind, its room and that it is open", async (t) => {
@@ -320,6 +336,17 @@ test("4. a Halloween bowl reads as a thing, never a place", async (t) => {
   assert.ok(col.icons.includes("ic-thing"), "the thing icon: " + JSON.stringify(col.icons));
   assert.ok(!col.icons.includes("ic-place"), "not a place");
   assert.ok(!col.meanings.some((m) => /^A place/.test(m)), JSON.stringify(col.meanings));
+});
+
+test("4b. the Candy Bag (old form, kind: sited + class) reads as a thing and offers no enter; a place still does", async (t) => {
+  if (!chromium) return t.skip(skipReason);
+  const place = await columnFor(STOOL, { until: "A stool." });
+  assert.ok(place.enter, "a plain place keeps its door: " + JSON.stringify(place));
+  const col = await columnFor(CANDY_BAG, { until: "8 of 200" });
+  assert.equal(col.facts.contents, "8 candies · 8 of 200");
+  assert.ok(col.icons.includes("ic-thing"), "a thing: " + JSON.stringify(col.icons));
+  assert.ok(!col.meanings.some((m) => /^A place/.test(m)), "never \"A place\": " + JSON.stringify(col.meanings));
+  assert.equal(col.enter, false, "a thing is not ground to stand on: no enter");
 });
 
 test("5. the say card says the office's numbers", async (t) => {
