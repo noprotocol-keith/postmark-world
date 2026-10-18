@@ -4561,11 +4561,47 @@ export function contestedMarksAtPoint(point, marks = [], radiusPx = MARK_SNAP_RA
 export function chooserLeadLine(ids = []) {
   const list = ids ?? [];
   const people = list.filter((id) => walkerHandleFromHoverId(id)).length;
-  const marks = list.length - people;
+  // A CREATURE IS NOT A MARK (play row 55: "2 marks are stacked here" over a wolf and a bat)
+  const creatures = list.filter((id) => isCreatureId(id)).length;
+  const marks = list.length - people - creatures;
   const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
-  if (!people) return `${count(marks, "mark is", "marks are")} stacked here — which one?`;
-  if (!marks) return `${count(people, "resident is", "residents are")} standing here — which one?`;
-  return `${count(people, "resident", "residents")} and ${count(marks, "mark", "marks")} are here — which one?`;
+  if (!people && !creatures) return `${count(marks, "mark is", "marks are")} stacked here — which one?`;
+  if (!marks && !creatures) return `${count(people, "resident is", "residents are")} standing here — which one?`;
+  if (!marks && !people) return `${count(creatures, "creature is", "creatures are")} here — which one?`;
+  const parts = [people && count(people, "resident", "residents"), creatures && count(creatures, "creature", "creatures"), marks && count(marks, "mark", "marks")].filter(Boolean);
+  return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]} are here — which one?`;
+}
+
+/** NO TOKEN HIDES ANOTHER (play row 55: three creatures within 8 m drew as one
+ *  clump that covered V). The residents stand where they stand; each creature,
+ *  in id order, keeps its own place unless a token already placed is within
+ *  `sep` (painting px, the token's size on screen at this zoom), and then
+ *  steps out on a ring around its own place, at the first free seat. Seats are
+ *  tried at 1×, 2× and 3× `sep`, eight to a ring, from an angle its own id
+ *  picks, so a creature keeps its seat across draws. Returns id -> {x, y}. Pure. */
+export function seatCreatureTokens(creatures = [], residents = [], sep = 1) {
+  const placed = (residents ?? []).filter((r) => Number.isFinite(r?.x) && Number.isFinite(r?.y)).map((r) => ({ x: r.x, y: r.y }));
+  const free = (q) => placed.every((o) => Math.hypot(o.x - q.x, o.y - q.y) >= sep - 1e-9);
+  const out = new Map();
+  for (const c of [...(creatures ?? [])].filter((c) => c?.id && Number.isFinite(c.x) && Number.isFinite(c.y)).sort((a, b) => String(a.id).localeCompare(String(b.id)))) {
+    let at = { x: c.x, y: c.y };
+    if (!free(at)) {
+      let h = 0;
+      for (const ch of String(c.id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      const start = (h % 360) * Math.PI / 180;
+      let found = null;
+      for (let ring = 1; ring <= 3 && !found; ring++)
+        for (let k = 0; k < 8 && !found; k++) {
+          const a = start + k * Math.PI / 4;
+          const q = { x: c.x + Math.cos(a) * sep * ring, y: c.y + Math.sin(a) * sep * ring };
+          if (free(q)) found = q;
+        }
+      at = found ?? at;
+    }
+    placed.push(at);
+    out.set(c.id, at);
+  }
+  return out;
 }
 
 export function orderInnermostFirst(ids, byId) {
@@ -13597,13 +13633,17 @@ export function mountViewer(appEl) {
     // NOTHING BEHIND THE WALL IS SEEN (POS-466): outdoors, a creature the
     // engine puts behind the wall's true face is the wall's, not the map's
     const m = sceneRoomId ? null : mistsAt(state.crossing, data?.skeleton?.mists);
+    // SEATED SO NONE HIDES ANOTHER (row 55): the residents' places are fixed, and
+    // a creature that would sit on a token already down steps aside by one token
+    const shown = [...liveCreatures.values()].filter((c) => !(sceneRoomId && !(box && pointInRect(c.x, c.y, box))) && !(m && mistsHere({ x: c.x, y: c.y }, m).inWall));
+    const sep = ((tier === "far" ? CREATURE_GLYPH.plainSize : CREATURE_GLYPH.size) + 6) / markerScale(mapCtx?.zoomK);
+    const residents = (walkState.walkers ?? []).filter((w) => Number.isFinite(w?.x) && Number.isFinite(w?.y)).map((w) => px({ x: w.x, y: w.y }));
+    const seats = seatCreatureTokens(shown.map((c) => ({ id: c.id, ...px({ x: c.x, y: c.y }) })), residents, sep);
     let out = "";
-    for (const c of liveCreatures.values()) {
-      if (sceneRoomId && !(box && pointInRect(c.x, c.y, box))) continue;
-      if (m && mistsHere({ x: c.x, y: c.y }, m).inWall) continue;
+    for (const c of shown) {
       // far: the plain token, as a resident is the blank walker there (fix 49)
       const plain = tier === "far";
-      out += creatureGlyphSVG({ creature: c, at: px({ x: c.x, y: c.y }), silhouette: plain ? null : creatureSilhouette(c.kind),
+      out += creatureGlyphSVG({ creature: c, at: seats.get(c.id) ?? px({ x: c.x, y: c.y }), silhouette: plain ? null : creatureSilhouette(c.kind),
         title: state.paintingOnly ? null : c.name, plain });
     }
     return out;
