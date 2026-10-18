@@ -1788,10 +1788,13 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   property with two child properties: `capacity`, how many it can hold, and
   `open`, whether other households may give and take.
   - **On `resident`:** `holder: true` and `capacity: 24`, both constitution
-    and locked (today's `carry_cap`), and `holders: 1`, constitution and
-    locked: **a resident carries at most one holder at a time** (ruled
-    2026-10-17 23:29, below). A resident has no `open`: a give to a
-    resident follows the general consent law below.
+    and locked (today's `carry_cap`). `holders`, how many holders a
+    resident carries, is constitution and unset: **a resident carries any
+    number of holders** (ruled 2026-10-18 12:17, below). A resident has no
+    `open`: a give to a resident follows the general consent law below.
+    *SUPERSEDED 2026-10-18 12:17: "and `holders: 1`, constitution and
+    locked: a resident carries at most one holder at a time (ruled
+    2026-10-17 23:29, below)."*
   - **On `thing`:** `holder` is sovereign, default false, so a thing holds
     nothing unless its maker says so. When it is true, `capacity` (sovereign,
     default 30, with constitution children `min` 1 and `max` 120) and `open`
@@ -1830,10 +1833,14 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   things show `take` (12:36, under the 12:38 `portable` ruling), so taking a
   thing that holds needs `portable: true`. **A carried
   holder's contents travel inside it.**
-- **One holder in hand, and counts confer up** (ruled 2026-10-17 23:29,
-  Darko: *"yes, rule it, one holder and counts confer up"*):
-  - **A resident carries at most one holder at a time** (the resident's
-    `holders`, 1, constitution and locked).
+- **Any number of holders, and counts confer up** (ruled 2026-10-18 12:17,
+  Darko, of WLD-76's recommended shape: *"Yeah, I agree with your
+  recommended shape"*; counts confer up ruled 2026-10-17 23:29: *"yes, rule
+  it, one holder and counts confer up"*):
+  - **A resident carries any number of holders.** The resident's `holders`
+    is unset, and unset means no limit.
+    *SUPERSEDED 2026-10-18 12:17: "A resident carries at most one holder at
+    a time (the resident's `holders`, 1, constitution and locked)."*
   - **Counts confer up between holders:** a holder counts 1 plus everything
     it holds, recursively, toward the room of whatever holds it.
   - **In a resident's hands, each top-level thing counts 1.** The 24 is
