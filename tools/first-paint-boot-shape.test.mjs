@@ -284,7 +284,8 @@ test("THE PALETTE IS ASKED FOR ONCE IN A BOOT", async (t) => {
   const palette = asked.filter((r) => {
     if (!r.url.includes("/world/apex")) return false;
     const q = new URL(r.url).searchParams;
-    return !!q.get("handle") && q.get("telling") !== "true";
+    // and a read: shadow or a close look (mark:, investigate:) is another question again (POS-678)
+    return !!q.get("handle") && q.get("telling") !== "true" && !q.get("read") && !q.get("mark") && !q.get("investigate");
   });
 
   assert.equal(palette.length, 1,

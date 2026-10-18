@@ -298,6 +298,20 @@ export function enterTargetOf(intoMark, marks) {
   return intoMark?.extent ? intoMark : containerOf(intoMark, marks);
 }
 
+/** A PLACE'S OWN DOOR IS A THRESHOLD, NEVER A ROOM (WLD-63, Darko 2026-10-13
+ *  23:54: "from ANYWHERE in the Chapel's extent, you can enter, and pick your
+ *  into, and end up at its position within the Chapel"). When the way picked
+ *  through `portal` is itself a portal standing inside it (the Chapel's front
+ *  door, set in its wall), the passage enters the room that door stands in and
+ *  sets you down at the door; nobody is put inside a doorway. Every other way
+ *  is `enterTargetOf`, unchanged. */
+export function passageTargetOf(portal, intoMark, marks) {
+  const law = intoMark && intoMark.id !== portal?.id ? entryLawOf(intoMark) : null;
+  if (law?.into?.length && !law.into.includes(intoMark.id) && markInside(portal, intoMark))
+    return containerOf(intoMark, marks);
+  return enterTargetOf(intoMark, marks);
+}
+
 /** The portals a walker standing in this room may take next — one step at a
  *  time, no route-finding. The room each portal belongs to is its container. */
 export function portalsIn(roomId, marks) {
@@ -321,7 +335,7 @@ export function portalsInto(dungeonId, marks) {
   for (const m of marks) {
     const law = entryLawOf(m);
     if (!law?.into || !m.at || inD(m.id)) continue;
-    if (!law.into.some((id) => { const t = byId.get(id); const n = t ? enterTargetOf(t, marks)?.id ?? id : null; return n && inD(n); })) continue;
+    if (!law.into.some((id) => { const t = byId.get(id); const n = t ? passageTargetOf(m, t, marks)?.id ?? id : null; return n && inD(n); })) continue;
     out.push({ id: m.id, into: law.into, word: law.word, at: m.at });
   }
   return out.sort((a, b) => a.id.localeCompare(b.id));
@@ -414,9 +428,9 @@ export function portalFindings(marks) {
   const say = (mark, rule, msg, sev = "ERROR") => found.push({ mark, rule, msg, sev });
 
   // node of a passage target: the room actually entered
-  const nodeOf = (id) => {
+  const nodeOf = (id, via) => {
     const t = byId.get(id);
-    return t ? enterTargetOf(t, list)?.id ?? null : null;
+    return t ? passageTargetOf(via, t, list)?.id ?? null : null;
   };
 
   const portals = [];
@@ -453,9 +467,9 @@ export function portalFindings(marks) {
   for (const d of idx.dungeons) {
     const inD = (id) => id === d || (idx.of.get(id) ?? []).includes(d);
     const inner = portals.filter(({ m }) => inD(m.id));
-    const isExit = (law) => law.into.some((id) => byId.has(id) && !inD(nodeOf(id) ?? id));
+    const isExit = (m, law) => law.into.some((id) => byId.has(id) && !inD(nodeOf(id, m) ?? id));
     for (const { m, law } of inner)
-      if (isExit(law) && law.word === "opposed")
+      if (isExit(m, law) && law.word === "opposed")
         say(m.id, "exit-never-opposed", `this portal leads out of ${d} and answers "opposed" — an exit is locked from the outside, never from the inside. No jails`);
 
     // rooms: every place inside the dungeon a passage can put you, and every
@@ -463,7 +477,7 @@ export function portalFindings(marks) {
     // floor does not exist yet: the stairs class's default) puts nobody anywhere, so
     // it makes no room; a welcomed or neutral one is a place you stand in.
     const rooms = new Set();
-    for (const { m, law } of portals) for (const id of law.into) { if (id === m.id && law.word === "opposed") continue; const n = nodeOf(id); if (n && inD(n)) rooms.add(n); }
+    for (const { m, law } of portals) for (const id of law.into) { if (id === m.id && law.word === "opposed") continue; const n = nodeOf(id, m); if (n && inD(n)) rooms.add(n); }
     for (const { m } of inner) { const c = containerOf(m, list)?.id; if (c && inD(c)) rooms.add(c); }
     const out = new Map([...rooms].map((r) => [r, { exit: false, to: new Set() }]));
     for (const { m, law } of inner) {
@@ -472,7 +486,7 @@ export function portalFindings(marks) {
       if (!out.has(from)) continue;
       for (const id of law.into) {
         if (!byId.has(id)) continue;
-        const n = nodeOf(id) ?? id;
+        const n = nodeOf(id, m) ?? id;
         if (inD(n)) out.get(from).to.add(n); else out.get(from).exit = true;
       }
     }
