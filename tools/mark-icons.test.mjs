@@ -106,3 +106,11 @@ test("on the map: the glyph is cut into the dot, replacing the doorway; states r
   assert.match(pill, /^<g transform="translate\(5 6\)"><g class="ov-s">/, "sized by the camera like a pip");
   assert.equal((pill.match(/class="ov-ic /g) ?? []).length, 2, "one glyph per state");
 });
+
+test("[pin] the plate wears what the mark is before its name and its states after; a mark with no icon keeps the dot", () => {
+  const SOURCE = readFileSync(new URL("../spectator/viewer.mjs", import.meta.url), "utf8");
+  const fn = SOURCE.match(/function markNameplateHTML\(id\) \{[\s\S]*?\n  \}\n/)[0];
+  assert.ok(fn.indexOf("wv-np-what") < fn.indexOf("wv-np-name") && fn.indexOf("wv-np-name") < fn.indexOf("wv-np-icons"),
+    "icon, name, states");
+  assert.match(fn, /: `<span class="wv-np-dot \$\{markClasses\(full\)\}" aria-hidden="true"><\/span>`/, "the dot when there is no icon");
+});

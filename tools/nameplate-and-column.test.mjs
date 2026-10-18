@@ -1,0 +1,43 @@
+// nameplate-and-column.test.mjs — the playground sitting's three levels, as the
+// page wires them (Darko, 2026-10-15): the hover's dot steps aside for the
+// nameplate, a click inside a mark's ground selects that ground, and the mounted
+// room's plate opens the room's column. Source pins: the page itself is a
+// browser's to drive, and these say only that the lines were written.
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const SOURCE = readFileSync(new URL("../spectator/viewer.mjs", import.meta.url), "utf8");
+
+test("[pin] a hovered mark is its outline and a faint fill in its own colour, with no dot; a selected one is lit as before", () => {
+  const fn = SOURCE.match(/function renderMarkHighlight\(\) \{[\s\S]*?\n  \}\n/)[0];
+  assert.match(fn, /renderOneMarkHighlight\(selectedId\)/, "the selection's highlight is unchanged");
+  assert.match(fn, /renderOneMarkHighlight\(glance, \{ hover: true \}\)/, "the hover's is asked for as a hover");
+  assert.match(fn, /syncHoveredPip\(/, "and the hovered mark's own pip steps aside");
+  assert.match(SOURCE, /if \(!hover\) s \+= `<circle cx="\$\{p\.x\}" cy="\$\{p\.y\}" r="\$\{14 \/ k\}" class="wv-hl-dot \$\{t\}"\/>`;/, "no growing dot on a hover");
+  assert.match(SOURCE, /\.wv-hl-box\.is-hover\.t-market \{ fill:rgba\(232,197,106,\.13\); \}/, "a faint fill in the mark's own colour");
+  assert.match(SOURCE, /\.ov-s\.is-hovering > \.ov-pip, \.ov-s\.is-hovering > \.ov-pip-door, \.ov-s\.is-hovering > \.ov-ic-in \{ opacity:0; \}/,
+    "the pip is hidden, not removed — and the icon drawn into it (fix 13) goes with it");
+  assert.match(SOURCE, /<span class="wv-np-dot \$\{markClasses\(full\)\}" aria-hidden="true"><\/span>/, "the plate wears the dot beside the name");
+});
+
+test("[pin] a click on open ground inside a mark selects that ground and still walks to the exact spot", () => {
+  const at = SOURCE.indexOf("…AND THE GROUND YOU CLICKED IS SELECTED");
+  assert.ok(at > 0);
+  const block = SOURCE.slice(at, at + 1600);
+  assert.match(block, /smallestContainingMark\(worldPoint, toldHere\(\), \{ insideRoomId: sceneRoomId \}\)/, "the hover's own containment rule picks the ground");
+  assert.match(block, /markInteraction\.select\(ground\);\s*if \(canAct\(\)\) chooseWalkPoint\(point\.x, point\.y\);/,
+    "selected directly (never selectMark's walk to a mark's centre), then the walk to the clicked point");
+  assert.match(block, /state\.arming \? null/, "a half-begun act keeps today's open-ground click");
+  // the precedence before it is untouched: faces first, then the contested chooser, then a pip
+  const up = SOURCE.slice(SOURCE.indexOf('svg.addEventListener("pointerup"'), at);
+  assert.ok(up.indexOf("peopleHere") < up.indexOf("openChooser(contested)") && up.indexOf("openChooser(contested)") < up.indexOf("selectMark(markId"),
+    "a face, then the chooser, then a pip, then the ground");
+});
+
+test("[pin] every mark's column, including the room you are in", () => {
+  assert.match(SOURCE, /const column = parcelColumnView\(selected\) \?\? regionColumnView\(selected\) \?\? markColumnView\(selected\);/);
+  const fn = SOURCE.match(/function markColumnView\(id\) \{[\s\S]*?\n  \}\n/)[0];
+  assert.match(fn, /region: id === sceneRoomId \? "you are inside" : where\.detail,/, "the mounted room's plate opens its column, which says where you are");
+  assert.match(fn, /if \(!state\.paintingOnly \|\| !id\) return null;/, "painting-only, like the bubble it replaces");
+});

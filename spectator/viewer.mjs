@@ -1785,10 +1785,17 @@ export function townGround(marks, skeleton, { originPx, mPerPx, pad = TOWN_GROUN
 // the click route has always listened for; the label is exitButtonLabel's, so a
 // nested dweller's exit still names the room it opens onto. `cellHTML` is the
 // caller's mark cell, passed in whole — this function never re-renders a mark.
-export function roomCardHTML({ roomId = null, cellHTML = "", exitLabel = "↤ step outside" } = {}) {
+//
+// THE CARD IS A NAMEPLATE NOW (Darko, playground sitting 2026-10-15 18:20: the
+// open card "is a bit obnoxious … whatever code we use to simplify or minimize
+// the shape on hover to just have that icon and the name, we should pretty much
+// have the same thing and then have one smaller version of the step outside
+// button. That's it."). `plateHTML` is the hover's own nameplate for the room;
+// a press on it opens the room's column, which is the full description. The
+// way out is the same button on the same route, smaller.
+export function roomCardHTML({ roomId = null, plateHTML = "", exitLabel = "↤ step outside" } = {}) {
   if (!roomId) return "";
-  return `<div class="wv-room-card-lbl">you are inside</div>`
-    + cellHTML
+  return plateHTML
     + `<div class="wv-int-exit wv-room-card-exit">`
     + `<button type="button" class="ctl wv-int-exit-btn" data-mark="${esc(roomId)}">${esc(exitLabel)}</button>`
     + `</div>`;
@@ -5724,10 +5731,17 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
    only: the crossing sheet's outline pill (.wv-cross-row) is untouched, and
    the class and click route (.wv-int-exit-btn → stepOutside) are the same. */
 .wv-int-exit.wv-room-card-exit .ctl {
-  display:flex; width:100%; justify-content:center;
-  padding:.7em 1em; font-size:.82rem; font-weight:600;
+  display:inline-flex; width:auto; justify-content:center; white-space:nowrap;
+  padding:.3em .75em; font-size:.7rem; font-weight:600;
   color:#0d1426; background:#e8c48b; border:1px solid #e8c48b;
 }
+/* THE CARD IS A NAMEPLATE AND ONE SMALL BUTTON (Darko, 2026-10-15 18:20): one
+   row, the plate pressable, the way out beside it */
+.wv-bubble.wv-room-card.is-plate { display:flex; align-items:center; gap:4px; overflow:visible;
+  max-width:min(26rem, calc(100% - 26px)); }
+.wv-room-card.is-plate .wv-nameplate { cursor:pointer; min-width:0; flex:0 1 auto; padding:4px 6px 4px 9px; }
+.wv-room-card.is-plate .wv-int-exit.wv-room-card-exit { position:static; padding:4px 6px 4px 2px;
+  border-top:0; background:transparent; flex:none; }
 .wv-int-exit.wv-room-card-exit .ctl:hover { color:#0d1426; background:#d4a862; border-color:#d4a862; }
 .wv-int-exit.wv-room-card-exit .ctl[disabled] { background:#e8c48b; border-color:#e8c48b; }
 /* the paper floor — the placeholder ground is the drafting sheet (founder's
@@ -5990,6 +6004,13 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-hl-box.t-home { stroke:var(--green); }
 .wv-hl-box.t-market { stroke:var(--amber); }
 .wv-hl-box.mech { stroke-dasharray:6 5; }
+/* a hovered mark fills in faintly in its own colour, and its dot steps aside
+   (Darko, 2026-10-15): the nameplate carries the dot now */
+.wv-hl-box.is-hover.t-market { fill:rgba(232,197,106,.13); }
+.wv-hl-box.is-hover.t-home { fill:rgba(132,201,143,.13); }
+.wv-hl-box.is-hover.t-constitution { fill:rgba(123,167,224,.13); }
+.wv-hl-box.is-hover.is-draft { fill:rgba(160,160,160,.12); }
+.ov-s.is-hovering > .ov-pip, .ov-s.is-hovering > .ov-pip-door, .ov-s.is-hovering > .ov-ic-in { opacity:0; }
 .wv-hl-dot { stroke:#fff; stroke-width:1.5; vector-effect:non-scaling-stroke; }
 .wv-hl-dot.t-constitution { fill:var(--blue); }
 .wv-hl-dot.t-home { fill:var(--green); }
@@ -6474,10 +6495,15 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-bubble.is-nameplate { max-width:min(19rem,60%); border-radius:5px; box-shadow:0 4px 14px rgba(0,0,0,.45);
   pointer-events:auto; cursor:pointer; }
 .wv-np-icons { display:inline-flex; align-items:center; gap:5px; flex:none; }
+.wv-np-what { display:inline-flex; flex:none; }
 .wv-nameplate { display:flex; align-items:center; gap:7px; padding:3px 9px 3px 8px; min-width:0; }
 .wv-np-name { color:var(--paper); font-size:.82rem; font-weight:700; line-height:1.35;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 .wv-np-name.is-determined { color:var(--amber); }
+.wv-np-dot { flex:none; width:9px; height:9px; border-radius:50%; background:var(--amber); }
+.wv-np-dot.t-home { background:var(--green); }
+.wv-np-dot.t-constitution { background:var(--blue); }
+.wv-np-dot.is-draft { background:var(--draft); }
 /* the contested-click chooser: a compact stack list in the bubble's own chrome,
    innermost first. Rows are the page's ordinary cell title, so a row looks like
    the thing it opens. */
@@ -8312,24 +8338,15 @@ export function mountViewer(appEl) {
       card.setAttribute("data-wv-keep", "");
       boxEl.appendChild(card);
     }
-    const built = `${room.id} ${exitLabel}`;
+    const plateHTML = markNameplateHTML(room.id);
+    const built = `${room.id} ${exitLabel} ${plateHTML}`;
     if (card.dataset.built === built && card.firstChild) { seatRoomCard(); return; }
-    const keptStack = card.dataset.room === room.id
-      ? [...($(card, `.wv-card[data-id="${CSS.escape(room.id)}"]`)?._stack ?? [])]
-      : [];
     card.dataset.built = built;
     card.dataset.room = room.id;
-    card.className = `wv-bubble wv-room-card ${markClasses(mark)}`;
-    const predicates = allMarks().filter((p) => p.parent === mark.id && isPredicateAttribute(p));
-    card.innerHTML = roomCardHTML({
-      roomId: room.id,
-      cellHTML: markCell(mark, { role: "fov" }) + predicates.map((p) => markCell(p, { role: "fov" })).join(""),
-      exitLabel,
-    });
-    foldRenderedPredicates(card);
-    mountMarkImages(card);
-    const cell = $(card, `.wv-card[data-id="${CSS.escape(room.id)}"]`);
-    if (cell && keptStack.length) { cell._stack = keptStack; renderExpansion(cell); }
+    card.className = `wv-bubble wv-room-card is-plate ${markClasses(mark)}`;
+    card.setAttribute("aria-label", `you are inside ${markIdentity(mark)}`);
+    card.setAttribute("title", "you are inside — press the name for the whole description");
+    card.innerHTML = roomCardHTML({ roomId: room.id, plateHTML, exitLabel });
     seatRoomCard();
   }
   // THE CARD YIELDS THE TOP EDGE TO THE RAIL WHERE THE TWO WOULD MEET. On a desk
@@ -9988,7 +10005,20 @@ export function mountViewer(appEl) {
       }
       const worldPoint = worldPointForEvent(e);
       const point = { x: Math.round(worldPoint.x), y: Math.round(worldPoint.y) };
-      markInteraction.select(null);
+      // …AND THE GROUND YOU CLICKED IS SELECTED (Darko, playground 2026-10-15
+      // 18:03: "if you click within a mark's extent, that should also count as
+      // selecting the mark so that it's super clear that that's where you're
+      // going to walk … from the fact that the literal column pops up"). The
+      // innermost mark the point is inside, by the hover's own containment rule
+      // (the same mark that lit under the pointer), is selected and its column
+      // opens; the walk still goes to the exact spot clicked, never the mark's
+      // centre — which is why this selects directly rather than through
+      // selectMark, whose walk preview aims at a named mark's middle. A
+      // half-begun act (state.arming) keeps today's open-ground click.
+      const ground = state.arming ? null
+        : smallestContainingMark(worldPoint, toldHere(), { insideRoomId: sceneRoomId });
+      bubbleTrail = ground ? [ground] : [];
+      markInteraction.select(ground);
       if (canAct()) chooseWalkPoint(point.x, point.y);
       else {
         state.cam = point;
@@ -10908,12 +10938,36 @@ export function mountViewer(appEl) {
     drawConversations();
     if (mapCtx.follow && mapCtx.lockOn && !mapCtx._tweening) mapCtx.lockOn();
   }
+  // ── A HOVER NO LONGER GROWS THE DOT (Darko, playground 2026-10-15 18:00) ──
+  //
+  // "right now on hover, the dot becomes bigger and like even more obnoxious …
+  // since we're going to have like the name anyway and like the inside of the
+  // marks area kind of fills in slightly, … we can actually just get rid of or
+  // like hide the dot and instead display it like next to the name." So a
+  // HOVERED mark draws its outline and a faint fill in its own colour, and no
+  // dot: its own pip is hidden for as long as the pointer rests on it, and the
+  // nameplate carries the dot beside the name. A SELECTED mark is lit as before.
   function renderMarkHighlight() {
     if (!mapCtx?.hlLayer) return;
-    const interaction = markInteraction.getState();
-    const ids = [interaction.selectedId, interaction.hoveredId]
-      .filter((id, index, all) => id && all.indexOf(id) === index);
-    writeHighlight(ids.map(renderOneMarkHighlight).join(""));
+    const { selectedId, hoveredId } = markInteraction.getState();
+    const glance = hoveredId && hoveredId !== selectedId ? hoveredId : null;
+    writeHighlight((selectedId ? renderOneMarkHighlight(selectedId) : "")
+      + (glance ? renderOneMarkHighlight(glance, { hover: true }) : ""));
+    syncHoveredPip(glance && !walkerHandleFromHoverId(glance) ? glance : null);
+  }
+  // The hovered mark's own pip steps out of sight (its group carries the class,
+  // so the dot and anything drawn into it go together); everything else of a
+  // parcel — its card — stays. Re-asserted after every overlay draw, which
+  // rebuilds the pips; a no-op while nothing has changed.
+  let hoveredPipId = null;
+  function syncHoveredPip(id) {
+    const overlay = mapCtx?.overlay;
+    if (!overlay) return;
+    if (id === hoveredPipId && (!id || overlay.querySelector(".ov-s.is-hovering"))) return;
+    for (const g of overlay.querySelectorAll(".ov-s.is-hovering")) g.classList.remove("is-hovering");
+    hoveredPipId = id;
+    if (!id) return;
+    for (const pip of overlay.querySelectorAll(`.ov-pip[data-id="${CSS.escape(id)}"]`)) pip.parentNode?.classList?.add("is-hovering");
   }
   // THE SAME HIGHLIGHT IS NOT WRITTEN TWICE (POS-228). This runs on every frame
   // of a drag, and an innerHTML write — even of the empty string over an empty
@@ -10926,7 +10980,7 @@ export function mountViewer(appEl) {
     layer._pmHtml = html;
     layer.innerHTML = html;
   }
-  function renderOneMarkHighlight(id) {
+  function renderOneMarkHighlight(id, { hover = false } = {}) {
     const walkerHandle = walkerHandleFromHoverId(id);
     if (walkerHandle) return renderWalkerHighlight(walkerHandle);
     const m = id && byId.get(id);
@@ -10973,9 +11027,9 @@ export function mountViewer(appEl) {
       // layer beneath was correctly drawing as a polygon — Keemin caught it as a
       // wash that didn't fit its own shape.
       const hlPx = (x, y) => ({ x: mapCtx.originPx.x + x / mapCtx.mPerPx, y: mapCtx.originPx.y + y / mapCtx.mPerPx });
-      s += markShapeSVG(target, hlPx, `wv-hl-box ${t}${mech}`);
+      s += markShapeSVG(target, hlPx, `wv-hl-box ${t}${mech}${hover ? " is-hover" : ""}`);
     }
-    s += `<circle cx="${p.x}" cy="${p.y}" r="${14 / k}" class="wv-hl-dot ${t}"/>`;
+    if (!hover) s += `<circle cx="${p.x}" cy="${p.y}" r="${14 / k}" class="wv-hl-dot ${t}"/>`;
     // In painting-only the bubble carries the name, so the SVG label stands down
     // — two boxes saying the same word over the same dot is one box too many.
     // The geometry (the wash, the dot, the edge arrow) is not a label and stays.
@@ -12948,7 +13002,8 @@ export function mountViewer(appEl) {
     return d;
   }
   function markColumnView(id) {
-    if (!state.paintingOnly || !id || id === sceneRoomId) return null;
+    // the mounted room has a column too: its plate opens it (syncRoomCard)
+    if (!state.paintingOnly || !id) return null;
     if (walkerHandleFromHoverId(id) || chooserIdsFrom(id)) return null;
     const mark = byId.get(id);
     if (!mark || isParcelMark(mark) || isRegionMark(mark)) return null;
@@ -12997,7 +13052,8 @@ export function mountViewer(appEl) {
       residentLink: false,
       kicker: String(mark.household ?? mark.by ?? "the town"),
       title: identity.name || String(mark.id),
-      region: where.detail,
+      // the room you are in is not somewhere at a distance
+      region: id === sceneRoomId ? "you are inside" : where.detail,
       leadImage: markImagePath(mark),
       door: { description: typeof mark.body === "string" ? mark.body : "" },
       byline: markByline(mark),
@@ -13243,19 +13299,28 @@ export function mountViewer(appEl) {
   // after the pointer has rested (GLANCE_DELAY_MS) so a sweep across the map
   // flashes nothing. No body: the words are the click's, in the column.
   //
-  // Still deliberately NOT a live cell: no data-id, no button. Beside the name
-  // ride the mark's icons (mark-icons.mjs), so the glance says what a mark IS —
-  // Darko's second complaint. The plate takes the pointer for exactly one
-  // reason: so its icons can say what they mean on hover; a pointer resting on
-  // it holds it up, and a press on it is the press on the mark.
+  // THE DOT RIDES BESIDE THE NAME (Darko, 18:00): the mark's own pip is hidden
+  // while it is hovered (renderMarkHighlight), so the plate wears it instead —
+  // and since the pip IS the mark's icon now (fix 13), the plate wears the icon:
+  // what the mark is before its name, its states after. A mark with no icon (an
+  // idea, a bounty) keeps the plain dot. The same plate is the room's, indoors
+  // (syncRoomCard).
+  //
+  // Still deliberately NOT a live cell: no data-id, no button. The plate takes
+  // the pointer for exactly one reason: so its icons can say what they mean on
+  // hover; a pointer resting on it holds it up, and a press on it is the press
+  // on the mark (the root delegate's `[data-nameplate]`).
   function markNameplateHTML(id) {
     const full = byId.get(id);
     if (!full) return "";
     const identity = markName(full);
     const icons = iconsOf(full);
+    const what = icons[0]?.kind === "what" ? icons[0] : null;
+    const states = what ? icons.slice(1) : icons;
     return `<div class="wv-nameplate" data-nameplate="${esc(full.id)}">`
+      + (what ? `<span class="wv-np-what">${iconsHTML([what])}</span>` : `<span class="wv-np-dot ${markClasses(full)}" aria-hidden="true"></span>`)
       + `<span class="wv-np-name${identity.determined ? " is-determined" : ""}">${esc(identity.name || full.id)}</span>`
-      + (icons.length ? `<span class="wv-np-icons">${iconsHTML(icons)}</span>` : "")
+      + (states.length ? `<span class="wv-np-icons">${iconsHTML(states)}</span>` : "")
       + `</div>`;
   }
   // A RESTING POINTER, NOT A PASSING ONE. The glance waits this long on one mark
@@ -14093,14 +14158,24 @@ export function mountViewer(appEl) {
     // selection, and the column is what it looks like for a parcel
     if (e.target.closest(".wv-bubble-close, .wv-homecol-close")) { clearSelectionAndDestination(); return; }
     if (e.target.closest(".wv-bubble-back, [data-homecol-back]")) { bubbleBack(); return; }
-    // a relative named in a mark's column opens that mark's column, and the
-    // trail remembers the way back exactly as the pinned bubble's did
+    // A PRESS ON A NAMEPLATE IS A PRESS ON ITS MARK. The room's own plate,
+    // indoors, opens and shuts the room's column and proposes no walk: you are
+    // already in it (Darko, 18:20, "if we click on it, then it expands into the
+    // full description").
     const plate = e.target.closest("[data-nameplate]");
     if (plate) {
       glanceHeld = false;
-      if (byId.has(plate.dataset.nameplate)) selectMark(plate.dataset.nameplate, { scrollCell: true });
+      const id = plate.dataset.nameplate;
+      if (id && id === sceneRoomId) {
+        bubbleTrail = [];
+        markInteraction.select(markInteraction.getState().selectedId === id ? null : id);
+        return;
+      }
+      if (byId.has(id)) selectMark(id, { scrollCell: true });
       return;
     }
+    // a relative named in a mark's column opens that mark's column, and the
+    // trail remembers the way back exactly as the pinned bubble's did
     const colGo = e.target.closest("[data-homecol-go]");
     if (colGo) { if (byId.has(colGo.dataset.homecolGo)) followInBubble(colGo.dataset.homecolGo); return; }
     const filterChip = e.target.closest("[data-mark-filter]");
