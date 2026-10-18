@@ -7512,6 +7512,15 @@ export function agentCopyText(mark, { name = null, crossing = null, enter = fals
   return lines.join("\n");
 }
 
+/** WHAT THE CROSSINGS SAY, IN ONE STRING (play fix 57): their count and the
+ *  newest of them, so a re-read that brought nothing new is told from one that
+ *  did without walking the ledger. Pure. */
+export function crossingsSignature(acts = []) {
+  const list = Array.isArray(acts) ? acts : [];
+  const last = list[list.length - 1];
+  return `${list.length}|${last ? JSON.stringify(last) : ""}`;
+}
+
 export function mountViewer(appEl) {
   if (!appEl) throw new Error("mountViewer needs a host element");
   const shadowHost = appEl;
@@ -16679,6 +16688,16 @@ export function mountViewer(appEl) {
     tick++;
     const nl = liveCrossing();
     if (nl !== lastLive) { lastLive = nl; if (!state.crossingOverride) { state.crossing = nl; reRender(`crossing ${nl}`); } }
+    // THE PAGE FOLLOWS CROSSINGS IT DID NOT MAKE (play fix 57). An agent's enter
+    // or exit used to reach an open page only on a reload: the crossings were
+    // re-read after the page's own acts and nowhere else, so the room chip kept
+    // the Grounds after visitor stepped into the Forecourt. Every tick of a
+    // visible tab now reads them again; when they moved, fix 03 drops the reads
+    // the step made stale and the render follows (the room scene included).
+    if (enterExitEpoch > 0 && !(typeof document !== "undefined" && document.hidden)) {
+      const before = crossingsSignature(enterExitLedger.acts);
+      loadEnterExitLedger().then(() => { if (crossingsSignature(enterExitLedger.acts) !== before) renderCurrent(); }).catch(() => {});
+    }
     // the countdown is arithmetic on the wall clock, so it re-reads every tick;
     // the NUMBER only moves when a settlement actually lands, so it is refreshed
     // on the same slower beat the fold uses
