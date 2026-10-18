@@ -56,3 +56,10 @@ test("[pin] the page: the plan drives the click; the column's ✕ and its relati
   assert.match(SOURCE, /if \(canAct\(\) && !keepWalk\) \{/);
   assert.match(SOURCE, /function keepDestinationClear\(\) \{/, "the armed point is panned clear of the column");
 });
+
+test("[pin] a refused walk is said where it can be seen, and a road into the wall is not 'already there'", () => {
+  const fn = SOURCE.match(/function showWalkRefusal\(message\) \{[\s\S]*?\n  \}\n/)[0];
+  assert.match(fn, /walkNote\(answer\);/, "the desk is hidden (fix 20); the note says it, in red");
+  assert.match(SOURCE, /const wall = departure\?\.leg\?\.mistRefused;/);
+  assert.match(SOURCE, /the mist is too thick to walk into — this road runs into the wall of the Mists at/, "the office's own words (world.mjs § mistsRefusal)");
+});

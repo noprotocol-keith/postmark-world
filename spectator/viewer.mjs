@@ -12274,6 +12274,10 @@ export function mountViewer(appEl) {
     answer.hidden = false;
     answer.className = "wv-walk-answer refusal";
     answer.textContent = message;
+    // THE DESK IS HIDDEN (fix 20), so a refusal said only there was said to
+    // nobody: a click that armed nothing looked like a click that did nothing
+    // (play fix 38, Darko 19:55). It is said in the note as well, in red.
+    walkNote(answer);
   }
 
   function renderWalkDestinations() {
@@ -12612,12 +12616,18 @@ export function mountViewer(appEl) {
     // as a destination with blank metrics. Refuse it here rather than let a
     // zero-length journey reach the ledger. The click is still heard; it just
     // arms nothing, and says why.
-    if (actorOrigin() && !isRealDeparture(walkPreviewTo(next))) {
+    const departure = actorOrigin() ? walkPreviewTo(next) : null;
+    if (actorOrigin() && !isRealDeparture(departure)) {
       walkState.destination = null;
       walkState.changingCourse = false;
       renderWalkDestination();
       clearWalkFeedback();
-      showWalkRefusal("You are already standing there — a departure needs somewhere else to go.");
+      // A ROAD INTO THE WALL IS NOT "ALREADY THERE" (play fix 38): the Mists
+      // refuse it, in the office's own words (world.mjs § mistsRefusal)
+      const wall = departure?.leg?.mistRefused;
+      showWalkRefusal(wall
+        ? `the mist is too thick to walk into — this road runs into the wall of the Mists at (${wall.x}, ${wall.y}), and no road goes into the wall, ends on it or crosses it.`
+        : "You are already standing there — a departure needs somewhere else to go.");
       return;
     }
     walkState.destination = next;
