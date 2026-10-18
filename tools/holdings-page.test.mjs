@@ -18,6 +18,8 @@
 //   holderLines dropping holder.capacity/open    → 1 and 2 red
 //   carriersFrom ignoring the ground's holder    → 4 reds
 //   carriedAt using the thing's own `at`         → 4 and 5 red
+//   a ground row with no holder that only sets    → 6 reds (the kite stays in her hands)
+//   handsLines counting holding.length            → 3b reds
 //   sayCardNote with the old "five minutes"      → 7 reds
 //   isThingKind reading only cls === "thing"     → 8 reds
 
@@ -25,7 +27,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   holderLines, residentHoldLines, handsLines, holdingParts,
-  carriersFrom, holderChain, carriedAt, carriedWords,
+  handsList, carriersFrom, carriedAt, carriedWords,
   sayCardNote, isThingKind,
 } from "../spectator/holdings.mjs";
 
@@ -77,47 +79,71 @@ test("3. a resident's hands: their whole things by name and their kinds; your ow
   assert.equal(residentHoldLines({ handle: "x" }), null, "a read that carried neither says nothing");
 });
 
+test("3b. your hands count what the door counted, not the page it sent (20 a page, 24 to carry)", () => {
+  const page = Array.from({ length: 20 }, (_, i) => ({ thing: `sb-ash/thing-${i}` }));
+  const lines = handsLines({ handle: "sb-ash", count: 23, shown: 20, limit: 20, offset: 0, complete: false, next_offset: 20, holding: page,
+    kinds: { holder: "sb-ash", count: 1, class: "candy", shows: "1 candy", kinds: [{ kind: "candy", count: 1, shows: "1 candy" }] } });
+  assert.equal(lines.count, 24, "23 whole things and 1 candy");
+  assert.equal(lines.whole, 3, "the three the page did not list");
+  assert.equal(holdingParts(lines).head, "24 things");
+  assert.match(holdingParts(lines).items.at(-1), /^3 whole things$/);
+  const list = handsList("sb-ash", { count: 23, complete: false, holding: page }, 5);
+  assert.equal(list.complete, false, "a page short of the count says nothing about the rest");
+});
+
+const at = (x, y) => ({ x, y });
+const bodies = { "sb-ash": at(214, -352), "sb-cleo": at(210, -350) };
+const places = { bodyAt: (h) => bodies[h] ?? null };
+
 test("4. a carried thing is drawn with its carrier: your hands, the ground's holder, a looked-at resident", () => {
-  const carriers = carriersFrom({
-    self: "sb-ash",
-    hands: { holding: [{ thing: "sb-ash/a-cloth-bag-two", made_by: "sb-ash" }] },
-    ground: { things: [
-      { thing: "sb-ash/a-cloth-bag-one", holder: "sb-ash/a-cloth-bag-two", stands_at: { x: 203, y: -344 } },
-      { thing: "sb-cleo/a-lantern", holder: "sb-cleo", stands_at: { x: 210, y: -350 } },
-      { thing: "the-town/a-stool", stands_at: { x: 1, y: 1 }, takeable: true },
+  const known = carriersFrom([
+    handsList("sb-ash", { count: 1, complete: true, holding: [{ thing: "sb-ash/a-cloth-bag-two", made_by: "sb-ash" }] }, 10),
+    { at: 10, ground: [
+      { thing: "sb-cleo/a-lantern", holder: "sb-cleo", stands_at: at(210, -350), place_from: "holder" },
+      { thing: "the-town/a-stool", stands_at: at(1, 1), place_from: "fold", takeable: true },
     ] },
-    investigated: [{ handle: "sb-dov", holds: ["sb-dov/a-kite"] }],
-  });
-  assert.equal(carriers.get("sb-ash/a-cloth-bag-two"), "sb-ash");
-  assert.equal(carriers.get("sb-ash/a-cloth-bag-one"), "sb-ash/a-cloth-bag-two");
-  assert.equal(carriers.get("sb-cleo/a-lantern"), "sb-cleo");
-  assert.equal(carriers.get("sb-dov/a-kite"), "sb-dov");
-  assert.equal(carriers.has("the-town/a-stool"), false, "a thing nobody holds stays where it stands");
-  const bodies = { "sb-ash": { x: 214, y: -352 }, "sb-cleo": { x: 210, y: -350 } };
-  const places = { bodyAt: (h) => bodies[h] ?? null, markAt: () => null };
-  assert.deepEqual(holderChain("sb-ash/a-cloth-bag-one", carriers), ["sb-ash/a-cloth-bag-two", "sb-ash"]);
-  const one = carriedAt("sb-ash/a-cloth-bag-one", carriers, places);
-  assert.deepEqual([one.x, one.y, one.carrier], [214, -352, "sb-ash"], "a bag in a bag in your hands rides you");
-  assert.equal(carriedWords("sb-ash/a-cloth-bag-one", carriers, { self: "sb-ash", nameOf: () => "A Cloth Bag Two" }),
-    "inside A Cloth Bag Two, in your hands");
-  assert.equal(carriedWords("sb-cleo/a-lantern", carriers, { self: "sb-ash" }), "in sb-cleo's hands");
-  assert.equal(carriedWords("the-town/a-stool", carriers, { self: "sb-ash" }), null);
+    { at: 8, holder: "sb-dov", things: ["sb-dov/a-kite"], complete: true },
+  ]);
+  assert.equal(known.holders.get("sb-ash/a-cloth-bag-two"), "sb-ash");
+  assert.equal(known.holders.get("sb-cleo/a-lantern"), "sb-cleo");
+  assert.equal(known.holders.get("sb-dov/a-kite"), "sb-dov");
+  assert.equal(known.holders.has("the-town/a-stool"), false, "a thing nobody holds stays where it stands");
+  assert.equal(known.placed.has("the-town/a-stool"), false, "and a canon place is the record's own, not moved");
+  const two = carriedAt("sb-ash/a-cloth-bag-two", known, places);
+  assert.deepEqual([two.x, two.y, two.holder], [214, -352, "sb-ash"]);
+  assert.equal(carriedWords("sb-ash/a-cloth-bag-two", known, { self: "sb-ash" }), "in your hands");
+  assert.equal(carriedWords("sb-cleo/a-lantern", known, { self: "sb-ash" }), "in sb-cleo's hands");
+  assert.equal(carriedWords("the-town/a-stool", known, { self: "sb-ash" }), null);
+});
+
+test("4b. A THING INSIDE A BAG IS NOT MOVED (a known gap): no read names it, and a thing-holder row moves nothing", () => {
+  // the office never sends this row (whereThingStands gives a thing-held thing no place); if it did, the page claims nothing
+  const known = carriersFrom([{ at: 1, ground: [{ thing: "sb-ash/a-cloth-bag-one", holder: "sb-ash/a-cloth-bag-two", stands_at: at(203, -344) }] }]);
+  assert.equal(known.holders.has("sb-ash/a-cloth-bag-one"), false);
+  assert.equal(carriedAt("sb-ash/a-cloth-bag-one", known, places), null, "drawn where the record has it");
+  assert.equal(carriedWords("sb-ash/a-cloth-bag-one", known, { self: "sb-ash" }), null);
 });
 
 test("5. a thing whose carrier cannot be placed is drawn nowhere, never where it used to stand", () => {
-  const carriers = carriersFrom({ self: "sb-ash", hands: { holding: [{ thing: "sb-ash/a-cloth-bag-one" }] },
-    investigated: [{ handle: "sb-far", holds: ["sb-far/a-hat"] }] });
-  const places = { bodyAt: (h) => (h === "sb-ash" ? { x: 214, y: -352 } : null) };
-  assert.deepEqual(carriedAt("sb-ash/a-cloth-bag-one", carriers, places).x, 214);
-  const far = carriedAt("sb-far/a-hat", carriers, places);
+  const known = carriersFrom([{ at: 1, holder: "sb-far", things: ["sb-far/a-hat"], complete: true }]);
+  const far = carriedAt("sb-far/a-hat", known, places);
   assert.equal(far.unplaced, true);
   assert.equal(far.x, null);
-  assert.equal(carriedAt("the-town/a-stool", carriers, places), null, "nobody holds it: it stands where it stands");
+  assert.equal(carriedAt("the-town/a-stool", known, places), null, "nobody holds it: it stands where it stands");
 });
 
-test("6. a loop in the holder record names no one twice and ends", () => {
-  const carriers = new Map([["a/one", "a/two"], ["a/two", "a/one"]]);
-  assert.deepEqual(holderChain("a/one", carriers), ["a/two"]);
+test("6. the freshest read wins: a kite set down leaves its holder, and stands where the ground read says", () => {
+  const looked = { at: 100, holder: "sb-cleo", things: ["sb-cleo/a-kite"], complete: true };
+  assert.equal(carriersFrom([looked]).holders.get("sb-cleo/a-kite"), "sb-cleo");
+  const dropped = { at: 200, ground: [{ thing: "sb-cleo/a-kite", stands_at: at(230, -360), place_from: "set-down", takeable: true }] };
+  const known = carriersFrom([dropped, looked]);   // handed in any order: applied oldest first
+  assert.equal(known.holders.has("sb-cleo/a-kite"), false, "the fresher row with no holder clears the older look");
+  assert.deepEqual(carriedAt("sb-cleo/a-kite", known, places), { x: 230, y: -360, holder: null, setDown: true });
+  assert.equal(carriersFrom([{ ...dropped, at: 50 }, looked]).holders.get("sb-cleo/a-kite"), "sb-cleo", "an older row does not undo a fresher look");
+  // a complete list says the holder holds nothing else; an incomplete one says nothing about the rest
+  const before = { at: 10, holder: "sb-ash", things: ["sb-ash/a-pouch", "sb-ash/a-bag"], complete: true };
+  assert.equal(carriersFrom([before, { at: 20, holder: "sb-ash", things: ["sb-ash/a-bag"], complete: true }]).holders.has("sb-ash/a-pouch"), false);
+  assert.equal(carriersFrom([before, { at: 20, holder: "sb-ash", things: ["sb-ash/a-bag"], complete: false }]).holders.get("sb-ash/a-pouch"), "sb-ash");
 });
 
 test("7. the say card's numbers are the office's: 60 m, drawn 15 minutes, heard until the settlement", () => {

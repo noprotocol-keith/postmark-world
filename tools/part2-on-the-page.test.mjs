@@ -11,16 +11,21 @@
 //      whether it is open; a resident's column says what is in their hands
 //   2. a bag in your own hands is drawn with you, and its column says "in
 //      your hands", never "11 m southeast of you"
-//   4. a Halloween bowl reads as a thing, never "A place"
-//   5. the say card says the office's numbers: 60 m, drawn 15 minutes, heard
-//      until the next settlement (the page said "fades from hearing in five
-//      minutes")
+//   2b. a kite someone held and set down leaves their hands at the next ground
+//      read, and is drawn where it was set down (review-241 H2)
+//   4. a Halloween bowl reads as a thing, never "A place", on the map before
+//      any column is opened (review-241 N2)
+//   5. the say card says the office's numbers (the stub's are off the
+//      defaults, 45 m and 20 minutes, so a page that hard-codes 60/15 reds;
+//      the page said "fades from hearing in five minutes")
 //
 // ── THE CAN-FAIL FLIPS ─────────────────────────────────────────────────────
 //   drop `...holdingFacts(holding)` from markColumnView      → 1 reds
 //   drop the carried relocation in overlayMarks              → 2 reds (the pips part)
 //   radialWhere without the carried line                     → 2 reds (the column says "11 m · southeast of you")
+//   a ground row with no holder that only sets (carriersFrom) → 2b reds
 //   markWhat without thingClasses                            → 4 reds
+//   iconsOf without askLineage                               → 4's draw-time row reds
 //   sayNote() back to the old sentence                       → 5 reds
 //
 // The browser is CI's (suite.yml installs playwright); the box skips by name.
@@ -58,12 +63,19 @@ const ACTOR = "rig-ash";
 const HERE = { x: 221, y: 95.5 };   // in the Town Centre, where the record's own rings are
 const BOWL = "rig-ash/a-halloween-bowl";
 const BAG = "rig-ash/a-cloth-bag-one";
+const CLEO = "rig-cleo";               // stands on the bowl too, so her body is drawn where the bowl's pip is
+const KITE = "rig-cleo/a-kite";
+const KITE_CANON = { x: 240, y: 80 };
+const STOOL = "rig-ash/a-stool";       // where the kite is set down: its pip is the reference
+const STOOL_AT = { x: 205, y: 110 };
 const RECORDS = {
   [BOWL]: { id: BOWL, by: ACTOR, household: ACTOR, kind: "halloween-candy-bowl", tier: "market", at: { ...HERE }, extent: { w: 1, h: 1 },
     body: "A second pumpkin bowl." },
   // its canon place, ~11 m southeast of where the actor stands: where the page used to draw it
   [BAG]: { id: BAG, by: ACTOR, household: ACTOR, kind: "thing", holder: true, capacity: 3, tier: "market", at: { x: 229, y: 103.5 }, extent: { w: 1, h: 1 },
     body: "A cloth bag." },
+  [KITE]: { id: KITE, by: CLEO, household: CLEO, kind: "thing", tier: "market", at: { ...KITE_CANON }, extent: { w: 1, h: 1 }, body: "A paper kite." },
+  [STOOL]: { id: STOOL, by: ACTOR, household: ACTOR, kind: "sited", tier: "market", at: { ...STOOL_AT }, extent: { w: 1, h: 1 }, body: "A stool." },
 };
 const READ = {
   handle: ACTOR,
@@ -72,6 +84,8 @@ const READ = {
   nearby: [
     { id: BOWL, at: { ...HERE }, bearing: "N", distance_m: 0, kind: "halloween-candy-bowl", tier: "market" },
     { id: BAG, at: { x: 229, y: 103.5 }, bearing: "SE", distance_m: 11, kind: "thing", tier: "market" },
+    { id: KITE, at: { ...KITE_CANON }, bearing: "NE", distance_m: 24, kind: "thing", tier: "market" },
+    { id: STOOL, at: { ...STOOL_AT }, bearing: "SW", distance_m: 21, kind: "sited", tier: "market" },
   ],
   // the ground set, as a real read carries it: townGround refuses a set with no region rings
   records: { ...Object.fromEntries(townRegionMarks(SERVED.marks).map((m) => [m.id, m])), ...RECORDS },
@@ -100,10 +114,18 @@ const TAKE = {
   ] },
 };
 // world-apex.mjs § investigateOn
-const INVESTIGATED = { handle: ACTOR, holds: [BAG],
-  holds_by_kind: { holder: ACTOR, count: 3, class: "candy", shows: "3 candies", kinds: [{ kind: "candy", count: 3, shows: "3 candies" }] } };
+const INVESTIGATED = {
+  [ACTOR]: { handle: ACTOR, holds: [BAG],
+    holds_by_kind: { holder: ACTOR, count: 3, class: "candy", shows: "3 candies", kinds: [{ kind: "candy", count: 3, shows: "3 candies" }] } },
+  [CLEO]: { handle: CLEO, holds: [KITE] },
+};
+// class-read.mjs § explainClass: the whole chain, which the page asks once at draw time
+const EXPLAIN = { "halloween-candy-bowl": { explains: "halloween-candy-bowl", class: "the-town/halloween-candy-bowl", what: "A Halloween Candy Bowl is a thing that holds.",
+  extends: [{ class: "thing" }, { class: "sited" }, { class: "mark" }, { class: "postmark-node" }] } };
+// the kite set down: a ground row with no holder (world-hold.mjs § groundRow, place_from "set-down")
+const KITE_SET_DOWN = { thing: KITE, made_by: CLEO, stands_at: { ...STOOL_AT }, place_from: "set-down", distance_m: 21, takeable: true };
 // voices.mjs § conversations
-const CONVERSATIONS = { now: "2026-10-18T03:00:00.000Z", earshot_m: 60, fade_minutes: 15, hearable_since: "2026-10-17T22:00:00.000Z",
+const CONVERSATIONS = { now: "2026-10-18T03:00:00.000Z", earshot_m: 45, fade_minutes: 20, hearable_since: "2026-10-17T22:00:00.000Z",
   close_minutes: 30, live: [], closed: [] };
 
 async function bootStubOffice() {
@@ -120,14 +142,15 @@ async function bootStubOffice() {
     const q = url.searchParams;
     if (url.pathname === "/ops/whoami") return send({ principal: false, household: "rig-house", handles: [ACTOR] });
     if (url.pathname === "/world/apex") {
+      if (q.get("explain")) return send(EXPLAIN[q.get("explain")] ?? { error: "bounce", defect: "no class by that name" });
       if (q.get("mark")) return send({ ...READ, focus: FOCUS[q.get("mark")] ?? { error: "bounce", defect: "no such mark" } });
-      if (q.get("investigate")) return send({ ...READ, investigated: q.get("investigate") === ACTOR ? INVESTIGATED : { error: "bounce" } });
+      if (q.get("investigate")) return send({ ...READ, investigated: INVESTIGATED[q.get("investigate")] ?? { error: "bounce" } });
       if (q.get("read") === "take") return send(TAKE);
       if (q.get("read") === "walk") return send({ read: "walk", walkers: { walkers: [] } });
       return send(READ);
     }
-    if (url.pathname === "/world/present") return send({ at: 1000, residents: [{ handle: ACTOR, at: { ...HERE }, source: "walk" }] });
-    if (url.pathname === "/world/walkers") return send({ at: 1000, walkers: [], standing: [{ handle: ACTOR, x: HERE.x, y: HERE.y }] });
+    if (url.pathname === "/world/present") return send({ at: 1000, residents: [{ handle: ACTOR, at: { ...HERE }, source: "walk" }, { handle: CLEO, at: { ...HERE }, source: "walk" }] });
+    if (url.pathname === "/world/walkers") return send({ at: 1000, walkers: [], standing: [{ handle: ACTOR, x: HERE.x, y: HERE.y }, { handle: CLEO, x: HERE.x, y: HERE.y }] });
     if (url.pathname === "/world/conversations") return send(CONVERSATIONS);
     // the resident's portfolio: nothing of theirs is published, so the read is the page's index
     if (url.pathname === "/world/my-marks") return send({ handle: ACTOR, drafts: [], docket: [], published: [], backed: [], complete: true, counts: { drafts: 0, docket: 0, published: 0, backed: 0 } });
@@ -220,11 +243,23 @@ const pipAt = (id) => page.evaluate((x) => {
   return m ? { x: Number(m[1]), y: Number(m[2]) } : null;
 }, id);
 
+test("4a. on the map, before any column is opened, the bowl wears the thing icon (its chain asked at draw time)", async (t) => {
+  if (!chromium) return t.skip(skipReason);
+  await page.waitForFunction((bowl) => window.__pmViewer.iconsOf(bowl).includes("thing"), BOWL, { timeout: 20_000 }).catch(() => {});
+  const icons = await page.evaluate((bowl) => window.__pmViewer.iconsOf(bowl), BOWL);
+  assert.ok(icons.includes("thing"), "the pip and the plate say thing: " + JSON.stringify(icons));
+  assert.ok(!icons.includes("place"));
+  assert.ok(office.asked.some((p) => p === "/world/apex?explain=halloween-candy-bowl"), "the chain was asked of the class layer, once");
+  assert.ok(!office.asked.some((p) => p.includes("mark=")), "and no column had been opened");
+  assert.equal(office.asked.filter((p) => p.startsWith("/world/apex?explain=")).length, 1, "once, however often the map draws");
+});
+
 test("1. a holder's column says what it holds, by kind, its room and that it is open", async (t) => {
   if (!chromium) return t.skip(skipReason);
   const col = await columnFor(BOWL, { until: "5 of 30" });
   assert.ok(col.open, "the bowl's column opened");
-  assert.equal(col.facts.holds, "5 things · 5 of 30", "the office's blur and its room: " + JSON.stringify(col.facts));
+  assert.equal(col.facts.contents, "5 things · 5 of 30", "the office's blur and its room: " + JSON.stringify(col.facts));
+  assert.equal(col.facts.holds, undefined, "\"holds\" stays the spatial relation's word");
   assert.equal(col.facts["by kind"], "4 candies, 1 whole thing");
   assert.equal(col.facts.open, "open: other households may give into it and take from it");
   assert.ok(office.asked.some((p) => p.startsWith(`/world/apex?mark=${encodeURIComponent(BOWL)}`) && p.includes(`handle=${ACTOR}`)),
@@ -235,9 +270,9 @@ test("1b. a resident's column says what is in their hands", async (t) => {
   if (!chromium) return t.skip(skipReason);
   const col = await columnFor(`walker:${ACTOR}`, { until: "3 candies" });
   assert.ok(col.open, "the resident's column opened");
-  assert.equal(col.facts.holds, "4 things", JSON.stringify(col.facts));
+  assert.equal(col.facts.carrying, "4 things", JSON.stringify(col.facts));
   assert.equal(col.facts["by kind"], "3 candies");
-  const carrying = col.relations.find((r) => r.label === "carrying");
+  const carrying = col.relations.find((r) => r.label === "whole things");
   assert.deepEqual(carrying?.items, [BAG], "their whole things, each a way into its column");
 });
 
@@ -249,9 +284,33 @@ test("2. a bag in your hands is drawn with you, and its column says so", async (
     `the bag rides you, at your body (where the bowl you stand on is): bag ${JSON.stringify(bag)}, bowl ${JSON.stringify(bowl)}`);
   const col = await columnFor(BAG, { until: "in your hands" });
   assert.equal(col.meta, "in your hands", "never its old place: " + JSON.stringify(col.meta));
-  assert.equal(col.facts.holds, "2 candies · 2 of 3");
+  assert.equal(col.facts.contents, "2 candies · 2 of 3");
   const heldBy = col.relations.find((r) => r.label === "held by");
   assert.deepEqual(heldBy?.items, [`walker:${ACTOR}`]);
+});
+
+test("2b. a kite set down leaves her hands at the next ground read, and is drawn where it was set down", async (t) => {
+  if (!chromium) return t.skip(skipReason);
+  const col = await columnFor(`walker:${CLEO}`, { until: "whole things" });
+  assert.ok(col.open, "her column opened, and with it her close look: she holds the kite");
+  for (let i = 0; i < 80; i++) {
+    const [k, b] = [await pipAt(KITE), await pipAt(BOWL)];
+    if (k && b && Math.hypot(k.x - b.x, k.y - b.y) < 0.01) break;
+    await page.waitForTimeout(250);
+  }
+  const held = await pipAt(KITE), body = await pipAt(BOWL);
+  assert.ok(held && Math.hypot(held.x - body.x, held.y - body.y) < 0.01, `in her hands, at her body: kite ${JSON.stringify(held)}, her spot ${JSON.stringify(body)}`);
+  // she sets it down; the next read of the ground (the walkers poll's) says so, while her close look is still fresh
+  TAKE.ground.things.push(KITE_SET_DOWN);
+  try {
+    await page.evaluate(() => window.__pmViewer.handsAgain());
+    await page.waitForTimeout(800);
+    const down = await pipAt(KITE), stool = await pipAt(STOOL);
+    assert.ok(down && stool && Math.hypot(down.x - stool.x, down.y - stool.y) < 0.01,
+      `on the ground where she set it down, not in her hands: kite ${JSON.stringify(down)}, the set-down spot ${JSON.stringify(stool)}`);
+    const kiteCol = await columnFor(KITE);
+    assert.ok(!/hands/.test(kiteCol.meta), "its column no longer says it is in anyone's hands: " + JSON.stringify(kiteCol.meta));
+  } finally { TAKE.ground.things.pop(); }
 });
 
 test("4. a Halloween bowl reads as a thing, never a place", async (t) => {
@@ -267,10 +326,10 @@ test("5. the say card says the office's numbers", async (t) => {
   await page.evaluate(() => window.__pmViewer.select(null));
   await page.waitForSelector('[data-action-verb="say"]', { timeout: 30_000 });
   await page.click('[data-action-verb="say"]');
-  await page.waitForFunction(() => /15 minutes/.test(document.querySelector(".wv-say-note")?.textContent ?? ""), null, { timeout: 20_000 }).catch(() => {});
+  await page.waitForFunction(() => /20 minutes/.test(document.querySelector(".wv-say-note")?.textContent ?? ""), null, { timeout: 20_000 }).catch(() => {});
   const note = await page.evaluate(() => document.querySelector(".wv-say-note")?.textContent ?? "");
-  assert.equal(note, "a voice carries 60 metres and stays drawn on the map for 15 minutes. everyone in earshot can hear it until the next settlement, nobody else does, and the town keeps its conversations browsable.");
-  assert.doesNotMatch(note, /five minutes/);
+  assert.equal(note, "a voice carries 45 metres and stays drawn on the map for 20 minutes. everyone in earshot can hear it until the next settlement, nobody else does, and the town keeps its conversations browsable.");
+  assert.doesNotMatch(note, /five minutes|60 metres|15 minutes/, "the office's numbers, never the page's");
 });
 
 test("the page threw nothing", async (t) => {

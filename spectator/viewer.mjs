@@ -58,7 +58,7 @@ import { homeOf, homesOnParcel } from "../tools/where-is.mjs";
 import { markIcons, iconSVG, iconsHTML, creatureClassesOf, thingClassesOf, MARK_ICON_CSS } from "./mark-icons.mjs";
 // LOGOS v2 part 2 on the page (POS-678): what a holder holds, who carries what,
 // and the say card's numbers, each from the office's own reads.
-import { holderLines, residentHoldLines, handsLines, holdingParts, carriersFrom, carriedAt, carriedWords, isThingId, sayCardNote, isThingKind } from "./holdings.mjs";
+import { holderLines, residentHoldLines, handsLines, handsList, holdingParts, carriersFrom, carriedAt, carriedWords, sayCardNote, isThingKind } from "./holdings.mjs";
 
 const $ = (root, s) => root.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -7836,7 +7836,12 @@ export function mountViewer(appEl) {
   const closeLooks = new Map();      // `${who}|${param}|${id}` -> { at, read, pending? }
   const thingKinds = new Map();      // class token -> whether the office's class pointer says it is a thing
   let hands = { for: null, at: 0, holdings: null, ground: null, pending: false };
-  let carriersEpoch = 0, carriersMemo = { epoch: -1, map: new Map() };
+  let carriersEpoch = 0, carriersMemo = { epoch: -1, until: 0, known: { holders: new Map(), placed: new Map() } };
+  let closeLookGen = 0, handsSeq = 0;   // an act's line in time, and the newest ask for your hands
+  const lineageAsked = new Set();      // kinds whose class chain has been asked of the class layer
+  // the kinds markWhat names before it asks whether a mark is a thing: no chain is asked for them
+  const ICON_DECIDED_BEFORE_THING = new Set(["", "idea", "bounty", "dungeon", "stairs", "portal-ground", "vehicle", "thing"]);
+  let recordClassMemo = { epoch: -1, set: null };
   // the threshold ledger's acts, and their own epoch. Occupancy is derived from
   // these the way position is derived from the walk ledger, so what is held is
   // the RECORD; the rooms are recomputed at whatever clock is asked for.
@@ -8098,8 +8103,10 @@ export function mountViewer(appEl) {
     const full = byId.get(m?.id) ?? m;
     if (!full) return [];
     const occupants = inside ?? occupantsOf(liveOccupancy());
+    const cls = classToken(instanceClassOf(full));
+    askLineage(cls);   // a kind with no class mark in hand: its chain, asked once
     return markIcons(full, {
-      cls: classToken(instanceClassOf(full)), creatureClasses: creatureClasses(), thingClasses: thingClasses(),
+      cls, creatureClasses: creatureClasses(), thingClasses: thingClasses(),
       yours: isOwnMark(full), weight: effectiveWeight(full), inside: (occupants.get(full.id) ?? []).length,
     });
   }
@@ -10665,13 +10672,15 @@ export function mountViewer(appEl) {
       if (m?.at && typeof m.at.x === "number") { seen.add(id); out.push(m); }
     }
     // A CARRIED THING RIDES ITS CARRIER (LOGOS v2 part 2): drawn at their body,
-    // or not at all when the carrier cannot be placed, never at its old place
-    if (!carriers().size) return out;
+    // or not at all when the carrier cannot be placed, never at its old place;
+    // and a thing the ground read says was set down, where it was set down
+    const known = carriers();
+    if (!known.holders.size && !known.placed.size) return out;
     const moved = [];
     for (const m of out) {
       const at = carriedPlace(m.id);
       if (!at) moved.push(m);
-      else if (!at.unplaced) moved.push({ ...m, at: { x: at.x, y: at.y }, carried: true });
+      else if (!at.unplaced) moved.push({ ...m, at: { x: at.x, y: at.y }, ...(at.holder ? { carried: true } : {}) });
     }
     return moved;
   }
@@ -12843,7 +12852,7 @@ export function mountViewer(appEl) {
     }
     const flat = raw.error === "bounce" ? raw : { ...(raw.result ?? {}), _apex: { did: raw.did, terms: raw.terms } };
     // an act may have moved what someone holds: the close looks and your hands are asked again
-    if (raw.error !== "bounce") { closeLooks.clear(); carriersEpoch += 1; loadHands({ fresh: true }); }
+    if (raw.error !== "bounce") { forgetCloseLooks(); loadHands({ fresh: true }); }
     return { ...response, body: flat };
   }
 
@@ -13920,7 +13929,7 @@ export function mountViewer(appEl) {
     if (look) noteThingKind(mark, look);
     const holding = holderLines(look);
     const carriedBy = carriedLine(id);
-    const holderOfIt = carriers().get(String(id)) ?? null;
+    const holderOfIt = carriers().holders.get(String(id)) ?? null;
     const icons = iconsOf(mark);
     // the record's class word, unless an icon already says it in its own line
     const what = icons.find((i) => i.kind === "what")?.key;
@@ -13949,8 +13958,7 @@ export function mountViewer(appEl) {
     ];
     const relations = [
       // its holder, a way into the holder's own column: a bag, or a resident's hands
-      { label: "held by", items: holderOfIt ? [{ id: isThingId(holderOfIt) ? holderOfIt : walkerHoverId(holderOfIt),
-        name: isThingId(holderOfIt) ? markIdentity(byId.get(holderOfIt) ?? { id: holderOfIt }) : faceOf(holderOfIt).name || holderOfIt }] : [] },
+      { label: "held by", items: holderOfIt ? [{ id: walkerHoverId(holderOfIt), name: faceOf(holderOfIt).name || holderOfIt }] : [] },
       { label: "leads into", items: (law?.into ?? []).map((into) => ({ id: into, name: markIdentity(byId.get(into) ?? { id: into }) })) },
       { label: "sits inside", items: rel(d?.parents) },
       { label: "holds", items: rel(d?.children), more: (d?.more?.children ?? 0) > 0 },
@@ -13989,8 +13997,10 @@ export function mountViewer(appEl) {
   // resident's is their close look's (`world { investigate: handle }`), and
   // the reader's own hands and the ground in reach are read: "take"'s shadow.
   // A resident asks as themselves, with their key; a spectator asks keyless,
-  // as the creatures' column does. Each read is asked once per record and again
-  // after an act, and lands by repainting the column.
+  // as the creatures' column does. Each read is asked at most every
+  // CLOSE_LOOK_MS while its column is open, and again after an act; it lands by
+  // repainting the column. A read asked before an act is not let back in after
+  // it (closeLookGen), and a fresh ask supersedes one still pending (handsSeq).
   function asWho() { return onResidentPath() ? state.handle : ""; }
   function closeLookUrl(param, id) {
     const who = asWho();
@@ -14000,89 +14010,125 @@ export function mountViewer(appEl) {
     const key = `${asWho()}|${param}|${id}`;
     const held = closeLooks.get(key);
     if (held && (held.pending || Date.now() - held.at < CLOSE_LOOK_MS)) return held;
+    const gen = closeLookGen;
     closeLooks.set(key, { ...(held ?? {}), pending: true, at: held?.at ?? 0 });
     fetch(closeLookUrl(param, id), { headers: { accept: "application/json", ...(asWho() ? authHeaders() : {}) }, credentials: "same-origin" })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
+        if (gen !== closeLookGen) return;   // asked before an act: what it says is older than the act
         const got = param === "mark" ? (j?.focus ?? null) : (j?.investigated ?? null);
         closeLooks.set(key, { at: Date.now(), read: got && !got.error ? got : null });
         // a resident's whole things are carried by them: the map moves them to their body
         if (param === "investigate" && got && !got.error) { carriersEpoch += 1; if (lastRadial && mapCtx) drawOverlay(lastRadial); }
       })
-      .catch(() => { closeLooks.set(key, { at: Date.now(), read: null }); })
+      .catch(() => { if (gen === closeLookGen) closeLooks.set(key, { at: Date.now(), read: null }); })
       .finally(() => syncMarkInteractionViews());
     return closeLooks.get(key);
   }
+  function forgetCloseLooks() { closeLooks.clear(); closeLookGen += 1; carriersEpoch += 1; }
   /** The close look in hand for a mark, or null while it is being asked. */
   function markCloseLook(id) { return loadCloseLook("mark", id)?.read ?? null; }
   function residentCloseLook(handle) { return loadCloseLook("investigate", handle)?.read ?? null; }
-  // what the class pointer of a close look says a kind IS, so the icon can say "thing" (W2 reads `kind`)
+  // what the class pointer of a close look says a kind IS (two ancestors deep: a fallback)
   function noteThingKind(mark, focus) {
     const cls = classToken(instanceClassOf(mark));
     if (cls && focus?.class_pointer && !thingKinds.has(cls)) thingKinds.set(cls, isThingKind(cls, { pointer: focus.class_pointer }));
+  }
+  // A KIND THE PAGE HOLDS NO CLASS MARK FOR is asked of the class layer once, at
+  // draw time: explain: "<kind>" answers its whole extends chain (office
+  // class-read.mjs § explainClass), the read any resident has. The resident
+  // path's records carry no class marks, so without this a bowl read "place"
+  // until its column was opened.
+  function recordClasses() {   // the class marks the page holds, once per record
+    if (recordClassMemo.epoch !== worldEpoch || !recordClassMemo.set)
+      recordClassMemo = { epoch: worldEpoch, set: new Set(allMarks().filter((m) => m?.kind === "class").map((m) => classToken(m.class)).filter(Boolean)) };
+    return recordClassMemo.set;
+  }
+  function askLineage(cls) {
+    if (ICON_DECIDED_BEFORE_THING.has(cls) || thingKinds.has(cls) || lineageAsked.has(cls)) return;
+    if (creatureClasses().has(cls) || recordClasses().has(cls)) return;   // the record answers
+    lineageAsked.add(cls);
+    fetch(officeUrl(`/world/apex?explain=${encodeURIComponent(cls)}`), { headers: { accept: "application/json" }, credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!Array.isArray(j?.extends)) return;
+        thingKinds.set(cls, isThingKind(cls, { chain: j.extends.map((c) => classToken(c?.class)) }));
+        if (lastRadial && mapCtx) drawOverlay(lastRadial);
+        syncMarkInteractionViews();
+      })
+      .catch(() => {});
   }
 
   // YOUR HANDS AND THE GROUND IN REACH: read: "take", which is exactly the
   // shadow the take verb shows a resident (`holdings`, and `ground` with each
   // held thing's `holder`). Where take is not afforded, your hands alone
-  // (GET /world/holdings, the same world_holdings). Asked with the resident's
-  // read and on the walkers poll, at most every HANDS_MS.
+  // (GET /world/holdings, the same world_holdings), and then no ground: an old
+  // ground read is not kept beside new hands. Asked with the resident's read
+  // and on the walkers poll, at most every HANDS_MS; a fresh ask (after an act)
+  // supersedes any still pending.
   async function loadHands({ fresh = false } = {}) {
     const handle = onResidentPath() ? state.handle : null;
     if (!handle) { if (hands.for) { hands = { for: null, at: 0, holdings: null, ground: null, pending: false }; carriersEpoch += 1; } return; }
-    if (hands.pending || (!fresh && hands.for === handle && Date.now() - hands.at < HANDS_MS)) return;
+    if (!fresh && (hands.pending || (hands.for === handle && Date.now() - hands.at < HANDS_MS))) return;
+    const seq = ++handsSeq;
     hands = { ...hands, pending: true };
-    let holdings = null, ground = null;
+    let holdings = null, ground = null, read = false;
     try {
       const options = { headers: { accept: "application/json", ...authHeaders() }, credentials: "same-origin" };
       const r = await fetch(officeUrl(`/world/apex?handle=${encodeURIComponent(handle)}&read=take&cards=names`), options);
       const j = r.ok ? await r.json() : null;
-      if (j && !j.error && j.holdings) { holdings = j.holdings; ground = j.ground ?? null; }
+      if (j && !j.error && j.holdings) { holdings = j.holdings; ground = j.ground ?? null; read = true; }
       else {
         const h = await fetch(officeUrl(`/world/holdings?handle=${encodeURIComponent(handle)}`), options);
         const hj = h.ok ? await h.json() : null;
-        holdings = hj && !hj.error ? hj : null;
+        if (hj && !hj.error) { holdings = hj; read = true; }
       }
-    } catch { /* the hands stay as they were read last */ }
-    if (state.handle !== handle) { hands = { ...hands, pending: false }; return; }
-    hands = { for: handle, at: Date.now(), holdings: holdings ?? hands.holdings, ground: ground ?? hands.ground, pending: false };
+    } catch { /* nothing read: the hands stay as they were read last */ }
+    if (seq !== handsSeq) return;   // a fresher ask is under way, and its answer is the one that counts
+    if (state.handle !== handle || !read) { hands = { ...hands, pending: false }; return; }
+    hands = { for: handle, at: Date.now(), holdings, ground, pending: false };
     carriersEpoch += 1;
     if (lastRadial && mapCtx) drawOverlay(lastRadial);
     syncMarkInteractionViews();
   }
-  // thing -> its holder, from every read in hand; rebuilt when one of them lands
+  // who carries what, from every read in hand younger than CLOSE_LOOK_MS (your
+  // hands and the ground are kept fresh by the poll); the freshest wins
   function carriers() {
     // until a read that names a holder has landed, nobody carries anything (and boot asks nothing)
-    if (carriersEpoch === 0 || carriersMemo.epoch === carriersEpoch) return carriersMemo.map;
-    const investigated = [];
+    if (carriersEpoch === 0 || (carriersMemo.epoch === carriersEpoch && Date.now() < carriersMemo.until)) return carriersMemo.known;
+    const now = Date.now();
+    const reads = [];
+    let until = Infinity;
     for (const [key, held] of closeLooks) {
       const [who, param, id] = key.split("|");
-      if (param === "investigate" && who === asWho() && held?.read && !isCreatureId(id)) investigated.push({ handle: id, holds: held.read.holds });
+      if (param !== "investigate" || who !== asWho() || !held?.read || isCreatureId(id) || !Array.isArray(held.read.holds)) continue;
+      if (now - held.at >= CLOSE_LOOK_MS) continue;   // too old to say where a thing is now
+      until = Math.min(until, held.at + CLOSE_LOOK_MS);
+      reads.push({ at: held.at, holder: id, things: held.read.holds, complete: true });
     }
-    const map = carriersFrom({ self: hands.for, hands: hands.holdings, ground: hands.ground, investigated });
-    carriersMemo = { epoch: carriersEpoch, map };
-    return map;
+    if (hands.for && hands.holdings) {
+      reads.push(handsList(hands.for, hands.holdings, hands.at));
+      if (Array.isArray(hands.ground?.things)) reads.push({ at: hands.at, ground: hands.ground.things });
+    }
+    const known = carriersFrom(reads);
+    carriersMemo = { epoch: carriersEpoch, until, known };
+    return known;
   }
   function bodyAtFor(handle) {
     const w = (walkState.walkers ?? []).find((entry) => entry?.handle === handle);
     return w && [w.x, w.y].every(Number.isFinite) ? { x: Number(w.x), y: Number(w.y) } : null;
   }
-  function markAtFor(id) { const m = byId.get(id); return m?.at && Number.isFinite(m.at.x) ? m.at : null; }
-  /** Where a carried thing is drawn, or null when nobody holds it. */
-  function carriedPlace(id) { return carriers().has(String(id)) ? carriedAt(id, carriers(), { bodyAt: bodyAtFor, markAt: markAtFor }) : null; }
-  /** "in your hands", "inside A Bag, in sb-ash's hands", or null. */
-  function carriedLine(id) {
-    const held = carriers();
-    if (!held.has(String(id))) return null;
-    return carriedWords(id, held, { self: hands.for, nameOf: (x) => markIdentity(byId.get(x) ?? { id: x }) });
-  }
+  /** Where a read says a thing is now (held, or set down), or null when none has said. */
+  function carriedPlace(id) { return carriedAt(id, carriers(), { bodyAt: bodyAtFor }); }
+  /** "in your hands", "in sb-ash's hands", or null. */
+  function carriedLine(id) { return carriedWords(id, carriers(), { self: hands.for }); }
 
-  /** A holder's facts for its column: the holding, its room, whether it is open. */
-  function holdingFacts(lines) {
+  /** A holder's facts for its column (`contents` for a thing, `carrying` for a resident), apart from the spatial "holds". */
+  function holdingFacts(lines, label = "contents") {
     const parts = holdingParts(lines, { nameOf: (x) => markIdentity(byId.get(x) ?? { id: x }) });
     if (!parts) return [];
     return [
-      { label: "holds", value: parts.head },
+      { label, value: parts.head },
       parts.items.length ? { label: "by kind", value: parts.items.join(", ") } : null,
       parts.open ? { label: "open", value: parts.open } : null,
     ].filter(Boolean);
@@ -14101,7 +14147,7 @@ export function mountViewer(appEl) {
     const moving = w.moving ?? (!w.arrived && !w.standing);
     const things = lines?.things ?? [];
     return {
-      key: ["resident", handle, carriersEpoch, inv ? "read" : "-", moving ? "m" : "s", things.join(",")].join("|"),
+      key: ["resident", handle, carriersEpoch, inv ? "read" : "-", moving ? "m" : "s", things.join(","), lines?.count ?? "-"].join("|"),
       handle, residentLink: false,
       residentHref: residentHref(handle),
       kicker: face.household || "a resident",
@@ -14111,9 +14157,9 @@ export function mountViewer(appEl) {
       door: { description: "" },
       byline: handle === state.handle && onResidentPath() ? "you" : handle,
       // the whole things are the relation below, each a way into its own column
-      facts: lines ? holdingFacts({ ...lines, things: [] })
-        : closeLooks.get(`${asWho()}|investigate|${handle}`)?.at ? [] : [{ label: "holds", value: "reading their hands…" }],
-      relations: things.length ? [{ label: "carrying", items: things.map((t) => ({ id: t, name: markIdentity(byId.get(t) ?? { id: t }) })) }] : [],
+      facts: lines ? holdingFacts({ ...lines, things: [] }, "carrying")
+        : closeLooks.get(`${asWho()}|investigate|${handle}`)?.at ? [] : [{ label: "carrying", value: "reading their hands…" }],
+      relations: things.length ? [{ label: "whole things", items: things.map((t) => ({ id: t, name: markIdentity(byId.get(t) ?? { id: t }) })) }] : [],
     };
   }
 
@@ -17385,6 +17431,10 @@ export function mountViewer(appEl) {
     // select a mark or a resident (walkerHoverId) as a click would, the
     // instrument behind tools/part2-on-the-page.test.mjs (POS-678)
     select: (id) => markInteraction.select(id),
+    // what a mark wears as icons now, as the pip and the plate draw it, and your hands asked
+    // again as the walkers poll would (POS-678's draw-time and set-down tests)
+    iconsOf: (id) => iconsOf(byId.get(id) ?? { id }).map((i) => i.key),
+    handsAgain: () => loadHands({ fresh: true }),
     stop: () => {
       clearInterval(clock);
       clearInterval(walkState.timer);

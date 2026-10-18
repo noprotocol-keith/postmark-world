@@ -17,10 +17,12 @@
 //                                    /world/holdings, or read: "take"'s
 //                                    `holdings`): `holding` and `kinds`.
 //   carriersFrom(reads)              which thing is in whose hands, from the
-//                                    reads that say so: your hands, the ground
-//                                    within reach (read: "take"'s `ground`, each
-//                                    row naming its `holder`), and any resident
-//                                    you have looked at closely.
+//                                    reads that say so, the freshest winning:
+//                                    your hands, the ground within reach (read:
+//                                    "take"'s `ground`, each row naming its
+//                                    `holder` or none), and any resident you
+//                                    have looked at closely. A thing inside a
+//                                    bag is not moved (no read names it).
 //   carriedAt / carriedWords         a held thing is drawn with its carrier and
 //                                    told as in someone's hands, never at the
 //                                    place it was last set (QA: "11 m southeast
@@ -82,19 +84,26 @@ export function residentHoldLines(investigated) {
   return handsShape({ things: things ?? [], byKind });
 }
 
-/** Your own hands, from world_holdings (`holding: [{ thing }]`, `kinds`). Null when the read is not one. */
+/**
+ * Your own hands, from world_holdings (`holding: [{ thing }]`, `count`, `kinds`).
+ * The door pages its whole things (20 a page against a capacity of 24), so the
+ * count is the read's `count`, and any it did not list on this page are told
+ * as whole things it counted. Null when the read is not one.
+ */
 export function handsLines(holdings) {
   if (!holdings || holdings.error || !Array.isArray(holdings.holding)) return null;
-  return handsShape({ things: holdings.holding.map((h) => String(h?.thing ?? h)).filter(Boolean), byKind: holdings.kinds ?? null });
+  const things = holdings.holding.map((h) => String(h?.thing ?? h)).filter(Boolean);
+  return handsShape({ things, total: countOf(holdings.count) ?? things.length, byKind: holdings.kinds ?? null });
 }
 
-function handsShape({ things, byKind }) {
+function handsShape({ things, total = things.length, byKind }) {
   const kinds = kindsOf(byKind);
-  const count = things.length + kinds.reduce((s, k) => s + k.count, 0);
+  const whole = Math.max(0, total - things.length);
+  const count = things.length + whole + kinds.reduce((s, k) => s + k.count, 0);
   // the office's own blur when it is the whole holding; with whole things beside
   // the kinds it gave none, and every kind and every holder is a thing
-  const shows = count && !things.length && byKind?.shows ? String(byKind.shows) : null;
-  return { count, shows, kinds, whole: 0, things, capacity: null, open: null };
+  const shows = count && !things.length && !whole && byKind?.shows ? String(byKind.shows) : null;
+  return { count, shows, kinds, whole, things, capacity: null, open: null };
 }
 
 const OPEN_WORDS = {
@@ -126,69 +135,89 @@ export function holdingParts(lines, { nameOf = (id) => id } = {}) {
 //
 // "Where a thing stands is derived, never stored: a held thing rides its
 // holder" (office world-apex.mjs § groundWithinReach's reading_law). The page
-// derives nothing of its own: it takes the holder each read names. A holder
-// can itself be held (a bag in a bag in your hands), so the chain is followed
-// up to whoever, or whatever, finally stands somewhere.
+// derives nothing of its own: it takes what each read says, and for each thing
+// the FRESHEST read wins.
+//
+//   a holder's own list   your hands (world_holdings) or a resident's close look
+//                         (investigate: `holds`): "this resident holds these".
+//                         A complete list also says they hold nothing else, so a
+//                         thing they set down leaves them.
+//   a ground row          read: "take"'s `ground.things`: a row with `holder` is
+//                         held by that resident; a row without one is NOT held,
+//                         and a fresher such row clears an older claim. A
+//                         set-down row stands at its `stands_at`.
+//
+// A THING INSIDE A BAG IS NOT MOVED (a known gap). No office read says a thing
+// is inside a holder: the ground read drops a row whose holder is a thing
+// (whereThingStands gives it no place), and a close look gives a holder's
+// holding as counts, never ids. So a bag in your hands rides you, and a bag
+// inside that bag stays drawn where it was. That needs an office read first.
 
 /** A thing's id is `<by>/<slug>`; a resident is a bare handle. */
 export const isThingId = (id) => typeof id === "string" && id.includes("/");
+const pointOf = (p) => (p && Number.isFinite(Number(p.x)) && Number.isFinite(Number(p.y)) ? { x: Number(p.x), y: Number(p.y) } : null);
 
-/**
- * thing id → its immediate holder, from the reads in hand:
- *   self + hands   your own hands (world_holdings' `holding`)
- *   ground         read: "take"'s `ground.things`, each row with `holder` when held
- *   investigated   [{ handle, holds: [ids] }], residents you looked at closely
- * A later read overrides an earlier one only where it names the same thing.
- */
-export function carriersFrom({ self = null, hands = null, ground = null, investigated = [] } = {}) {
-  const out = new Map();
-  for (const row of Array.isArray(ground?.things) ? ground.things : Array.isArray(ground) ? ground : [])
-    if (row?.thing && row.holder) out.set(String(row.thing), String(row.holder));
-  for (const inv of investigated ?? [])
-    if (inv?.handle) for (const id of Array.isArray(inv.holds) ? inv.holds : []) out.set(String(id), String(inv.handle));
-  if (self) for (const h of Array.isArray(hands?.holding) ? hands.holding : []) {
-    const id = h?.thing ?? h;
-    if (id) out.set(String(id), String(self));
-  }
-  return out;
-}
-
-/** The chain of holders above a thing, innermost first, or [] when nobody holds it. Bounded: a loop names no one. */
-export function holderChain(id, carriers) {
-  const chain = [];
-  const seen = new Set([String(id)]);
-  let at = carriers?.get?.(String(id));
-  while (at != null && !seen.has(at) && chain.length < 16) {
-    chain.push(at);
-    seen.add(at);
-    at = carriers.get(at);
-  }
-  return chain;
+/** Your hands as a holder's list: complete only when the page holds every thing the read counted. */
+export function handsList(handle, holdings, at = 0) {
+  if (!handle || !holdings || holdings.error || !Array.isArray(holdings.holding)) return null;
+  const things = holdings.holding.map((h) => String(h?.thing ?? h)).filter(Boolean);
+  const total = countOf(holdings.count) ?? things.length;
+  return { at, holder: String(handle), things, complete: holdings.complete !== false && things.length >= total };
 }
 
 /**
- * Where a held thing is drawn: its outermost holder's body when that is a
- * resident the page can place (`bodyAt(handle)`), else that holder's own place
- * (`markAt(id)`) for a thing inside a holder set down. Null when nobody holds
- * it, or when its holder cannot be placed — then the page draws it nowhere
- * rather than at the place it used to be.
+ * What the page knows of who carries what, from reads taken at `at` (ms):
+ *   { at, holder, things, complete }   a holder's own list
+ *   { at, ground: [rows] }             the ground within reach
+ * Applied oldest first, so the freshest read wins for each thing. Returns
+ * `holders` (thing → resident) and `placed` (thing → where a set-down row
+ * says it stands).
  */
-export function carriedAt(id, carriers, { bodyAt = () => null, markAt = () => null } = {}) {
-  const chain = holderChain(id, carriers);
-  if (!chain.length) return null;
-  const top = chain[chain.length - 1];
-  const at = isThingId(top) ? markAt(top) : bodyAt(top);
-  return at && Number.isFinite(Number(at.x)) && Number.isFinite(Number(at.y))
-    ? { x: Number(at.x), y: Number(at.y), holder: chain[0], carrier: top, chain }
-    : { x: null, y: null, holder: chain[0], carrier: top, chain, unplaced: true };
+export function carriersFrom(reads = []) {
+  const holders = new Map(), placed = new Map();
+  for (const r of [...(reads ?? [])].filter(Boolean).sort((a, b) => (Number(a.at) || 0) - (Number(b.at) || 0))) {
+    if (Array.isArray(r.ground)) for (const row of r.ground) {
+      if (!row?.thing) continue;
+      const id = String(row.thing);
+      // a resident's hands; a thing as holder is a row the office never sends, and it moves nothing
+      const holder = row.holder != null && !isThingId(String(row.holder)) ? String(row.holder) : null;
+      if (holder) { holders.set(id, holder); placed.delete(id); continue; }
+      holders.delete(id);
+      const at = row.place_from === "set-down" ? pointOf(row.stands_at) : null;
+      if (at) placed.set(id, at); else placed.delete(id);
+    }
+    if (r.holder != null) {
+      const holder = String(r.holder);
+      const things = new Set((r.things ?? []).map(String));
+      if (r.complete !== false) for (const [id, who] of holders) if (who === holder && !things.has(id)) holders.delete(id);
+      for (const id of things) { holders.set(id, holder); placed.delete(id); }
+    }
+  }
+  return { holders, placed };
 }
 
-/** "in your hands", "in sb-ash's hands", "inside A Cloth Bag, in your hands"; null when nobody holds it. */
-export function carriedWords(id, carriers, { self = null, nameOf = (x) => x } = {}) {
-  const chain = holderChain(id, carriers);
-  if (!chain.length) return null;
-  const hands = (h) => (self != null && h === self ? "in your hands" : `in ${h}'s hands`);
-  return chain.map((h) => (isThingId(h) ? `inside ${nameOf(h)}` : hands(h))).join(", ");
+/**
+ * Where the page draws a thing the reads have spoken of: a held thing at its
+ * carrier's body (`bodyAt(handle)`), or nowhere (`unplaced`) when the carrier
+ * cannot be placed, never at the place it used to be; a set-down thing where
+ * the ground read says it stands. Null when no read has spoken of it.
+ */
+export function carriedAt(id, known, { bodyAt = () => null } = {}) {
+  const key = String(id);
+  const holder = known?.holders?.get?.(key);
+  if (holder != null) {
+    const at = pointOf(bodyAt(holder));
+    return at ? { ...at, holder } : { x: null, y: null, holder, unplaced: true };
+  }
+  const set = known?.placed?.get?.(key);
+  return set ? { ...set, holder: null, setDown: true } : null;
+}
+
+/** "in your hands", "in sb-ash's hands"; null when no read says anyone holds it. */
+export function carriedWords(id, known, { self = null } = {}) {
+  const holder = known?.holders?.get?.(String(id));
+  if (holder == null) return null;
+  return self != null && holder === self ? "in your hands" : `in ${holder}'s hands`;
 }
 
 // ── THE SAY CARD ─────────────────────────────────────────────────────────────
