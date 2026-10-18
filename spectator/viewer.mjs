@@ -13256,11 +13256,42 @@ export function mountViewer(appEl) {
     noteWalkRecord(handle, {
       handle, from: body.from, toward: body.toward, at: Number(body.departed_at_crossing),
       pace: Number(body.mists?.stride_km) > 0 ? Number(body.mists.stride_km) : (departPaceKm(byId) ?? null),
-      targetExtent: target?.extent ? { w: Number(target.extent.w), h: Number(target.extent.h) } : null,
-      targetMarkId: body.mark_id ?? null,
+      // THE RECORD'S OWN EXTENT, NEVER THE MARK'S (play fix 85, Darko 19:55, "it stayed
+      // completely still and then jumped to the edge"): a walk to a mark is recorded
+      // to the point on its rim with no `within` (the walks read says so), so the
+      // mark's whole extent laid around that point put the walker inside it at the
+      // start: arrived at once, standing still. Only an extent the answer carries is used.
+      targetExtent: body.within && Number(body.within.w) > 0 ? { w: Number(body.within.w), h: Number(body.within.h) } : null,
+      targetMarkId: body.mark_id ?? target?.id ?? null,
     }, Date.now());
     drawWalkers();
     animateWalks();
+    // an entry queued for the arrival: follow it the moment it is written (fix 85)
+    if (body.entry?.queued_for_arrival) followArrival(body.arrives_at, body.entry?.eta);
+  }
+  // THE ARRIVAL'S ENTER, FOLLOWED (play fix 85, Darko 19:55: "until I reloaded, I
+  // did not even go into the interior"). A walk-there-and-enter is entered by the
+  // office's arrival tick a few seconds after the walk arrives, and the page heard
+  // of it only on its 30 s crossings tick (fix 57), if the tab was still open by
+  // then. So from the arrival the page asks the crossings again every 3 s, for at
+  // most 30 s, until they move; then fix 03 drops the stale read and the room
+  // follows. The same request fix 57 makes; nothing new.
+  let arrivalFollow = null;
+  function followArrival(arrivesAt, etaCrossing) {
+    clearTimeout(arrivalFollow?.timer);
+    const atMs = Number.isFinite(Date.parse(arrivesAt ?? "")) ? Date.parse(arrivesAt)
+      : Number.isFinite(Number(etaCrossing)) ? CROSSING_EPOCH_UTC + Number(etaCrossing) * 12 * 3600 * 1000 : NaN;
+    if (!Number.isFinite(atMs)) return;
+    const before = crossingsSignature(enterExitLedger.acts);
+    const until = atMs + 30_000;
+    const ask = () => {
+      if (Date.now() > until) return;
+      loadEnterExitLedger().then(() => {
+        if (crossingsSignature(enterExitLedger.acts) !== before) { renderCurrent(); return; }
+        arrivalFollow = { timer: setTimeout(ask, 3000) };
+      }).catch(() => { arrivalFollow = { timer: setTimeout(ask, 3000) }; });
+    };
+    arrivalFollow = { timer: setTimeout(ask, Math.max(0, atMs - Date.now()) + 1000) };
   }
   /** A stop or a landing your own act reports (an enter mid-walk, a passage):
    *  an event, drawn in that frame as a zero-length walk where it set you down. */

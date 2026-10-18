@@ -105,3 +105,23 @@ test("arriving lands where the record says, even while the last poll still saw i
   assert.equal(w.moving, false);
   assert.ok(Math.abs(w.y - record.toward.y) < 1e-9, "at the walk's end, not snapped back to the poll's mid-walk point");
 });
+
+// ── fix 85 (Darko 19:55, a real walk-there-and-enter the Spire as darko): "It is not
+// moving on the next frame. It stayed completely still. and then jumped to the edge." ──
+test("a walk to a big mark is drawn from the record's rim point, never inside the mark's extent", () => {
+  // the office's record for that walk: toward the Spire's rim, no `within`
+  const toSpire = { handle: "darko", from: { x: 3748, y: -5512 }, toward: { x: 3775, y: -5512 }, at: at0, pace: 60, targetExtent: null };
+  assert.equal(positionAt(toSpire, sec(5)).arrived, false, "the record's own way: walking");
+  assert.ok(positionAt(toSpire, sec(5)).x > 3748 + 5);
+  // the old page laid the Spire's whole extent (236 × 176) around that rim point: the walker started inside it
+  const invented = { ...toSpire, targetExtent: { w: 236, h: 176 } };
+  assert.equal(positionAt(invented, sec(5)).arrived, true, "arrived at once: the stand-still Darko saw");
+  assert.equal(positionAt(invented, sec(5)).x, 3748);
+});
+
+test("pins: your own walk's record takes only the answer's extent; a queued entry is followed from the arrival", () => {
+  assert.match(SOURCE, /targetExtent: body\.within && Number\(body\.within\.w\) > 0 \? \{ w: Number\(body\.within\.w\), h: Number\(body\.within\.h\) \} : null,/);
+  assert.doesNotMatch(SOURCE, /targetExtent: target\?\.extent \?/, "never the mark's extent");
+  assert.match(SOURCE, /if \(body\.entry\?\.queued_for_arrival\) followArrival\(body\.arrives_at, body\.entry\?\.eta\);/);
+  assert.match(SOURCE, /function followArrival\(arrivesAt, etaCrossing\) \{[\s\S]*?loadEnterExitLedger\(\)\.then\(\(\) => \{\s*if \(crossingsSignature\(enterExitLedger\.acts\) !== before\) \{ renderCurrent\(\); return; \}/);
+});
