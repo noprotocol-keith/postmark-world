@@ -58,7 +58,7 @@ import { homeOf, homesOnParcel } from "../tools/where-is.mjs";
 import { markIcons, iconSVG, iconsHTML, creatureClassesOf, thingClassesOf, MARK_ICON_CSS } from "./mark-icons.mjs";
 // LOGOS v2 part 2 on the page (POS-678): what a holder holds, who carries what,
 // and the say card's numbers, each from the office's own reads.
-import { holderLines, residentHoldLines, handsLines, handsList, holdingParts, carriersFrom, carriedAt, carriedWords, sayCardNote, isThingKind } from "./holdings.mjs";
+import { holderLines, residentHoldLines, residentList, handsLines, handsList, holdingParts, carriersFrom, carriedAt, carriedWords, sayCardNote, isThingKind } from "./holdings.mjs";
 
 const $ = (root, s) => root.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -14099,16 +14099,18 @@ export function mountViewer(appEl) {
     let until = Infinity;
     for (const [key, held] of closeLooks) {
       const [who, param, id] = key.split("|");
-      if (param !== "investigate" || who !== asWho() || !held?.read || isCreatureId(id) || !Array.isArray(held.read.holds)) continue;
-      if (now - held.at >= CLOSE_LOOK_MS) continue;   // too old to say where a thing is now
-      until = Math.min(until, held.at + CLOSE_LOOK_MS);
-      reads.push({ at: held.at, holder: id, things: held.read.holds, complete: true });
+      if (param !== "investigate" || who !== asWho() || isCreatureId(id)) continue;
+      // her `holds` are mark rows; past CLOSE_LOOK_MS the look says nothing (carriersFrom's `now`)
+      const list = residentList(id, held?.read, held?.at ?? 0, CLOSE_LOOK_MS);
+      if (!list || list.expires <= now) continue;
+      until = Math.min(until, list.expires);
+      reads.push(list);
     }
     if (hands.for && hands.holdings) {
       reads.push(handsList(hands.for, hands.holdings, hands.at));
       if (Array.isArray(hands.ground?.things)) reads.push({ at: hands.at, ground: hands.ground.things });
     }
-    const known = carriersFrom(reads);
+    const known = carriersFrom(reads, { now });
     carriersMemo = { epoch: carriersEpoch, until, known };
     return known;
   }
@@ -14157,7 +14159,7 @@ export function mountViewer(appEl) {
       // the whole things are the relation below, each a way into its own column
       facts: lines ? holdingFacts({ ...lines, things: [] }, "carrying")
         : closeLooks.get(`${asWho()}|investigate|${handle}`)?.at ? [] : [{ label: "carrying", value: "reading their hands…" }],
-      relations: things.length ? [{ label: "whole things", items: things.map((t) => ({ id: t, name: markIdentity(byId.get(t) ?? { id: t }) })) }] : [],
+      relations: things.length ? [{ label: "whole things", items: things.map((t) => ({ id: t, name: lines.names?.get(t) ?? markIdentity(byId.get(t) ?? { id: t }) })) }] : [],
     };
   }
 

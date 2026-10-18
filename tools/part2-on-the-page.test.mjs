@@ -114,10 +114,11 @@ const TAKE = {
   ] },
 };
 // world-apex.mjs § investigateOn
+// `holds` as the office sends it: mark rows (world-investigate-entity.mjs), never bare ids
 const INVESTIGATED = {
-  [ACTOR]: { handle: ACTOR, holds: [BAG],
+  [ACTOR]: { kind: "resident", handle: ACTOR, holds: [{ id: BAG, name: "A Cloth Bag", body: "A cloth bag." }],
     holds_by_kind: { holder: ACTOR, count: 3, class: "candy", shows: "3 candies", kinds: [{ kind: "candy", count: 3, shows: "3 candies" }] } },
-  [CLEO]: { handle: CLEO, holds: [KITE] },
+  [CLEO]: { kind: "resident", handle: CLEO, holds: [{ id: KITE, name: "A Paper Kite", body: "A paper kite." }] },
 };
 // class-read.mjs § explainClass: the whole chain, which the page asks once at draw time
 const EXPLAIN = { "halloween-candy-bowl": { explains: "halloween-candy-bowl", class: "the-town/halloween-candy-bowl", what: "A Halloween Candy Bowl is a thing that holds.",

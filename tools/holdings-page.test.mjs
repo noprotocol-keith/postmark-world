@@ -7,7 +7,9 @@
 //     count, class, shows, kinds } }, with kinds sharpened (kind-holding.mjs §
 //     blurOf, sharp: true);
 //   - a resident's close look: world-apex.mjs § investigateOn, `holds` (whole
-//     things) and `holds_by_kind`;
+//     things as mark ROWS { id, name, body }: world-investigate-entity.mjs,
+//     pinned by the office's test/world-investigate-entity.test.mjs) and
+//     `holds_by_kind`;
 //   - your hands: world-hold.mjs § world_holdings, `holding: [{ thing }]` and `kinds`;
 //   - the ground within reach: world-hold.mjs § groundRow, `holder` on a held thing;
 //   - the say card: voices.mjs § conversations (`earshot_m`, `fade_minutes`,
@@ -20,6 +22,8 @@
 //   carriedAt using the thing's own `at`         → 4 and 5 red
 //   a ground row with no holder that only sets    → 6 reds (the kite stays in her hands)
 //   handsLines counting holding.length            → 3b reds
+//   a close look's holds read as bare ids         → 3 and 6b red (review-241 H3)
+//   carriersFrom ignoring `expires`               → 6c reds (review-241 N9)
 //   sayCardNote with the old "five minutes"      → 7 reds
 //   isThingKind reading only cls === "thing"     → 8 reds
 
@@ -27,7 +31,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   holderLines, residentHoldLines, handsLines, holdingParts,
-  handsList, carriersFrom, carriedAt, carriedWords,
+  handsList, residentList, carriersFrom, carriedAt, carriedWords,
   sayCardNote, isThingKind,
 } from "../spectator/holdings.mjs";
 
@@ -66,11 +70,15 @@ test("2. a closed holder says so; an empty one says nothing is in it; a mark tha
 });
 
 test("3. a resident's hands: their whole things by name and their kinds; your own hands from world_holdings", () => {
-  const inv = residentHoldLines({ handle: "sb-ash", holds: ["sb-ash/a-candy-bag"],
+  // the office's shape: each held thing a mark row, named as the record names it
+  const inv = residentHoldLines({ handle: "sb-ash", holds: [{ id: "sb-ash/a-candy-bag", name: "A Candy Bag", body: "A bag for candy." }],
     holds_by_kind: { holder: "sb-ash", count: 1, class: "candy", shows: "1 candy", kinds: [{ kind: "candy", count: 1, shows: "1 candy" }] } });
   assert.equal(inv.count, 2);
-  const names = { "sb-ash/a-candy-bag": "A Candy Bag" };
-  assert.deepEqual(holdingParts(inv, { nameOf: (id) => names[id] ?? id }).items, ["1 candy", "A Candy Bag"]);
+  assert.deepEqual(inv.things, ["sb-ash/a-candy-bag"], "the row's id, never [object Object]");
+  assert.deepEqual(holdingParts(inv).items, ["1 candy", "A Candy Bag"], "the office's name for it");
+  assert.deepEqual(residentHoldLines({ handle: "sb-ash", holds: ["sb-ash/a-candy-bag"] }).things, ["sb-ash/a-candy-bag"], "a bare id still reads");
+  assert.equal(residentHoldLines({ handle: "sb-ash", holds: { unavailable: "what they carry could not be read this time" } }), null,
+    "an unreadable holding is no list, and no claim that they carry nothing");
   assert.equal(holdingParts(inv).head, "2 things", "kinds and whole things together are things");
   const mine = handsLines({ handle: "sb-cleo", count: 0, holding: [], kinds: { holder: "sb-cleo", count: 2, class: "candy", shows: "2 candies", kinds: [{ kind: "candy", count: 2, shows: "2 candies" }] } });
   assert.equal(holdingParts(mine).head, "2 candies", "the office's blur when kinds are the whole holding");
@@ -144,6 +152,26 @@ test("6. the freshest read wins: a kite set down leaves its holder, and stands w
   const before = { at: 10, holder: "sb-ash", things: ["sb-ash/a-pouch", "sb-ash/a-bag"], complete: true };
   assert.equal(carriersFrom([before, { at: 20, holder: "sb-ash", things: ["sb-ash/a-bag"], complete: true }]).holders.has("sb-ash/a-pouch"), false);
   assert.equal(carriersFrom([before, { at: 20, holder: "sb-ash", things: ["sb-ash/a-bag"], complete: false }]).holders.get("sb-ash/a-pouch"), "sb-ash");
+});
+
+test("6b. a resident's close look names her lantern by its row, so it stays in her hands (review-241 H3)", () => {
+  const ground = { at: 100, ground: [{ thing: "sb-cleo/a-lantern", holder: "sb-cleo", stands_at: at(210, -350), place_from: "holder" }] };
+  const look = residentList("sb-cleo", { handle: "sb-cleo", holds: [{ id: "sb-cleo/a-lantern", name: "A Lantern", body: "" }] }, 200, 30_000);
+  assert.deepEqual(look.things, ["sb-cleo/a-lantern"]);
+  const known = carriersFrom([ground, look], { now: 210 });
+  assert.equal(known.holders.get("sb-cleo/a-lantern"), "sb-cleo", "her complete list names it: it is not cleared");
+  assert.deepEqual(carriedAt("sb-cleo/a-lantern", known, places), { x: 210, y: -350, holder: "sb-cleo" });
+  assert.equal(residentList("sb-cleo", { holds: { unavailable: "x" } }, 200), null, "an unreadable holding clears nothing");
+});
+
+test("6c. an expired close look no longer pins a thing: with no fresher read it falls back to the record's place (review-241 N9)", () => {
+  const look = residentList("sb-cleo", { handle: "sb-cleo", holds: [{ id: "sb-cleo/a-kite", name: "A Kite", body: "" }] }, 1_000, 30_000);
+  assert.equal(carriersFrom([look], { now: 30_999 }).holders.get("sb-cleo/a-kite"), "sb-cleo", "fresh, it says she holds it");
+  const later = carriersFrom([look], { now: 31_000 });
+  assert.equal(later.holders.has("sb-cleo/a-kite"), false, "at CLOSE_LOOK_MS it says nothing");
+  assert.equal(carriedAt("sb-cleo/a-kite", later, places), null, "so the kite is drawn where the record has it, as before this page knew");
+  assert.equal(carriersFrom([{ at: 1, holder: "sb-ash", things: ["sb-ash/a-bag"], complete: true }], { now: 1e12 }).holders.get("sb-ash/a-bag"), "sb-ash",
+    "a read with no expiry (your hands, kept fresh by the poll) is not aged out here");
 });
 
 test("7. the say card's numbers are the office's: 60 m, drawn 15 minutes, heard until the settlement", () => {

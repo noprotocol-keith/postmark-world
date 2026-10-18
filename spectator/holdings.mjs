@@ -75,13 +75,27 @@ export function holderLines(focus) {
   };
 }
 
-/** The resident close look's holding: their whole things by id, and their kinds. Null when the read carried neither. */
+/**
+ * A held thing as a read names it: a resident close look's `holds` is a list of
+ * mark ROWS, `{ id, name, body }` (office world-investigate-entity.mjs, where
+ * the ids are looked up as marks), world_holdings' is `{ thing }`; a bare id
+ * is read too.
+ */
+export const heldIdOf = (h) => String(h?.id ?? h?.thing ?? h);
+const heldNameOf = (h) => (h && typeof h === "object" && h.name != null && String(h.name).trim() ? String(h.name) : null);
+
+/**
+ * The resident close look's holding: their whole things by id (named as the
+ * office named them), and their kinds. Null when the read carried neither; a
+ * `holds` the office could not read (`{ unavailable }`) is no list at all.
+ */
 export function residentHoldLines(investigated) {
   if (!investigated || investigated.error) return null;
-  const things = Array.isArray(investigated.holds) ? investigated.holds.map(String) : null;
+  const rows = Array.isArray(investigated.holds) ? investigated.holds : null;
   const byKind = investigated.holds_by_kind ?? null;
-  if (things == null && byKind == null) return null;
-  return handsShape({ things: things ?? [], byKind });
+  if (rows == null && byKind == null) return null;
+  const names = new Map((rows ?? []).filter((h) => heldNameOf(h)).map((h) => [heldIdOf(h), heldNameOf(h)]));
+  return { ...handsShape({ things: (rows ?? []).map(heldIdOf), byKind }), names };
 }
 
 /**
@@ -103,7 +117,7 @@ function handsShape({ things, total = things.length, byKind }) {
   // the office's own blur when it is the whole holding; with whole things beside
   // the kinds it gave none, and every kind and every holder is a thing
   const shows = count && !things.length && !whole && byKind?.shows ? String(byKind.shows) : null;
-  return { count, shows, kinds, whole, things, capacity: null, open: null };
+  return { count, shows, kinds, whole, things, names: new Map(), capacity: null, open: null };
 }
 
 const OPEN_WORDS = {
@@ -124,7 +138,7 @@ export function holdingParts(lines, { nameOf = (id) => id } = {}) {
     head: lines.capacity != null ? `${head} · ${lines.count} of ${lines.capacity}` : head,
     items: lines.count ? [
       ...lines.kinds.map((k) => k.shows),
-      ...lines.things.map((id) => nameOf(id)),
+      ...lines.things.map((id) => lines.names?.get(id) ?? nameOf(id)),
       ...(lines.whole ? [`${lines.whole} whole ${plural(lines.whole, "thing")}`] : []),
     ] : [],
     open: lines.open == null ? null : OPEN_WORDS[lines.open],
@@ -157,6 +171,16 @@ export function holdingParts(lines, { nameOf = (id) => id } = {}) {
 export const isThingId = (id) => typeof id === "string" && id.includes("/");
 const pointOf = (p) => (p && Number.isFinite(Number(p.x)) && Number.isFinite(Number(p.y)) ? { x: Number(p.x), y: Number(p.y) } : null);
 
+/**
+ * A resident's close look as a holder's list: their whole things, complete
+ * (the look lists every one), saying nothing once it is `maxAgeMs` old (it
+ * then `expires`). Null when the look carried no list.
+ */
+export function residentList(handle, investigated, at = 0, maxAgeMs = Infinity) {
+  if (!handle || !investigated || investigated.error || !Array.isArray(investigated.holds)) return null;
+  return { at, holder: String(handle), things: investigated.holds.map(heldIdOf), complete: true, expires: at + maxAgeMs };
+}
+
 /** Your hands as a holder's list: complete only when the page holds every thing the read counted. */
 export function handsList(handle, holdings, at = 0) {
   if (!handle || !holdings || holdings.error || !Array.isArray(holdings.holding)) return null;
@@ -169,13 +193,15 @@ export function handsList(handle, holdings, at = 0) {
  * What the page knows of who carries what, from reads taken at `at` (ms):
  *   { at, holder, things, complete }   a holder's own list
  *   { at, ground: [rows] }             the ground within reach
- * Applied oldest first, so the freshest read wins for each thing. Returns
+ * Applied oldest first, so the freshest read wins for each thing. A read whose
+ * `expires` is at or before `now` says nothing: a held thing it alone placed
+ * falls back to where the record has it, as before any read. Returns
  * `holders` (thing → resident) and `placed` (thing → where a set-down row
  * says it stands).
  */
-export function carriersFrom(reads = []) {
+export function carriersFrom(reads = [], { now = -Infinity } = {}) {
   const holders = new Map(), placed = new Map();
-  for (const r of [...(reads ?? [])].filter(Boolean).sort((a, b) => (Number(a.at) || 0) - (Number(b.at) || 0))) {
+  for (const r of [...(reads ?? [])].filter((r) => r && !(Number(r.expires) <= now)).sort((a, b) => (Number(a.at) || 0) - (Number(b.at) || 0))) {
     if (Array.isArray(r.ground)) for (const row of r.ground) {
       if (!row?.thing) continue;
       const id = String(row.thing);
@@ -188,7 +214,7 @@ export function carriersFrom(reads = []) {
     }
     if (r.holder != null) {
       const holder = String(r.holder);
-      const things = new Set((r.things ?? []).map(String));
+      const things = new Set((r.things ?? []).map(heldIdOf));
       if (r.complete !== false) for (const [id, who] of holders) if (who === holder && !things.has(id)) holders.delete(id);
       for (const id of things) { holders.set(id, holder); placed.delete(id); }
     }
