@@ -22,7 +22,7 @@
 // runs the exact library anyone can `node`. If this page and a clone disagree,
 // the office has explaining to do.
 import { isGround, instanceClassOf, isPredicate } from "../tools/mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
-import { orient, openYourEyes, investigate, containmentChain, mistsSentence, veilSentence, standpointSight } from "../tools/world-verbs.mjs";
+import { orient, openYourEyes, investigate, containmentChain, mistsSentence, veilSentence, standpointSight, shelterOf } from "../tools/world-verbs.mjs";
 import { assembleWorld } from "../tools/world-build.mjs";
 import { DIALS, bearingDeg, quantizeBearing, mistsAt, mistsHere, mistsRoad } from "../tools/world-engine.mjs";
 import { marksContain, pointInPolygon, pointInRect, polygonBBox, polygonOf, rect } from "../tools/geometry.mjs"; // read-only: home color + point-destination labels
@@ -761,12 +761,15 @@ export function departPaceKm(marks) {
 
 // `at` is the clock (the live crossing unless a caller pins one, as a test must:
 // the Mists make the preview a function of the crossing).
-export function previewWalkLeg({ from, toward, targetExtent = null, skeleton = null, paceKm = null, at = fractionalCrossing() } = {}) {
+// `shelter` is the walker's own (play fix 45): the engine's shelterOf over their enter
+// stack, handed to the engine's mistsRoad exactly as the office's walk does
+// (src/world.mjs § mistsOnTheRoad). Null reads the road as it always was.
+export function previewWalkLeg({ from, toward, targetExtent = null, skeleton = null, paceKm = null, at = fractionalCrossing(), shelter = null } = {}) {
   if (![from?.x, from?.y, toward?.x, toward?.y].every(Number.isFinite)) return null;
   // THE MISTS ON THIS ROAD (POS-468), read the way the office reads them at the
   // declare: a road into the wall is no walk at all, and a road through the
   // fringe walks at its slowed stride. No Mists, and nothing here changes.
-  const road = skeleton?.mists ? mistsRoad(from, toward, at, skeleton.mists) : null;
+  const road = skeleton?.mists ? mistsRoad(from, toward, at, skeleton.mists, { shelter }) : null;
   if (road?.refused) return { distanceM: 0, etaCrossings: 0, paceKm: 0, paceFromRecord: paceKm != null, viaCrossings: [], mistRefused: road.refused };
   const stride = road && road.factor < 1 ? (paceKm ?? WALK_KM_PER_CROSSING) * road.factor : paceKm;
   // positionAt already speaks pace — a departure may carry its own stride and
@@ -815,10 +818,10 @@ export function formatWalkPreviewLabel(leg) {
   return parts?.eta ? `${parts.distance} · ${parts.eta}` : "";
 }
 
-export function deriveWalkPreview({ from, destination, skeleton = null, residentMode = true, paceKm = null } = {}) {
+export function deriveWalkPreview({ from, destination, skeleton = null, residentMode = true, paceKm = null, shelter = null } = {}) {
   if (!residentMode || !destination) return null;
   const toward = { x: Number(destination.x), y: Number(destination.y) };
-  const leg = previewWalkLeg({ from, toward, skeleton, paceKm });
+  const leg = previewWalkLeg({ from, toward, skeleton, paceKm, shelter });
   if (!leg) return null;
   return {
     from: { x: Number(from.x), y: Number(from.y) },
@@ -11516,7 +11519,32 @@ export function mountViewer(appEl) {
       skeleton: data?.skeleton,
       residentMode: canAct(),
       paceKm: departPaceKm(byId),
+      shelter: actorShelter(),
     });
+  }
+  // ── THE WALKER'S SHELTER (play fix 45, Darko 20:36) ─────────────────────
+  //
+  // An entered mark is shelter (Darko 2026-10-15; world #226, office #585): the
+  // office's walk door builds it from the walker's enter stack and hands it to
+  // the engine's mistsRoad, so a resident who has entered the Spire's Grounds may
+  // walk inside them while the Mists stand all round. The page's own preview
+  // asked mistsRoad with no shelter, so it refused the walk the office would
+  // take ("the mist is too thick"). Now it asks the same question the same way:
+  // the stack is the acting resident's own, from the crossings this page already
+  // reads (standpointOccupancy over the enter/exit ledger, the one source the
+  // room scene and the step-outside button use), and the shelter is the engine's
+  // own shelterOf over it. No semantics of our own: what counts as shelter, and
+  // which roads it covers, are the engine's, and change with it.
+  function actorEnterStack() {
+    if (!canAct() || !state.handle) return [];
+    return standpointOccupancy({ acts: enterExitLedger.acts, at: occupancyClock(), handle: state.handle }).entered ?? [];
+  }
+  function actorShelter() {
+    const entered = actorEnterStack();
+    if (!entered.length) return null;
+    // the entered marks themselves, from the read the page holds (full records by id first)
+    const marks = entered.map((id) => byId.get(id) ?? allMarks().find((m) => m?.id === id)).filter(Boolean);
+    return shelterOf({ marks }, entered);
   }
 
   // WHICH RECORD A READING WAS TAKEN AGAINST (#2912 (2)). The marks the page
@@ -12620,6 +12648,7 @@ export function mountViewer(appEl) {
       skeleton: data?.skeleton,
       residentMode: canAct(),
       paceKm: departPaceKm(byId),
+      shelter: actorShelter(),
     });
   }
 
