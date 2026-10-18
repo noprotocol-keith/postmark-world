@@ -13011,9 +13011,10 @@ export function mountViewer(appEl) {
   // Walk-here is not a button: selecting a mark already previews the walk on
   // the desk (Keemin 2026-08-04), so the column's only action is the door.
   //
-  // PAINTING-ONLY, like the bubble it replaces. With the Telling beside the map,
-  // a click scrolls the mark's own cell into view and the cell opens in place;
-  // a column over the map as well would tell the same mark twice.
+  // IN BOTH MODES (play fix 34; Darko 18:25: "the full description is always
+  // that column for everything"). With the Telling beside the map a click still
+  // scrolls the mark's own cell into view (selectMark's scrollCell), and the
+  // column opens over the map regardless.
   //
   // The relatives come from the same `investigate` the card's expansion runs,
   // asked ONCE per mark per record (the view is rebuilt on every pointer move,
@@ -13036,7 +13037,7 @@ export function mountViewer(appEl) {
   }
   function markColumnView(id) {
     // the mounted room has a column too: its plate opens it (syncRoomCard)
-    if (!state.paintingOnly || !id) return null;
+    if (!id) return null;
     if (walkerHandleFromHoverId(id) || chooserIdsFrom(id)) return null;
     const mark = byId.get(id);
     if (!mark || isParcelMark(mark) || isRegionMark(mark)) return null;

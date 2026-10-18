@@ -39,5 +39,6 @@ test("[pin] every mark's column, including the room you are in", () => {
   assert.match(SOURCE, /const column = parcelColumnView\(selected\) \?\? regionColumnView\(selected\) \?\? markColumnView\(selected\);/);
   const fn = SOURCE.match(/function markColumnView\(id\) \{[\s\S]*?\n  \}\n/)[0];
   assert.match(fn, /region: id === sceneRoomId \? "you are inside" : where\.detail,/, "the mounted room's plate opens its column, which says where you are");
-  assert.match(fn, /if \(!state\.paintingOnly \|\| !id\) return null;/, "painting-only, like the bubble it replaces");
+  // CHANGED by play fix 34 (Darko 18:25): the column opens in both view modes
+  assert.match(fn, /if \(!id\) return null;/, "every selected mark has a column, Telling open or not");
 });
