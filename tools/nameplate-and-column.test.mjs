@@ -40,7 +40,7 @@ test("[pin] a click on open ground inside a mark selects that ground and still w
 
 test("[pin] every mark's column, including the room you are in", () => {
   // play fix 35 put the live creatures' column in the chain, before the marks'
-  assert.match(SOURCE, /const column = parcelColumnView\(selected\) \?\? regionColumnView\(selected\) \?\? (creatureColumnView\(selected\) \?\? )?markColumnView\(selected\);/);
+  assert.match(SOURCE, /const column = parcelColumnView\(selected\) \?\? regionColumnView\(selected\) \?\? (creatureColumnView\(selected\) \?\? )?(residentColumnView\(selected\) \?\? )?markColumnView\(selected\);/);
   const fn = SOURCE.match(/function markColumnView\(id\) \{[\s\S]*?\n  \}\n/)[0];
   assert.match(fn, /region: id === sceneRoomId \? "you are inside" : where\.detail,/, "the mounted room's plate opens its column, which says where you are");
   // CHANGED by play fix 34 (Darko 18:25): the column opens in both view modes
