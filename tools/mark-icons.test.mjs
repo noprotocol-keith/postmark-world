@@ -125,3 +125,11 @@ test("one resident icon: the walker's token, in sovereign green; a creature is t
   for (const key of ["inside", "creature"]) assert.doesNotMatch(MARK_ICONS_CSS_OF(key), /stamp-violet|#aa8fd8/, `${key} is never purple`);
 });
 function MARK_ICONS_CSS_OF(key) { return MARK_ICON_CSS.split("\n").find((l) => l.startsWith(`.wv-ic.ic-${key} `)) ?? ""; }
+
+test("the door is a door (play row 71, Darko 19:00): upright, with a knob; never the plan view's swing", () => {
+  const d = MARK_ICONS.door.d;
+  assert.match(d, /^M 4 13\.5 V 2\.5 H 12 V 13\.5 Z /, "the door itself, standing");
+  assert.doesNotMatch(d, /A 10 10/, "no swing arc");
+  assert.notEqual(d, MARK_ICONS.dungeon.d);
+  assert.notEqual(d, MARK_ICONS.stairs.d);
+});

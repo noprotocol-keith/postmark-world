@@ -39,9 +39,10 @@ const circle = (x, y, r) => `M ${x - r} ${y} a ${r} ${r} 0 1 0 ${2 * r} 0 a ${r}
 
 // The vocabulary. `what` icons say what a mark is (one per mark at most);
 // `state` badges say what is true of it now. `fill` glyphs are solid; the rest
-// are drawn as a 1.6-unit line. The door is the floor's own door — the leaf
-// and its swing that `placeholderDoorSVG` draws on a portal-ground, on its sill
-// (the frame dropped: at fourteen pixels it closed the arc into a square).
+// are drawn as a 1.6-unit line. THE DOOR IS A DOOR (play row 71, Darko 19:00:
+// "the icon for door should just be like a door like a regular door image
+// instead of the uh blueprint door image"): an upright door with a knob,
+// never the plan view's leaf and swing.
 export const MARK_ICONS = Object.freeze({
   place: { kind: "what", label: "place", meaning: "A place: a mark set down on the ground.",
     d: `M 8 14.5 C 8 14.5 3.5 9.6 3.5 6.6 A 4.5 4.5 0 0 1 12.5 6.6 C 12.5 9.6 8 14.5 8 14.5 Z ${circle(8, 6.6, 1.6)}` },
@@ -50,7 +51,7 @@ export const MARK_ICONS = Object.freeze({
   thing: { kind: "what", label: "thing", meaning: "A thing: an object in the world, not ground to stand on.",
     d: "M 8 2.5 L 13.5 5.2 V 10.8 L 8 13.5 L 2.5 10.8 V 5.2 Z M 2.5 5.2 L 8 7.9 L 13.5 5.2 M 8 7.9 V 13.5" },
   door: { kind: "what", label: "door", meaning: "A door: entering it takes you somewhere else.",
-    d: "M 2.5 13.5 H 13.5 M 3.5 13.5 V 3.5 A 10 10 0 0 1 13.5 13.5" },
+    d: `M 4 13.5 V 2.5 H 12 V 13.5 Z ${circle(9.6, 8.4, 0.5)}` },
   dungeon: { kind: "what", label: "dungeon", meaning: "A dungeon: a place with its own floors and rooms inside.",
     d: "M 3 14 V 5 H 5 V 3.2 H 7 V 5 H 9 V 3.2 H 11 V 5 H 13 V 14 Z M 6.5 14 V 10.6 A 1.5 1.5 0 0 1 9.5 10.6 V 14" },
   stairs: { kind: "what", label: "stairs", meaning: "Stairs: a way between floors.",
