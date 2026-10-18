@@ -31,7 +31,6 @@
 //   iconsOf without askLineage                               → 4's draw-time row reds
 //   containmentIndex keying things on class === "thing" alone → 2b reds (her place line names the bowl)
 //   noteThingKind ignoring a close look's holder             → 4b reds (the old-form bag is "A place")
-//   the column offering enter to a thing                     → 4b reds
 //   sayNote() back to the old sentence                       → 5 reds
 //
 // The browser is CI's (suite.yml installs playwright); the box skips by name.
@@ -360,7 +359,7 @@ test("4. a Halloween bowl reads as a thing, never a place", async (t) => {
   assert.ok(!col.meanings.some((m) => /^A place/.test(m)), JSON.stringify(col.meanings));
 });
 
-test("4b. the Candy Bag (old form, kind: sited + class) reads as a thing and offers no enter; a place still does", async (t) => {
+test("4b. the Candy Bag (old form, kind: sited + class) reads as a thing; it offers enter as the office grants, like a place", async (t) => {
   if (!chromium) return t.skip(skipReason);
   const place = await columnFor(STOOL, { until: "A stool." });
   assert.ok(place.enter, "a plain place keeps its door: " + JSON.stringify(place));
@@ -368,7 +367,8 @@ test("4b. the Candy Bag (old form, kind: sited + class) reads as a thing and off
   assert.equal(col.facts.contents, "8 candies · 8 of 200");
   assert.ok(col.icons.includes("ic-thing"), "a thing: " + JSON.stringify(col.icons));
   assert.ok(!col.meanings.some((m) => /^A place/.test(m)), "never \"A place\": " + JSON.stringify(col.meanings));
-  assert.equal(col.enter, false, "a thing is not ground to stand on: no enter");
+  // the office's enter takes any mark with a place and an extent, a thing included (Darko's F1 ruling, a)
+  assert.equal(col.enter, true, "the page offers what the office grants");
 });
 
 test("4d. a thing held inside a holder names that holder, and is drawn at it (page fix 4)", async (t) => {

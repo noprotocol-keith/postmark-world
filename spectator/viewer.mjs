@@ -14147,9 +14147,7 @@ export function mountViewer(appEl) {
     ];
     const cameFrom = bubbleTrail.length > 1 ? bubbleTrail[bubbleTrail.length - 2] : null;
     const backTo = cameFrom && byId.get(cameFrom) ? { id: cameFrom, name: markIdentity(byId.get(cameFrom)) } : null;
-    // A THING IS NOT GROUND TO STAND ON: it offers no "enter" unless its law makes it a door
-    // (the door icon outranks the thing's), the Candy Bag's card (W2 final)
-    const enter = crossing.show && what !== "thing" ? id : null;
+    const enter = crossing.show ? id : null;
     return {
       // the key carries everything that changes what the column says, so a
       // repaint happens exactly when one is owed (the column's own law)
