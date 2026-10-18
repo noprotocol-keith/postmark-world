@@ -24,6 +24,7 @@
 //   handsLines counting holding.length            → 3b reds
 //   a close look's holds read as bare ids         → 3 and 6b red (review-241 H3)
 //   carriersFrom ignoring `expires`               → 6c reds (review-241 N9)
+//   holderLines re-counting past a `whole` list    → 10 reds ("9 whole things" beside the office's 17)
 //   sayCardNote with the old "five minutes"      → 7 reds
 //   isThingKind reading only cls === "thing"     → 8 reds
 
@@ -214,4 +215,21 @@ test("9. ONLY A YES IS KEPT: a close look whose pointer names no thing never blo
   plain.fromChain("portal-ground", ["sited", "mark"]);
   assert.deepEqual(plain.things(), []);
   assert.equal(plain.shouldAsk("thing"), false, "thing itself is never asked");
+});
+
+test("10. counts confer up: the column reads the office's 17 and its whole things, never a count of its own (office hotfix w43.1)", () => {
+  // the bowl's close look once the hotfix is live: 8 candies and a bag of 8, counted as the room counts them
+  const lines = holderLines({ holder: { capacity: 30, open: true },
+    holds: { holder: "sb-ash/a-halloween-bowl", count: 17, class: "thing", shows: "8 candies and A Candy Bag holding 8",
+      kinds: [{ kind: "candy", count: 8, shows: "8 candies" }],
+      whole: [{ thing: "sb-ash/a-candy-bag", name: "A Candy Bag", holds: 8, counts: 9 }],
+      counting: "8 candies, A Candy Bag as 1 and the 8 it holds: 17 counted, as the room counts it (a holder counts 1 and everything it holds)" } });
+  const parts = holdingParts(lines);
+  assert.equal(parts.head, "8 candies and A Candy Bag holding 8 · 17 of 30", "the office's count and words");
+  assert.deepEqual(parts.items, ["8 candies", "A Candy Bag holding 8"], "never \"9 whole things\" (17 less the 8 the kinds name)");
+  // before the hotfix (no `whole` list) the read stands as it did: 9, and 1 whole thing
+  const before = holdingParts(holderLines({ holder: { capacity: 30, open: true },
+    holds: { holder: "sb-ash/a-halloween-bowl", count: 9, class: "thing", shows: "9 things", kinds: [{ kind: "candy", count: 8, shows: "8 candies" }] } }));
+  assert.equal(before.head, "9 things · 9 of 30");
+  assert.deepEqual(before.items, ["8 candies", "1 whole thing"]);
 });

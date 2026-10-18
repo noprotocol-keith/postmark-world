@@ -65,12 +65,24 @@ export function holderLines(focus) {
   const counted = kinds.reduce((s, k) => s + k.count, 0);
   const capacity = Number.isInteger(focus.holder?.capacity) ? focus.holder.capacity : null;
   const open = typeof focus.holder?.open === "boolean" ? focus.holder.open : null;
+  // COUNTS CONFER UP (office hotfix w43.1, Darko 2026-10-17 23:29): when something
+  // inside holds things, `count` is the room's own number (a bowl of 8 and a bag
+  // of 8 reads 17), and `whole` names each whole thing with what it holds. The
+  // page never derives a count of its own: the whole things are the office's
+  // list, and only a read without one leaves them as what `count` minus the
+  // kinds leaves (each counting 1 there).
+  const listed = Array.isArray(focus.holds.whole) ? focus.holds.whole.filter((w) => w?.thing) : null;
+  const names = new Map((listed ?? []).map((w) => {
+    const name = String(w.name ?? w.thing), holds = countOf(w.holds);
+    return [String(w.thing), holds ? `${name} holding ${holds}` : name];
+  }));
   return {
     count,
     shows: count ? String(focus.holds.shows ?? `${count} ${plural(count, "thing")}`) : null,
     kinds,
-    whole: Math.max(0, count - counted),
-    things: [],
+    whole: listed ? 0 : Math.max(0, count - counted),
+    things: (listed ?? []).map((w) => String(w.thing)),
+    names,
     capacity, open,
   };
 }
