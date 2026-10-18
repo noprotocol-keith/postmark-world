@@ -7600,6 +7600,22 @@ export function liveWalkerAt(row, { record = null, declaredMs = 0, polledMs = 0,
     ...(p.arrived ? { standing: true } : {}) };
 }
 
+/** WHAT A MOUNTED ROOM WAS DRAWN FROM (play row 80, Darko 19:45: "Entering the
+ *  Starforge spire from outside brought me to a blank interior until I reloaded
+ *  the page … it had all of the marks, just not the actual background image").
+ *  A room's scene bakes its ground once, at mount, from the room's record: its
+ *  picture, its extent, its place. Entering from outside, the first record the
+ *  page holds of the room can be the household's portfolio copy (an owner's own
+ *  marks are always in hand), which carries no picture; the read taken inside
+ *  brings the full one a moment later, but the same room was never remounted.
+ *  So the scene remembers what it was drawn from, and a record that now says
+ *  otherwise remounts it. Pure. */
+export function roomGroundSignature(room) {
+  if (!room?.id) return "";
+  const e = room.extent ?? {}, a = room.at ?? {};
+  return [room.id, markImagePath(room) ?? "", `${e.w ?? ""}x${e.h ?? ""}`, `${a.x ?? ""},${a.y ?? ""}`, room.points ? JSON.stringify(room.points) : ""].join("|");
+}
+
 export function mountViewer(appEl) {
   if (!appEl) throw new Error("mountViewer needs a host element");
   const shadowHost = appEl;
@@ -8515,6 +8531,7 @@ export function mountViewer(appEl) {
     return () => overlays.forEach((el) => boxEl.appendChild(el));
   }
   let sceneRoomId = null;       // the mark whose scene is mounted, or null = the town
+  let sceneRoomSig = "";   // roomGroundSignature of the mounted room (row 80)
   // THE HOUSE WHOSE COLUMN IS OPEN (Keemin, 2026-09-12: "when a house is clicked
   // (and the column is up), it gets pinned in its 'zoomed' form even when zoomed
   // out"). One parcel id, or null. Read by homeCard, written where the column
@@ -8581,6 +8598,7 @@ export function mountViewer(appEl) {
       placeholderExtents: true, // art-less marks stand in as tinted extents (founder's word)
     });
     sceneRoomId = room.id;
+    sceneRoomSig = roomGroundSignature(room);   // what this ground was baked from (row 80)
     syncChip();
   }
   function remountTown(boxEl) {
@@ -8660,7 +8678,9 @@ export function mountViewer(appEl) {
     const room = built?.room ?? null;
     boxEl.classList.toggle("is-scene-mark", !!room);
     syncRoomCard(boxEl, room, key);
-    if ((room?.id ?? null) === sceneRoomId) return;
+    // the same room, drawn from the same record: nothing to do. The same room
+    // whose record now carries a picture (or a shape) it was not drawn with: drawn again
+    if ((room?.id ?? null) === sceneRoomId && (!room || roomGroundSignature(room) === sceneRoomSig)) return;
     if (room) mountRoomScene(boxEl, room);
     else remountTown(boxEl);
   }
