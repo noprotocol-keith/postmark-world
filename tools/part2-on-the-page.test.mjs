@@ -314,6 +314,13 @@ test("1b. a resident's column says what is in their hands", async (t) => {
 
 test("2. a bag in your hands is drawn with you, and its column says so", async (t) => {
   if (!chromium) return t.skip(skipReason);
+  // your hands land after the read (read: "take"); under a loaded machine that can trail the
+  // first draw, so the pips are read once the hands have moved the bag, for up to 15 s
+  for (let i = 0; i < 60; i++) {
+    const [b, g] = [await pipAt(BOWL), await pipAt(BAG)];
+    if (b && g && Math.hypot(g.x - b.x, g.y - b.y) < 0.01) break;
+    await page.waitForTimeout(250);
+  }
   const bowl = await pipAt(BOWL), bag = await pipAt(BAG);
   assert.ok(bowl && bag, "both pips drawn");
   assert.ok(Math.hypot(bag.x - bowl.x, bag.y - bowl.y) < 0.01,
