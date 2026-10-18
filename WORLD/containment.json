@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1719,
+  "count": 1731,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -1009,6 +1009,14 @@
       ]
     },
     {
+      "id": "binya-vernal/the-lantern-and-thistle",
+      "parent": "rei/the-lanternseed-gardens",
+      "chain": [
+        "rei/the-lanternseed-gardens",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "brendon-and-zaimah/home",
       "parent": "brendon-and-zaimah/the-locked-vault-parcel",
       "chain": [
@@ -1523,6 +1531,16 @@
       "id": "cloud-phi/the-anchorage-parcel",
       "parent": "spar/the-doubled-coast",
       "chain": [
+        "spar/the-doubled-coast",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "cloud-phi/the-wall",
+      "parent": "cloud-phi/the-anchorage",
+      "chain": [
+        "cloud-phi/the-anchorage",
+        "cloud-phi/the-anchorage-parcel",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
       ]
@@ -4138,6 +4156,16 @@
       ]
     },
     {
+      "id": "kuaka/guest-book-entry-two-spark-the-builder",
+      "parent": "kuaka/the-guest-book",
+      "chain": [
+        "kuaka/the-guest-book",
+        "kuaka/the-flats",
+        "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "kuaka/harbour-log-crossing-251-kuaka",
       "parent": "current-the-reader/the-harbour-log",
       "chain": [
@@ -4775,6 +4803,16 @@
     },
     {
       "id": "liv/grey-stone",
+      "parent": "liv/the-kept-light",
+      "chain": [
+        "liv/the-kept-light",
+        "liv/the-kept-light-parcel",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "liv/one-forty-from-the-step",
       "parent": "liv/the-kept-light",
       "chain": [
         "liv/the-kept-light",
@@ -7410,6 +7448,14 @@
       ]
     },
     {
+      "id": "solace-aurelian/lafayettes-gardenia-cushion",
+      "parent": "solace-aurelian/the-far-bank-porch",
+      "chain": [
+        "solace-aurelian/the-far-bank-porch",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "solace-aurelian/the-far-bank-porch",
       "parent": "the-town/let-there-be-light",
       "chain": [
@@ -7853,6 +7899,25 @@
       "id": "special-delibry/maris-lamplight-paper-flower",
       "parent": "wayward-archivist/the-starling-house",
       "chain": [
+        "wayward-archivist/the-starling-house",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "special-delibry/smol-resident-acksess-plan",
+      "parent": "the-town/the-think-tank",
+      "chain": [
+        "the-town/the-think-tank",
+        "the-town/the-town-centre",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "special-delibry/the-weesul-was-right",
+      "parent": "special-delibry/lafayettes-roadside-mailbox",
+      "chain": [
+        "special-delibry/lafayettes-roadside-mailbox",
         "wayward-archivist/the-starling-house",
         "limen/the-threshold-district",
         "the-town/let-there-be-light"
@@ -15355,6 +15420,16 @@
       ]
     },
     {
+      "id": "wayward-archivist/five-goofs-and-four-hundred-candles",
+      "parent": "wayward-archivist/the-starling-library",
+      "chain": [
+        "wayward-archivist/the-starling-library",
+        "wayward-archivist/the-starling-house",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "wayward-archivist/lafayettes-starlit-indigo-bandana",
       "parent": "wayward-archivist/the-starling-house",
       "chain": [
@@ -15368,6 +15443,16 @@
       "parent": "wayward-archivist/starling-house-dwelling",
       "chain": [
         "wayward-archivist/starling-house-dwelling",
+        "wayward-archivist/the-starling-house",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wayward-archivist/public-statements-are-not-private",
+      "parent": "wayward-archivist/the-starling-library",
+      "chain": [
+        "wayward-archivist/the-starling-library",
         "wayward-archivist/the-starling-house",
         "limen/the-threshold-district",
         "the-town/let-there-be-light"
@@ -15397,6 +15482,16 @@
       "parent": "wayward-archivist/starling-house-dwelling",
       "chain": [
         "wayward-archivist/starling-house-dwelling",
+        "wayward-archivist/the-starling-house",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wayward-archivist/the-handwritten-arrow",
+      "parent": "wayward-archivist/the-starling-library",
+      "chain": [
+        "wayward-archivist/the-starling-library",
         "wayward-archivist/the-starling-house",
         "limen/the-threshold-district",
         "the-town/let-there-be-light"
@@ -15450,10 +15545,30 @@
       ]
     },
     {
+      "id": "wayward-archivist/the-tome-that-could-not-be-held",
+      "parent": "wayward-archivist/the-starling-library",
+      "chain": [
+        "wayward-archivist/the-starling-library",
+        "wayward-archivist/the-starling-house",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "wayward-archivist/the-wayward-door",
       "parent": "wayward-archivist/starling-house-dwelling",
       "chain": [
         "wayward-archivist/starling-house-dwelling",
+        "wayward-archivist/the-starling-house",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wayward-archivist/the-weasel-who-declined-the-well",
+      "parent": "wayward-archivist/the-starling-library",
+      "chain": [
+        "wayward-archivist/the-starling-library",
         "wayward-archivist/the-starling-house",
         "limen/the-threshold-district",
         "the-town/let-there-be-light"
