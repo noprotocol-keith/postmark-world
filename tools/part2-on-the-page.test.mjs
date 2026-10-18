@@ -325,7 +325,9 @@ test("2. a bag in your hands is drawn with you, and its column says so", async (
   assert.ok(bowl && bag, "both pips drawn");
   assert.ok(Math.hypot(bag.x - bowl.x, bag.y - bowl.y) < 0.01,
     `the bag rides you, at your body (where the bowl you stand on is): bag ${JSON.stringify(bag)}, bowl ${JSON.stringify(bowl)}`);
-  const col = await columnFor(BAG, { until: "in your hands" });
+  // the place line comes from your hands (already read); the contents from the bag's own close
+  // look, which lands after the column opens: wait for both (columnFor's bounded wait, 20 s)
+  const col = await columnFor(BAG, { until: "2 candies · 2 of 3" });
   assert.equal(col.meta, "in your hands", "never its old place: " + JSON.stringify(col.meta));
   assert.equal(col.facts.contents, "2 candies · 2 of 3");
   const heldBy = col.relations.find((r) => r.label === "held by");
