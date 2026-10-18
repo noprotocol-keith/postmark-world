@@ -61,3 +61,27 @@ test("pins: the pick is the enter again, with into", () => {
   assert.match(SOURCE, /const wayBtn = e\.target\.closest\("\[data-enter-way\]"\);\s*if \(wayBtn\) \{ e\.stopPropagation\(\); crossInto\(wayBtn\.dataset\.enterWay, \{ into: wayBtn\.dataset\.into, button: wayBtn \}\); return; \}/);
   assert.match(SOURCE, /crossInto\(acceptBtn\.dataset\.enterAccept, \{ accept: true, into: acceptBtn\.dataset\.into \|\| null, button: acceptBtn \}\)/);
 });
+
+// ── row 8's second half, with office fix 50 (plumb-wld60's shape) ──────────
+import { walkThereSheetHTML } from "../spectator/viewer.mjs";
+
+test("a wrong pick asks again: the 422 carries the ways, and the door's own sentence says why", () => {
+  const bounce = { error: "bounce", code: 422, defect: 'into: "x" is not one of darko/the-starforge-spire\'s ways; pick one of: a, b', choose: answer.choose };
+  const html = chooseWaySheetHTML(bounce, SPIRE, { nameOf });
+  assert.match(html, /is not one of darko\/the-starforge-spire&#39;s ways|is not one of darko\/the-starforge-spire's ways/);
+  assert.doesNotMatch(html, /This leads more than one way/);
+  assert.equal((html.match(/class="wv-cross-way"/g) ?? []).length, 2);
+});
+
+test("from outside the door, the walk there carries the pick", () => {
+  const offer = { mark: SPIRE, to: { x: 1, y: 2 } };
+  assert.match(walkThereSheetHTML(offer, "", { into: "darko/spire-gilded-vestibule" }), /data-walk-enter="darko\/the-starforge-spire" data-into="darko\/spire-gilded-vestibule"/);
+  assert.doesNotMatch(walkThereSheetHTML(offer, ""), /data-into=/);
+});
+
+test("pins: the wrong pick re-asks before any error line; the walk door takes into", () => {
+  assert.match(SOURCE, /if \(answer\.error === "bounce" && Array\.isArray\(answer\.choose\) && answer\.choose\.length\) \{[\s\S]*?chooseWaySheetHTML\(answer, markId,[\s\S]*?return;\s*\}\s*if \(answer\.error === "bounce"\) throw/);
+  assert.match(SOURCE, /walkThereSheetHTML\(offer, answer\.defect, \{ into \}\)/);
+  assert.match(SOURCE, /apexAct\("walk", \{ mark_id: markId, enter_on_arrival: true, \.\.\.\(into \? \{ into \} : \{\}\), \.\.\.\(accept \? \{ accept: true \} : \{\}\) \}\)/);
+  assert.match(SOURCE, /walkThereAndEnter\(walkEnterBtn\.dataset\.walkEnter, \{ into: walkEnterBtn\.dataset\.into \|\| null, button: walkEnterBtn \}\)/);
+});

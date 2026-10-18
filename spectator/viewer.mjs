@@ -4749,12 +4749,12 @@ export function walkThereOffer(status, body = {}, markId = "") {
 
 /** The refusal sheet that offers the walk: the door's own sentence, then one
  *  button that sends the walk with entry on arrival. Pure. */
-export function walkThereSheetHTML(offer, because = "") {
+export function walkThereSheetHTML(offer, because = "", { into = null } = {}) {
   return `<div class="wv-cross-sheet is-refused is-far" data-for="${esc(offer.mark)}">`
     + `<div class="wv-cross-head">you are not at that door</div>`
     + (because ? `<p class="wv-cross-body">${esc(because)}</p>` : "")
     + `<div class="wv-cross-row">`
-    + `<button type="button" class="ctl wv-walk-enter" data-walk-enter="${esc(offer.mark)}">walk there and enter</button>`
+    + `<button type="button" class="ctl wv-walk-enter" data-walk-enter="${esc(offer.mark)}"${into ? ` data-into="${esc(into)}"` : ""}>walk there and enter</button>`
     + `<button type="button" class="ctl wv-cross-cancel">stay here</button>`
     + `</div></div>`;
 }
@@ -4827,9 +4827,13 @@ export function placeCrossingSheet(host, sheet, { button = null } = {}) {
 export function chooseWaySheetHTML(answer = {}, markId = "", { nameOf = (id) => id } = {}) {
   const ways = (Array.isArray(answer?.choose) ? answer.choose : []).filter((w) => w?.id);
   if (!ways.length) return "";
+  // A WRONG PICK ASKS AGAIN (row 8, with office fix 50: plumb-wld60's shape): the office's 422
+  // carries `choose` beside its own sentence, which says why, so the ways come
+  // back with that sentence instead of the first ask's
+  const said = answer?.error === "bounce" ? String(answer.defect ?? "").trim() : "";
   return `<div class="wv-cross-sheet is-choose" data-for="${esc(markId)}">`
     + `<div class="wv-cross-head">which way?</div>`
-    + `<p class="wv-cross-body">This leads more than one way. Pick the one to go through; nothing is recorded until you do.</p>`
+    + `<p class="wv-cross-body">${said ? esc(said) : "This leads more than one way. Pick the one to go through; nothing is recorded until you do."}</p>`
     + `<div class="wv-cross-ways">`
     + ways.map((w) => {
       const body = String(w.body ?? "").trim();
@@ -8420,9 +8424,16 @@ export function mountViewer(appEl) {
       const offer = answer.error === "bounce" ? walkThereOffer(response?.status, answer, markId) : null;
       if (offer) {
         clearSheet();
-        placeCrossingSheet(liveCard(), walkThereSheetHTML(offer, answer.defect), { button });
+        placeCrossingSheet(liveCard(), walkThereSheetHTML(offer, answer.defect, { into }), { button });
         positionBubbles();
         if (button) { button.disabled = false; button.textContent = label ?? "enter"; }
+        return;
+      }
+      // a wrong pick: the office names the ways again (office fix 50), so the page asks again
+      if (answer.error === "bounce" && Array.isArray(answer.choose) && answer.choose.length) {
+        clearSheet();
+        placeCrossingSheet(liveCard(), chooseWaySheetHTML(answer, markId, { nameOf: (id) => markIdentity(byId.get(id) ?? { id }) }), { button });
+        positionBubbles();
         return;
       }
       if (answer.error === "bounce") throw new Error(answer.defect ?? answer.error);
@@ -8463,13 +8474,13 @@ export function mountViewer(appEl) {
   // the walkers poll already does. A terms door answers the walk with its
   // terms; the same sheet renders them, and accept resends the walk with the
   // walker's word.
-  async function walkThereAndEnter(markId, { accept = false, button = null } = {}) {
+  async function walkThereAndEnter(markId, { accept = false, into = null, button = null } = {}) {
     const sheet = button?.closest?.(".wv-cross-sheet");
     const clicked = button?.closest?.(".wv-card, .wv-homecol") ?? null;
     const liveCard = () => liveMarkCard(root, markId, clicked);   // see crossInto
     if (button) { button.disabled = true; button.textContent = "setting out…"; }
     try {
-      const response = await apexAct("walk", { mark_id: markId, enter_on_arrival: true, ...(accept ? { accept: true } : {}) });
+      const response = await apexAct("walk", { mark_id: markId, enter_on_arrival: true, ...(into ? { into } : {}), ...(accept ? { accept: true } : {}) });
       const answer = response?.body ?? {};
       if (answer.error === "bounce") throw new Error([answer.defect, answer.hint].filter(Boolean).join(" — "));
       sheet?.remove();
@@ -14336,7 +14347,7 @@ export function mountViewer(appEl) {
     const enterBtn = e.target.closest("[data-enter]");
     if (enterBtn) { e.stopPropagation(); crossInto(enterBtn.dataset.enter, { button: enterBtn }); return; }
     const walkEnterBtn = e.target.closest("[data-walk-enter]");
-    if (walkEnterBtn) { e.stopPropagation(); walkThereAndEnter(walkEnterBtn.dataset.walkEnter, { button: walkEnterBtn }); return; }
+    if (walkEnterBtn) { e.stopPropagation(); walkThereAndEnter(walkEnterBtn.dataset.walkEnter, { into: walkEnterBtn.dataset.into || null, button: walkEnterBtn }); return; }
     const walkAcceptBtn = e.target.closest("[data-walk-enter-accept]");
     if (walkAcceptBtn) { e.stopPropagation(); walkThereAndEnter(walkAcceptBtn.dataset.walkEnterAccept, { accept: true, button: walkAcceptBtn }); return; }
     const acceptBtn = e.target.closest("[data-enter-accept]");
