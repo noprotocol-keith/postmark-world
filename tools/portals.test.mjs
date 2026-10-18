@@ -174,7 +174,7 @@ test("only the portal's own word is asked: opposed refuses and is recorded; term
 
 // ── the dungeon's rules ──────────────────────────────────────────────────────
 
-test("a dungeon is entered by its portals, never directly", () => {
+test("a dungeon that names no into of its own is entered by its portals (WLD-63: one that does is passed through it, dungeon-into.test.mjs)", () => {
   const a = enter(AT(1000, 1000), SPIRE, world(), { occupancy: occ([]), handle: "ann" });
   assert.equal(a.refused, "dungeon");
   assert.deepEqual(a.portals.map((p) => p.id), ["spire/doors-outside"]);
