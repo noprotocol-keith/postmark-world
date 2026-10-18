@@ -17,7 +17,7 @@ test("[pin] a hovered mark is its outline and a faint fill in its own colour, wi
   // steps aside, and no mark is ever lit by a swollen dot, hovered or selected
   assert.match(fn, /syncHiddenPips\(pillPipIds\(\)\);/, "the pips the pills stand over step aside");
   assert.doesNotMatch(SOURCE, /class="wv-hl-dot \$\{t\}"/, "no swollen dot on a mark, hovered or selected");
-  assert.match(SOURCE, /\.wv-hl-box\.is-hover\.t-market \{ fill:rgba\(232,197,106,\.13\); \}/, "a faint fill in the mark's own colour");
+  assert.match(SOURCE, /\.wv-hl-box\.is-hover\.t-market \{ fill:color-mix\(in srgb, var\(--pm-gold\) 13%, transparent\); \}/, "a faint fill in the mark's own colour");
   assert.match(SOURCE, /\.ov-s\.is-hovering > \.ov-pip, \.ov-s\.is-hovering > \.ov-pip-door, \.ov-s\.is-hovering > \.ov-ic-in \{ opacity:0; \}/,
     "the pip is hidden, not removed — and the icon drawn into it (fix 13) goes with it");
   assert.match(SOURCE, /<span class="wv-np-dot \$\{markClasses\(full\)\}" aria-hidden="true"><\/span>/, "the plate wears the dot beside the name");

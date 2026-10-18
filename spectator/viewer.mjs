@@ -5409,7 +5409,13 @@ const STYLE = `
   --mono:ui-monospace,"SF Mono",Consolas,Menlo,monospace;
   --stamp-violet:#aa8fd8; --stamp-violet-dark:#65517f;
   --stamp-violet-heading:#d8c7ef; --stamp-violet-subhead:#cbb8e5;
-  /* tier accents (Keemin 2026-07-23): constitution → blue, sovereign/homes → green, market → amber */
+  /* COMMONS MARKS WEAR POSTMARK GOLD (play row 66, Darko 19:06: "base gold, and then
+     the season's color should override it during the season, as they already
+     currently do on the prod site"). The site's own tokens, by the site's own
+     names and base values (postmark.css): the World page's season frame
+     (HalloweenWorldFrame) sets them on .wv in season, as it sets --amber today. */
+  --pm-gold:#e8c48b; --pm-gold-bright:#f6dcae;
+  /* tier accents (Keemin 2026-07-23): constitution → blue, sovereign/homes → green, market (the commons) → Postmark gold */
   --blue:#7ba7e0; --blue-dark:#5580b8; --green:#84c98f; --green-dark:#57a068;
   /* draft (Keemin 2026-08-04): a mark your household has written that the town
      has not published. Cool and desaturated ON PURPOSE — every other colour in
@@ -5612,7 +5618,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-arrow { width:.95em; height:.95em; vertical-align:-.15em; margin-right:.3em; overflow:visible; }
 .wv-arrow path { fill:currentColor; opacity:.8; }
 .wv-card { border:1px solid var(--line); border-left:3px solid var(--amber-dark); border-radius:5px;
-  --wv-mark-accent:var(--amber); padding:10px 13px; margin:8px 0; cursor:pointer; max-width:76ch; }
+  --wv-mark-accent:var(--pm-gold); padding:10px 13px; margin:8px 0; cursor:pointer; max-width:76ch; }
 .wv-card:hover { border-color:var(--amber-dark); }
 .wv-card.t-constitution { --wv-mark-accent:var(--blue); }
 .wv-card.t-home { --wv-mark-accent:var(--green); }
@@ -5806,7 +5812,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
    to its own cell; the tier-colored edge keeps the navigation line legible. */
 .wv-tree-label { font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); margin:12px 0 4px 10px; }
 .wv-relation-lines { margin-left:10px; }
-.wv-rnode { --wv-mark-accent:var(--amber); padding:4px 9px; margin:3px 0; border-left:3px solid var(--amber-dark);
+.wv-rnode { --wv-mark-accent:var(--pm-gold); padding:4px 9px; margin:3px 0; border-left:3px solid var(--amber-dark);
   color:var(--paper); font-size:.84rem; line-height:1.35; cursor:pointer; }
 .wv-rnode-head { display:flex; align-items:center; gap:8px; }
 .wv-rnode .cname { color:var(--paper); font-size:.9rem; line-height:1.25; font-style:normal; }
@@ -5816,7 +5822,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-rnode.t-home { --wv-mark-accent:var(--green); border-left-color:var(--green-dark); }
 .wv-rnode:hover { color:var(--amber); background:rgba(255,255,255,.025); }
 .wv-attributes { margin:7px 0 2px; border-top:1px dotted var(--line); }
-.wv-attribute { --wv-mark-accent:var(--amber); display:flex; align-items:baseline; gap:7px;
+.wv-attribute { --wv-mark-accent:var(--pm-gold); display:flex; align-items:baseline; gap:7px;
   padding:5px 0 4px 9px; border-left:2px solid var(--amber-dark); color:var(--dim);
   font-size:.8rem; line-height:1.35; cursor:pointer; }
 .wv-attribute.t-constitution { --wv-mark-accent:var(--blue); border-left-color:var(--blue-dark); }
@@ -6130,7 +6136,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
    never in the way of a click — the route is a reading, not a target */
 .wv-walk-path { stroke-width:1.5; stroke-opacity:.75; stroke-dasharray:5 4;
   vector-effect:non-scaling-stroke; fill:none; pointer-events:none; }
-.ov-pip { fill:var(--amber); opacity:.65; }
+.ov-pip { fill:var(--pm-gold); opacity:.65; }
 .ov-pip.t-constitution { fill:var(--blue); }
 .ov-pip.t-home { fill:var(--green); }
 /* a portal-ground on the map: the tier dot it always was, with a doorway cut
@@ -6192,11 +6198,11 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-hl-box { fill:rgba(255,255,255,.06); stroke-width:3; vector-effect:non-scaling-stroke; }
 .wv-hl-box.t-constitution { stroke:var(--blue); }
 .wv-hl-box.t-home { stroke:var(--green); }
-.wv-hl-box.t-market { stroke:var(--amber); }
+.wv-hl-box.t-market { stroke:var(--pm-gold); }
 .wv-hl-box.mech { stroke-dasharray:6 5; }
 /* a hovered mark fills in faintly in its own colour, and its dot steps aside
    (Darko, 2026-10-15): the nameplate carries the dot now */
-.wv-hl-box.is-hover.t-market { fill:rgba(232,197,106,.13); }
+.wv-hl-box.is-hover.t-market { fill:color-mix(in srgb, var(--pm-gold) 13%, transparent); }
 .wv-hl-box.is-hover.t-home { fill:rgba(132,201,143,.13); }
 .wv-hl-box.is-hover.t-constitution { fill:rgba(123,167,224,.13); }
 .wv-hl-box.is-hover.is-draft { fill:rgba(160,160,160,.12); }
@@ -6204,7 +6210,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-hl-dot { stroke:#fff; stroke-width:1.5; vector-effect:non-scaling-stroke; }
 .wv-hl-dot.t-constitution { fill:var(--blue); }
 .wv-hl-dot.t-home { fill:var(--green); }
-.wv-hl-dot.t-market { fill:var(--amber); }
+.wv-hl-dot.t-market { fill:var(--pm-gold); }
 /* a hovered resident lights in the walker's own two-state colour, not a tier —
    a person is not a tier of mark, but they speak the same box */
 .wv-hl-dot.wv-hl-walker { fill:var(--green); }
@@ -6316,7 +6322,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-root-mark.on { opacity:1; box-shadow:0 0 0 4px var(--wv-chip-halo, rgba(123,167,224,.35)), 0 1px 6px rgba(0,0,0,.55); }
 /* the chip takes the tier of whatever it names (ported from the birthday lineage, 2026-09-11) */
 .wv-root-mark.t-home { --wv-chip-tint:var(--green); --wv-chip-halo:rgba(132,201,143,.35); }
-.wv-root-mark.t-market { --wv-chip-tint:var(--amber); --wv-chip-halo:rgba(232,197,106,.35); }
+.wv-root-mark.t-market { --wv-chip-tint:var(--pm-gold); --wv-chip-halo:color-mix(in srgb, var(--pm-gold) 35%, transparent); }
 .wv-mapctl { position:absolute; z-index:6; top:10px; right:10px; display:flex; gap:6px;
   flex-wrap:wrap; justify-content:flex-end; max-width:calc(100% - 20px); }
 /* glyph only, so they are round rather than pill-shaped — the word each one used
@@ -6428,7 +6434,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-fp { fill:none; stroke-width:1.4; vector-effect:non-scaling-stroke; }
 .wv-fp.t-constitution { stroke:var(--blue-dark); }
 .wv-fp.t-home { stroke:var(--green-dark); }
-.wv-fp.t-market { stroke:var(--amber-dark); }
+.wv-fp.t-market { stroke:color-mix(in srgb, var(--pm-gold) 78%, #000); }
 .wv-fp.mech { stroke-dasharray:6 5; }
 .wv-fp.fp-parcel { fill:rgba(132,201,143,.10); }
 /* the marks you stand WITHIN read a tad heavier — the map's echo of the
@@ -6446,7 +6452,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-hl-label, .wv-edge-indicator { color:var(--amber); }
 .wv-hl-label.t-constitution, .wv-edge-indicator.t-constitution { color:var(--blue); }
 .wv-hl-label.t-home, .wv-edge-indicator.t-home { color:var(--green); }
-.wv-hl-label.t-market, .wv-edge-indicator.t-market { color:var(--amber); }
+.wv-hl-label.t-market, .wv-edge-indicator.t-market { color:var(--pm-gold); }
 /* a resident is not a tier of mark, but speaks the same box — in the walker's own
    two states, so the name agrees with the dot it is naming */
 .wv-hl-label.wv-hl-walker { color:var(--green); }
@@ -6456,7 +6462,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-hl-label text, .wv-edge-indicator text { fill:currentColor; font-family:Georgia,"Times New Roman",serif; }
 .wv-edge-indicator.t-constitution { color:var(--blue); }
 .wv-edge-indicator.t-home { color:var(--green); }
-.wv-edge-indicator.t-market { color:var(--amber); }
+.wv-edge-indicator.t-market { color:var(--pm-gold); }
 .wv-edge-indicator > path { fill:currentColor; stroke:var(--night); stroke-width:.8; }
 .wv-edge-indicator rect { fill:rgba(13,15,19,.94); stroke:currentColor; stroke-width:1; }
 .wv-edge-indicator text { fill:currentColor; font-family:Georgia,"Times New Roman",serif; }
@@ -6661,14 +6667,14 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
    makes the opposite choice, which is exactly why it stands down in this mode. */
 .wv-bubbles { position:absolute; inset:0; z-index:7; pointer-events:none; overflow:hidden; }
 .wv-bubble { position:absolute; top:0; left:0; width:max-content; max-width:min(31rem,72%);
-  --wv-mark-accent:var(--amber);
+  --wv-mark-accent:var(--pm-gold);
   border:1px solid var(--line); border-left:3px solid var(--wv-mark-accent); border-radius:6px;
   background:rgba(13,15,19,.97); box-shadow:0 10px 30px rgba(0,0,0,.55);
   will-change:transform; }
 .wv-bubble[hidden] { display:none; }
 .wv-bubble.t-constitution { --wv-mark-accent:var(--blue); }
 .wv-bubble.t-home { --wv-mark-accent:var(--green); }
-.wv-bubble.t-market { --wv-mark-accent:var(--amber); }
+.wv-bubble.t-market { --wv-mark-accent:var(--pm-gold); }
 /* a bubble that fits on neither side of its anchor is covering the thing it
    describes; say so with weight rather than pretending it still points at it */
 .wv-bubble.side-over { opacity:.93; }
@@ -6693,7 +6699,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .wv-bubble-back.t-constitution { color:var(--blue); }
 .wv-bubble-back.t-home { color:var(--green); }
-.wv-bubble-back.t-market { color:var(--amber); }
+.wv-bubble-back.t-market { color:var(--pm-gold); }
 .wv-bubble-back:hover, .wv-bubble-back:focus-visible { background:var(--panel2); }
 .wv-bubble-close { margin-left:auto; flex:none; border:0; background:transparent; color:var(--dim);
   font:inherit; font-size:.95rem; line-height:1; padding:4px 7px; cursor:pointer; border-radius:4px; }
@@ -6720,7 +6726,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 /* THE PIP, OPENED (play fix 37): the pip's own dot as the pill's left cap, the
    name and the badges after it, anchored where the pip stands. It folds open
    sideways and back. Selected: the same pill, held open and ringed. */
-.wv-pill { position:absolute; top:0; left:0; z-index:4; --h:28px; --wv-mark-accent:var(--amber);
+.wv-pill { position:absolute; top:0; left:0; z-index:4; --h:28px; --wv-mark-accent:var(--pm-gold);
   display:flex; align-items:center; gap:7px; height:var(--h); max-width:var(--h); overflow:hidden;
   white-space:nowrap; border-radius:999px; background:rgba(13,15,19,.94);
   box-shadow:0 0 0 1.5px var(--wv-mark-accent), 0 4px 14px rgba(0,0,0,.45);
