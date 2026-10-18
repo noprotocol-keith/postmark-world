@@ -7526,6 +7526,39 @@ export function whereLine({ distance, bearing = null, far = false, who = "the ca
   return `${dist} · ${BEARING_LONG[bearing] ?? bearing} of ${who}`;
 }
 
+/** WHERE A BODY IS DRAWN NOW (play row 69, Darko 19:03: "polling for your
+ *  location is dumb when you literally declare the exact trajectory of your
+ *  walk … for your own walks, it should just be literally … from what you
+ *  declared"). `row` is the last poll's word on the body, polled at `polledMs`;
+ *  `record` the walk it declared ({ from, toward, at, pace, targetExtent }),
+ *  declared at `declaredMs`. The place is the world's own positionAt over the
+ *  record, never a second formula, wherever the record is the body's walk:
+ *  declared after the poll (your own walk, the moment it answers), or the walk
+ *  the poll still says it is on. A stop the poll reports before the record would
+ *  have arrived (an enter mid-walk, a landing, a set-down) is an event, and the
+ *  poll's place wins. A body on a walk the page has no record of yet stays at
+ *  the poll's place. `nowCrossing` is the fractional crossing; `polledCrossing`
+ *  the poll's, which tells the walk a row is on when the row names no `toward`
+ *  (the earshot read's rows do not): it is this record's walk when the record
+ *  puts the body within a few metres of where the poll saw it. Pure. */
+export function onRecordedWalk(row, record, polledCrossing) {
+  const near = (a, b, m) => !!a && !!b && Math.hypot(Number(a.x) - Number(b.x), Number(a.y) - Number(b.y)) <= m;
+  if (!row || !record) return false;
+  if (row.toward) return near(record.toward, row.toward, 1);
+  const q = Number.isFinite(polledCrossing) ? positionAt(record, polledCrossing) : null;
+  return !!q && !q.arrived && near(q, row, 5);
+}
+export function liveWalkerAt(row, { record = null, declaredMs = 0, polledMs = 0, nowCrossing, polledCrossing = NaN } = {}) {
+  if (!row || !record) return row;
+  const sameWalk = onRecordedWalk(row, record, polledCrossing);
+  const declaredAfterPoll = declaredMs > polledMs;
+  if (!declaredAfterPoll && !(row.moving && sameWalk)) return row;
+  const p = positionAt(record, nowCrossing);
+  if (!p) return row;
+  return { ...row, x: p.x, y: p.y, moving: !p.arrived, arrived: !!p.arrived, toward: record.toward,
+    ...(p.arrived ? { standing: true } : {}) };
+}
+
 export function mountViewer(appEl) {
   if (!appEl) throw new Error("mountViewer needs a host element");
   const shadowHost = appEl;
@@ -8718,6 +8751,8 @@ export function mountViewer(appEl) {
         if (button) { button.disabled = false; button.textContent = label ?? "enter"; }
         return;
       }
+      // a passage sets you down somewhere: that is an event, drawn in this frame (row 69)
+      if (answer.landed) ownStopAt(state.handle, answer.landed);
       // CROSSED. The ledger is the answer, so go and read it rather than
       // assuming — and then the interior takes over on its own, off insideOf,
       // because that path already exists and is the one the record drives.
@@ -8752,6 +8787,7 @@ export function mountViewer(appEl) {
       const response = await apexAct("walk", { mark_id: markId, enter_on_arrival: true, ...(into ? { into } : {}), ...(accept ? { accept: true } : {}) });
       const answer = response?.body ?? {};
       if (answer.error === "bounce") throw new Error([answer.defect, answer.hint].filter(Boolean).join(" — "));
+      ownWalkDeclared(state.handle, answer);   // drawn from what it declared (row 69)
       sheet?.remove();
       // the door's answer is the walk's `entry` (WLD-48), so the sheet reads it there
       placeCrossingSheet(liveCard(), walkEnterSheetHTML(answer, markId), { button });
@@ -12076,7 +12112,8 @@ export function mountViewer(appEl) {
     // from any pointer inside it.
     const tier = drawTier();
     const bounds = drawnBounds();
-    const inView = sceneWalkerSet({ walkers: walkState.walkers, manifest, roomId: sceneRoomId, marks: draw.marks });
+    // each body where its declared walk puts it now (row 69)
+    const inView = sceneWalkerSet({ walkers: (walkState.walkers ?? []).map(liveBody), manifest, roomId: sceneRoomId, marks: draw.marks });
     const drawnWalkers = inView.filter((w) => pointInDrawnBounds(w, bounds));
     // ONE BODY, ONE MARKER (POS-93), ASKED OF THE BODIES DRAWN (#2848 (a),
     // 2026-09-17). This asked the walker LIST: jetto-of-starforge was in it, so
@@ -12413,7 +12450,65 @@ export function mountViewer(appEl) {
   // identity (so everything memoised on it holds — the actor's reading, the
   // vessel set) and the layer is not written. The readout still gets the
   // clock the answer carried, because it prints it.
+  // ── BODIES DRAWN FROM THEIR DECLARED WALKS (play row 69) ─────────────────
+  //
+  // The 15 s poll stays, to find new walks and stops. Between polls every body
+  // on a walk the page holds the record of is drawn where positionAt puts it,
+  // each frame while something on screen moves, and the reader's own walk from
+  // the moment its act answers. Nothing runs while all are still, or in a
+  // hidden tab.
+  const walkRecords = new Map();   // handle -> { record, declaredMs }
+  let walksPolledMs = 0;
+  function noteWalkRecord(handle, record, declaredMs) {
+    if (!handle || !record?.from || !record?.toward || !Number.isFinite(Number(record.at))) return;
+    const had = walkRecords.get(handle);
+    if (had && had.declaredMs > declaredMs) return;
+    walkRecords.set(handle, { record, declaredMs });
+  }
+  function recordsFromDepartures(list) {
+    for (const d of list ?? []) noteWalkRecord(d.handle, d, Date.parse(d.iso) || 0);
+  }
+  const liveBody = (w) => {
+    const r = w?.handle ? walkRecords.get(w.handle) : null;
+    return r ? liveWalkerAt(w, { record: r.record, declaredMs: r.declaredMs, polledMs: walksPolledMs, nowCrossing: fractionalCrossing(), polledCrossing: fractionalCrossing(walksPolledMs) }) : w;
+  };
+  // a walk the poll shows that the page holds no record of: ask the record once
+  let walkRecordsAsking = null;
+  function askNewWalkRecords(rows) {
+    const at = fractionalCrossing();
+    const unknown = (rows ?? []).some((w) => w?.moving && w.handle && !onRecordedWalk(w, walkRecords.get(w.handle)?.record, at));
+    if (!unknown || walkRecordsAsking) return;
+    const newest = Math.max(0, ...[...walkRecords.values()].map((r) => r.declaredMs));
+    const since = new Date((newest || Date.now() - 86_400_000) - 1000).toISOString();
+    walkRecordsAsking = fetch(officeUrl(`/world2/walks?since=${encodeURIComponent(since)}`), { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (j) { recordsFromDepartures(walksFromOffice(j).departures); animateWalks(); } })
+      .catch(() => {})
+      .finally(() => { walkRecordsAsking = null; });
+  }
+  let walkFrame = 0, walkFrameKey = "";
+  function animateWalks() {
+    if (walkFrame || (typeof document !== "undefined" && document.hidden)) return;
+    const moving = () => (walkState.walkers ?? []).map(liveBody).filter((w) => w?.moving && walkRecords.has(w.handle));
+    if (!moving().length) return;
+    const tick = () => {
+      walkFrame = 0;
+      if (typeof document !== "undefined" && document.hidden) return;
+      const now = moving();
+      if (!now.length) { drawWalkers(); return; }   // the last frame sets them down
+      // redraw only when a moving body has moved by half a pixel on screen
+      const k = mapCtx?.mPerPx || 1;
+      const key = now.map((w) => w.handle + ":" + Math.round(w.x / k * 2) + "," + Math.round(w.y / k * 2)).join("|");
+      if (key !== walkFrameKey) { walkFrameKey = key; drawWalkers(); }
+      walkFrame = requestAnimationFrame(tick);
+    };
+    walkFrame = requestAnimationFrame(tick);
+  }
+  if (typeof document !== "undefined") document.addEventListener("visibilitychange", () => { if (!document.hidden) animateWalks(); });
   function takeWalkers(rows) {
+    walksPolledMs = Date.now();
+    askNewWalkRecords(rows);
+    animateWalks();
     if (sameWalkers(rows, walkState.walkers)) {
       walkDraws.pollsUnchanged += 1;
       walkReadout(walkState.lastDrawn ?? []);
@@ -13073,6 +13168,8 @@ export function mountViewer(appEl) {
       answer.classList.add("success");
       answer.textContent = `${handle} departed: ${Number(response.body.leg_m ?? 0).toLocaleString()} m, ETA ${formatEtaCrossings(response.body.eta_crossings ?? 0)}.`;
       walkNote(answer);
+      // FROM WHAT YOU DECLARED (row 69): the walk's own record, drawn at once
+      ownWalkDeclared(handle, response.body);
       await pollWalkers();
       if (sameWalkDestination(walkState.destination, armedDestination)) clearSelectionAndDestination();
     } catch (error) {
@@ -13081,6 +13178,30 @@ export function mountViewer(appEl) {
       walkNote(answer);
       confirm.disabled = false;
     }
+  }
+
+  /** Your own walk, drawn from the answer that declared it: from, toward, the
+   *  crossing it set out at, the stride (the Mists' slowed stride when the
+   *  answer gives one, else the class dial) and the target's frozen extent. */
+  function ownWalkDeclared(handle, body) {
+    if (!handle || !body?.from || !body?.toward || !Number.isFinite(Number(body.departed_at_crossing))) return;
+    const target = body.mark_id ? (byId.get(body.mark_id) ?? null) : null;
+    noteWalkRecord(handle, {
+      handle, from: body.from, toward: body.toward, at: Number(body.departed_at_crossing),
+      pace: Number(body.mists?.stride_km) > 0 ? Number(body.mists.stride_km) : (departPaceKm(byId) ?? null),
+      targetExtent: target?.extent ? { w: Number(target.extent.w), h: Number(target.extent.h) } : null,
+      targetMarkId: body.mark_id ?? null,
+    }, Date.now());
+    drawWalkers();
+    animateWalks();
+  }
+  /** A stop or a landing your own act reports (an enter mid-walk, a passage):
+   *  an event, drawn in that frame as a zero-length walk where it set you down. */
+  function ownStopAt(handle, at) {
+    if (!handle || !Number.isFinite(Number(at?.x)) || !Number.isFinite(Number(at?.y))) return;
+    const here = { x: Number(at.x), y: Number(at.y) };
+    noteWalkRecord(handle, { handle, from: here, toward: here, at: fractionalCrossing(), pace: null }, Date.now());
+    drawWalkers();
   }
 
   // Where the sheet hangs: the mark's own cell, preferring the pinned bubble when
@@ -16342,6 +16463,7 @@ export function mountViewer(appEl) {
           : parseWalkLedger(await r.text());
         if (parsed.departures.length) {
           departures = parsed.departures;
+          recordsFromDepartures(departures);   // every body's declared walk (row 69)
           noteRecordRead("/WORLD/walk-ledger.md");
           // The ledger can arrive after the map and its other readers painted.
           // Its paths owe their own repaint, not another lane's lucky redraw.
