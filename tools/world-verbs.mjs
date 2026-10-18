@@ -27,7 +27,7 @@ import {
 } from "./enter-exit.mjs"; // DEMO SLICE — the enter-exit acts (step 5, jetto/enter-exit-demo)
 import {
   pointInMark, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence,
-  landingOf, enterTargetOf, portalsIn, portalsInto, dungeonLanding,
+  landingOf, passageTargetOf, portalsIn, portalsInto, dungeonLanding,
 } from "./portals.mjs"; // WLD-5: portals and the dungeon class, one home for the verbs and the lint
 // The office loads this file and enter-exit.mjs from the clone, and nothing else,
 // so the portal reads it needs ride out through here.
@@ -358,9 +358,14 @@ export function enter(state, targetId, world, {
   // A mark a dungeon hides from you is no mark at all to you: the same answer
   // as an id that does not exist, so naming one from outside learns nothing.
   if (named && hiddenFrom(marks, held).has(targetId)) return { error: `no mark '${targetId}' to enter` };
+  // ENTERING A MARK ENTERS ITS `into` (WLD-5's ruling, restored by WLD-63): any
+  // mark carrying one is passed through it, the dungeon itself included. The
+  // Starforge Spire carries `into` its vestibule, so entering it from anywhere
+  // in its outline sets you down inside the Gilded Doors; a list asks which.
   if (named && entryLawOf(named)?.into) return enterThroughPortal(state, named, world, { held, handle, at, iso, accepted, into });
-  // Inside a dungeon, or into one, the only enter is through a portal: the cure
-  // for the Swiss-cheese exit must not leak on the way in.
+  // Inside a dungeon the only enter is through a portal (G3: the cure for the
+  // Swiss-cheese exit must not leak on the way in), and a dungeon that names no
+  // `into` of its own is entered by the portals that lead into it.
   if (named && dungeonIndex(marks).dungeons.length) {
     const inside = heldDungeon(held, marks);
     const governs = dungeonsOf(named, marks);
@@ -370,7 +375,7 @@ export function enter(state, targetId, world, {
       return {
         error: inside
           ? `you are inside ${d}, a dungeon — inside one, the only way to enter anything is a portal. The portals where you stand: ${ways.map((p) => p.id).join(", ") || "(none)"}`
-          : `${d} is a dungeon — it is entered through its portals, never directly. Its ways in: ${ways.map((p) => p.id).join(", ") || "(none)"}`,
+          : `${d} is a dungeon that names no way in of its own (no \`into\`), so it is entered through the portals that lead into it. Its ways in: ${ways.map((p) => p.id).join(", ") || "(none)"}`,
         refused: "dungeon", dungeon: d, portals: ways,
       };
     }
@@ -482,7 +487,7 @@ function enterThroughPortal(state, portal, world, { held, handle, at, iso, accep
 
   if (verdict.effect === "terms") return { ...base, crossings: [verdict], stranded: portal.id, awaiting: verdict };
 
-  const target = enterTargetOf(intoMark, marks);
+  const target = passageTargetOf(portal, intoMark, marks);
   const chain = target
     ? [...ancestorsByGeometry(target, world, { kinds: THRESHOLD_KINDS }).slice().reverse().map((m) => m.id), target.id]
     : [];
@@ -689,19 +694,36 @@ export { withinOf };
 // The spine is CONTAINMENT, parents-first (Keemin, 2026-07-23): the root's body
 // opens as the establishing line; then you home inward through the marks you are
 // WITHIN (region → any containing mark); THEN the radial FOV listing.
+//
+// THE TELLING IS THE TOWN'S OWN VOICE (POS-393; Darko 2026-10-13 21:11 EDT,
+// ruling B, inside WLD-29's pointer model). A resident's mark is NAMED here, by
+// its author and its id, and never quoted: its body is read by focus
+// (investigate, or the apex's `mark:`), where it arrives in its own field,
+// beside its author — the reading law's named fields. The town's own marks (by
+// `the-town`) are the narration, and stay told. These are all five places a
+// body enters the telling: the establishing line, the "You are within" clause,
+// the band lines, the horizon lines and the lost-horizon lines (a far mark the
+// Mists' wall took, told where it stood).
+export const TELLING_TOWN = "the-town";
+const authorOf = (m) => String(m?.by ?? String(m?.id ?? "").split("/")[0] ?? "");
+const townsOwn = (m) => authorOf(m) === TELLING_TOWN;
+/** How the telling names a resident's mark: its author, and its id where the line carries none. */
+export function residentMarkNamed(m, { withId = true } = {}) {
+  return `a mark by ${authorOf(m) || "someone"}${withId ? ` [${m?.id}]` : ""}`;
+}
 function renderTelling(state, radial, fov) {
   const o = radial.observer;
   const within = radial.within ?? [];
   const L = [];
   // 1. the establishing line — the root's body (the frame; never a card)
   const root = within[0];
-  if (root?.body) { L.push(root.body); L.push(""); }
+  if (root?.body) { L.push(townsOwn(root) ? root.body : residentMarkNamed(root)); L.push(""); }
   const who = o.name ?? "You";
   const stands = who === "You" ? "stand" : "stands"; // verb agreement: "You stand" vs "an agent stands"
   L.push(`— ${who} ${stands} at (${o.at?.x ?? state.x}, ${o.at?.y ?? state.y}), ${o.groundElevM} m above the sea.`);
   // 2. the containment spine — home inward through what contains you (skip the root frame)
   const spine = within.slice(1).filter((m) => m.body);
-  if (spine.length) L.push(`You are within ${spine.map((m) => firstLine(m.body).replace(/[.·\s]+$/, "")).join(" · ")}.`);
+  if (spine.length) L.push(`You are within ${spine.map((m) => (townsOwn(m) ? firstLine(m.body).replace(/[.·\s]+$/, "") : residentMarkNamed(m))).join(" · ")}.`);
   const anySignalCarries = fov.carried.some((m) => m.signal); // don't promise lights that aren't there
   // in a season the fog keeps the crossing's own hour; before one, "tonight", as it always said
   const fogWhen = radial.mists ? `this ${hourOf(radial.crossing)}` : "tonight";
@@ -741,12 +763,14 @@ function renderTelling(state, radial, fov) {
       if (m.lost) { parts.push(`  · ${lostHorizonPhrase(m)}`); continue; }
       // the band heads the section, so a horizon line no longer restates it
       if (m.far) { parts.push(`  · ${horizonPhrase(m)}`); continue; }
+      // a resident's mark is named, never quoted (POS-393): the line's own tag carries its id
+      const told = townsOwn(m) ? (firstLine(m.body) || m.id) : residentMarkNamed(m, { withId: false });
       // under a veil a light still carries, but it gutters
       const lit = m.signal ? (radial.mists?.veil > 0 ? " (its light carries, guttering)" : " (its light carries)") : "";
       const occ = m.occluded && m.signal ? " — its footing is hidden, only the light shows" : "";
       const dim = m.dim < 0.5 ? " — dim, at the dark edge" : "";
       const more = m.clusteredCount ? ` (+${m.clusteredCount} more of ${m.household}'s — investigate)` : "";
-      parts.push(`  · ${m.here ? "here" : `${m.distM} m ${m.bearing}`} — ${firstLine(m.body) || m.id}${lit}${occ}${dim}${more}  [${m.id}, ✦${m.weight}]`);
+      parts.push(`  · ${m.here ? "here" : `${m.distM} m ${m.bearing}`} — ${told}${lit}${occ}${dim}${more}  [${m.id}, ✦${m.weight}]`);
     }
     if (parts.length) { L.push(`${bandHeading(bandName)}:`); L.push(...parts); }
   }
@@ -1076,12 +1100,15 @@ function regionOf(state, world) {
 function orderBands(keys) { const order = DIALS.distance_bands.map((b) => b.name); return keys.slice().sort((a, b) => order.indexOf(a) - order.indexOf(b)); }
 // band names are written as prose ("a fair way off"); a section head wants sentence case
 function bandHeading(name) { const s = String(name ?? ""); return s.charAt(0).toUpperCase() + s.slice(1); }
+// A horizon's label is the skeleton's (the town's terrain); with none, the
+// body is told only when the mark is the town's own, and a resident's far mark
+// is named by author and id (POS-393, § the telling renderer).
 function lostHorizonPhrase(m) {
-  const name = m.label || shortName(m);
+  const name = m.label || (townsOwn(m) ? shortName(m) : residentMarkNamed(m));
   return `${m.bearing}, where ${name} stood: only grey`;
 }
 function horizonPhrase(m) {
   const km = (m.distM / 1000).toFixed(0);
-  const name = m.label || ellipsize(bodyProse(m.body), 80); // a short label, not the decision-008 arithmetic
+  const name = m.label || (townsOwn(m) ? ellipsize(bodyProse(m.body), 80) : residentMarkNamed(m)); // a short label, not the decision-008 arithmetic
   return `${name} (${m.bearing}, ~${km} km, ${m.heightM} m up)`;
 }

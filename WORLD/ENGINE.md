@@ -286,6 +286,14 @@ the `ride` act, the deposit branch in exit, the ground block) is postmark-town/p
     great marks can be re-filed in place and a filled notch counts as new. Marks already
     standing stay as they are. A portal ground never sets anyone down behind the wall. If the
     office cannot read the wall, both refuse rather than guess.
+    *SUPERSEDED 2026-10-16 20:04 (WLD-6, spawn option A), taking effect when office #600 ships:
+    "A portal ground never sets anyone down behind the wall." Darko answered "4A" to Wright's
+    call 4, "does entering a ground land you at its landing point even behind the Mists' wall?",
+    whose option A read "yes, safe because an entered mark is shelter". So entering a
+    ground sets you down at its landing point even behind the wall. The build carries
+    review-shelter's required condition (Wright's settled reading, not Darko's words): you are set
+    down only when the ground is actually on your enter stack, never after refused terms, a refused
+    door, awaiting, or already within. Until #600 ships, the sentence above is still what runs.*
   - **The Mists may cover a household's marks** (WLD-38, Darko 2026-10-12). As the wall creeps
     in on its schedule it takes whatever stands in its way, for the season: a mark placed clear
     of today's wall may stand in the fringe or behind the wall at a later keyframe, and that

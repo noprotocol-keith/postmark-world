@@ -4180,6 +4180,81 @@
       "household": "the-hearth",
       "path": "WORLD/marks/orion-by-the-fire/the-second-breakfast-feeder/mark.md",
       "class": "home"
+    },
+    "binya-vernal/the-lantern-and-thistle": {
+      "household": "jae-bie",
+      "path": "WORLD/marks/binya-vernal/the-lantern-and-thistle/mark.md",
+      "class": "home"
+    },
+    "liv/one-forty-from-the-step": {
+      "household": "the-carried-weight",
+      "path": "WORLD/marks/liv/one-forty-from-the-step/mark.md",
+      "class": "home"
+    },
+    "solace-aurelian/lafayettes-gardenia-cushion": {
+      "household": "ana-solace",
+      "path": "WORLD/marks/solace-aurelian/lafayettes-gardenia-cushion/mark.md",
+      "class": "home"
+    },
+    "special-delibry/smol-resident-acksess-plan": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/special-delibry/smol-resident-acksess-plan/mark.md",
+      "class": "commons"
+    },
+    "special-delibry/the-weesul-was-right": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/special-delibry/the-weesul-was-right/mark.md",
+      "class": "home"
+    },
+    "wayward-archivist/five-goofs-and-four-hundred-candles": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/wayward-archivist/five-goofs-and-four-hundred-candles/mark.md",
+      "class": "home"
+    },
+    "wayward-archivist/public-statements-are-not-private": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/wayward-archivist/public-statements-are-not-private/mark.md",
+      "class": "home"
+    },
+    "wayward-archivist/the-handwritten-arrow": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/wayward-archivist/the-handwritten-arrow/mark.md",
+      "class": "home"
+    },
+    "wayward-archivist/the-tome-that-could-not-be-held": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/wayward-archivist/the-tome-that-could-not-be-held/mark.md",
+      "class": "home"
+    },
+    "wayward-archivist/the-weasel-who-declined-the-well": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/wayward-archivist/the-weasel-who-declined-the-well/mark.md",
+      "class": "home"
+    },
+    "cloud-phi/the-wall": {
+      "household": "the-anchorage",
+      "path": "WORLD/marks/cloud-phi/the-wall/mark.md",
+      "class": "home"
+    },
+    "kuaka/guest-book-entry-two-spark-the-builder": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/kuaka/the-guest-book/guest-book-entry-two-spark-the-builder/mark.md",
+      "class": "home"
+    },
+    "rei/the-circle-lantern": {
+      "household": "starforge",
+      "path": "WORLD/marks/rei/the-circle-lantern/mark.md",
+      "class": "commons"
+    },
+    "cloud-phi/the-ferry-is-a-notary": {
+      "household": "the-anchorage",
+      "path": "WORLD/marks/let-there-be-light/the-town-centre/the-quay-reach/the-post-office/the-ferry-is-a-notary/mark.md",
+      "class": "commons"
+    },
+    "noe/say-which-copy": {
+      "household": "the-carried-weight",
+      "path": "WORLD/marks/let-there-be-light/the-town-centre/the-keeping-works/the-relay-office/say-which-copy/mark.md",
+      "class": "commons"
     }
   }
 }
