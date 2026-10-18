@@ -220,7 +220,7 @@ export function isParcelMark(mark) {
  * renders blank: every state below ends in either prose or one line saying why
  * there is none.
  */
-export function homeColumnModel({ handle, kicker, title, region, leadImage, door = null, error = null, loading = false, residentHref = null, parcelId = null, canEnter = false, byline = null, residents = [], ownWords = null, enterId = null, facts = [], relations = [], back = null, icons = [], stamps = null, footprint = null, bars = [], tokens = [] } = {}) {
+export function homeColumnModel({ handle, kicker, title, region, leadImage, door = null, error = null, loading = false, residentHref = null, parcelId = null, canEnter = false, byline = null, residents = [], ownWords = null, enterId = null, facts = [], relations = [], back = null, icons = [], stamps = null, footprint = null, bars = [], tokens = [], copyId = null } = {}) {
   const who = String(handle ?? "").trim();
   // THE DOOR SPEAKS ONLY FOR ITS OWN PARCEL (POS-584, Darko 2026-10-11: "Sol's
   // parcel got yeeted"). There is one home page per handle, so a household's
@@ -287,6 +287,10 @@ export function homeColumnModel({ handle, kicker, title, region, leadImage, door
         .map((i) => ({ id: String(i.id).trim(), name: String(i.name ?? i.id).trim() })),
       more: !!r?.more,
     })).filter((r) => r.items.length),
+    // COPY FOR YOUR AGENT (play row 28): the mark this column can hand to a
+    // chat-only human's agent, by id. The viewer builds the text at the press,
+    // from its own record, so the column carries no prose of its own here.
+    copy: String(copyId ?? "").trim() ? { id: String(copyId).trim() } : null,
     // the way back to the mark this column was reached from, named
     back: back && String(back.id ?? "").trim()
       ? { id: String(back.id).trim(), name: String(back.name ?? back.id).trim() } : null,
@@ -724,6 +728,18 @@ export function renderHomeColumn(doc, host, model, { imagePath = null } = {}) {
     scroll.appendChild(link);
   }
 
+  if (model.copy) {
+    // ONE BUTTON, AT THE FOOT (play row 28, Darko 18:25: "an easy button they
+    // can press to just copy it to clipboard"). The viewer's root delegate reads
+    // `data-homecol-copy`, as it reads `data-enter`: no handler of the column's own.
+    const copy = el(doc, "button", "wv-homecol-copy");
+    copy.setAttribute("type", "button");
+    copy.setAttribute("data-homecol-copy", model.copy.id);
+    copy.setAttribute("title", "copy this mark and the commands to take it further, to paste into your agent's chat");
+    copy.textContent = "copy for your agent";
+    scroll.appendChild(copy);
+  }
+
   host.appendChild(scroll);
   return host;
 }
@@ -778,6 +794,7 @@ export function createHomeColumn({ doc, host, readHome, imagePath = null, reside
       footprint: view.footprint ?? null,
       bars: view.bars ?? [],
       tokens: view.tokens ?? [],
+      copyId: view.copyId ?? null,
     }), { imagePath });
   };
 
@@ -877,6 +894,10 @@ export const HOME_COLUMN_CSS = `
   border:1px solid var(--line); border-radius:3px; }
 .wv-homecol-altonly { color:var(--dim); font-size:.78rem; font-style:italic; }
 .wv-homecol-note { margin:.9rem 0 0; color:var(--dim); font-size:.8rem; line-height:1.5; }
+.wv-homecol-copy { display:block; width:100%; margin:1.1rem 0 .2rem; padding:7px 10px; border-radius:7px; cursor:pointer;
+  border:1px dashed rgba(240,213,168,.45); background:transparent; color:var(--dim); font:inherit; font-size:.8rem; text-align:center; }
+.wv-homecol-copy:hover { border-color:var(--amber); color:var(--paper); }
+.wv-homecol-copy:focus-visible { outline:2px solid var(--amber); outline-offset:1px; }
 /* every mark's column (Darko, 2026-10-15): the way back, the facts, the relatives */
 .wv-homecol-back { flex:0 1 auto; min-width:0; border:0; background:transparent; color:var(--amber);
   font:inherit; font-size:.76rem; padding:2px 6px; border-radius:4px; cursor:pointer;
