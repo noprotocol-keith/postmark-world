@@ -457,3 +457,104 @@ test("THE BYLINE SAYS WHERE THE WORDS CAME FROM — and a parcel's is unchanged"
   // ⚑ THE FLIP: drop the `byline` parameter from homeColumnModel and the region
   //   line falls back to "in limen's own words", which is the claim being fixed.
 });
+
+// ── EVERY MARK'S COLUMN (Darko, playground sitting 2026-10-15) ──────────────
+
+test("a mark's column carries its facts, its relatives and the way back as plain data", () => {
+  const model = homeColumnModel({
+    handle: "darko",
+    title: "Spire Gilded Doors",
+    door: { description: "The Gilded Doors, the way into the Starforge Spire." },
+    enterId: "darko/spire-gilded-doors", canEnter: true,
+    facts: [{ label: "backing", value: "✦ 3" }, { label: "empty", value: "  " }, null],
+    relations: [
+      { label: "leads into", items: [{ id: "darko/spire-gilded-vestibule", name: "Spire Gilded Vestibule" }] },
+      { label: "holds", items: [] },
+      { label: "sits inside", items: [{ id: "darko/spire-forecourt" }], more: true },
+    ],
+    back: { id: "darko/the-starforge-spire", name: "The Starforge Spire" },
+  });
+  assert.deepEqual(model.enter, { parcelId: "darko/spire-gilded-doors" }, "a mark's door rides the parcel's one key");
+  assert.deepEqual(model.facts, [{ label: "backing", value: "✦ 3", detail: null }], "a fact with no value is not said (and one with no description has none: row 70)");
+  assert.deepEqual(model.relations.map((r) => r.label), ["leads into", "sits inside"], "an empty relation is not said");
+  assert.equal(model.relations[1].items[0].name, "darko/spire-forecourt", "a relative with no name reads as its id");
+  assert.equal(model.relations[1].more, true);
+  assert.deepEqual(model.back, { id: "darko/the-starforge-spire", name: "The Starforge Spire" });
+  // a parcel's model is unchanged by any of it
+  const parcel = homeColumnModel({ handle: "nyx", parcelId: "nyx/the-night-room-parcel", canEnter: true });
+  assert.deepEqual([parcel.facts, parcel.relations, parcel.back], [[], [], null]);
+});
+
+test("a mark's relatives are buttons the viewer's root delegate reads, built without a string of markup", () => {
+  const host = render(homeColumnModel({
+    handle: "darko",
+    facts: [{ label: "class", value: "<img src=x onerror=alert(1)>" }],
+    relations: [{ label: "holds", items: [{ id: "darko/a", name: "<b>A</b>" }] }],
+    back: { id: "darko/b", name: "B" },
+  }));
+  const go = find(host, "button").filter((b) => b.attrs["data-homecol-go"]);
+  assert.equal(go.length, 1);
+  assert.equal(go[0].attrs["data-homecol-go"], "darko/a");
+  assert.equal(serialize(go[0]), "<b>A</b>", "a resident's name arrives as letters");
+  assert.equal(serialize(find(host, "dd")[0]), "<img src=x onerror=alert(1)>", "and so does a fact");
+  const back = find(host, "button").filter((b) => b.attrs["data-homecol-back"]);
+  assert.equal(back.length, 1, "the way back is in the nav");
+  assert.ok(byClass(host, "wv-homecol-nav")[0].children.includes(back[0]));
+  assert.equal(serialize(back[0]), "◂ B");
+  const VIEWER = readFileSync(new URL("../spectator/viewer.mjs", import.meta.url), "utf8");
+  assert.match(VIEWER, /closest\("\[data-homecol-go\]"\)/, "the viewer's root delegate reads the relative's attribute");
+  assert.match(VIEWER, /closest\("\.wv-bubble-back, \[data-homecol-back\]"\)/, "and the way back's");
+});
+
+test("a column spells out each icon's meaning beside it, and a key can only ever be a class name", () => {
+  const model = homeColumnModel({
+    handle: "darko",
+    icons: [
+      { key: "door", label: "door", meaning: "A door: entering it takes you somewhere else." },
+      { key: "staked", label: "staked", meaning: "Staked: ✦ 3 behind it.", count: 3 },
+      { key: "x\" onclick=\"y", label: "bad", meaning: "never" },
+    ],
+  });
+  assert.deepEqual(model.icons.map((i) => i.key), ["door", "staked"], "a key that is not [a-z-] is dropped, not cleaned");
+  const host = render(model);
+  const rows = byClass(host, "wv-homecol-icon");
+  assert.equal(rows.length, 2);
+  assert.equal(rows[0].attrs.title, "A door: entering it takes you somewhere else.", "the hover says it too");
+  assert.equal(byClass(rows[0], "wv-ic")[0].className, "wv-ic ic-door", "the glyph is the page's masked span");
+  assert.equal(serialize(rows[1]), "Staked: ✦ 3 behind it.");
+  assert.deepEqual(homeColumnModel({ handle: "nyx" }).icons, [], "no icons handed in, none drawn");
+});
+
+// ── SHOW, DON'T LIST (play fix 41, Darko 20:14) ────────────────────────────
+
+test("a mark's backing, size, moods and company are shapes: the ✦ and a number, its outline, bars, tokens", () => {
+  const model = homeColumnModel({
+    handle: "darko",
+    stamps: 12,
+    footprint: { w: 152.5, h: 280, ring: [[0, 0], [152.5, 0], [152.5, 280], [0, 280]] },
+    bars: [{ label: "fear", value: 1, max: 3 }, { label: "bad", value: 1, max: 0 }],
+    tokens: [
+      { kind: "resident", id: "walker:visitor", name: "visitor", monogram: "V", color: "#88aaff" },
+      { kind: "creature", id: "creature:wolf-251-play1", name: "a grey wolf", silhouette: "url(\"data:image/svg+xml,x\")" },
+      { kind: "resident", id: "", name: "nobody" },
+    ],
+  });
+  assert.equal(model.stamps, 12);
+  assert.deepEqual(model.bars, [{ label: "fear", value: 1, max: 3 }], "a bar with no scale is not drawn");
+  assert.deepEqual(model.tokens.map((t) => [t.kind, t.id]), [["resident", "walker:visitor"], ["creature", "creature:wolf-251-play1"]]);
+  // a document that can build SVG draws the footprint; the stand-in grows the one call it needs
+  const svgDoc = { ...doc, createElementNS: (_ns, tag) => element(tag) };
+  const host = renderHomeColumn(svgDoc, element("aside"), model, { imagePath: shelfGate });
+  const stamps = byClass(host, "wv-homecol-stamps")[0];
+  assert.equal(serialize(stamps), "✦12", "the stamp and its number, nothing else");
+  assert.equal(find(host, "polygon").length, 1, "the mark's own outline");
+  assert.equal(serialize(byClass(host, "wv-extent-t")[0]), "152.5×280 m", "its size on it");
+  assert.equal(byClass(host, "wv-homecol-bar-cell").filter((c) => c.className.includes("is-on")).length, 1, "one of three, lit");
+  const toks = byClass(host, "wv-tok");
+  assert.deepEqual(toks.map((t) => t.attrs["data-choose"]), ["walker:visitor", "creature:wolf-251-play1"], "a press opens it");
+  assert.equal(toks[1].className, "wv-tok is-creature");
+  assert.equal(byClass(toks[0], "wv-tok-leg").length, 2, "two stubby legs");
+  // without SVG the outline is left out, never drawn as a string
+  const plain = render(model);
+  assert.equal(find(plain, "polygon").length, 0);
+});
