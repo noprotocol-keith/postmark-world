@@ -163,6 +163,13 @@ async function bootStubOffice() {
     if (url.pathname === "/ops/whoami") return send({ principal: "rig", handles: ["rei"] });
     if (url.pathname === "/world/my-marks") return send({ drafts: [], docket: [], published: [], backed: [], counts: { drafts: 0, docket: 0, published: 0, backed: 0 }, complete: true });
     if (url.pathname === "/world/apex") return send(READ);
+    // the close look's own door (world.mjs § worldInvestigate), answering from what the read carries:
+    // the column (play fix 34 in #240) draws a mark's predicates from it, where the pinned bubble read the records
+    if (url.pathname === "/world/investigate") {
+      const id = url.searchParams.get("mark"), rec = READ.records[id];
+      return rec ? send({ id, body: rec.body, predicates: Object.values(READ.records).filter((r) => r.parent === id && /^predicat/.test(r.kind)), parents: [], children: [] })
+        : send({ error: "bounce", defect: "no such mark in the rig" });
+    }
     if (url.pathname === "/world/lights") return send(lights());
     if (url.pathname === "/world/dials") return send(DIALS);
     // a resident of the DARK house RESTING inside it: presence is not a light
@@ -353,13 +360,20 @@ test("THE GENERAL PAGE GUARD: the selected mark's bubble draws the READ's record
     const listed = await until(page, (id) => !!document.querySelector(`.wv-act-line .what[data-id="${id}"]`), TARGET, 45_000);
     assert.ok(listed, `precondition: the read's gate is in Lately: ${await diag(page, errors)}`);
     await page.evaluate((id) => document.querySelector(`.wv-act-line .what[data-id="${id}"]`).click(), TARGET);
-    const opened = await until(page, (id) => !!document.querySelector(`.wv-bubbles .wv-bubble.is-pinned .wv-card[data-id="${id}"]`), TARGET, 20_000);
-    assert.ok(opened, `selecting the gate opened no bubble for it: ${await diag(page, errors)}`);
-    await page.waitForTimeout(600);
+    // THE PANE IS THE COLUMN NOW (play fix 34, column-always, in #240): a selected
+    // mark opens its column in either view; the pinned bubble stands only in
+    // painting-only mode. Either is the pane under guard, whichever opened.
+    const opened = await until(page, (id) => !!document.querySelector(`.wv-bubbles .wv-bubble.is-pinned .wv-card[data-id="${id}"]`)
+      || !!document.querySelector(`.wv-homecol:not([hidden]) [data-homecol-copy="${id}"]`), TARGET, 20_000);
+    assert.ok(opened, `selecting the gate opened no bubble or column for it: ${await diag(page, errors)}`);
+    await page.waitForTimeout(1500);
     const seen = await page.evaluate(() => {
-      const b = document.querySelector(".wv-bubbles .wv-bubble.is-pinned");
+      const col = document.querySelector(".wv-homecol:not([hidden]) [data-homecol-copy]")?.closest(".wv-homecol") ?? null;
+      // the pinned bubble only when it holds a card (an empty one stays mounted in the split view)
+      const b = document.querySelector(".wv-bubbles .wv-bubble.is-pinned .wv-card")?.closest(".wv-bubble") ?? col;
       const ids = (sel) => [...document.querySelectorAll(`${sel} [data-id]`)].map((e) => e.getAttribute("data-id"));
-      return { bubble: b?.innerText ?? "", bubbleHtml: b?.innerHTML ?? "", ids: { bubble: ids(".wv-bubbles"), lately: ids(".wv-acts"), desk: ids(".wv-walkdesk"), overlay: ids("#wv-overlay") } };
+      const goes = [...document.querySelectorAll(".wv-homecol [data-homecol-go]")].map((e) => e.getAttribute("data-homecol-go"));
+      return { bubble: (b?.innerText || b?.textContent) ?? "", bubbleHtml: b?.innerHTML ?? "", ids: { bubble: ids(".wv-bubbles"), column: goes, lately: ids(".wv-acts"), desk: ids(".wv-walkdesk"), overlay: ids("#wv-overlay") } };
     });
     console.log(`    PAGE GUARD RECEIPT · bubble ${JSON.stringify(seen.bubble.slice(0, 240))} · ids ${JSON.stringify(seen.ids)}`);
     // the pane renders record content and predicates — so it CAN show a bad source
