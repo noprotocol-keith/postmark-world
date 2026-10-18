@@ -4383,23 +4383,35 @@ export function creatureColumnFacts(row = null, inv = null) {
   return { facts, lately };
 }
 
-/** One live creature on the painting: its kind's silhouette (the Mists' own
- *  art) at its point, held at a constant size on screen like a pip, a hit disc
- *  carrying its id, and — at street zoom — fix 13's creature icon in a small
- *  pip at its feet. `silhouette` is { d } in a 100-unit box. Pure. */
-export const CREATURE_GLYPH = Object.freeze({ size: 34, hit: 17, pip: 7.5 });
-export function creatureGlyphSVG({ creature, at, silhouette = null, icon = "", title = null } = {}) {
+/** One live creature on the painting, as a TOKEN (play fix 40, Darko 20:09:
+ *  "like D&D, like Roll20 virtual tabletop tokens … they have to be in circles,
+ *  just like … the residents"; 20:16: "the same body"). The walker's own body —
+ *  `walkerFrameSVG`'s round frame at its near size, its two stubby legs from the
+ *  rim — filled pastel red where a resident's portrait would sit, with the
+ *  kind's silhouette (the Mists' own art) inside the circle, clipped to it. Red
+ *  means a creature, green a resident, purple a stamp. Held at a constant size
+ *  on screen like a walker (`.ov-s`). `silhouette` is { d } in a 100-unit box. Pure. */
+export const CREATURE_GLYPH = Object.freeze({ size: WALKER_FRAME.near, leg: WALKER_FRAME.legNear, hit: 17, art: 0.86 });
+export function creatureGlyphSVG({ creature, at, silhouette = null, title = null } = {}) {
   const x = Number(at?.x), y = Number(at?.y);
   if (!creature?.id || ![x, y].every(Number.isFinite)) return "";
-  const k = CREATURE_GLYPH.size / 100;
+  const { size, leg } = CREATURE_GLYPH, r = size / 2;
+  // the legs start where they meet the rim, exactly as the walker's do
+  const rim = Math.sqrt(r * r - (size * 0.22) ** 2);
+  const safe = String(creature.id).toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const k = (size * CREATURE_GLYPH.art) / 100;
   const art = silhouette?.d
-    ? `<g transform="scale(${k}) translate(-50 -50)"><path d="${silhouette.d}" class="ov-creature-art"/></g>` : "";
+    ? `<clipPath id="wv-ct-${safe}"><circle cx="0" cy="0" r="${r}"/></clipPath>`
+      + `<g clip-path="url(#wv-ct-${safe})"><g transform="scale(${k.toFixed(4)}) translate(-50 -52)"><path d="${silhouette.d}" class="ov-creature-art"/></g></g>`
+    : "";
   return `<g transform="translate(${x} ${y})"><g class="ov-s">`
     + `<g class="ov-creature ov-creature-${esc(String(creature.kind).toLowerCase().replace(/[^a-z0-9-]/g, ""))}" data-creature="${esc(creature.id)}">`
     + `<circle r="${CREATURE_GLYPH.hit}" class="ov-creature-hit">${title ? `<title>${esc(title)}</title>` : ""}</circle>`
+    + `<circle cx="0" cy="0" r="${r}" class="ov-creature-disc"/>`
     + art
-    + (icon ? `<g class="ov-creature-pip" transform="translate(${CREATURE_GLYPH.size * 0.36} ${CREATURE_GLYPH.size * 0.3})">`
-      + `<circle r="${CREATURE_GLYPH.pip}" class="ov-creature-pip-disc"/>${icon}</g>` : "")
+    + `<circle cx="0" cy="0" r="${r}" class="ov-creature-ring"/>`
+    + `<line x1="${-size * 0.22}" y1="${rim}" x2="${-size * 0.3}" y2="${rim + leg}" class="ov-creature-leg"/>`
+    + `<line x1="${size * 0.22}" y1="${rim}" x2="${size * 0.3}" y2="${rim + leg}" class="ov-creature-leg"/>`
     + `</g></g></g>`;
 }
 
@@ -6434,9 +6446,12 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
    rim so it reads on any ground, held at a pip's size; the creature icon at its
    feet at street zoom; their answer to an act in a note like the walk's */
 .ov-creature-hit { fill:transparent; pointer-events:none; }   /* the map hit-tests the point; nothing on the stage takes the pointer */
-.ov-creature-art { fill:#241d22; stroke:#d8c6cf; stroke-width:5; paint-order:stroke; stroke-linejoin:round; pointer-events:none; }
-.ov-creature-pip-disc { fill:#3a2f36; stroke:#d8c6cf; stroke-width:1; pointer-events:none; }
-.ov-creature-pip .ov-ic { pointer-events:none; }
+.ov-creature-art { fill:#4a2326; pointer-events:none; }
+/* THE CREATURE TOKEN (play fix 40): the walker's body in pastel red — the disc
+   where a portrait sits, the ring and the legs in a deeper red of the same hue */
+.ov-creature-disc { fill:#f4b4ad; pointer-events:none; }
+.ov-creature-ring { fill:none; stroke:#d8706a; stroke-width:2; stroke-linejoin:round; vector-effect:non-scaling-stroke; pointer-events:none; }
+.ov-creature-leg { stroke:#d8706a; stroke-width:2; stroke-linecap:round; vector-effect:non-scaling-stroke; pointer-events:none; }
 .wv-hl-creature { fill:none; stroke:#d8c6cf; stroke-width:2; vector-effect:non-scaling-stroke; }
 .wv-bubble.is-nameplate.is-creature { --wv-mark-accent:#b9a3b1; }
 .wv-choose-row.is-creature { border-left:3px solid #b9a3b1; display:flex; align-items:baseline; gap:7px; flex-wrap:wrap; font-size:.78rem; }
@@ -11134,7 +11149,7 @@ export function mountViewer(appEl) {
     // THE LIVE CREATURES (play fix 35), where they stand, on their own layer
     // over the Mists' paint: every living one outdoors that the wall does not
     // hide, and indoors only those inside the room (the roof rule). Each wears
-    // its kind's silhouette, and at street zoom fix 13's creature icon.
+    // a token like a resident's, in pastel red, its kind's silhouette inside (play fix 40).
     if (mapCtx.creatureLayer) mapCtx.creatureLayer.innerHTML = liveCreatureGlyphs(px, tier);
     s += overlayStandpointSVG({ at: me });
     overlay.innerHTML = s;
@@ -13385,7 +13400,6 @@ export function mountViewer(appEl) {
     // indoors, only the creatures inside the room (the roof rule)
     const room = sceneRoomId ? byId.get(sceneRoomId) : null;
     const box = room?.at && room.extent ? rect(room) : null;
-    const icon = tier === "near" ? iconSVG(creatureIcon(), { x: -5.5, y: -5.5, size: 11, ink: "#e8e0cf" }) : "";
     // NOTHING BEHIND THE WALL IS SEEN (POS-466): outdoors, a creature the
     // engine puts behind the wall's true face is the wall's, not the map's
     const m = sceneRoomId ? null : mistsAt(state.crossing, data?.skeleton?.mists);
@@ -13393,7 +13407,7 @@ export function mountViewer(appEl) {
     for (const c of liveCreatures.values()) {
       if (sceneRoomId && !(box && pointInRect(c.x, c.y, box))) continue;
       if (m && mistsHere({ x: c.x, y: c.y }, m).inWall) continue;
-      out += creatureGlyphSVG({ creature: c, at: px({ x: c.x, y: c.y }), silhouette: creatureSilhouette(c.kind), icon,
+      out += creatureGlyphSVG({ creature: c, at: px({ x: c.x, y: c.y }), silhouette: creatureSilhouette(c.kind),
         title: state.paintingOnly ? null : c.name });
     }
     return out;
