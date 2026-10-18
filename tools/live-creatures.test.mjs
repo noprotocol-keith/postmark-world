@@ -45,7 +45,8 @@ test("an act's answer carries the creatures' lines, wherever the office put them
 
 test("a creature's column: its kind, what it is doing, its moods as bars, when it came out and fades, and what it did lately", () => {
   const [wolf] = liveCreaturesFrom(FOUND);
-  const { facts, lately, bars } = creatureColumnFacts(wolf, INVESTIGATED);
+  // CHANGED by play row 54: the times are the reader's own clock, never UTC (here, EDT)
+  const { facts, lately, bars } = creatureColumnFacts(wolf, INVESTIGATED, { timeZone: "America/New_York" });
   const by = Object.fromEntries(facts.map((f) => [f.label, f.value]));
   assert.equal(by.kind, "wolf");
   assert.equal(by.doing, "out of the Mists");
@@ -54,9 +55,9 @@ test("a creature's column: its kind, what it is doing, its moods as bars, when i
   assert.deepEqual(bars, [{ label: "fear", value: 1, max: 3 }, { label: "curiosity", value: 1, max: 3 }, { label: "hunger", value: 2, max: 3 }]);
   assert.equal(by.moods, undefined, "no moods line");
   assert.equal(by.remembers, undefined, "no bare count");
-  assert.equal(by["out since"], "2026-10-15 23:06 UTC");
-  assert.equal(by.fades, "in 11h 55m (2026-10-16 11:06 UTC)");
-  assert.deepEqual(lately, [{ label: "lately", value: "At the edge of the Mists a grey wolf stands perfectly still, watching visitor. (2026-10-15 23:06 UTC)" }]);
+  assert.equal(by["out since"], "Oct 15, 7:06 PM");
+  assert.equal(by.fades, "in 11h 55m (Oct 16, 7:06 AM)");
+  assert.deepEqual(lately, [{ label: "lately", value: "At the edge of the Mists a grey wolf stands perfectly still, watching visitor. (Oct 15, 7:06 PM)" }]);
   // before its reading lands, the find row alone still says what it can
   assert.deepEqual(creatureColumnFacts(wolf, null).facts.map((f) => f.label), ["kind", "fades"]);
 });

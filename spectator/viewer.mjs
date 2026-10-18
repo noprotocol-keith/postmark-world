@@ -4366,9 +4366,33 @@ export function creatureReactionLines(raw) {
   return (Array.isArray(rows) ? rows : []).map((r) => String(r?.line ?? "").trim()).filter(Boolean);
 }
 
+/** A moment in the reader's own clock (play row 54: the column said UTC). Day
+ *  and time, never a zone name; `timeZone` is for tests. Pure. */
+export function localWhen(iso, { timeZone = undefined } = {}) {
+  const t = Date.parse(iso ?? "");
+  if (!Number.isFinite(t)) return "";
+  return new Date(t).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", ...(timeZone ? { timeZone } : {}) });
+}
+
+/** WHAT A CREATURE DID SINCE WE LAST LOOKED (play row 54). Its newest reaction
+ *  rows, newest first as the office answers them ({ at, line }), against the
+ *  newest moment this page has already shown (`seenMs`, null the first time).
+ *  The first look shows only what landed in the last `freshMs`, so opening a
+ *  page does not replay an hour. Returns the lines to show, oldest first, and
+ *  the newest moment now seen. Pure. */
+export function newReactions(rows = [], seenMs = null, { nowMs = Date.now(), freshMs = 60000 } = {}) {
+  const dated = (Array.isArray(rows) ? rows : [])
+    .map((r) => ({ at: Date.parse(r?.at ?? ""), line: String(r?.line ?? "").trim() }))
+    .filter((r) => Number.isFinite(r.at));
+  const newest = dated.reduce((m, r) => Math.max(m, r.at), seenMs ?? -Infinity);
+  const after = seenMs ?? nowMs - freshMs;
+  const lines = dated.filter((r) => r.at > after && r.line).sort((a, b) => a.at - b.at).map((r) => r.line);
+  return { lines, newestMs: Number.isFinite(newest) ? newest : seenMs };
+}
+
 /** What a creature's column says beside its words: { facts, lately } from its
  *  find row and its investigate answer (either may be missing). Pure. */
-export function creatureColumnFacts(row = null, inv = null) {
+export function creatureColumnFacts(row = null, inv = null, { timeZone = undefined } = {}) {
   const now = inv?.presence?.now ?? null;
   // A MOOD IS A BAR (play fix 41): "1 of 3" is a value on a scale, so it is
   // drawn as one, labelled; a mood whose words do not read as "N of M" is left
@@ -4378,7 +4402,8 @@ export function creatureColumnFacts(row = null, inv = null) {
       const m = /^\s*(\d+)\s+of\s+(\d+)\s*$/.exec(String(v ?? ""));
       return m && Number(m[2]) > 0 ? [{ label, value: Number(m[1]), max: Number(m[2]) }] : [];
     }) : [];
-  const when = (iso) => { const t = Date.parse(iso ?? ""); return Number.isFinite(t) ? new Date(t).toISOString().slice(0, 16).replace("T", " ") + " UTC" : ""; };
+  // the reader's own clock (row 54), never UTC
+  const when = (iso) => localWhen(iso, { timeZone });
   const facts = [
     { label: "kind", value: row?.kind ?? inv?.id?.slice(CREATURE_PREFIX.length).replace(/-\d.*$/, "") ?? "" },
     { label: "doing", value: now?.state ?? "" },
@@ -6478,6 +6503,11 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
   padding:6px 12px; border:1px solid #b8615b; border-radius:8px; background:rgba(20,16,19,.94); color:#f1dcd8;
   font-size:.8rem; font-style:italic; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .25s; }
 .wv-creature-note.show { opacity:1; }
+/* WHAT A CREATURE JUST DID, AT THE CREATURE (play row 54): whoever's act it answered */
+.wv-creature-say { position:absolute; top:0; left:0; z-index:5; max-width:15rem; padding:4px 9px; border:1px solid #b8615b;
+  border-radius:8px; background:rgba(20,16,19,.94); color:#f1dcd8; font-size:.74rem; font-style:italic; line-height:1.35;
+  pointer-events:none; opacity:0; transition:opacity .3s; transform:translate(-50%, calc(-100% - 16px)); }
+.wv-creature-say.show { opacity:1; }
 .wv-walkdesk { position:absolute; z-index:8; right:10px; bottom:10px; width:min(19rem,42%);
   padding:11px 13px 13px; border:1px solid var(--line); border-left:3px solid var(--green);
   border-radius:6px; background:rgba(13,15,19,.97); box-shadow:0 10px 30px rgba(0,0,0,.55); }
@@ -12448,7 +12478,8 @@ export function mountViewer(appEl) {
     host.innerHTML = `<span id="wv-walk-readout">checking the walk ledger…</span>`;
     pollWalkers().then((available) => { host.hidden = !available; });
     clearInterval(walkState.timer);
-    walkState.timer = setInterval(pollWalkers, 15000);
+    // …and the creatures on screen, for what they did whoever acted (row 54)
+    walkState.timer = setInterval(() => { pollWalkers(); pollCreatureReactions(); }, 15000);
   }
 
   async function officeCall(path, { method = "GET", body = null } = {}) {
@@ -13615,6 +13646,75 @@ export function mountViewer(appEl) {
       icons: [creatureIcon()],
     };
   }
+  // ── WHAT A CREATURE DID, WHOEVER ACTED (play row 54) ──────────────────────
+  //
+  // The note below answers only acts made on this page; an agent's acts (most
+  // acts) showed nothing, and the one place a reaction showed was the column,
+  // two clicks deep. So with every walkers poll the page reads the creatures it
+  // is drawing on screen (at most CREATURE_SAY_MAX, through the same keyless
+  // investigate the column uses), and a reaction newer than the last one shown
+  // is said at the creature's token for a few seconds: its kind's own line.
+  const CREATURE_SAY_MAX = 6, CREATURE_SAY_MS = 8000;
+  const reactionSeen = new Map();   // creature id -> newest reaction moment shown (ms)
+  const creatureSays = new Map();   // creature id -> { el, timer }
+  function onScreenCreatures() {
+    const layer = mapCtx?.creatureLayer, box = $(root, ".wv-minimap")?.getBoundingClientRect();
+    if (!layer || !box) return [];
+    const out = [];
+    for (const g of layer.querySelectorAll(".ov-creature[data-creature]")) {
+      const r = g.getBoundingClientRect();
+      if (r.width && r.right > box.left && r.left < box.right && r.bottom > box.top && r.top < box.bottom) out.push(g.dataset.creature);
+      if (out.length >= CREATURE_SAY_MAX) break;
+    }
+    return out;
+  }
+  function pollCreatureReactions() {
+    if (typeof document !== "undefined" && document.hidden) return;
+    for (const id of onScreenCreatures()) {
+      fetch(officeUrl(`/world/apex?investigate=${encodeURIComponent(id)}`), { headers: { accept: "application/json" }, credentials: "same-origin" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          const inv = j?.investigated ?? null;
+          if (!inv) return;
+          creatureReads.set(id, { at: Date.now(), inv });   // the column reads the same, fresher
+          const { lines, newestMs } = newReactions(inv.reactions?.rows ?? [], reactionSeen.get(id) ?? null);
+          reactionSeen.set(id, newestMs);
+          if (lines.length) creatureSay(id, lines[lines.length - 1]);
+        })
+        .catch(() => {});
+    }
+  }
+  function creatureSay(id, line) {
+    const host = bubbleHost();
+    if (!host || !line) return;
+    let say = creatureSays.get(id);
+    if (!say?.el?.isConnected) {
+      const el = document.createElement("div");
+      el.className = "wv-creature-say";
+      el.dataset.creatureSay = id;
+      host.appendChild(el);
+      say = { el, timer: null };
+      creatureSays.set(id, say);
+    }
+    say.el.textContent = line;
+    positionCreatureSay(id, say.el);
+    say.el.classList.add("show");
+    clearTimeout(say.timer);
+    say.timer = setTimeout(() => { say.el.classList.remove("show"); }, CREATURE_SAY_MS);
+  }
+  function positionCreatureSay(id, el) {
+    const host = bubbleHost();
+    const g = mapCtx?.creatureLayer?.querySelector('.ov-creature[data-creature="' + CSS.escape(id) + '"]');
+    const r = g?.getBoundingClientRect();
+    if (!host || !r?.width) { el.classList.remove("show"); return; }
+    const b = host.getBoundingClientRect();
+    el.style.left = Math.round(r.x + r.width / 2 - b.x) + "px";
+    el.style.top = Math.round(r.y - b.y) + "px";
+  }
+  function positionCreatureSays() {
+    for (const [id, say] of creatureSays) if (say.el?.isConnected && say.el.classList.contains("show")) positionCreatureSay(id, say.el);
+  }
+
   // THE CREATURES' ANSWER TO AN ACT, as a small note (fix 20's walk note's
   // kind), never a sheet: the lines their kinds wrote, for a few seconds.
   let creatureNoteTimer = null;
@@ -13774,6 +13874,7 @@ export function mountViewer(appEl) {
     el.style.transform = "translate3d(" + Math.round(r.x + r.width / 2 - b.x - h / 2) + "px, " + Math.round(r.y + r.height / 2 - b.y - h / 2) + "px, 0)";
   }
   function positionPills() {
+    positionCreatureSays();   // what a creature just did rides with the camera too (row 54)
     for (const el of pillEls.values()) if (el && !el.hidden) positionPill(el);
   }
   /** The mark whose open pill covers this screen point, or null. */
