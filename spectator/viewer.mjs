@@ -4398,12 +4398,23 @@ export function creatureColumnFacts(row = null, inv = null) {
  *  rim — filled pastel red where a resident's portrait would sit, with the
  *  kind's silhouette (the Mists' own art) inside the circle, clipped to it. Red
  *  means a creature, green a resident, purple a stamp. Held at a constant size
- *  on screen like a walker (`.ov-s`). `silhouette` is { d } in a 100-unit box. Pure. */
-export const CREATURE_GLYPH = Object.freeze({ size: WALKER_FRAME.near, leg: WALKER_FRAME.legNear, hit: 17, art: 0.86 });
-export function creatureGlyphSVG({ creature, at, silhouette = null, title = null } = {}) {
+ *  on screen like a walker (`.ov-s`). `silhouette` is { d } in a 100-unit box.
+ *
+ *  THE PLAIN TOKEN (play fix 49, Darko 21:10: "a creature icon that replaces any
+ *  specific art for creatures the same way that the blank resident kind of
+ *  replaces any resident profile pictures at far zoom"). `plain` is the far
+ *  tier's creature, exactly as the far tier's resident is the blank walker: the
+ *  walker's far size and legs, filled pastel red, and no kind's silhouette,
+ *  which shows only where a resident's picture shows. Pure. */
+export const CREATURE_GLYPH = Object.freeze({ size: WALKER_FRAME.near, leg: WALKER_FRAME.legNear, hit: 17, art: 0.86,
+  plainSize: WALKER_FRAME.far, plainLeg: WALKER_FRAME.legFar, plainHit: 12 });
+export function creatureGlyphSVG({ creature, at, silhouette = null, title = null, plain = false } = {}) {
   const x = Number(at?.x), y = Number(at?.y);
   if (!creature?.id || ![x, y].every(Number.isFinite)) return "";
-  const { size, leg } = CREATURE_GLYPH, r = size / 2;
+  const size = plain ? CREATURE_GLYPH.plainSize : CREATURE_GLYPH.size;
+  const leg = plain ? CREATURE_GLYPH.plainLeg : CREATURE_GLYPH.leg;
+  const r = size / 2;
+  if (plain) silhouette = null;
   // the legs start where they meet the rim, exactly as the walker's do
   const rim = Math.sqrt(r * r - (size * 0.22) ** 2);
   const safe = String(creature.id).toLowerCase().replace(/[^a-z0-9-]/g, "");
@@ -4413,8 +4424,8 @@ export function creatureGlyphSVG({ creature, at, silhouette = null, title = null
       + `<g clip-path="url(#wv-ct-${safe})"><g transform="scale(${k.toFixed(4)}) translate(-50 -52)"><path d="${silhouette.d}" class="ov-creature-art"/></g></g>`
     : "";
   return `<g transform="translate(${x} ${y})"><g class="ov-s">`
-    + `<g class="ov-creature ov-creature-${esc(String(creature.kind).toLowerCase().replace(/[^a-z0-9-]/g, ""))}" data-creature="${esc(creature.id)}">`
-    + `<circle r="${CREATURE_GLYPH.hit}" class="ov-creature-hit">${title ? `<title>${esc(title)}</title>` : ""}</circle>`
+    + `<g class="ov-creature${plain ? " is-plain" : ""} ov-creature-${esc(String(creature.kind).toLowerCase().replace(/[^a-z0-9-]/g, ""))}" data-creature="${esc(creature.id)}">`
+    + `<circle r="${plain ? CREATURE_GLYPH.plainHit : CREATURE_GLYPH.hit}" class="ov-creature-hit">${title ? `<title>${esc(title)}</title>` : ""}</circle>`
     + `<circle cx="0" cy="0" r="${r}" class="ov-creature-disc"/>`
     + art
     + `<circle cx="0" cy="0" r="${r}" class="ov-creature-ring"/>`
@@ -13559,8 +13570,10 @@ export function mountViewer(appEl) {
     for (const c of liveCreatures.values()) {
       if (sceneRoomId && !(box && pointInRect(c.x, c.y, box))) continue;
       if (m && mistsHere({ x: c.x, y: c.y }, m).inWall) continue;
-      out += creatureGlyphSVG({ creature: c, at: px({ x: c.x, y: c.y }), silhouette: creatureSilhouette(c.kind),
-        title: state.paintingOnly ? null : c.name });
+      // far: the plain token, as a resident is the blank walker there (fix 49)
+      const plain = tier === "far";
+      out += creatureGlyphSVG({ creature: c, at: px({ x: c.x, y: c.y }), silhouette: plain ? null : creatureSilhouette(c.kind),
+        title: state.paintingOnly ? null : c.name, plain });
     }
     return out;
   }
