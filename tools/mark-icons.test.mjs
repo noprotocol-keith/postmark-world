@@ -114,3 +114,14 @@ test("[pin] the plate wears what the mark is before its name and its states afte
     "icon, name, states");
   assert.match(fn, /: `<span class="wv-np-dot \$\{markClasses\(full\)\}" aria-hidden="true"><\/span>`/, "the dot when there is no icon");
 });
+
+test("one resident icon: the walker's token, in sovereign green; a creature is the same body in red; never the stamps' purple (play fix 43)", () => {
+  assert.equal(MARK_ICONS.inside.d, MARK_ICONS.creature.d, "one body for a person and a creature");
+  assert.ok(MARK_ICONS.inside.fill && MARK_ICONS.creature.fill, "filled, as the token's frame is on the map");
+  assert.match(MARK_ICONS.inside.d, /^M 3\.4 6\.6 a 4\.6 4\.6/, "a round frame…");
+  assert.equal((MARK_ICONS.inside.d.match(/ Z/g) ?? []).length, 3, "…and two stubby legs");
+  assert.match(MARK_ICONS_CSS_OF("inside"), /color:var\(--green, #84c98f\)/, "a resident is green");
+  assert.match(MARK_ICONS_CSS_OF("creature"), /color:#e6948c/, "a creature is red");
+  for (const key of ["inside", "creature"]) assert.doesNotMatch(MARK_ICONS_CSS_OF(key), /stamp-violet|#aa8fd8/, `${key} is never purple`);
+});
+function MARK_ICONS_CSS_OF(key) { return MARK_ICON_CSS.split("\n").find((l) => l.startsWith(`.wv-ic.ic-${key} `)) ?? ""; }

@@ -6458,10 +6458,10 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .ov-creature-ring { fill:none; stroke:#d8706a; stroke-width:2; stroke-linejoin:round; vector-effect:non-scaling-stroke; pointer-events:none; }
 .ov-creature-leg { stroke:#d8706a; stroke-width:2; stroke-linecap:round; vector-effect:non-scaling-stroke; pointer-events:none; }
 .wv-hl-creature { fill:none; stroke:#d8c6cf; stroke-width:2; vector-effect:non-scaling-stroke; }
-.wv-bubble.is-nameplate.is-creature { --wv-mark-accent:#b9a3b1; }
-.wv-choose-row.is-creature { border-left:3px solid #b9a3b1; display:flex; align-items:baseline; gap:7px; flex-wrap:wrap; font-size:.78rem; }
+.wv-bubble.is-nameplate.is-creature { --wv-mark-accent:#d8706a; }   /* red means a creature (play fix 43) */
+.wv-choose-row.is-creature { border-left:3px solid #d8706a; display:flex; align-items:baseline; gap:7px; flex-wrap:wrap; font-size:.78rem; }
 .wv-creature-note { position:absolute; z-index:9; left:50%; bottom:58px; transform:translateX(-50%); max-width:min(34rem,80%);
-  padding:6px 12px; border:1px solid #6b5a64; border-radius:8px; background:rgba(20,16,19,.94); color:#e6d8df;
+  padding:6px 12px; border:1px solid #b8615b; border-radius:8px; background:rgba(20,16,19,.94); color:#f1dcd8;
   font-size:.8rem; font-style:italic; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .25s; }
 .wv-creature-note.show { opacity:1; }
 .wv-walkdesk { position:absolute; z-index:8; right:10px; bottom:10px; width:min(19rem,42%);

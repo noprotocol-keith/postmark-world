@@ -28,6 +28,13 @@ import { entryLawOf, isStairs, STAIRS_LINE } from "../tools/enter-exit.mjs";
 import { isDungeon } from "../tools/portals.mjs";
 
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+// THE TOKEN (play fix 43, Darko 20:16): a resident is drawn on the map as a round
+// frame on two stubby legs, so that body IS the icon for a person — "replace our
+// just like head and shoulders with the circle with two little stubby legs coming
+// out the bottom". The same body stands for a creature, in its own red. Filled,
+// so the mask and the map draw it alike.
+const TOKEN_D = "M 3.4 6.6 a 4.6 4.6 0 1 0 9.2 0 a 4.6 4.6 0 1 0 -9.2 0 Z "
+  + "M 5.9 10.4 L 7.0 10.7 L 6.3 14.2 L 5.2 13.9 Z M 10.1 10.4 L 9.0 10.7 L 9.7 14.2 L 10.8 13.9 Z";
 const circle = (x, y, r) => `M ${x - r} ${y} a ${r} ${r} 0 1 0 ${2 * r} 0 a ${r} ${r} 0 1 0 ${-2 * r} 0`;
 
 // The vocabulary. `what` icons say what a mark is (one per mark at most);
@@ -50,8 +57,8 @@ export const MARK_ICONS = Object.freeze({
     d: "M 2.5 13.5 H 5.5 V 10.5 H 8.5 V 7.5 H 11.5 V 4.5 H 13.5" },
   vehicle: { kind: "what", label: "vehicle", meaning: "A vehicle: it moves, and you can ride it.",
     d: "M 2 9.6 H 14 L 12 13 H 4 Z M 8 9.6 V 2.5 L 12.2 8 H 8" },
-  creature: { kind: "what", label: "creature", meaning: "A creature: something alive that answers what you do near it.",
-    d: `M 8 9 C 10.4 9 12 11 11 12.8 C 10.3 14 9 13.4 8 13.4 C 7 13.4 5.7 14 5 12.8 C 4 11 5.6 9 8 9 Z ${circle(4, 7.2, 1.25)} ${circle(6.6, 4.8, 1.25)} ${circle(9.4, 4.8, 1.25)} ${circle(12, 7.2, 1.25)}` },
+  creature: { kind: "what", label: "creature", meaning: "A creature: something alive that answers what you do near it.", fill: true,
+    d: TOKEN_D },
   yours: { kind: "state", label: "yours", meaning: "Yours: your household's mark.",
     d: "M 4 14 V 2.5 M 4 3 H 12.5 L 10.4 5.6 L 12.5 8.2 H 4" },
   locked: { kind: "state", label: "locked", meaning: "Locked: it refuses entry.",
@@ -60,8 +67,8 @@ export const MARK_ICONS = Object.freeze({
     d: "M 4 2.5 H 9.8 L 12.4 5.1 V 13.5 H 4 Z M 9.8 2.5 V 5.1 H 12.4 M 6 8.6 H 10.4 M 6 11 H 9" },
   staked: { kind: "state", label: "staked", meaning: "Staked: stamps are staked behind it.", fill: true,
     d: "M 8 1.5 L 9.6 6.4 L 14.5 8 L 9.6 9.6 L 8 14.5 L 6.4 9.6 L 1.5 8 L 6.4 6.4 Z" },
-  inside: { kind: "state", label: "people inside", meaning: "People inside: someone is inside it now.",
-    d: `${circle(8, 5, 2.3)} M 3.5 14 C 3.5 10.6 5.5 9 8 9 C 10.5 9 12.5 10.6 12.5 14` },
+  inside: { kind: "state", label: "people inside", meaning: "People inside: someone is inside it now.", fill: true,
+    d: TOKEN_D },
   soon: { kind: "state", label: "coming soon", meaning: "Coming soon: what it leads to is not built yet.",
     d: "M 4 2.5 H 12 M 4 13.5 H 12 M 5 2.5 C 5 6 8 7 8 8 C 8 9 5 10 5 13.5 M 11 2.5 C 11 6 8 7 8 8 C 8 9 11 10 11 13.5" },
 });
@@ -69,7 +76,9 @@ export const MARK_ICONS = Object.freeze({
 // the ink each badge is drawn in — the page's own tokens, one meaning each
 const INK = {
   yours: "var(--green, #84c98f)", locked: "var(--err, #d98a7a)", consent: "var(--amber, #e8c56a)",
-  staked: "var(--stamp-violet, #aa8fd8)", inside: "var(--blue, #7ba7e0)", soon: "var(--dim, #9a9280)",
+  staked: "var(--stamp-violet, #aa8fd8)", soon: "var(--dim, #9a9280)",
+  // green is a resident (sovereign green), red a creature, purple a stamp (play fix 43)
+  inside: "var(--green, #84c98f)", creature: "#e6948c",
 };
 const WHAT_INK = "var(--paper, #e8e0cf)";
 export const inkOf = (key) => INK[key] ?? WHAT_INK;
