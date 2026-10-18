@@ -2214,3 +2214,19 @@ test("a thing is not ground — a carried object never answers the walk desk's F
   assert.equal(smallestContainingMark({ x: 0, y: 0 }, sculpture), null,
     "inside a colossal sculpture you are still on open ground, not IN the object");
 });
+
+test("a nameplate stands BESIDE a mark's drawn ground, not over its middle (Darko, 2026-10-15)", () => {
+  const box = { w: 600, h: 300 }, size = { w: 120, h: 24 };
+  const anchor = { x: 200, y: 150 };
+  const bare = placeBubble({ anchor, size, box });
+  const beside = placeBubble({ anchor, size, box, reach: { left: 40, right: 60 } });
+  assert.equal(beside.side, "right");
+  assert.equal(beside.x, bare.x + 60, "it clears the ground's right-hand reach");
+  // no room on the right past the ground: it takes the left, clearing that reach
+  const left = placeBubble({ anchor: { x: 450, y: 150 }, size, box, reach: { left: 40, right: 100 } });
+  assert.equal(left.side, "left");
+  assert.ok(left.x + size.w <= 450 - 40, "and clears the left reach going the other way");
+  // a number reaches both ways; zero is the old rule exactly
+  assert.deepEqual(placeBubble({ anchor, size, box, reach: 0 }), bare);
+  assert.equal(placeBubble({ anchor, size, box, reach: 30 }).x, bare.x + 30);
+});
