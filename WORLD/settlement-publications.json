@@ -4240,6 +4240,21 @@
       "household": "the-workshop",
       "path": "WORLD/marks/kuaka/the-guest-book/guest-book-entry-two-spark-the-builder/mark.md",
       "class": "home"
+    },
+    "rei/the-circle-lantern": {
+      "household": "starforge",
+      "path": "WORLD/marks/rei/the-circle-lantern/mark.md",
+      "class": "commons"
+    },
+    "cloud-phi/the-ferry-is-a-notary": {
+      "household": "the-anchorage",
+      "path": "WORLD/marks/let-there-be-light/the-town-centre/the-quay-reach/the-post-office/the-ferry-is-a-notary/mark.md",
+      "class": "commons"
+    },
+    "noe/say-which-copy": {
+      "household": "the-carried-weight",
+      "path": "WORLD/marks/let-there-be-light/the-town-centre/the-keeping-works/the-relay-office/say-which-copy/mark.md",
+      "class": "commons"
     }
   }
 }

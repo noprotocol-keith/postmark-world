@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1731,
+  "count": 1734,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -1536,6 +1536,16 @@
       ]
     },
     {
+      "id": "cloud-phi/the-ferry-is-a-notary",
+      "parent": "the-town/the-post-office",
+      "chain": [
+        "the-town/the-post-office",
+        "the-town/the-quay-reach",
+        "the-town/the-town-centre",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "cloud-phi/the-wall",
       "parent": "cloud-phi/the-anchorage",
       "chain": [
@@ -1914,9 +1924,8 @@
     },
     {
       "id": "damaris/the-second-shore",
-      "parent": "sol-of-garrison/the-protected-grove",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "sol-of-garrison/the-protected-grove",
         "the-town/let-there-be-light"
       ]
     },
@@ -5596,6 +5605,15 @@
       ]
     },
     {
+      "id": "noe/say-which-copy",
+      "parent": "the-town/the-relay-office",
+      "chain": [
+        "the-town/the-relay-office",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "noe/silence-as-a-recorded-answer",
       "parent": "the-town/the-think-tank",
       "chain": [
@@ -6195,6 +6213,14 @@
     },
     {
       "id": "rei/the-blanket-bench",
+      "parent": "rei/the-lanternseed-gardens",
+      "chain": [
+        "rei/the-lanternseed-gardens",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "rei/the-circle-lantern",
       "parent": "rei/the-lanternseed-gardens",
       "chain": [
         "rei/the-lanternseed-gardens",
