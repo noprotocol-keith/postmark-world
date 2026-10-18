@@ -4718,7 +4718,7 @@ export function coLocatedMarkIds(marks, withinM = FAN_SAME_SPOT_M) {
   return stacked;
 }
 
-export function smallestContainingMark(point, marks = [], { insideRoomId = null, index = null } = {}) {
+export function smallestContainingMark(point, marks = [], { insideRoomId = null, index = null, thingClasses = null } = {}) {
   const x = Number(point?.x), y = Number(point?.y);
   if (![x, y].every(Number.isFinite)) return null;
   // THE ROOM STOPS ANSWERING EVERY PIXEL OF ITS OWN FLOOR (founder, 2026-08-29:
@@ -4770,7 +4770,7 @@ export function smallestContainingMark(point, marks = [], { insideRoomId = null,
   // first. The answer is the same by construction: the first containing mark
   // in (area, id) order is the one the sort put first. A caller with no index
   // in hand builds one here and pays what it paid before, no more.
-  const own = index?.insideRoomId === (insideRoomId ?? null) ? index : containmentIndex(marks, { insideRoomId });
+  const own = index?.insideRoomId === (insideRoomId ?? null) ? index : containmentIndex(marks, { insideRoomId, thingClasses });
   for (const g of own.ground) if (pointInsideMark({ x, y }, g.mark)) return g.mark.id;
   return null;
 }
@@ -4781,13 +4781,18 @@ export function smallestContainingMark(point, marks = [], { insideRoomId = null,
  *  enclosing it, and has a body — in the (area, id) order the answer is chosen
  *  by. Built once per draw by drawWalkers and handed through walkerPlace →
  *  bodyPlace → smallestContainingMark / placeLabel (#2912). Pure. */
-export function containmentIndex(marks = [], { insideRoomId = null } = {}) {
+export function containmentIndex(marks = [], { insideRoomId = null, thingClasses = null } = {}) {
   const byMarkId = markIndex(marks);
+  // A KIND OF THING IS A THING (W2 final): a halloween-candy-bowl is no more ground
+  // than a class:thing top. The thing classes are the caller's (the page's, which
+  // knows the office's answers) or the record's own class marks.
+  const things = thingClasses ?? thingClassesOf(marks, classToken);
+  const isThingMark = (mark) => { const cls = classToken(instanceClassOf(mark)); return cls === "thing" || things.has(cls); };
   const room = insideRoomId ? (marks ?? []).find((mark) => mark?.id === insideRoomId) : null;
   const encloses = (mark) => !!insideRoomId
     && (mark?.id === insideRoomId || (room && mark?.at && mark?.extent ? marksContain(mark, room) : false));
   const ground = (marks ?? [])
-    .filter((mark) => instanceClassOf(mark) !== "thing" && !encloses(mark) && isEmbodiedMark(mark) && !isAmbientMark(mark, byMarkId))
+    .filter((mark) => !isThingMark(mark) && !encloses(mark) && isEmbodiedMark(mark) && !isAmbientMark(mark, byMarkId))
     .map((mark) => ({ mark, area: Number(mark.extent.w) * Number(mark.extent.h) }))
     .sort((a, b) => a.area - b.area || String(a.mark.id).localeCompare(String(b.mark.id)));
   return { byMarkId, ground, insideRoomId: insideRoomId ?? null };
@@ -8166,6 +8171,14 @@ export function mountViewer(appEl) {
       thingClassMemo = { epoch: worldEpoch, size: thingKinds.size, set };
     }
     return thingClassMemo.set;
+  }
+  // the thing classes for a containment question over `marks`: each kind among them
+  // with no answer yet is asked of the class layer (once), so a place line stops
+  // naming a bowl as ground as soon as the office says what a bowl is
+  function learnedThingClasses(marks) {
+    const seen = new Set();
+    for (const m of marks ?? []) { const cls = classToken(instanceClassOf(m)); if (cls && !seen.has(cls)) { seen.add(cls); askLineage(cls); } }
+    return thingClasses();
   }
   function iconsOf(m, inside = null) {
     const full = byId.get(m?.id) ?? m;
@@ -11891,7 +11904,7 @@ export function mountViewer(appEl) {
   // a single-body caller (the hover, the bubble) omits it and pays one index.
   const walkerPlace = (w, draw = null) => {
     const marks = draw?.marks ?? allMarks();
-    const index = draw?.index ?? containmentIndex(marks);
+    const index = draw?.index ?? containmentIndex(marks, { thingClasses: learnedThingClasses(marks) });
     return placeLabel(
       bodyPlace(w, { marks, acts: enterExitLedger.acts, at: occupancyClock(), index }),
       marks, data?.worldState?.determined ?? {}, { index });
@@ -12300,7 +12313,7 @@ export function mountViewer(appEl) {
     // to every body's placement — the #2910 hoist made it once per CALL, which
     // at 72 drawn bodies was still 72 indexes a draw, 351 ms of a 6× crossing.
     const marks = allMarks();
-    const draw = { marks, index: containmentIndex(marks) };
+    const draw = { marks, index: containmentIndex(marks, { thingClasses: learnedThingClasses(marks) }) };
     const vessels = vesselHandles(marks);
     const px = (m) => ({ x: mapCtx.originPx.x + m.x / mapCtx.mPerPx, y: mapCtx.originPx.y + m.y / mapCtx.mPerPx });
     // TWO PASSES, ONE LAYER. Hulls are collected separately and emitted first so
@@ -14301,13 +14314,15 @@ export function mountViewer(appEl) {
     const face = faceOf(handle);
     const moving = w.moving ?? (!w.arrived && !w.standing);
     const things = lines?.things ?? [];
+    const region = moving ? walkingLabel(w.remaining_m, w.eta_crossings) : walkerPlace(w);
     return {
-      key: ["resident", handle, carriersEpoch, inv ? "read" : "-", moving ? "m" : "s", things.join(","), lines?.count ?? "-"].join("|"),
+      // the place line is in the key: it changes when the page learns a kind is a thing (not ground)
+      key: ["resident", handle, carriersEpoch, inv ? "read" : "-", moving ? "m" : "s", things.join(","), lines?.count ?? "-", region].join("|"),
       handle, residentLink: false,
       residentHref: residentHref(handle),
       kicker: face.household || "a resident",
       title: face.name || handle,
-      region: moving ? walkingLabel(w.remaining_m, w.eta_crossings) : walkerPlace(w),
+      region,
       leadImage: null,
       door: { description: "" },
       byline: handle === state.handle && onResidentPath() ? "you" : handle,

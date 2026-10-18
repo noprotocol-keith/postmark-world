@@ -26,6 +26,7 @@
 //   a ground row with no holder that only sets (carriersFrom) → 2b reds
 //   markWhat without thingClasses                            → 4 reds
 //   iconsOf without askLineage                               → 4's draw-time row reds
+//   containmentIndex keying things on class === "thing" alone → 2b reds (her place line names the bowl)
 //   noteThingKind ignoring a close look's holder             → 4b reds (the old-form bag is "A place")
 //   the column offering enter to a thing                     → 4b reds
 //   sayNote() back to the old sentence                       → 5 reds
@@ -165,8 +166,8 @@ async function bootStubOffice() {
       if (q.get("read") === "walk") return send({ read: "walk", walkers: { walkers: [] } });
       return send(READ);
     }
-    if (url.pathname === "/world/present") return send({ at: 1000, residents: [{ handle: ACTOR, at: { ...HERE }, source: "walk" }, { handle: CLEO, at: { ...HERE }, source: "walk" }] });
-    if (url.pathname === "/world/walkers") return send({ at: 1000, walkers: [], standing: [{ handle: ACTOR, x: HERE.x, y: HERE.y }, { handle: CLEO, x: HERE.x, y: HERE.y }] });
+    if (url.pathname === "/world/present") return send({ at: 1000, residents: [{ handle: ACTOR, at: { ...HERE }, source: "walk", standing: true }, { handle: CLEO, at: { ...HERE }, source: "walk", standing: true }] });
+    if (url.pathname === "/world/walkers") return send({ at: 1000, walkers: [], standing: [{ handle: ACTOR, x: HERE.x, y: HERE.y, standing: true }, { handle: CLEO, x: HERE.x, y: HERE.y, standing: true }] });
     if (url.pathname === "/world/conversations") return send(CONVERSATIONS);
     // the resident's portfolio: nothing of theirs is published, so the read is the page's index
     if (url.pathname === "/world/my-marks") return send({ handle: ACTOR, drafts: [], docket: [], published: [], backed: [], complete: true, counts: { drafts: 0, docket: 0, published: 0, backed: 0 } });
@@ -310,6 +311,8 @@ test("2b. a kite set down leaves her hands at the next ground read, and is drawn
   if (!chromium) return t.skip(skipReason);
   const col = await columnFor(`walker:${CLEO}`, { until: "whole things" });
   assert.ok(col.open, "her column opened, and with it her close look: she holds the kite");
+  // she stands at the bowl: her place line names the ground under it, never the bowl (a kind of thing)
+  assert.doesNotMatch(col.meta, /Halloween Bowl/, "never \"on A Halloween Bowl's ground\": " + JSON.stringify(col.meta));
   for (let i = 0; i < 80; i++) {
     const [k, b] = [await pipAt(KITE), await pipAt(BOWL)];
     if (k && b && Math.hypot(k.x - b.x, k.y - b.y) < 0.01) break;
