@@ -7839,8 +7839,6 @@ export function mountViewer(appEl) {
   let carriersEpoch = 0, carriersMemo = { epoch: -1, until: 0, known: { holders: new Map(), placed: new Map() } };
   let closeLookGen = 0, handsSeq = 0;   // an act's line in time, and the newest ask for your hands
   const lineageAsked = new Set();      // kinds whose class chain has been asked of the class layer
-  // the kinds markWhat names before it asks whether a mark is a thing: no chain is asked for them
-  const ICON_DECIDED_BEFORE_THING = new Set(["", "idea", "bounty", "dungeon", "stairs", "portal-ground", "vehicle", "thing"]);
   let recordClassMemo = { epoch: -1, set: null };
   // the threshold ledger's acts, and their own epoch. Occupancy is derived from
   // these the way position is derived from the walk ledger, so what is held is
@@ -14045,7 +14043,7 @@ export function mountViewer(appEl) {
     return recordClassMemo.set;
   }
   function askLineage(cls) {
-    if (ICON_DECIDED_BEFORE_THING.has(cls) || thingKinds.has(cls) || lineageAsked.has(cls)) return;
+    if (!cls || cls === "thing" || thingKinds.has(cls) || lineageAsked.has(cls)) return;
     if (creatureClasses().has(cls) || recordClasses().has(cls)) return;   // the record answers
     lineageAsked.add(cls);
     fetch(officeUrl(`/world/apex?explain=${encodeURIComponent(cls)}`), { headers: { accept: "application/json" }, credentials: "same-origin" })
