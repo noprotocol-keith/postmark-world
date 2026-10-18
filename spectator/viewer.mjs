@@ -10865,16 +10865,22 @@ export function mountViewer(appEl) {
     // text." At `far` and `mid` they would be confetti over a town, so they
     // are drawn at `near` and nowhere else. The dot IS the marker: what a mark
     // is goes inside its pip, the way the doorway already did, and its states
-    // ride in a small pill beside it. A mark wearing its picture keeps its
-    // picture clear — its pill hangs off the top-right corner of its ground.
-    // A parcel's card already says "home", so it carries only its states.
+    // ride in a small pill beside it. A parcel's card already says "home", so it
+    // carries only its states.
+    //
+    // ONE PIP FOR EVERY ICON (play fix 48, Darko 21:10: "the icon for the
+    // Starforge Spire, the dungeon icon, does not match up with the pips for
+    // sited marks … the same exact mechanism"). A mark wearing its picture used
+    // to stand its dot down and hang its icons, what it is included, in a pill
+    // off the top-right corner of its ground: a second marker, which is how the
+    // Spire's dungeon icon came to look like nothing else on the map. Now a mark
+    // with an icon wears its pip here whatever it wears on its ground: the dot
+    // with its icon, the pill on hover, the ringed selected state (fixes 13, 37,
+    // 46). The picture's own rule (Keemin 2026-09-18: no dot on a picture)
+    // still holds where no icon is drawn, at far and mid.
     const iconsHere = tier === "near";
     const insideNow = iconsHere ? occupantsOf(liveOccupancy()) : null;
     const PIP_GLYPH = 14;   // the glyph across, inside a pip OVERLAY_PIP_R * 2 across
-    const cornerOf = (mark) => {
-      const ring = polygonOf(mark), bb = ring ? polygonBBox(ring) : null, r = rect(mark);
-      return px(bb ? { x: bb.maxx, y: bb.miny } : { x: r.x + r.w / 2, y: r.y - r.h / 2 });
-    };
     // TWO PILLS NEVER SIT ON EACH OTHER. A house mark wider than its parcel
     // puts its corner pill on the card's own; the later one steps down a row.
     // Measured in painting pixels at this draw's marker scale — a zoom inside
@@ -10932,18 +10938,18 @@ export function mountViewer(appEl) {
       const fan = fanned.has(m.id) ? fanOffsetPx(m.id) : null;
       const icons = iconsHere && !underCard(full) ? iconsOf(full, insideNow) : [];
       const what = icons[0]?.kind === "what" ? icons[0] : null;
-      const isPictured = pictured.has(m.id);
+      // the dot stands down for a picture only where it carries no icon (fix 48)
+      const isPictured = pictured.has(m.id) && !what;
       s += overlayPipSVG({
-        at: p, id: m.id, classes: markClasses(m) + (pictured.has(m.id) ? " ov-pip-pictured" : ""),
+        at: p, id: m.id, classes: markClasses(m) + (isPictured ? " ov-pip-pictured" : ""),
         fan,
         // the OS tooltip stands down in painting-only for the same reason the SVG
         // label does: the bubble is already saying this word, sooner and better
         title: nameOf(m),
-        inner: what && !isPictured ? iconSVG(what, { x: -PIP_GLYPH / 2, y: -PIP_GLYPH / 2, size: PIP_GLYPH, ink: "var(--night)" }) : "",
+        inner: what ? iconSVG(what, { x: -PIP_GLYPH / 2, y: -PIP_GLYPH / 2, size: PIP_GLYPH, ink: "var(--night)" }) : "",
       });
-      if (isPictured && icons.length && full.at && full.extent)
-        pills += placePill(icons, cornerOf(full), 2, -15);
-      else if (!isPictured && icons.length > (what ? 1 : 0))
+      // its states beside its pip, as every mark's are: never a corner pill of its own
+      if (icons.length > (what ? 1 : 0))
         pills += placePill(what ? icons.slice(1) : icons, p, (Number(fan?.dx) || 0) + OVERLAY_PIP_R + 2, (Number(fan?.dy) || 0) - 6.5);
     }
     // THE TOWN'S HOUSES ARE ALWAYS ON THE MAP. The atlas drew every home on its
