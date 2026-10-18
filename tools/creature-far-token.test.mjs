@@ -40,6 +40,6 @@ test("mid and near: the full token with the kind's silhouette, as before", () =>
 });
 
 test("pins: the painting asks for the plain token exactly at the far tier", () => {
-  assert.match(SOURCE, /const plain = tier === "far";\s*out \+= creatureGlyphSVG\(\{ creature: c, at: seats\.get\(c\.id\) \?\? px\(\{ x: c\.x, y: c\.y \}\), silhouette: plain \? null : creatureSilhouette\(c\.kind\),/);
+  assert.match(SOURCE, /const plain = tier === "far";\s*out \+= creatureGlyphSVG\(\{ creature: c, at: px\(\{ x: c\.x, y: c\.y \}\), silhouette: plain \? null : creatureSilhouette\(c\.kind\),/);
   assert.match(SOURCE, /if \(tier === "far"\) \{\s*for \(const w of bodies\)/, "the tier where the walker goes blank");
 });

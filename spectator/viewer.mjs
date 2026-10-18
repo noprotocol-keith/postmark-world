@@ -2655,15 +2655,18 @@ export function hiddenInsideParcel(mark, marks = [], underfoot = new Set(), chai
  *  2026-09-11: "separate the multi-mark selector (when clicking a crowded space)
  *  into residents, parcels, and then other marks"). Order within a group is the
  *  order handed in (people first, marks innermost-first — see openChooser).
- *  `isWalker` says which ids are people; `kindOf` answers a mark's kind. Pure. */
-export function groupChooserIds(ids = [], { isWalker = () => false, kindOf = () => null } = {}) {
-  const residents = [], parcels = [], others = [];
+ *  `isWalker` says which ids are people; `kindOf` answers a mark's kind.
+ *  CREATURES ARE THEIR OWN GROUP (play row 55: the chooser filed them under
+ *  "other marks"); `isCreature` says which ids are creatures. Pure. */
+export function groupChooserIds(ids = [], { isWalker = () => false, kindOf = () => null, isCreature = () => false } = {}) {
+  const residents = [], creatures = [], parcels = [], others = [];
   for (const id of ids ?? []) {
     if (isWalker(id)) residents.push(id);
+    else if (isCreature(id)) creatures.push(id);
     else if (kindOf(id) === "parcel") parcels.push(id);
     else others.push(id);
   }
-  return { residents, parcels, others };
+  return { residents, creatures, parcels, others };
 }
 
 /** THE PARCEL UNDERFOOT WEARS NO CARD (founder, 2026-09-11: "let's not display
@@ -4572,36 +4575,30 @@ export function chooserLeadLine(ids = []) {
   return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]} are here — which one?`;
 }
 
-/** NO TOKEN HIDES ANOTHER (play row 55: three creatures within 8 m drew as one
- *  clump that covered V). The residents stand where they stand; each creature,
- *  in id order, keeps its own place unless a token already placed is within
- *  `sep` (painting px, the token's size on screen at this zoom), and then
- *  steps out on a ring around its own place, at the first free seat. Seats are
- *  tried at 1×, 2× and 3× `sep`, eight to a ring, from an angle its own id
- *  picks, so a creature keeps its seat across draws. Returns id -> {x, y}. Pure. */
-export function seatCreatureTokens(creatures = [], residents = [], sep = 1) {
-  const placed = (residents ?? []).filter((r) => Number.isFinite(r?.x) && Number.isFinite(r?.y)).map((r) => ({ x: r.x, y: r.y }));
-  const free = (q) => placed.every((o) => Math.hypot(o.x - q.x, o.y - q.y) >= sep - 1e-9);
-  const out = new Map();
-  for (const c of [...(creatures ?? [])].filter((c) => c?.id && Number.isFinite(c.x) && Number.isFinite(c.y)).sort((a, b) => String(a.id).localeCompare(String(b.id)))) {
-    let at = { x: c.x, y: c.y };
-    if (!free(at)) {
-      let h = 0;
-      for (const ch of String(c.id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-      const start = (h % 360) * Math.PI / 180;
-      let found = null;
-      for (let ring = 1; ring <= 3 && !found; ring++)
-        for (let k = 0; k < 8 && !found; k++) {
-          const a = start + k * Math.PI / 4;
-          const q = { x: c.x + Math.cos(a) * sep * ring, y: c.y + Math.sin(a) * sep * ring };
-          if (free(q)) found = q;
-        }
-      at = found ?? at;
+/** THE PILE A CLICK LANDED ON (play row 55, Darko 2026-10-16 17:36: "we already
+ *  have code … that asks you which one did you mean to click on"). Tokens (the
+ *  residents and the creatures, screen points) stay where they stand, so three
+ *  at one spot draw as one pile, and the chooser must offer every token in it.
+ *  The snap radius around the click finds the first of them; any token whose
+ *  centre is within one token's width (`touchPx`) of a token already in the
+ *  pile is in it too, so a pile wider than the snap radius is offered whole
+ *  (the encounter's raven, 16 m from the wolf, was left out). Ordered as the
+ *  snap ranks: nearest the click first. Pure. */
+export function tokenPileAtPoint(point, tokens = [], { radiusPx = MARK_SNAP_RADIUS_PX, touchPx = 24 } = {}) {
+  const seeds = rankMarksAtPoint(point, tokens, radiusPx).map((t) => t.id);
+  if (!seeds.length) return [];
+  const byId = new Map((tokens ?? []).filter((t) => t?.id && Number.isFinite(Number(t.x)) && Number.isFinite(Number(t.y))).map((t) => [t.id, t]));
+  const pile = new Set(seeds);
+  for (let grew = true; grew;) {
+    grew = false;
+    for (const [id, t] of byId) {
+      if (pile.has(id)) continue;
+      if ([...pile].some((m) => { const o = byId.get(m); return o && Math.hypot(Number(o.x) - Number(t.x), Number(o.y) - Number(t.y)) <= touchPx; })) { pile.add(id); grew = true; }
     }
-    placed.push(at);
-    out.set(c.id, at);
   }
-  return out;
+  const x = Number(point?.x), y = Number(point?.y);
+  const away = (id) => { const t = byId.get(id); return t ? Math.hypot(Number(t.x) - x, Number(t.y) - y) : Infinity; };
+  return [...pile].sort((a, b) => away(a) - away(b) || String(a).localeCompare(String(b)));
 }
 
 export function orderInnermostFirst(ids, byId) {
@@ -10284,7 +10281,11 @@ export function mountViewer(appEl) {
       // is shown the stack and picks. One candidate in radius is exactly
       // today's behaviour, and the head of this list IS what the snap would
       // have returned, so the single-face case cannot have moved.
-      const peopleHere = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, [...screenWalkerCandidates(), ...screenCreatureCandidates()]);
+      // the whole pile the click landed on, every token in it (row 55): one token's
+      // width on screen, read off a drawn creature token, else the walker's
+      const disc = creatureLayer.querySelector(".ov-creature-disc")?.getBoundingClientRect();
+      const peopleHere = tokenPileAtPoint({ x: e.clientX, y: e.clientY }, [...screenWalkerCandidates(), ...screenCreatureCandidates()],
+        { touchPx: disc?.width > 0 ? disc.width : 24 });
       if (peopleHere.length) {
         const under = contestedMarksAtPoint({ x: e.clientX, y: e.clientY }, screenMarkCandidates());
         if (peopleHere.length + under.length > 1) { openChooser([...peopleHere, ...under]); return; }
@@ -13642,17 +13643,17 @@ export function mountViewer(appEl) {
     // NOTHING BEHIND THE WALL IS SEEN (POS-466): outdoors, a creature the
     // engine puts behind the wall's true face is the wall's, not the map's
     const m = sceneRoomId ? null : mistsAt(state.crossing, data?.skeleton?.mists);
-    // SEATED SO NONE HIDES ANOTHER (row 55): the residents' places are fixed, and
-    // a creature that would sit on a token already down steps aside by one token
-    const shown = [...liveCreatures.values()].filter((c) => !(sceneRoomId && !(box && pointInRect(c.x, c.y, box))) && !(m && mistsHere({ x: c.x, y: c.y }, m).inWall));
-    const sep = ((tier === "far" ? CREATURE_GLYPH.plainSize : CREATURE_GLYPH.size) + 6) / markerScale(mapCtx?.zoomK);
-    const residents = (walkState.walkers ?? []).filter((w) => Number.isFinite(w?.x) && Number.isFinite(w?.y)).map((w) => px({ x: w.x, y: w.y }));
-    const seats = seatCreatureTokens(shown.map((c) => ({ id: c.id, ...px({ x: c.x, y: c.y }) })), residents, sep);
+    // EVERY TOKEN AT ITS TRUE POINT (Darko 2026-10-16 17:36, row 55: "we're not
+    // doing any kind of no clumping rule … The tokens should stay in their
+    // correct geometric positions"). Tokens that share a spot are told apart by
+    // the chooser a click on them opens, never by moving them.
     let out = "";
-    for (const c of shown) {
+    for (const c of liveCreatures.values()) {
+      if (sceneRoomId && !(box && pointInRect(c.x, c.y, box))) continue;
+      if (m && mistsHere({ x: c.x, y: c.y }, m).inWall) continue;
       // far: the plain token, as a resident is the blank walker there (fix 49)
       const plain = tier === "far";
-      out += creatureGlyphSVG({ creature: c, at: seats.get(c.id) ?? px({ x: c.x, y: c.y }), silhouette: plain ? null : creatureSilhouette(c.kind),
+      out += creatureGlyphSVG({ creature: c, at: px({ x: c.x, y: c.y }), silhouette: plain ? null : creatureSilhouette(c.kind),
         title: state.paintingOnly ? null : c.name, plain });
     }
     return out;
@@ -14107,9 +14108,9 @@ export function mountViewer(appEl) {
         + `</button>`;
     };
     // THREE GROUPS, LABELLED, EMPTY ONES SILENT (founder, 2026-09-11) — see groupChooserIds
-    const groups = groupChooserIds(ids, { isWalker: (x) => !!walkerHandleFromHoverId(x), kindOf: (x) => byId.get(x)?.kind ?? null });
+    const groups = groupChooserIds(ids, { isWalker: (x) => !!walkerHandleFromHoverId(x), kindOf: (x) => byId.get(x)?.kind ?? null, isCreature: isCreatureId });
     const section = (label, list) => { const rows = list.map(rowOf).filter(Boolean).join(""); return rows ? `<p class="wv-choose-group">${label}</p>${rows}` : ""; };
-    const body = section("residents", groups.residents) + section("parcels", groups.parcels) + section("other marks", groups.others);
+    const body = section("residents", groups.residents) + section("creatures", groups.creatures) + section("parcels", groups.parcels) + section("other marks", groups.others);
     if (!body) return "";
     return `<div class="wv-chooser">`
       + `<p class="wv-choose-lead">${esc(chooserLeadLine(ids))}</p>`

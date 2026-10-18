@@ -1,46 +1,52 @@
-// no-clump.test.mjs — play row 55 (encounter run, 21:1x): three creature
-// tokens within 8 m drew as one clump that covered V, and clicking it said "2
-// marks are stacked here — which one?", missing the raven and calling creatures
-// marks. Residents and creatures never hide each other now (each creature takes
-// a free seat beside its own place, the residents never move), so every token
-// is reached by its own click; and the chooser names creatures as creatures.
+// no-clump.test.mjs — play row 55, as RULED (Darko 2026-10-16 17:36): "we're
+// not doing any kind of no clumping rule … The tokens should stay in their
+// correct geometric positions. And we already have code … that asks you which
+// one did you mean to click on." So no token is moved, at any zoom, and a click
+// on a pile opens the chooser with every token in it, creatures named as
+// creatures. (The seating fix 55 first shipped drifted as he zoomed: its ring
+// was in screen pixels.)
 // Run: node --test tools/no-clump.test.mjs
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { seatCreatureTokens, chooserLeadLine, walkerHoverId } from "../spectator/viewer.mjs";
+import { creatureGlyphSVG, chooserLeadLine, tokenPileAtPoint, walkerHoverId } from "../spectator/viewer.mjs";
 
 const SOURCE = readFileSync(new URL("../spectator/viewer.mjs", import.meta.url), "utf8");
-const sep = 28;
-const apart = (pts) => { for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) if (Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y) < sep - 1e-6) return false; return true; };
+const layer = SOURCE.slice(SOURCE.indexOf("  function liveCreatureGlyphs(px, tier) {"), SOURCE.indexOf("  function creatureNameplateHTML(id) {"));
 
-test("the encounter's clump: V and three creatures within a token of each other all come apart", () => {
-  const V = { x: 100, y: 100 };
-  const creatures = [{ id: "creature:wolf-1", x: 104, y: 100 }, { id: "creature:bat-1", x: 100, y: 104 }, { id: "creature:raven-1", x: 96, y: 100 }];
-  const seats = seatCreatureTokens(creatures, [V], sep);
-  assert.equal(seats.size, 3);
-  assert.ok(apart([V, ...seats.values()]), "no token sits on another, the resident's included");
-  for (const c of creatures) assert.ok(Math.hypot(seats.get(c.id).x - c.x, seats.get(c.id).y - c.y) <= sep * 3 + 1e-6, "each stays close to where it stands");
+test("a stacked trio draws at its true points: one place, three tokens, nothing moved", () => {
+  const at = { x: 380.2, y: -537 };
+  for (const kind of ["wolf", "raven", "bat"])
+    assert.match(creatureGlyphSVG({ creature: { id: `creature:${kind}-253-play1`, kind }, at }), /^<g transform="translate\(380\.2 -537\)">/);
+  assert.match(layer, /out \+= creatureGlyphSVG\(\{ creature: c, at: px\(\{ x: c\.x, y: c\.y \}\),/, "the token's own point, from the record");
+  assert.doesNotMatch(SOURCE, /seatCreatureTokens|seats\.get\(/, "no seating anywhere");
+  assert.doesNotMatch(layer, /markerScale|walkState\.walkers/, "nothing on screen moves a creature");
 });
 
-test("the resident never moves; a creature with room keeps its own place; the seats hold across draws", () => {
-  const creatures = [{ id: "creature:wolf-1", x: 300, y: 300 }, { id: "creature:bat-1", x: 102, y: 100 }];
-  const seats = seatCreatureTokens(creatures, [{ x: 100, y: 100 }], sep);
-  assert.deepEqual(seats.get("creature:wolf-1"), { x: 300, y: 300 });
-  assert.notDeepEqual(seats.get("creature:bat-1"), { x: 102, y: 100 });
-  assert.deepEqual(seatCreatureTokens([...creatures].reverse(), [{ x: 100, y: 100 }], sep), seats, "the same seats whatever order they arrive in");
+test("a click on the pile offers every token in it, nearest first, even past the snap radius", () => {
+  // the encounter's three: wolf 8 m E, bat 8 m S, raven 8 m W of V, drawn as overlapping tokens
+  const V = { id: walkerHoverId("visitor"), x: 400, y: 300 };
+  const wolf = { id: "creature:wolf-1", x: 416, y: 300 }, bat = { id: "creature:bat-1", x: 400, y: 316 }, raven = { id: "creature:raven-1", x: 384, y: 300 };
+  const far = { id: "creature:wolf-2", x: 520, y: 300 };
+  const pile = tokenPileAtPoint({ x: 416, y: 300 }, [V, wolf, bat, raven, far], { touchPx: 24 });
+  assert.deepEqual(pile, ["creature:wolf-1", V.id, "creature:bat-1", "creature:raven-1"], "the raven, 32 px from the click, is in it");
+  assert.ok(!pile.includes(far.id), "a token that touches nothing in the pile is not in it");
+  assert.deepEqual(tokenPileAtPoint({ x: 0, y: 0 }, [V, wolf]), [], "a click on nothing is no pile");
+  assert.deepEqual(tokenPileAtPoint({ x: 520, y: 300 }, [V, wolf, far]), [far.id], "one token alone is just itself");
 });
 
 test("the chooser names creatures as creatures", () => {
   assert.equal(chooserLeadLine(["creature:wolf-1", "creature:bat-1", "creature:raven-1"]), "3 creatures are here — which one?");
   assert.equal(chooserLeadLine([walkerHoverId("visitor"), "creature:wolf-1", "creature:bat-1"]), "1 resident and 2 creatures are here — which one?");
   assert.equal(chooserLeadLine([walkerHoverId("visitor"), "creature:wolf-1", "the-town/a-stone"]), "1 resident, 1 creature and 1 mark are here — which one?");
-  assert.equal(chooserLeadLine(["creature:wolf-1", "the-town/a-stone"]), "1 creature and 1 mark are here — which one?");
   assert.equal(chooserLeadLine(["the-town/a", "the-town/b"]), "2 marks are stacked here — which one?", "a pile of marks reads as it always did");
 });
 
-test("pins: the creature layer draws each token at its seat", () => {
-  assert.match(SOURCE, /const seats = seatCreatureTokens\(shown\.map\(\(c\) => \(\{ id: c\.id, \.\.\.px\(\{ x: c\.x, y: c\.y \}\) \}\)\), residents, sep\);/);
-  assert.match(SOURCE, /creatureGlyphSVG\(\{ creature: c, at: seats\.get\(c\.id\) \?\? px\(/);
-  assert.match(SOURCE, /const sep = \(\(tier === "far" \? CREATURE_GLYPH\.plainSize : CREATURE_GLYPH\.size\) \+ 6\) \/ markerScale\(mapCtx\?\.zoomK\);/);
+test("pins: the people click asks for the whole pile, one token's width read off a drawn token", () => {
+  assert.match(SOURCE, /const peopleHere = tokenPileAtPoint\(\{ x: e\.clientX, y: e\.clientY \}, \[\.\.\.screenWalkerCandidates\(\), \.\.\.screenCreatureCandidates\(\)\],\s*\{ touchPx: disc\?\.width > 0 \? disc\.width : 24 \}\);/);
+});
+
+test("pins: the chooser files creatures under their own label, never \"other marks\"", () => {
+  assert.match(SOURCE, /isCreature: isCreatureId \}\);/);
+  assert.match(SOURCE, /section\("creatures", groups\.creatures\)/);
 });
