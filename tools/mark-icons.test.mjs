@@ -26,6 +26,18 @@ test("the vocabulary is closed: eight things a mark can be, six states, and no i
   assert.equal(markWhat(sited({ class: "bounty" }), { cls: "bounty" }), null, "nor a bounty");
 });
 
+test("LOGOS v2 W2: a mark whose kind names its class is read as the sited mark it was", () => {
+  const w2 = (kind, extra = {}) => ({ id: "h/m", kind, at: { x: 0, y: 0 }, extent: { w: 4, h: 4 }, ...extra });
+  for (const cls of ["thing", "dungeon", "stairs", "vehicle"]) {
+    const m = w2(cls);
+    assert.equal(instanceClassOf(m), cls, `the kind names the class (${cls})`);
+    assert.equal(markWhat(m, { cls: tok(instanceClassOf(m)) }), markWhat(sited({ class: cls }), { cls }),
+      `kind: ${cls} reads as the sited mark of class ${cls}`);
+  }
+  assert.equal(markWhat(w2("thing"), { cls: "thing" }), "thing", "not null: a W2 mark still wears its icon");
+  // ⚑ THE FLIP: restore `if (mark.kind !== "sited") return null;` in markWhat → red.
+});
+
 test("what a mark is, read from the record", () => {
   assert.equal(markWhat({ id: "h/p", kind: "parcel" }), "home");
   assert.equal(markWhat(sited()), "place", "a plain sited mark is a place");

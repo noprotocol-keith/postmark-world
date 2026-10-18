@@ -511,8 +511,12 @@ test("A MARK WITH NOWHERE TO GO IS STILL FOUND, AND STILL SELECTABLE", async (t)
     + JSON.stringify(found.hits));
   await clickHit(page, PLACELESS_ID);
   const after = await readState(page);
-  assert.equal(after.selected, PLACELESS_ID, "a placeless mark was found but could not be selected");
-  assert.ok(!after.columnOpen, "a placeless mark has no house column to open");
+  // A SELECTED MARK OPENS ITS COLUMN, WHATEVER IT IS (Darko 2026-10-15 17:40, play fix 12:
+  // "regardless of what kind of mark it is"), a placeless one too; this replaced the
+  // card the selection used to light, so the column is what says it was selected.
+  assert.ok(after.columnOpen, "a placeless mark was found but could not be selected: no column opened");
+  assert.equal(after.kicker, String(PLACELESS.household ?? PLACELESS.by ?? "the town"),
+    "the column that opened is not the placeless mark's");
   assert.deepEqual(after.centre, before.centre, "selecting a placeless mark moved the camera to nowhere");
   await page.close();
   assert.deepEqual(errors, [], "the page threw: " + errors.join(" | "));
