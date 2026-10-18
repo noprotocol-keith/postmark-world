@@ -1833,19 +1833,12 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
 - **One holder in hand, and counts confer up** (ruled 2026-10-17 23:29,
   Darko: *"yes, rule it, one holder and counts confer up"*):
   - **A resident carries at most one holder at a time** (the resident's
-    `holders`, 1, constitution and locked). A second holder coming into a
-    resident's hands, by a take, a give or a make, is refused: "you're
-    already carrying a holder (its id); set it down first."
-  - **Between holders, a holder counts 1 plus everything it holds,**
-    recursively, toward the room of whatever holds it: a bag holding 30
-    takes 31 places in a chest of 120. A give, take or make into a holder
-    checks the room of that holder and of every holder above it, up to but
-    not including a resident.
-  - **In a resident's hands, each thing counts 1,** however full. The 24 is
-    unchanged, and the one holder carried is 1 of the 24.
-  - **A holder is never inside itself,** however deep: the walk up the
-    holders goes the whole way, and a loop already in the record is refused
-    rather than followed. No depth is set, because the room bounds it.
+    `holders`, 1, constitution and locked).
+  - **Counts confer up between holders:** a holder counts 1 plus everything
+    it holds, recursively, toward the room of whatever holds it.
+  - **In a resident's hands, each top-level thing counts 1.** The 24 is
+    unchanged, and the carried holder is 1 of the 24, however full.
+  - **The loop check is complete; there is no depth cap.**
   *SUPERSEDED 2026-10-17 23:29 for a holder inside a holder (counts confer
   up); it still stands for a resident's hands: "it counts 1 toward its
   carrier's `capacity`, whatever it holds (ruled 16:02)."*
