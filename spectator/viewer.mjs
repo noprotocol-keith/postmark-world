@@ -6068,15 +6068,13 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 .wv-walk-preview-dest { fill:rgba(132,201,143,.18); stroke:var(--green); stroke-width:2.4; vector-effect:non-scaling-stroke; }
 .wv-walk-preview-label rect { fill:rgba(13,15,19,.94); stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
 .wv-walk-preview-label text { fill:var(--green); font-family:Consolas,Menlo,monospace; font-weight:700; }
-.wv-walk-chip-go rect { fill:rgba(13,15,19,.94); stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
+.wv-walk-chip-go .wv-chip-shape { fill:rgba(13,15,19,.94); stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
 .wv-walk-chip-go .wv-chip-check { fill:#0d0f13; font-weight:800; opacity:0; }
-.wv-walk-chip-go:not(.is-still):hover rect { fill:var(--green); stroke:var(--green); }
+.wv-walk-chip-go:not(.is-still):hover .wv-chip-shape { fill:var(--green); stroke:var(--green); }
 .wv-walk-chip-go:not(.is-still):hover .wv-chip-text { opacity:0; }
 .wv-walk-chip-go:not(.is-still):hover .wv-chip-check { opacity:1; }
-.wv-chip-tab { fill:rgba(13,15,19,.94); stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
 .wv-chip-walker-head { fill:var(--green); }
 .wv-chip-walker-body { fill:none; stroke:var(--green); stroke-width:1.15; stroke-linecap:round; stroke-linejoin:round; }
-.wv-walk-chip-go:not(.is-still):hover .wv-chip-tab { fill:var(--green); stroke:var(--green); }
 .wv-walk-chip-go:not(.is-still):hover .wv-chip-walker-head { fill:#0d0f13; }
 .wv-walk-chip-go:not(.is-still):hover .wv-chip-walker-body { stroke:#0d0f13; }
 .wv-walk-chip-no circle { fill:#2a2f38; stroke:var(--green-dark); stroke-width:1; vector-effect:non-scaling-stroke; }
@@ -11888,19 +11886,26 @@ export function mountViewer(appEl) {
     // A WALKER ON THE CARD'S TOP EDGE (Darko 17:55: "a little semicircle … at the
     // top that has like a walk icon/silhouette"), so the card says what it is.
     const cx = x + w / 2, u = 1.3 * unit;
-    const walker = `<g class="wv-chip-walker" transform="translate(${cx} ${y - 3.2 * u + 5 * unit}) scale(${u})">`
-      + `<path d="M -${9} 3.2 A 9 9 0 0 1 9 3.2 Z" class="wv-chip-tab"/>`
+    // ONE OUTLINE (Darko 18:03: "the outline of the box could just include the
+    // semicircle … one continuous outline. Instead of two separate shapes"): the
+    // card and its top bump are a single path, the bump's circle centred 5 px below
+    // the top edge so it rises out of the card rather than sitting on it.
+    const R = 9 * u, sink = 5 * unit, rr = 5 * unit, dx = Math.sqrt(Math.max(R * R - sink * sink, 0));
+    const shape = `<path class="wv-chip-shape" d="M ${x + rr} ${y} H ${cx - dx} A ${R} ${R} 0 0 1 ${cx + dx} ${y} H ${x + w - rr}`
+      + ` A ${rr} ${rr} 0 0 1 ${x + w} ${y + rr} V ${y + h - rr} A ${rr} ${rr} 0 0 1 ${x + w - rr} ${y + h} H ${x + rr}`
+      + ` A ${rr} ${rr} 0 0 1 ${x} ${y + h - rr} V ${y + rr} A ${rr} ${rr} 0 0 1 ${x + rr} ${y} Z"/>`;
+    const walker = `<g class="wv-chip-walker" transform="translate(${cx} ${y - 2.2 * u + sink}) scale(${u})">`
       + `<circle cx="0.4" cy="-4.6" r="1.35" class="wv-chip-walker-head"/>`
       + `<path d="M 0.2 -2.8 L -0.3 1 M -0.3 1 L -2.2 3.6 M -0.3 1 L 1.6 3.4 M 0 -1.8 L -2.1 -0.3 M 0 -1.8 L 2.1 -1" class="wv-chip-walker-body"/></g>`;
     const text = lines.map((l, i) => `<text class="wv-chip-text" x="${x + w / 2}" y="${y + (5 + lineH * (i + 1) - 3) * unit}" font-size="${fontPx * unit}" text-anchor="middle">${esc(l)}</text>`).join("");
     const card = confirmable
       ? `<g class="wv-walk-chip-go" data-walk-chip="go" style="pointer-events:auto;cursor:pointer"><title>walk there (Enter)</title>`
-        + `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${5 * unit}"/>${text}`
+        + `${shape}${text}`
         + `<text class="wv-chip-check" x="${x + w / 2}" y="${y + h / 2 + 7 * unit}" font-size="${20 * unit}" text-anchor="middle">✓</text>${walker}</g>`
         + `<g class="wv-walk-chip-no" data-walk-chip="no" style="pointer-events:auto;cursor:pointer"><title>cancel (Esc)</title>`
         + `<circle cx="${x + w}" cy="${y}" r="${7.5 * unit}"/>`
         + `<text x="${x + w}" y="${y + 3.6 * unit}" font-size="${10 * unit}" text-anchor="middle">✕</text></g>`
-      : `<g class="wv-walk-chip-go is-still"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${5 * unit}"/>${text}${walker}</g>`;
+      : `<g class="wv-walk-chip-go is-still">${shape}${text}${walker}</g>`;
     layer.innerHTML = `<line x1="${from.x}" y1="${from.y}" x2="${toward.x}" y2="${toward.y}" class="wv-walk-preview-leg"/>`
       + `<circle cx="${toward.x}" cy="${toward.y}" r="${6 / k}" class="wv-walk-preview-dest"/>`
       + `<g class="wv-walk-preview-label wv-walk-chip">${card}</g>`;
