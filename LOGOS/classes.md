@@ -1003,6 +1003,51 @@ two cuts: "it fades or it flees" and "it is no one's".)
 
 Rendered in the world as `the-town/creature`, `the-town/wolf`, `the-town/raven` and `the-town/bat`.
 
+## The appearance class — predicates on an entity (WLD-83, 2026-10-19)
+
+Ruled by Darko on WLD-83 (18:59, 19:04, 19:42). What a resident looks like is
+**a tree of real predicates whose root stands on the resident itself**: "they're
+predicates, not sited, so maybe that makes it more possible to kind of treat
+them more like marks". The predicate class always said "every world family may
+carry them" (`the-town/predicate`); this is the first family that is not a mark.
+
+- **The parent is the entity** ([lifetimes.md](lifetimes.md) § The node, as
+  amended): the root names `parent: resident:<handle>`, and every node under it
+  is a predicate on the node above (the continuation law). A predicate on an
+  entity takes the entity's locus whole: it is wherever the resident is, carries
+  no geometry, and is never drawn on the map.
+- **One shape, the predicate's own.** Each node is a slot, a value and a body.
+  The root's slot is `appearance` and its body is **the glance**; the details'
+  slots are the author's own words. The only cap is the one every mark has: a
+  body of at most 150 characters (19:42: *"I would much rather enforce a global
+  predicate level cap than have differing caps for different types"*). There is
+  no maximum on the tree's size or depth.
+- **Who writes it:** the resident's own household, by default (P1). Other
+  households may later hang predicates on a resident, and the resident's
+  household declares a stance on them.
+- **Canon live.** `appearance` extends `predicate` with `canon: live`. Its acts
+  cannot conflict, because only the holder writes on its own entity, so each is
+  canon the moment it lands ([lifetimes.md](lifetimes.md) § The three
+  lifetimes; [tiers.md](tiers.md) § The two apexes: an act is sovereign because
+  its author is). A revision is a new act on the same node, the latest appended
+  wins, and a withdrawal is a withdraw.
+- **Where it is kept (P3):** the store's log of acts, as the entity's living
+  state, folded by the office and photographed by every crossing-save, like a
+  creature's. It is not filed in `WORLD/marks`, which stays the ground. The
+  notary's publication of the acts is the public record.
+- **A creature kind (P5):** a kind's appearance is the same tree, nested under
+  the kind's own class mark, town-authored and settled with the world. A kind's
+  `voice:` stays the line a reaction speaks.
+- **A close look descends (P10).** The appearance shows on a close look and in
+  the World page's resident column, not in the glance at who is around (D4). The
+  look reads the tree to a depth under one cap on total bodies, and the reader
+  calls it again on the branches it wants: the same progressive descent
+  `investigate` gives every mark tree.
+- **The picture stays the one profile picture** (P9). The reserved `face` slot
+  (`WORLD/marks/SCHEMA.md`) could carry it in this tree later, after a sitting.
+
+Rendered in the world as `the-town/appearance`.
+
 ## The round class — the offices' procedures, as papers
 
 Ruled 2026-08-19 (with the meep class): **a round is an office's
