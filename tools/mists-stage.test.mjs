@@ -179,7 +179,8 @@ test("the page: an idle second of drift lays the map out zero times, and the sta
   assert.deepEqual(where.inSvg, [], "nothing animates inside the map's svg");
   assert.equal(where.paintInSvg, false, "the moving paint is not in the svg");
   assert.equal(where.wallInSvg, true, "the wall stays in the svg, where it takes the pointer");
-  assert.deepEqual(where.topOrder, ["wv-convo-hover-layer", "wv-housemate-edge-layer"], "what drew above the Mists draws above them still");
+  // the live creatures (play fix 35) stand over the Mists' paint too, under the housemate chevrons
+  assert.deepEqual(where.topOrder, ["wv-convo-hover-layer", "wv-creature-layer", "wv-housemate-edge-layer"], "what drew above the Mists draws above them still");
 
   // the stage's camera is the svg's: each bake's corner lands where the svg puts the same painting point
   const agree = (label) => page.evaluate((label) => {

@@ -41,7 +41,10 @@
 // entry law governs future entries only, and nobody's history rewrites.
 //
 // Pure: no fs, no geometry, no engine import. The office pen owns writing; the
-// verbs (world-verbs.mjs) own the geometry; this owns grammar and arithmetic.
+// verbs (world-verbs.mjs) own the geometry; this owns grammar and arithmetic. The
+// one import is mark-kind.mjs, pure too: what a record is, in either form.
+
+import { isSited, instanceClassOf } from "./mark-kind.mjs";
 
 // ── the three words ─────────────────────────────────────────────────────────
 export const ENTRY_WORDS = Object.freeze(["welcomed", "neutral", "opposed"]);
@@ -157,7 +160,12 @@ export const stampAt = (fc) => Math.floor(Number(fc) * 1e4) / 1e4;
 export function formatEnterExit({ handle, act, mark, at, word = null, iso = null }) {
   const stamp = iso ?? new Date().toISOString();
   const said = act === "enters" && isEntryWord(word) ? ` · word ${word}` : "";
-  return `- ${stamp} · ${handle} · ${act} ${mark} · ${FERRY_FIELD} ${stampAt(at).toFixed(4)}${said}`;
+  // `at` arrives as the record's value: every writer hands this row stampAt's
+  // floor (the office's passageInstant, src/world-crossings.mjs). It is printed,
+  // never floored again. In floats stampAt is not idempotent ((k/1e4)·1e4 can land
+  // just under k), so a second floor wrote about 9% of rows 0.0001 crossing early
+  // (POS-699, 2026-10-19).
+  return `- ${stamp} · ${handle} · ${act} ${mark} · ${FERRY_FIELD} ${Number(at).toFixed(4)}${said}`;
 }
 
 export function parseEnterExitLedger(text) {
@@ -244,7 +252,7 @@ export const STAIRS_CLASS = "stairs";
 /** The stairs class's answer, verbatim (Darko, 2026-10-15 13:31). */
 export const STAIRS_LINE = "Moving to higher/lower floors has not been implemented yet. Coming Soon!";
 /** A stairs is an instance: a sited mark carrying the class (never its declaration). */
-export const isStairs = (m) => String(m?.class ?? "") === STAIRS_CLASS && m?.kind === "sited";
+export const isStairs = (m) => instanceClassOf(m) === STAIRS_CLASS && isSited(m);
 /** The class's default law: into itself, opposed, the line as its consequence.
  *  Applied only to a stair that writes no `entry:` (entryLawOf). */
 export const stairsLaw = (m) => ({ word: "opposed", consequence: STAIRS_LINE, into: m?.id ?? null });

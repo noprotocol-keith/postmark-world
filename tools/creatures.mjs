@@ -35,9 +35,18 @@
 //
 // THE NUMBERS ARE LAW (D1, D2; Darko 2026-10-15 12:09, as recommended): the band
 // is the 400 m fringe on the clear side of the wall, open country only; per window
-// a wolf 2, a raven 4, a bat 3, each at its own seeded minute. They live on the
-// creature class's dials and each kind's `count_per_window` (WORLD/marks/…/entity/
-// creature/), read by `creatureLaw`; nothing here hard-codes a creature's numbers.
+// a wolf 2, a raven 4, a bat 3, each at its own seeded minute. *SUPERSEDED
+// 2026-10-17 13:58 (Darko, WLD-56): one creature a window, the kinds in turn, a
+// bat first; each count_per_window is 1, under the rotation below.* The numbers
+// live on the creature class's dials and each kind's `count_per_window`
+// (WORLD/marks/…/entity/creature/), read by `creatureLaw`; nothing here
+// hard-codes a creature's numbers.
+//
+// THE KINDS IN TURN (Darko 2026-10-17 13:58, WLD-56): one creature per window, a
+// bat first, then raven, then wolf, and round again. The class's `rotation` dial
+// names the kinds in turn; window N brings only `rotation[(N - from_crossing) mod
+// length]`, at that kind's `count_per_window`. Written null, every kind comes at
+// its own count; an absent rotation mark is refused, like any missing dial.
 //
 // ── THE FOLD (W4, W5) ──────────────────────────────────────────────────────────
 // A creature is a fold of the log's rows: `spawn` (the-town, object = its id),
@@ -66,6 +75,7 @@ import { mistsAt, mistsHere } from "./world-engine.mjs";
 import { mistsKeepRects, keptByTheTown } from "./mists-keep.mjs";
 import { CROSSING_EPOCH_UTC, CROSSING_MS } from "./walk.mjs";
 import { pointInPolygon, polygonOf } from "./geometry.mjs";
+import { classIndex, propertyOf } from "./class-properties.mjs";
 
 export const TOWN = "the-town";
 export const DESPAWN_REASONS = Object.freeze(["faded", "fled"]);
@@ -87,29 +97,78 @@ export const CREATURE_DIAL_NAMES = Object.freeze(["band_from_m", "band_to_m", "k
  *   dials         { counts: { <kind>: count_per_window }, band_from_m, band_to_m, keep_m, apart_m, span_h }
  *   kinds         [{ kind, kind_file }], by name
  * `marks` are parsed mark records (`loadMarks`, or `parseRecord` on each file read
- * at a ref). Only the-town's classes count. Null when there is no creature class:
- * no class, no creatures. A class missing a dial, or a kind with no whole count or
- * no kind file, throws: the law is read whole or not at all.
+ * at a ref). Only the-town's classes count. Each dial is a property of its class
+ * (LOGOS v2 part 2: "every dial is a property, and a locked value is its
+ * default"), read up `extends` by tools/class-properties.mjs. Records read file by
+ * file carry no id or parent, so those are taken from the path each was read at
+ * (`nestedByPath`). Null when there is no creature class: no class, no creatures.
+ * A class missing a dial, or a kind with no whole count or no kind file, throws:
+ * the law is read whole or not at all.
  */
-export function creatureLaw(marks) {
-  const classes = (marks ?? []).filter((m) => m?.kind === "class" && m.by === TOWN);
+export function creatureLaw(records) {
+  const marks = nestedByPath(records ?? []);
+  const classes = marks.filter((m) => m?.kind === "class" && m.by === TOWN);
   const c = classes.find((m) => String(m.class) === "creature");
   if (!c) return null;
+  const idx = classIndex(marks);
+  const dial = (name, k) => propertyOf(idx, name, k)?.value;
   const dials = { counts: {} };
   for (const k of CREATURE_DIAL_NAMES) {
-    const v = c.dials?.[k];
+    const v = dial("creature", k);
     if (typeof v !== "number" || !Number.isFinite(v) || v < 0) throw new Error(`creatureLaw: the creature class's ${k} dial is ${JSON.stringify(v)}, not a number ≥ 0`);
     dials[k] = v;
   }
   const kinds = [];
   for (const m of classes.filter((x) => x.extends === "creature").sort((a, b) => (String(a.class) < String(b.class) ? -1 : 1))) {
-    const kind = String(m.class), n = m.dials?.count_per_window;
+    const kind = String(m.class), n = dial(kind, "count_per_window");
     if (!Number.isInteger(n) || n < 0) throw new Error(`creatureLaw: ${kind}'s count_per_window is ${JSON.stringify(n)}, not a whole number`);
     if (typeof m.kind_file !== "string" || !m.kind_file) throw new Error(`creatureLaw: ${kind} names no kind_file`);
     dials.counts[kind] = n;
     kinds.push({ kind, kind_file: m.kind_file });
   }
-  return { fromCrossing: c.dials?.from_crossing ?? null, dials, kinds };
+  // Read whole like every other dial (review-239 N1): an absent rotation mark is
+  // refused, never read as "every kind at its count". Only a written null is none.
+  const rot = propertyOf(idx, "creature", "rotation");
+  if (!rot) throw new Error("creatureLaw: the creature class has no rotation dial (write it null for no rotation)");
+  const rotation = rotationOf(rot.value, dials.counts);
+  if (rotation) dials.rotation = rotation;
+  return { fromCrossing: dial("creature", "from_crossing") ?? null, dials, kinds };
+}
+
+// A record from `parseRecord` alone has no id and no parent; the file it was read
+// from does (`_file`, unlisted), and the directory above a property's is the node
+// it stands under. Loader records already carry both and pass through unchanged.
+function nestedByPath(records) {
+  if (records.every((m) => m?.id != null)) return records;
+  const dirOf = (file) => String(file ?? "").replace(/\\/g, "/").replace(/(^|\/)mark\.md$/, "");
+  const up = (dir) => (dir.includes("/") ? dir.slice(0, dir.lastIndexOf("/")) : "");
+  return records.map((m) => {
+    if (!m || m.id != null || m._file == null) return m;
+    const dir = dirOf(m._file);
+    return { ...m, id: `path:${dir}`, parent: `path:${up(dir)}` };
+  });
+}
+
+/** The rotation dial, read whole: text naming the class's own kinds in turn
+ *  ("bat raven wolf", the one form that is also a LOGOS v2 property's free-text
+ *  value), or null for none. Anything else throws. */
+function rotationOf(v, counts) {
+  if (v === null) return null;
+  const list = typeof v === "string" ? v.trim().split(/\s+/).filter(Boolean) : null;
+  if (!list?.length || !list.every((k) => Object.hasOwn(counts, k)))
+    throw new Error(`creatureLaw: the creature class's rotation dial is ${JSON.stringify(v)}, not its kinds in turn`);
+  return list;
+}
+
+/** The kinds crossing N brings and how many of each: every kind at its count, or,
+ *  under a rotation, only the kind whose turn N is (counted from the launch dial). */
+export function countsFor(crossing, dials, fromCrossing) {
+  const counts = dials?.counts ?? {};
+  const rotation = dials?.rotation ?? null;
+  if (!rotation) return counts;
+  const from = Number(fromCrossing), len = rotation.length;
+  const kind = rotation[((((crossing | 0) - from) % len) + len) % len];
+  return { [kind]: counts[kind] ?? 0 };
 }
 
 /** A plain object: {…} or Object.create(null); never an array, a date or a boxed value. */
@@ -210,7 +269,7 @@ const TRIES = 64;
  *
  *   mists        the skeleton's `mists` block at the window's opening sha
  *   marks        the standing marks at that sha (the town's keep-out is read from them)
- *   dials        { counts, band_from_m, band_to_m, keep_m, apart_m, span_h }: creatureLaw's
+ *   dials        { counts, rotation?, band_from_m, band_to_m, keep_m, apart_m, span_h }: creatureLaw's
  *   fromCrossing the creature class's launch dial; null is off (W6)
  *
  * Empty when the dial is off for N or the Mists are out of season (mistsAt null).
@@ -233,8 +292,9 @@ export function scheduleFor(crossing, secret, { mists, marks = [], dials = null,
   // another kind's count never moves it; only "apart" couples spawns, in a fixed
   // order (kinds by name, then index).
   const placed = [];
-  for (const kind of Object.keys(dials.counts ?? {}).sort()) {
-    const n = Math.max(0, Math.floor(Number(dials.counts[kind]) || 0));
+  const counts = countsFor(N, dials, fromCrossing);
+  for (const kind of Object.keys(counts).sort()) {
+    const n = Math.max(0, Math.floor(Number(counts[kind]) || 0));
     for (let i = 1; i <= n; i += 1) {
       const id = creatureId(kind, N, i);
       const minute = Math.floor(draw(secret, `${id}|minute`) * minutes);
