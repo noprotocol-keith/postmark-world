@@ -4426,7 +4426,7 @@ export function liveCreaturesFrom(answer) {
     const x = Number(c?.at?.x ?? c?.x), y = Number(c?.at?.y ?? c?.y);
     if (!isCreatureId(c?.id) || ![x, y].every(Number.isFinite)) return [];
     return [{ id: String(c.id), kind: String(c.kind ?? "creature"), name: String(c.name ?? c.kind ?? "a creature"), x, y,
-      fades_in: c.fades_in ? String(c.fades_in) : null }];
+      fades_in: c.fades_in ? String(c.fades_in) : null, ...(Number(c?.ring_m) > 0 ? { ring_m: Number(c.ring_m) } : {}) }];
   });
 }
 
@@ -4540,6 +4540,20 @@ export function creatureGlyphSVG({ creature, at, silhouette = null, title = null
     + art
     + `<polygon points="${points}" class="ov-creature-ring"/>`
     + `</g></g></g>`;
+}
+
+/** A creature's AWARENESS RING (WLD-82, RULED by Darko 2026-10-19 17:09: "we can
+ *  use the same red color to denote kind of the awareness radius of the creature
+ *  … a similar like faint dotted line with expired conversations in the way those
+ *  are represented on the map"). A circle at its kind's ring_m, the ground it
+ *  hears in (the office's find row carries it, from the kind's own law), drawn in
+ *  painting pixels so it holds its true size as the map zooms. It wears the
+ *  map's one faint-ring style (.wv-faint-ring, the expired conversation's line)
+ *  in the creature's red. No ring_m, no ring. Pure. */
+export function creatureRingSVG({ at, ringM, mPerPx } = {}) {
+  const x = Number(at?.x), y = Number(at?.y), r = Number(ringM) / Number(mPerPx);
+  if (![x, y].every(Number.isFinite) || !(r > 0) || !Number.isFinite(r)) return "";
+  return `<circle cx="${+x.toFixed(1)}" cy="${+y.toFixed(1)}" r="${+r.toFixed(2)}" class="wv-faint-ring ov-creature-aware"/>`;
 }
 
 // ── A MARK IS HIT BY WHAT WAS DRAWN FOR IT (Keemin, 2026-09-11: "make parcels
@@ -6521,8 +6535,10 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
    after a day. The aboard variant is the deck drawn as a room rather than the
    length of the water it crossed. A wash carries no text of its own: hovering
    raises the SAME name-box a mark raises, in this same pale voice. */
-.wv-convo { fill:rgba(183,198,212,.06); stroke:#7f93a6; stroke-width:1.5;
-  stroke-dasharray:3 4; vector-effect:non-scaling-stroke; }
+/* THE FAINT RING, one style (WLD-82): the expired conversation's dotted line,
+   worn by a creature's awareness ring too; each says its own colour */
+.wv-faint-ring, .wv-convo { stroke-width:1.5; stroke-dasharray:3 4; vector-effect:non-scaling-stroke; }
+.wv-convo { fill:rgba(183,198,212,.06); stroke:#7f93a6; }
 .wv-convo.is-live { fill:rgba(183,198,212,.12); stroke:#b7c6d4; stroke-width:2;
   stroke-dasharray:none; animation:wv-convo-breathe 3.2s ease-in-out infinite; }
 .wv-convo.is-aboard { stroke-dasharray:6 5; }
@@ -6629,6 +6645,7 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
 /* THE CREATURE TOKEN (play fix 40; a diamond since WLD-82): pastel red where a
    portrait sits, the rim in a deeper red of the same hue, and no legs */
 .ov-creature-disc { fill:#f4b4ad; pointer-events:none; }
+.ov-creature-aware { fill:rgba(216,112,106,.06); stroke:#d8706a; pointer-events:none; }   /* its awareness ring, in the faint ring's line (WLD-82) */
 .ov-creature-ring { fill:none; stroke:#d8706a; stroke-width:2; stroke-linejoin:round; vector-effect:non-scaling-stroke; pointer-events:none; }
 .wv-hl-creature { fill:none; stroke:#d8c6cf; stroke-width:2; vector-effect:non-scaling-stroke; }
 .wv-bubble.is-nameplate.is-creature { --wv-mark-accent:#d8706a; }   /* red means a creature (play fix 43) */
@@ -14439,16 +14456,18 @@ export function mountViewer(appEl) {
     // doing any kind of no clumping rule … The tokens should stay in their
     // correct geometric positions"). Tokens that share a spot are told apart by
     // the chooser a click on them opens, never by moving them.
-    let out = "";
+    let out = "", rings = "";
     for (const c of liveCreatures.values()) {
       if (sceneRoomId && !(box && pointInRect(c.x, c.y, box))) continue;
       if (m && mistsHere({ x: c.x, y: c.y }, m).inWall) continue;
+      // its awareness ring (WLD-82), under every token
+      rings += creatureRingSVG({ at: px({ x: c.x, y: c.y }), ringM: c.ring_m, mPerPx: mapCtx?.mPerPx });
       // far: the plain token, as a resident is the blank walker there (fix 49)
       const plain = tier === "far";
       out += creatureGlyphSVG({ creature: c, at: px({ x: c.x, y: c.y }), silhouette: plain ? null : creatureSilhouette(c.kind),
         title: state.paintingOnly ? null : c.name, plain, jiggling: (creatureJiggleUntil.get(c.id) ?? 0) > Date.now() });
     }
-    return out;
+    return rings + out;
   }
   function creatureNameplateHTML(id) {
     const c = liveCreatures.get(id);
