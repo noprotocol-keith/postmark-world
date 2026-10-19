@@ -441,9 +441,9 @@ export function enter(state, targetId, world, {
  *     alone, as the Post Office's stops always did. Every row carries the
  *     portal's word; nothing above a dungeon is written.
  *
- *  `landing` is where he now stands (portals.mjs § landingOf, clamped into
- *  `into`); the office's pen writes it as the walk ledger's zero-length stop,
- *  the same write the Post Office's deposit makes. `portals` are the portals of
+ *  `landing` is where he now stands (portals.mjs § landingOf: inside the room
+ *  entered, a step in from the door); the office's land pen writes it as a
+ *  landing (the-town/land), the same write the Post Office's deposit makes. `portals` are the portals of
  *  the room he lands in: the next step is his to pick. */
 function enterThroughPortal(state, portal, world, { held, handle, at, iso, accepted, into: pick }) {
   const marks = world.marks ?? [];
@@ -482,12 +482,13 @@ function enterThroughPortal(state, portal, world, { held, handle, at, iso, accep
   const intoMark = byId.get(chosen);
   if (!intoMark) return broken("into", chosen, `into: ${JSON.stringify(chosen)} names no mark, so this portal leads nowhere`);
   if (!intoMark.at) return broken("into", chosen, `into: ${JSON.stringify(chosen)} names a mark with no place in the world`);
-  const landing = landingOf(law, intoMark, byId);
+  // where it sets you down is measured in the room it enters (row 68 (a))
+  const target = passageTargetOf(portal, intoMark, marks);
+  const landing = landingOf(law, intoMark, byId, { room: target ?? intoMark, portal });
   if (!landing.ok) return broken(landing.field, landing.value, landing.because);
 
   if (verdict.effect === "terms") return { ...base, crossings: [verdict], stranded: portal.id, awaiting: verdict };
 
-  const target = passageTargetOf(portal, intoMark, marks);
   const chain = target
     ? [...ancestorsByGeometry(target, world, { kinds: THRESHOLD_KINDS }).slice().reverse().map((m) => m.id), target.id]
     : [];
