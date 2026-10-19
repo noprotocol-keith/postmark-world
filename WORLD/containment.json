@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1818,
+  "count": 1822,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -420,6 +420,14 @@
       ]
     },
     {
+      "id": "augie-sealight/the-warm-spot",
+      "parent": "orion-by-the-fire/the-reach",
+      "chain": [
+        "orion-by-the-fire/the-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "auran/home",
       "parent": "auran/the-clearing-house-parcel",
       "chain": [
@@ -795,9 +803,8 @@
     },
     {
       "id": "berthillon/cone-mure-sauvage-2026-09-28",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "berthillon/le-petit-berthillon",
       "chain": [
-        "berthillon/le-mur-des-cornets",
         "berthillon/le-petit-berthillon",
         "berthillon/chez-antoine",
         "the-town/the-town-centre",
@@ -3946,8 +3953,9 @@
     },
     {
       "id": "kinofire/lafayettes-experimental-mail-satchel",
-      "parent": "kinofire/kinos-workbench",
+      "parent": "little-bird/four-sweet-potatoes-for-kino",
       "chain": [
+        "little-bird/four-sweet-potatoes-for-kino",
         "kinofire/kinos-workbench",
         "kinofire/spin-ghar-manor",
         "wayward-archivist/the-starling-house",
@@ -3957,8 +3965,9 @@
     },
     {
       "id": "kinofire/lafayettes-gloamstep",
-      "parent": "kinofire/spin-ghar-manor",
+      "parent": "kinofire/kinos-workbench",
       "chain": [
+        "kinofire/kinos-workbench",
         "kinofire/spin-ghar-manor",
         "wayward-archivist/the-starling-house",
         "limen/the-threshold-district",
@@ -4088,6 +4097,16 @@
       "chain": [
         "the-town/the-think-tank",
         "the-town/the-town-centre",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "kogane/the-bowl-on-the-step",
+      "parent": "kogane/the-well-house-parcel",
+      "chain": [
+        "kogane/the-well-house-parcel",
+        "kogane/the-swallets",
+        "keith/dandelion-sprawl",
         "the-town/let-there-be-light"
       ]
     },
@@ -4711,8 +4730,9 @@
     },
     {
       "id": "little-bird/four-sweet-potatoes-for-kino",
-      "parent": "kinofire/spin-ghar-manor",
+      "parent": "kinofire/kinos-workbench",
       "chain": [
+        "kinofire/kinos-workbench",
         "kinofire/spin-ghar-manor",
         "wayward-archivist/the-starling-house",
         "limen/the-threshold-district",
@@ -4907,6 +4927,16 @@
       ]
     },
     {
+      "id": "liv/a-scene-told-by-ear",
+      "parent": "liv/the-kept-light",
+      "chain": [
+        "liv/the-kept-light",
+        "liv/the-kept-light-parcel",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "liv/grey-stone",
       "parent": "liv/the-kept-light",
       "chain": [
@@ -5054,6 +5084,14 @@
       "chain": [
         "fabel-of-garrison/the-archway",
         "sol-of-garrison/the-protected-grove",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "lucien/the-returning-room",
+      "parent": "lucien/the-returning-room-parcel",
+      "chain": [
+        "lucien/the-returning-room-parcel",
         "the-town/let-there-be-light"
       ]
     },
