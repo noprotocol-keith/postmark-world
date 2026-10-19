@@ -268,12 +268,15 @@ test("[pin] THE TIER IS THE CAMERA'S ON EVERY PATH — no resident-path null, no
   // ⚑ THE FLIP: restore `onResidentPath() ? null :` in drawTier → the first and last lines red.
 });
 
-test("[pin] THE PLACEHOLDER BLOCK IS HALF PRESENT — the ground reads through it (founder, 2026-09-11, revising 08-20's 'no transparency games')", () => {
-  assert.match(SOURCE, /\.wv-ph-extent \{ [^}]*opacity:\.5;/, "50%, on the element, so the edge fades with the fill");
+test("[pin] AN IMAGE-LESS MARK IS ITS OUTLINE; ONLY A THING KEEPS THE HALF-PRESENT BLOCK (Darko, playground 2026-10-15, play fix 14, revising the founder's 2026-09-11 half block)", () => {
+  assert.match(SOURCE, /\.wv-ph-extent \{ [^}]*fill-opacity:0;/, "by default the block has no fill: the ground and any art read through it");
+  assert.match(SOURCE, /\.wv-ph-extent\.is-thing \{ [^}]*opacity:\.5; fill-opacity:1;/, "a thing keeps the 50% block, on the element, so the edge fades with the fill");
   const svg = placeholderExtentSVG({ id: "a/b", kind: "sited", at: { x: 0, y: 0 }, extent: { w: 4, h: 4 } }, (p) => p);
-  assert.match(svg, /class="wv-ph-extent"/, "the block is still the block");
-  assert.doesNotMatch(svg, /opacity/, "the half is the stylesheet's, not the markup's — one place");
-  // ⚑ THE FLIP: delete `opacity:.5;` from the .wv-ph-extent rule → reds.
+  assert.match(svg, /class="wv-ph-extent"/, "a place is the plain block");
+  assert.doesNotMatch(svg, /opacity/, "the opacity is the stylesheet's, not the markup's — one place");
+  const thing = placeholderExtentSVG({ id: "a/c", kind: "sited", class: "thing", at: { x: 0, y: 0 }, extent: { w: 4, h: 4 } }, (p) => p);
+  assert.match(thing, /class="wv-ph-extent is-thing"/, "a thing wears is-thing");
+  // ⚑ THE FLIP: drop `fill-opacity:0;` from the .wv-ph-extent rule, or the is-thing class → reds.
 });
 
 test("THE MID FURNITURE — a mark's shape without its photograph", () => {
@@ -358,7 +361,7 @@ test("townHouseMarks on the town's own record: every parcel present, and only de
   const out = townHouseMarks(TOWN.marks);
   const parcels = TOWN.marks.filter((m) => m.kind === "parcel").length;
   assert.equal(out.filter((m) => m.kind === "parcel").length, parcels, "every parcel is handed over");
-  const words = TOWN.marks.filter((m) => m.kind === "predicated" && m.slot === "home").length;
+  const words = TOWN.marks.filter((m) => (m.kind === "predicated" || m.kind === "predicate") && m.slot === "home").length;
   assert.ok(out.length <= parcels + words, "at most one house per resident's home word rides with the parcels");
   // A declared house is SITED. Its tier is not asserted: a home word does not
   // read standing, and on the committed record vermillion's house (named by his
