@@ -41,11 +41,17 @@ test("freshLanding answers a landing this page has not drawn yet, once", () => {
 });
 
 test("leaving a dungeon asks first: the office's own words, go and stay; nothing else is a confirmation", () => {
-  const ask = { awaiting: { effect: "confirm", because: "exiting darko/spire-red-stair-hall leaves the whole of darko/the-starforge-spire, a dungeon, and sets you down outside, at darko/spire-gilded-doors (3772.5, -5508). Call again with confirm: true to go; nothing was recorded." },
+  // the office's words since WLD-5 A (Darko 2026-10-19 09:21): `because` is his sentence, `how` is for agents
+  const ask = { awaiting: { effect: "confirm",
+    because: "Leave the Starforge Spire from here? You can't come back in until the next settlement (18:00Z). Walking out through a door doesn't count. You'll be set down outside, at Spire Gilded Doors.",
+    how: "exiting darko/spire-red-stair-hall leaves the whole of darko/the-starforge-spire. Call again with confirm: true to go; nothing was recorded." },
     dungeon: "darko/the-starforge-spire", target: "darko/spire-red-stair-hall" };
   const html = exitConfirmSheetHTML(ask, "darko/spire-red-stair-hall");
-  assert.match(html, /leave the whole darko\/the-starforge-spire\?/);
-  assert.match(html, /sets you down outside, at darko\/spire-gilded-doors \(3772\.5, -5508\)/);
+  // the head is the dungeon's name (the words below it ask the question), and the agent's `how` is not printed
+  assert.match(html, /<div class="wv-cross-head">The Starforge Spire<\/div>/);
+  assert.match(html, /Leave the Starforge Spire from here\? You can.{1,6}t come back in until the next settlement \(18:00Z\)\./);
+  assert.doesNotMatch(html, /confirm: true/);
+  assert.match(exitConfirmSheetHTML(ask, "x", { nameOf: () => "the Spire" }), /<div class="wv-cross-head">the Spire<\/div>/);
   assert.match(html, /data-exit-confirm="darko\/spire-red-stair-hall">go</);
   assert.match(html, /class="ctl wv-exit-stay">stay</);
   assert.equal(exitConfirmSheetHTML({ within: [] }, "x"), null, "a done exit is not asking");
@@ -59,7 +65,8 @@ test("the wiring: the passage, the exit and the walkers poll each draw the landi
   assert.ok(cross.indexOf("placeLanded(") < cross.indexOf("await loadEnterExitLedger();"), "the body is set down before the room is read and drawn");
   const out = fnBody("stepOutside");
   assert.match(out, /apexAct\("exit", \{ mark: markId, \.\.\.\(confirm \? \{ confirm: true \} : \{\}\) \}\)/, "go sends the word");
-  assert.ok(out.indexOf("exitConfirmSheetHTML(answer, markId)") < out.indexOf("await loadEnterExitLedger();"), "a confirmation is shown, and nothing re-read, before the word");
+  assert.ok(out.includes("exitConfirmSheetHTML(answer, markId, { nameOf: (id) => markName(byId.get(id) ?? { id }).name })"), "the head is named by the page's own namer");
+  assert.ok(out.indexOf("exitConfirmSheetHTML(answer, markId") < out.indexOf("await loadEnterExitLedger();"), "a confirmation is shown, and nothing re-read, before the word");
   assert.match(out, /if \(answer\.set_down\?\.recorded\) \{ walkState\.walkers = placeLanded\(/);
   assert.match(SOURCE, /const exitGo = e\.target\.closest\("\[data-exit-confirm\]"\);\n    if \(exitGo\) \{ e\.stopPropagation\(\); stepOutside\(exitGo\.dataset\.exitConfirm, exitGo, \{ confirm: true \}\); return; \}/);
   const poll = fnBody("pollWalkers");

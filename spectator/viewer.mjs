@@ -7014,11 +7014,13 @@ export function freshLanding(bodies = [], handle = null, seenIso = null) {
 }
 
 /** LEAVING A DUNGEON ASKS FIRST (row 72): the office's own words, then go or stay. Null
- *  for any answer that is not asking. Pure. */
-export function exitConfirmSheetHTML(answer = {}, markId = "") {
+ *  for any answer that is not asking. Pure. The head is the dungeon's name, since the
+ *  words below it already ask the question (WLD-5 A, Darko 2026-10-19 09:21: "Leave the
+ *  Spire from here? …"); `nameOf` is the page's own namer. */
+export function exitConfirmSheetHTML(answer = {}, markId = "", { nameOf = (id) => deslugMarkId(id) } = {}) {
   if (answer?.awaiting?.effect !== "confirm") return null;
   return `<div class="wv-cross-sheet is-terms wv-exit-confirm-sheet" data-for="${esc(markId)}">`
-    + `<div class="wv-cross-head">leave the whole ${esc(String(answer.dungeon ?? "dungeon"))}?</div>`
+    + `<div class="wv-cross-head">${esc(String(answer.dungeon ? nameOf(answer.dungeon) : "leaving"))}</div>`
     + `<p class="wv-cross-body">${esc(String(answer.awaiting.because ?? ""))}</p>`
     + `<div class="wv-cross-row">`
     + `<button type="button" class="ctl wv-exit-confirm" data-exit-confirm="${esc(markId)}">go</button>`
@@ -8333,7 +8335,7 @@ export function mountViewer(appEl) {
       if (answer.error === "bounce") throw new Error(answer.defect ?? answer.error);
       // LEAVING A DUNGEON ASKS FIRST (WLD-5 21:13; row 72): the first answer writes
       // nothing and says what will happen. It is shown, and "go" sends the word.
-      const ask = exitConfirmSheetHTML(answer, markId);
+      const ask = exitConfirmSheetHTML(answer, markId, { nameOf: (id) => markName(byId.get(id) ?? { id }).name });
       if (ask) {
         const row = button?.closest(".wv-int-exit");
         row?.querySelector(".wv-exit-confirm-sheet")?.remove();
