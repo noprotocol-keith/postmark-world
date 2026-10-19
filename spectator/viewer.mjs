@@ -4487,7 +4487,8 @@ export function creatureColumnFacts(row = null, inv = null, { timeZone = undefin
   return { facts, lately, bars };
 }
 
-/** One live creature on the painting, as a TOKEN (play fix 40, Darko 20:09:
+/** One live creature on the painting, as a TOKEN (its SHAPE is superseded by
+ *  WLD-82 below: a diamond, no legs; the rest stands) (play fix 40, Darko 20:09:
  *  "like D&D, like Roll20 virtual tabletop tokens … they have to be in circles,
  *  just like … the residents"; 20:16: "the same body"). The walker's own body —
  *  `walkerFrameSVG`'s round frame at its near size, its two stubby legs from the
@@ -4501,32 +4502,43 @@ export function creatureColumnFacts(row = null, inv = null, { timeZone = undefin
  *  replaces any resident profile pictures at far zoom"). `plain` is the far
  *  tier's creature, exactly as the far tier's resident is the blank walker: the
  *  walker's far size and legs, filled pastel red, and no kind's silhouette,
- *  which shows only where a resident's picture shows. Pure. */
-export const CREATURE_GLYPH = Object.freeze({ size: WALKER_FRAME.near, leg: WALKER_FRAME.legNear, hit: 17, art: 0.86,
-  plainSize: WALKER_FRAME.far, plainLeg: WALKER_FRAME.legFar, plainHit: 12 });
+ *  which shows only where a resident's picture shows. Pure.
+ *
+ *  A CREATURE IS A DIAMOND (WLD-82, RULED by Darko 2026-10-19 17:07–17:09):
+ *  "creatures shouldn't have the same shape of icon as residents … the exact
+ *  same circle with the two little legs"; "replace the zoomed out silhouette
+ *  with the diamond. And as you zoom in, just keep that same diamond"; "I do
+ *  want the token to remain a token … and just have artwork inside". So the
+ *  disc and its ring are a diamond at every zoom, with no legs, the kind's art
+ *  clipped inside it where the round token carried it, and the colours as they
+ *  were ("the color choice is intentional"). The walker's sizes still set its
+ *  scale: the diamond holds the same area as the walker's circle at each tier
+ *  (half-diagonal r·√(π/2)), so neither body reads as the bigger one. */
+export const CREATURE_GLYPH = Object.freeze({ size: WALKER_FRAME.near, hit: 17, art: 0.86,
+  plainSize: WALKER_FRAME.far, plainHit: 12 });
+/** The creature's diamond at a token size: its half-diagonal and its points, centred on 0 0. Pure. */
+export function creatureDiamond(size) {
+  const h = (size / 2) * Math.sqrt(Math.PI / 2), n = (v) => +v.toFixed(2);
+  return { h: n(h), points: `0,${n(-h)} ${n(h)},0 0,${n(h)} ${n(-h)},0` };
+}
 export function creatureGlyphSVG({ creature, at, silhouette = null, title = null, plain = false, jiggling = false } = {}) {
   const x = Number(at?.x), y = Number(at?.y);
   if (!creature?.id || ![x, y].every(Number.isFinite)) return "";
   const size = plain ? CREATURE_GLYPH.plainSize : CREATURE_GLYPH.size;
-  const leg = plain ? CREATURE_GLYPH.plainLeg : CREATURE_GLYPH.leg;
-  const r = size / 2;
+  const { points } = creatureDiamond(size);
   if (plain) silhouette = null;
-  // the legs start where they meet the rim, exactly as the walker's do
-  const rim = Math.sqrt(r * r - (size * 0.22) ** 2);
   const safe = String(creature.id).toLowerCase().replace(/[^a-z0-9-]/g, "");
   const k = (size * CREATURE_GLYPH.art) / 100;
   const art = silhouette?.d
-    ? `<clipPath id="wv-ct-${safe}"><circle cx="0" cy="0" r="${r}"/></clipPath>`
+    ? `<clipPath id="wv-ct-${safe}"><polygon points="${points}"/></clipPath>`
       + `<g clip-path="url(#wv-ct-${safe})"><g transform="scale(${k.toFixed(4)}) translate(-50 -52)"><path d="${silhouette.d}" class="ov-creature-art"/></g></g>`
     : "";
   return `<g transform="translate(${x} ${y})"><g class="ov-s">`
     + `<g class="ov-creature${plain ? " is-plain" : ""}${jiggling ? " is-jiggling" : ""} ov-creature-${esc(String(creature.kind).toLowerCase().replace(/[^a-z0-9-]/g, ""))}" data-creature="${esc(creature.id)}">`
     + `<circle r="${plain ? CREATURE_GLYPH.plainHit : CREATURE_GLYPH.hit}" class="ov-creature-hit">${title ? `<title>${esc(title)}</title>` : ""}</circle>`
-    + `<circle cx="0" cy="0" r="${r}" class="ov-creature-disc"/>`
+    + `<polygon points="${points}" class="ov-creature-disc"/>`
     + art
-    + `<circle cx="0" cy="0" r="${r}" class="ov-creature-ring"/>`
-    + `<line x1="${-size * 0.22}" y1="${rim}" x2="${-size * 0.3}" y2="${rim + leg}" class="ov-creature-leg"/>`
-    + `<line x1="${size * 0.22}" y1="${rim}" x2="${size * 0.3}" y2="${rim + leg}" class="ov-creature-leg"/>`
+    + `<polygon points="${points}" class="ov-creature-ring"/>`
     + `</g></g></g>`;
 }
 
@@ -6614,11 +6626,10 @@ html.wv-lite .wv-mc-flit, html.wv-lite .wv-mc-lift, html.wv-lite .wv-mc-eyes { a
    feet at street zoom; their answer to an act in a note like the walk's */
 .ov-creature-hit { fill:transparent; pointer-events:none; }   /* the map hit-tests the point; nothing on the stage takes the pointer */
 .ov-creature-art { fill:#4a2326; pointer-events:none; }
-/* THE CREATURE TOKEN (play fix 40): the walker's body in pastel red — the disc
-   where a portrait sits, the ring and the legs in a deeper red of the same hue */
+/* THE CREATURE TOKEN (play fix 40; a diamond since WLD-82): pastel red where a
+   portrait sits, the rim in a deeper red of the same hue, and no legs */
 .ov-creature-disc { fill:#f4b4ad; pointer-events:none; }
 .ov-creature-ring { fill:none; stroke:#d8706a; stroke-width:2; stroke-linejoin:round; vector-effect:non-scaling-stroke; pointer-events:none; }
-.ov-creature-leg { stroke:#d8706a; stroke-width:2; stroke-linecap:round; vector-effect:non-scaling-stroke; pointer-events:none; }
 .wv-hl-creature { fill:none; stroke:#d8c6cf; stroke-width:2; vector-effect:non-scaling-stroke; }
 .wv-bubble.is-nameplate.is-creature { --wv-mark-accent:#d8706a; }   /* red means a creature (play fix 43) */
 .wv-choose-row.is-convo { border-left:3px solid #7f93a6; display:flex; align-items:baseline; gap:7px; flex-wrap:wrap; font-size:.78rem; }

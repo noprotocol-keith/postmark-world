@@ -32,10 +32,12 @@ const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").
 // THE TOKEN (play fix 43, Darko 20:16): a resident is drawn on the map as a round
 // frame on two stubby legs, so that body IS the icon for a person — "replace our
 // just like head and shoulders with the circle with two little stubby legs coming
-// out the bottom". The same body stands for a creature, in its own red. Filled,
-// so the mask and the map draw it alike.
+// out the bottom". A creature is a diamond, as its token on the map is (WLD-82,
+// Darko 2026-10-19: "creatures shouldn't have the same shape of icon as
+// residents"), in its own red. Filled, so the mask and the map draw it alike.
 const TOKEN_D = "M 3.4 6.6 a 4.6 4.6 0 1 0 9.2 0 a 4.6 4.6 0 1 0 -9.2 0 Z "
   + "M 5.9 10.4 L 7.0 10.7 L 6.3 14.2 L 5.2 13.9 Z M 10.1 10.4 L 9.0 10.7 L 9.7 14.2 L 10.8 13.9 Z";
+const CREATURE_D = "M 8 1.6 L 14.4 8 L 8 14.4 L 1.6 8 Z";
 const circle = (x, y, r) => `M ${x - r} ${y} a ${r} ${r} 0 1 0 ${2 * r} 0 a ${r} ${r} 0 1 0 ${-2 * r} 0`;
 
 // The vocabulary. `what` icons say what a mark is (one per mark at most);
@@ -60,7 +62,7 @@ export const MARK_ICONS = Object.freeze({
   vehicle: { kind: "what", label: "vehicle", meaning: "A vehicle: it moves, and you can ride it.",
     d: "M 2 9.6 H 14 L 12 13 H 4 Z M 8 9.6 V 2.5 L 12.2 8 H 8" },
   creature: { kind: "what", label: "creature", meaning: "A creature: something alive that answers what you do near it.", fill: true,
-    d: TOKEN_D },
+    d: CREATURE_D },
   yours: { kind: "state", label: "yours", meaning: "Yours: your household's mark.",
     d: "M 4 14 V 2.5 M 4 3 H 12.5 L 10.4 5.6 L 12.5 8.2 H 4" },
   locked: { kind: "state", label: "locked", meaning: "Locked: it refuses entry.",

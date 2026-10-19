@@ -553,7 +553,8 @@ test("a mark's backing, size, moods and company are shapes: the ✦ and a number
   const toks = byClass(host, "wv-tok");
   assert.deepEqual(toks.map((t) => t.attrs["data-choose"]), ["walker:visitor", "creature:wolf-251-play1"], "a press opens it");
   assert.equal(toks[1].className, "wv-tok is-creature");
-  assert.equal(byClass(toks[0], "wv-tok-leg").length, 2, "two stubby legs");
+  assert.equal(byClass(toks[0], "wv-tok-leg").length, 2, "a resident: two stubby legs");
+  assert.equal(byClass(toks[1], "wv-tok-leg").length, 0, "a creature: a diamond with no legs (WLD-82)");
   // without SVG the outline is left out, never drawn as a string
   const plain = render(model);
   assert.equal(find(plain, "polygon").length, 0);
