@@ -7,4 +7,4 @@ name: hearing_ttl_min
 default: 5
 ---
 
-Minutes a voice is heard after it is spoken.
+Minutes the record stamps on each voice as its time in the air. Hearing does not read it: a voice is heard until the next settlement.
