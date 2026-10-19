@@ -60,9 +60,10 @@ test("a NAMED dungeon is said by its name, as given", () => {
 });
 
 test("CONFIRMED, the exit carries the lock the office writes on its act: the dungeon and the settlement", () => {
-  const x = exit("spire/hall", world(), { occupancy: occ([SPIRE, "spire/hall"]), handle: "ann", confirm: true, enteredVia: "spire/doors-outside", locksUntil: UNTIL });
+  const x = exit("spire/hall", world(), { occupancy: occ([SPIRE, "spire/hall"]), handle: "ann", confirm: true, enteredVia: "spire/doors-outside", locksUntil: UNTIL, iso: LEFT });
   assert.equal(x.rows.length, 1);
-  assert.deepEqual(x.lock, { dungeon: SPIRE, until: UNTIL });
+  assert.deepEqual(x.lock, { dungeon: SPIRE, until: UNTIL, left_at: LEFT,
+    note: "You can't come back into the Spire until the next settlement (18:00Z)." }, "and the time is said again");
 });
 
 test("LOCKED OUT, every way in is refused with a line naming when, and nothing is written: the portal", () => {

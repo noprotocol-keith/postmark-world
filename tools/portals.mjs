@@ -549,6 +549,12 @@ export function exitLockWords({ dungeon, until = null, setDownAt = null, determi
     + (setDownAt ? ` You'll be set down outside, at ${nameInSentence(setDownAt, determined)}.` : "");
 }
 
+/** The time said again once you have left (Wright, W2): "You can't come back into
+ *  the Spire until the next settlement (18:00Z)." */
+export function lockStandsWords({ dungeon, until, determined = {} }) {
+  return `You can't come back into ${nameInSentence(dungeon, determined)} until the next settlement (${hhmmZ(until) ?? until}).`;
+}
+
 /** A refused re-entry (A-G2, ruled 09:21): "You left the Spire by exit at
  *  17:12Z, so you can't come back in until the next settlement (18:00Z).
  *  Nothing was recorded." */

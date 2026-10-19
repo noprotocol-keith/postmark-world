@@ -25,7 +25,7 @@ import {
 } from "./enter-exit.mjs"; // DEMO SLICE — the enter-exit acts (step 5, jetto/enter-exit-demo)
 import {
   pointInMark, markInside, roomHolds, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence,
-  landingOf, passageTargetOf, portalsIn, portalsInto, dungeonLanding, exitLockWords, lockedPassage, hhmmZ,
+  landingOf, passageTargetOf, portalsIn, portalsInto, dungeonLanding, exitLockWords, lockStandsWords, lockedPassage, hhmmZ,
 } from "./portals.mjs"; // WLD-5: portals and the dungeon class, one home for the verbs and the lint
 // The office loads this file and enter-exit.mjs from the clone, and nothing else,
 // so the portal reads it needs ride out through here.
@@ -582,6 +582,8 @@ export function exit(targetId, world, {
       };
     return {
       ...base,
+      // the lock the office writes on this exit, and the time said again (Wright, W2)
+      lock: { ...lock, left_at: iso, ...(locksUntil ? { note: lockStandsWords({ dungeon: inside, until: locksUntil, determined }) } : {}) },
       rows: [formatEnterExit({ handle, act: "exits", mark: held[cut], at, iso })],
       within: held.slice(0, cut),
       into: cut > 0 ? held[cut - 1] : null,
