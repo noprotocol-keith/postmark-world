@@ -1732,6 +1732,14 @@ that already stood: a mark's `entry: {word, edge, consequence}` is its fixed ans
   says what it will do, and the second, with `confirm: true`, does it. Exiting from any mark inside a dungeon exits
   the whole dungeon, and you are set down outside it, at the portal you entered by (the Post Office's deposit rule,
   restated).
+- **Leaving by `exit` costs the dungeon until the next settlement** (Darko, Sitting B, 2026-10-18 20:22 and 20:27;
+  the words and readings ruled 2026-10-19 09:21). After an exit-verb leave, every way back into that dungeon (any
+  portal, or entering it from its outline) is refused until the next settlement, 06:00 or 18:00Z by the clock: a
+  settlement that runs late does not extend it, and there is no minimum. Leaving through a portal's inside face costs
+  nothing, and moving between rooms never counts. The lock is the class's, for every dungeon, and each resident's
+  own. The exit's accept step says it ("Leave the Spire from here? You can't come back in until the next settlement
+  (18:00Z). Walking out through a door doesn't count."), and a refused re-entry names when ("You left the Spire by
+  exit at 17:12Z, so you can't come back in until the next settlement (18:00Z).").
 - **A dungeon is opaque from outside.** A resident who has not entered it reads it as the dungeon mark alone, with
   nothing it contains at any depth. The block keys off having *entered* (the enter ledger), never off where you
   stand, so walking onto a room's ground from outside reveals nothing. *Superseded in part 2026-10-16 19:53, for

@@ -215,7 +215,14 @@ test("EXIT IS OFFERED, WITH A CONFIRMATION: the first call writes nothing and sa
   assert.equal(x.dungeon, SPIRE);
   assert.deepEqual(x.left, [SPIRE, "spire/vestibule"]);
   assert.deepEqual(x.landing, { x: 845, y: 1000, via: "spire/doors-outside", chosen: false });
-  assert.match(x.awaiting.because, /^exiting spire\/vestibule leaves the whole of spire\/the-spire, a dungeon, and sets you down outside, at spire\/doors-outside \(845, 1000\)\. Call again with confirm: true to go; nothing was recorded\.$/);
+  // WLD-5 A (Darko 2026-10-19 09:21): the accept step is his sentence, which the
+  // World page prints; the instruction to confirm moved to `how`, for agents.
+  // Until then `because` read "exiting spire/vestibule leaves the whole of
+  // spire/the-spire, a dungeon, and sets you down outside, at spire/doors-outside
+  // (845, 1000). Call again with confirm: true to go; nothing was recorded."
+  assert.equal(x.awaiting.because, "Leave the Spire from here? You can't come back in until the next settlement."
+    + " Walking out through a door doesn't count. You'll be set down outside, at Doors Outside.");
+  assert.equal(x.awaiting.how, "exiting spire/vestibule leaves the whole of spire/the-spire. Call again with confirm: true to go; nothing was recorded.");
 });
 
 test("CONFIRMED, EXIT LEAVES THE WHOLE DUNGEON from any room in it, and sets you down at the portal you entered by", () => {

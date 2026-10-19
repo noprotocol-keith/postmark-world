@@ -27,11 +27,11 @@ import {
 } from "./enter-exit.mjs"; // DEMO SLICE — the enter-exit acts (step 5, jetto/enter-exit-demo)
 import {
   pointInMark, markInside, roomHolds, isDungeon, dungeonIndex, dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence,
-  landingOf, passageTargetOf, portalsIn, portalsInto, dungeonLanding,
+  landingOf, passageTargetOf, portalsIn, portalsInto, dungeonLanding, exitLockWords, lockStandsWords, lockedPassage, hhmmZ,
 } from "./portals.mjs"; // WLD-5: portals and the dungeon class, one home for the verbs and the lint
 // The office loads this file and enter-exit.mjs from the clone, and nothing else,
 // so the portal reads it needs ride out through here.
-export { dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence, portalsIn, portalsInto, dungeonLanding, isDungeon, pointInMark };
+export { dungeonsOf, heldDungeon, hiddenFrom, scopeWorld, standpointSight, walkFence, portalsIn, portalsInto, dungeonLanding, isDungeon, pointInMark, hhmmZ };
 
 // ───────────────────────── orient — charter + your state ────────────────────
 // The establishing line of every telling: the let-there-be-light root (light
@@ -370,7 +370,7 @@ export function enterExitPlan(state, targetId, world, { occupancy = new Map(), h
  *  a resident should not be asked to affirm a hallway).
  */
 export function enter(state, targetId, world, {
-  occupancy = new Map(), handle = null, at = 0, iso = null, accepted = false, into = null,
+  occupancy = new Map(), handle = null, at = 0, iso = null, accepted = false, into = null, lockedOut = null,
 } = {}) {
   // ── WLD-5: what a dungeon hides, a portal, and the dungeon's one way in ──
   const marks = world.marks ?? [];
@@ -383,7 +383,7 @@ export function enter(state, targetId, world, {
   // mark carrying one is passed through it, the dungeon itself included. The
   // Starforge Spire carries `into` its vestibule, so entering it from anywhere
   // in its outline sets you down inside the Gilded Doors; a list asks which.
-  if (named && entryLawOf(named)?.into) return enterThroughPortal(state, named, world, { held, handle, at, iso, accepted, into });
+  if (named && entryLawOf(named)?.into) return enterThroughPortal(state, named, world, { held, handle, at, iso, accepted, into, lockedOut });
   // Inside a dungeon the only enter is through a portal (G3: the cure for the
   // Swiss-cheese exit must not leak on the way in), and a dungeon that names no
   // `into` of its own is entered by the portals that lead into it.
@@ -465,10 +465,18 @@ export function enter(state, targetId, world, {
  *  `landing` is where he now stands (portals.mjs § landingOf: inside the room
  *  entered, a step in from the door); the office's land pen writes it as a
  *  landing (the-town/land), the same write the Post Office's deposit makes. `portals` are the portals of
- *  the room he lands in: the next step is his to pick. */
-function enterThroughPortal(state, portal, world, { held, handle, at, iso, accepted, into: pick }) {
+ *  the room he lands in: the next step is his to pick.
+ *
+ *  0. FIRST, THE EXIT LOCK (WLD-5, Darko 2026-10-18 20:27): a passage into a
+ *     dungeon this walker left by `exit` before the settlement now in force
+ *     (`lockedOut`, the office's record) is refused before any word, pick or
+ *     terms, and nothing is written. Every way into a dungeon passes here: its
+ *     portals, and the dungeon itself, which carries `into`. */
+function enterThroughPortal(state, portal, world, { held, handle, at, iso, accepted, into: pick, lockedOut = null }) {
   const marks = world.marks ?? [];
   const byId = new Map(marks.map((m) => [m.id, m]));
+  const lock = lockedPassage(portal, { pick: pick == null ? null : String(pick), marks, held, lockedOut, determined: world.determined ?? {} });
+  if (lock) return { error: lock.words, refused: "dungeon-locked", dungeon: lock.dungeon, locked_until: lock.until, left_at: lock.left_at ?? null };
   const law = entryLawOf(portal);
   const said = accepted === true ? null : new Set(Array.isArray(accepted) ? accepted : accepted ? [accepted] : []);
   const standing = portal.at ? pointWithinMark(state, portal) : false;
@@ -549,9 +557,15 @@ function enterThroughPortal(state, portal, world, { held, handle, at, iso, accep
  *  truncates everything inside), and you are set down outside, at the portal
  *  you entered by (`enteredVia`, the enter row's `via`, read by the office;
  *  portals.mjs § dungeonLanding). The Post Office's deposit rule, restated.
- *  `state` is only the fallback's: with no `via` on record, the nearest way in. */
+ *  `state` is only the fallback's: with no `via` on record, the nearest way in.
+ *
+ *  AND IT COSTS THE DUNGEON UNTIL THE NEXT SETTLEMENT (WLD-5, Darko 2026-10-18
+ *  20:27; words 2026-10-19 09:21). `locksUntil` is that settlement, read by the
+ *  office at this exit's own instant; the accept step says it in Darko's words
+ *  (`because`, which the World page prints), and the instruction to confirm is
+ *  its own field (`how`), for callers that are agents. */
 export function exit(targetId, world, {
-  occupancy = new Map(), handle = null, at = 0, iso = null, confirm = false, enteredVia = null, state = null,
+  occupancy = new Map(), handle = null, at = 0, iso = null, confirm = false, enteredVia = null, state = null, locksUntil = null,
 } = {}) {
   const held = occupancy.get(handle) ?? [];
   const i = held.indexOf(targetId);
@@ -563,17 +577,22 @@ export function exit(targetId, world, {
     const first = held.findIndex((id) => id === inside || dungeonsOf(marks.find((m) => m.id === id) ?? { id }, marks).includes(inside));
     const cut = first >= 0 ? Math.min(i, first) : i;
     const landing = dungeonLanding(inside, marks, { enteredVia, state });
-    const base = { target: held[cut], dungeon: inside, left: held.slice(cut), landing };
+    const determined = world.determined ?? {};
+    const lock = { dungeon: inside, until: locksUntil };
+    const base = { target: held[cut], dungeon: inside, left: held.slice(cut), landing, lock };
     if (confirm !== true)
       return {
         ...base, rows: [], within: [...held],
         awaiting: {
           effect: "confirm",
-          because: `exiting ${targetId} leaves the whole of ${inside}, a dungeon${landing ? `, and sets you down outside, at ${landing.via} (${landing.x}, ${landing.y})` : ""}. Call again with confirm: true to go; nothing was recorded.`,
+          because: exitLockWords({ dungeon: inside, until: locksUntil, setDownAt: landing?.via ?? null, determined }),
+          how: `exiting ${targetId} leaves the whole of ${inside}. Call again with confirm: true to go; nothing was recorded.`,
         },
       };
     return {
       ...base,
+      // the lock the office writes on this exit, and the time said again (Wright, W2)
+      lock: { ...lock, left_at: iso, ...(locksUntil ? { note: lockStandsWords({ dungeon: inside, until: locksUntil, determined }) } : {}) },
       rows: [formatEnterExit({ handle, act: "exits", mark: held[cut], at, iso })],
       within: held.slice(0, cut),
       into: cut > 0 ? held[cut - 1] : null,
