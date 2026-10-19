@@ -40,7 +40,7 @@ import { parseEnterExitLedger, occupancyAt, occupantsOf, withinOf, isMark, isEnt
 // is not allowed to hold one, and `tools/record-sources.test.mjs` reads these
 // bytes to prove it.
 import { recordSources, recordAbsenceMessage } from "../tools/record-sources.mjs";
-import { creatureSilhouette, roomInMists, bakeRoomSurround, MISTS_PAINT, bakeSheetFeather, mistsBakePlan, mistsBaker, mistsKeepRasterBuilder, mistsCoreHex, mistsKeepRects, mistsKeepAt, mistsCreatures, mistsCreatureHTML, bellFor, ringBell, mistsWallStepM } from "./mists-render.mjs";
+import { creatureSilhouette, roomInMists, bakeRoomSurround, MISTS_PAINT, bakeSheetFeather, mistsBakePlan, mistsBaker, mistsKeepRasterBuilder, mistsCoreHex, mistsKeepRects, mistsKeepAt, mistsCreatures, mistsCreatureHTML, bellFor, ringBell, mistsOpaqueFromM } from "./mists-render.mjs";
 // THE PARCEL'S COLUMN — the atlas's right-hand panel, back (Keemin 2026-09-11).
 // It owns its own markdown reader, its own builder and its own dress, and it
 // takes no viewer internals: the door read, the shelf gate and the handle rule
@@ -4175,17 +4175,18 @@ export function mistsVeilSVG(m, { originPx, mPerPx }) {
   return `<rect class="wv-mists-veil" data-src="mists:veil" aria-hidden="true" x="${n(originPx.x - r)}" y="${n(originPx.y - r)}"`
     + ` width="${n(2 * r)}" height="${n(2 * r)}" fill="#060d18" fill-opacity="${(0.6 * m.veil).toFixed(3)}" pointer-events="none"/>`;
 }
-export function mistsWallSVG(m, { originPx, mPerPx, id = "wv-mists", painted = false, stepped = false }) {
+export function mistsWallSVG(m, { originPx, mPerPx, id = "wv-mists", painted = false, ragged = false }) {
   if (!m) return "";
   // PAINTED (POS-553): the wall keeps its exact geometry and its pointer, in the
   // paint's core colour; the fringe and the clearings' rings are the paint's
   // (mists-render.mjs), so the vector strips stand down.
   //
-  // STEPPED (WLD-81, RULED by Darko 2026-10-19 18:18): once the paint is on the
-  // page, the opaque wall steps back to where the paint is opaque whatever its
-  // noise (mistsWallStepM), so the paint's ragged face, which stands back into
-  // the Mist, shows over the ground it floors at 0.9. The pointer is still taken
-  // from the true face: the wall's own path stays where it was, unpainted.
+  // RAGGED (WLD-81, RULED by Darko 2026-10-19 18:53): once the paint is on the
+  // page its face wanders both ways about the true face, so the opaque wall
+  // follows it: along every side and round every clearing, it starts where the
+  // paint turns opaque (mistsOpaqueFromM), and a pocket the face leaves past the
+  // true face shows what the paint's own falloff paints there. The pointer is
+  // still taken from the true face: the wall's own path stays, unpainted.
   const MISTS_INK = painted ? mistsCoreHex(m) : MISTS_INK_FLAT;
   const px = (p) => ({ x: originPx.x + p.x / mPerPx, y: originPx.y + p.y / mPerPx });
   const n = (v) => v.toFixed(1);
@@ -4199,14 +4200,25 @@ export function mistsWallSVG(m, { originPx, mPerPx, id = "wv-mists", painted = f
     + (m.clearings ?? []).map((k) => { const c = px(k), kr = k.r / mPerPx;
       return ` M ${n(c.x - kr)} ${n(c.y)} a ${n(kr)} ${n(kr)} 0 1 0 ${n(2 * kr)} 0 a ${n(kr)} ${n(kr)} 0 1 0 ${n(-2 * kr)} 0 Z`; }).join("")
     + `"/>`;
-  if (painted && stepped) {
-    const st = mistsWallStepM(m) / mPerPx;
-    const back = `<path class="wv-mists-wall-back" data-src="mists:wall-back" fill="${MISTS_INK}" fill-rule="evenodd" pointer-events="none"`
-      + ` d="M ${n(originPx.x - r)} ${n(originPx.y - r)} H ${n(originPx.x + r)} V ${n(originPx.y + r)} H ${n(originPx.x - r)} Z`
-      + ` M ${n(a.x - st)} ${n(a.y - st)} H ${n(b.x + st)} V ${n(b.y + st)} H ${n(a.x - st)} Z`
-      + (m.clearings ?? []).map((k) => { const c = px(k), kr = k.r / mPerPx + st;
-        return ` M ${n(c.x - kr)} ${n(c.y)} a ${n(kr)} ${n(kr)} 0 1 0 ${n(2 * kr)} 0 a ${n(kr)} ${n(kr)} 0 1 0 ${n(-2 * kr)} 0 Z`; }).join("")
-      + `"/>`;
+  if (painted && ragged) {
+    const STEP = 60, pt = (q) => { const v = px(q); return `${n(v.x)} ${n(v.y)}`; };
+    const out = (at, dir) => { const d = mistsOpaqueFromM(m, at, dir, { stepM: 15 }); return { x: at.x + dir.x * d, y: at.y + dir.y * d }; };
+    const c = m.clear, ring = [];
+    const side = (x0, y0, x1, y1, dir) => { const len = Math.hypot(x1 - x0, y1 - y0), k = Math.max(1, Math.ceil(len / STEP));
+      for (let i = 0; i < k; i++) ring.push(out({ x: x0 + (x1 - x0) * i / k, y: y0 + (y1 - y0) * i / k }, dir)); };
+    side(c.minX, c.minY, c.maxX, c.minY, { x: 0, y: -1 });
+    side(c.maxX, c.minY, c.maxX, c.maxY, { x: 1, y: 0 });
+    side(c.maxX, c.maxY, c.minX, c.maxY, { x: 0, y: 1 });
+    side(c.minX, c.maxY, c.minX, c.minY, { x: -1, y: 0 });
+    let d = `M ${n(originPx.x - r)} ${n(originPx.y - r)} H ${n(originPx.x + r)} V ${n(originPx.y + r)} H ${n(originPx.x - r)} Z`
+      + ` M ${ring.map(pt).join(" L ")} Z`;
+    for (const k of m.clearings ?? []) {
+      const steps = Math.max(24, Math.ceil(2 * Math.PI * k.r / STEP)), arc = [];
+      for (let i = 0; i < steps; i++) { const a = 2 * Math.PI * i / steps, dir = { x: Math.cos(a), y: Math.sin(a) };
+        arc.push(out({ x: k.x + dir.x * k.r, y: k.y + dir.y * k.r }, dir)); }
+      d += ` M ${arc.map(pt).join(" L ")} Z`;
+    }
+    const back = `<path class="wv-mists-wall-ragged" data-src="mists:wall-ragged" fill="${MISTS_INK}" fill-rule="evenodd" pointer-events="none" d="${d}"/>`;
     return `<g class="wv-mists" aria-hidden="true">${back}${wall.replace(` fill="${MISTS_INK}"`, ` fill="${MISTS_INK}" fill-opacity="0"`)}</g>`;
   }
   // a clearing's fringe: a soft ring on its own clear side, fading inward from the wall
@@ -11015,6 +11027,7 @@ export function mountViewer(appEl) {
     // page draws before the paint stands alone, with no feather and no creatures.
     // The bell still arms once a session, as the roll-in would have armed it.
     if (lite.on) {
+      mapCtx.mistsLayer.innerHTML = mistsWallSVG(m, { ...mapCtx, painted: true });   // no paint, so the wall stands on the true face (WLD-81)
       mapCtx?.svg?.querySelector(".wv-sheet-feather")?.remove(); unmaskSheetWashes();
       if (state.crossing <= liveCrossing() && sessionOnce("pm_world_mists_intro")) mistsBellArm(m);
       mistsBellButton(m);
@@ -11046,8 +11059,8 @@ export function mountViewer(appEl) {
     g.className = "wv-mists-paint";
     g.innerHTML = mistsPaintHTML(baked, { originPx, mPerPx, layers: MISTS_PAINT.layers, creatures });
     mapCtx.mistsCam.replaceChildren(g);
-    // the paint is on: the opaque wall steps back behind its ragged face (WLD-81)
-    mapCtx.mistsLayer.innerHTML = mistsWallSVG(drawn, { ...mapCtx, painted: true, stepped: true });
+    // the paint is on: the opaque wall follows its ragged face (WLD-81)
+    mapCtx.mistsLayer.innerHTML = mistsWallSVG(drawn, { ...mapCtx, painted: true, ragged: true });
     // the roll-in and the bell belong to the live crossing: dialling ahead shows
     // the paint (as it shows the wall) but neither spends the session's roll-in
     // nor rings the bell
