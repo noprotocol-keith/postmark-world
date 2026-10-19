@@ -1,18 +1,19 @@
 // mists-render.test.mjs — the Mists as the page paints them (POS-553).
 //
-// THE ONE HARD RULE first: the paint never covers less than the physics, and
-// on the clear side more only by a thin ragged band (WLD-81, Darko 2026-10-19,
-// superseding POS-553's "more than the physics"). At the schedule's crossings
-// 244, 272 and 282, every point the engine puts behind the wall (mistsHere →
-// inWall) is fully opaque in the paint's back layer, on a dense grid over the
-// whole band and around every clearing.
+// THE ONE HARD RULE first (WLD-81, Darko 2026-10-19 17:14 and 18:13–18:18,
+// superseding POS-553's "the paint may cover more than the physics"): no solid
+// paint on ground the engine keeps clear; the ragged face stands back OUTWARD
+// into the Mist from the true face. At the schedule's crossings 244, 272 and 282,
+// every point the engine puts behind the wall (mistsHere → inWall) is at least
+// wallFloor (0.9) in the paint's back layer, and opaque past its ragged face, on a
+// dense grid over the whole band and around every clearing.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mistsAt, mistsHere } from "./world-engine.mjs";
-import { mistsBakePlan, mistsSheetFeatherAt, mistsRenderAt, mistsBakeAt, mistsTrueDistance, mistsColourAt, mistsCoreHex, mistsReachM, mistsKeepRects, mistsKeepAt, mistsOpenCountry, mistsCreatures, mistsCreatureBox, mistsCreatureSVG, bellFor, BELL_PARTIALS, MISTS_PAINT, MISTS_TINT } from "../spectator/mists-render.mjs";
+import { mistsBakePlan, mistsSheetFeatherAt, mistsRenderAt, mistsBakeAt, mistsTrueDistance, mistsColourAt, mistsCoreHex, mistsReachM, mistsWallStepM, mistsCoreM, mistsKeepRects, mistsKeepAt, mistsOpenCountry, mistsCreatures, mistsCreatureBox, mistsCreatureSVG, bellFor, BELL_PARTIALS, MISTS_PAINT, MISTS_TINT } from "../spectator/mists-render.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const MISTS = JSON.parse(readFileSync(join(ROOT, "WORLD/skeleton.json"), "utf8")).mists;
@@ -37,7 +38,7 @@ function samples(m) {
 }
 
 for (const n of CROSSINGS) {
-  test(`the hard rule at ${n}: every point behind the wall is fully opaque in the paint`, () => {
+  test(`the hard rule at ${n}: every point behind the wall is at least the floor in the paint, and opaque past the ragged face`, () => {
     const m = mistsAt(n, MISTS);
     assert.ok(m, `the Mists stand at ${n}`);
     let behind = 0;
@@ -46,43 +47,38 @@ for (const n of CROSSINGS) {
       assert.equal(mistsTrueDistance(m, p.x, p.y) > 0, inWall, `the paint's distance agrees with the engine at (${p.x}, ${p.y})`);
       if (!inWall) continue;
       behind += 1;
-      assert.equal(mistsRenderAt(m, p.x, p.y, 0).alpha, 1, `opaque behind the wall at (${p.x.toFixed(0)}, ${p.y.toFixed(0)})`);
-      assert.equal(mistsRenderAt(m, p.x, p.y, 0, KEEP).alpha, 1, `opaque behind the wall even where the town is kept clear (${p.x.toFixed(0)}, ${p.y.toFixed(0)})`);
+      assert.ok(mistsRenderAt(m, p.x, p.y, 0).alpha >= MISTS_PAINT.wallFloor, `at least the floor behind the wall at (${p.x.toFixed(0)}, ${p.y.toFixed(0)})`);
+      assert.ok(mistsRenderAt(m, p.x, p.y, 0, KEEP).alpha >= MISTS_PAINT.wallFloor, `at least the floor behind the wall even where the town is kept clear (${p.x.toFixed(0)}, ${p.y.toFixed(0)})`);
+      if (mistsTrueDistance(m, p.x, p.y) >= mistsWallStepM(m)) assert.equal(mistsRenderAt(m, p.x, p.y, 0, KEEP).alpha, 1, `opaque past the ragged face at (${p.x.toFixed(0)}, ${p.y.toFixed(0)})`);
+      else if (mistsTrueDistance(m, p.x, p.y) < 0) assert.fail("unreachable");
     }
     assert.ok(behind > 1000, `the grid reached the wall (${behind} points)`);
   });
 }
 
-// WLD-81 (RULED by Darko 2026-10-19 17:14): the solid paint reaches past the true
-// face onto clear ground by a thin ragged band only (clearBandM, 80 m); past it the
-// clear side carries the fringe's translucent haze. SUPERSEDES POS-553's "the paint
-// covers more than the physics: the corners round into banks, and the banks reach
-// inward" (up to ~1.4 km in, 600 m corners).
 for (const n of [244, 259, 272, 282]) {
-  test(`the solid paint stands on clear ground by a thin ragged band only, at ${n}`, () => {
+  test(`the ragged face stands back into the Mist, never onto clear ground, unevenly, at ${n}`, () => {
     const m = mistsAt(n, MISTS), c = m.clear;
-    // along every side, how far in from the true face the back layer stays opaque
     const sides = {
-      north: (s, d) => [c.minX + s, c.minY + d], south: (s, d) => [c.minX + s, c.maxY - d],
-      west: (s, d) => [c.minX + d, c.minY + s], east: (s, d) => [c.maxX - d, c.minY + s],
+      north: (t, d) => [c.minX + t, c.minY - d], south: (t, d) => [c.minX + t, c.maxY + d],
+      west: (t, d) => [c.minX - d, c.minY + t], east: (t, d) => [c.maxX + d, c.minY + t],
     };
     for (const [side, at] of Object.entries(sides)) {
       const len = side === "north" || side === "south" ? c.maxX - c.minX : c.maxY - c.minY, depths = [];
-      for (let s = 1500; s < len - 1500; s += 250) {
-        let d = 0; while (mistsRenderAt(m, ...at(s, d + 1), 0).alpha >= 1 && d < 2000) d += 1;
+      for (let t = 1500; t < len - 1500; t += 250) {
+        // no layer lays solid paint on the clear side: only the fringe's haze, under 1
+        for (const dIn of [1, 30, 200]) for (const li of [0, 1, 2]) assert.ok(mistsRenderAt(m, ...at(t, -dIn), li).alpha < 1, `${side}: layer ${li} is not solid ${dIn} m onto clear ground`);
+        // how far back into the wall the back layer turns opaque
+        let d = 0; while (mistsRenderAt(m, ...at(t, d), 0).alpha < 1 && d < 3000) d += 5;
         depths.push(d);
       }
-      assert.ok(Math.max(...depths) <= MISTS_PAINT.clearBandM, `${side}: never past the band (${Math.max(...depths)} m)`);
-      assert.ok(Math.min(...depths) > 0, `${side}: the face never steps back off the true one`);
-      assert.ok(Math.max(...depths) - Math.min(...depths) > 20, `${side}: ragged within it (${Math.min(...depths)}..${Math.max(...depths)} m)`);
+      assert.ok(Math.min(...depths) >= 0 && Math.max(...depths) <= mistsWallStepM(m) + 5, `${side}: within the step (${Math.min(...depths)}..${Math.max(...depths)} m)`);
+      assert.ok(Math.max(...depths) - Math.min(...depths) > 100, `${side}: uneven (${Math.min(...depths)}..${Math.max(...depths)} m)`);
     }
-    // the corner is the box's own: no 600 m rounding into clear ground
-    let k = 0; while (mistsRenderAt(m, c.minX + k + 1, c.minY + k + 1, 0).alpha >= 1 && k < 2000) k += 1;
-    assert.ok(k <= MISTS_PAINT.clearBandM, `the corner's solid reach, diagonally (${k} m)`);
   });
 }
 
-test("FALSIFIER (WLD-81): the bat the office reads 94 m clear at 259 is not under solid paint", () => {
+test("FALSIFIER (WLD-81): the bat the office reads 94 m clear at 259 is not under solid paint, and just past the true face is the wall", () => {
   const m = mistsAt(259, MISTS), bat = { x: -4297, y: 2233 };
   const here = mistsHere(bat, m);
   assert.equal(here.inWall, false);
@@ -91,7 +87,9 @@ test("FALSIFIER (WLD-81): the bat the office reads 94 m clear at 259 is not unde
   assert.ok(layers[0] < 1, `the back layer is not opaque there (${layers[0].toFixed(2)})`);
   const together = 1 - layers.reduce((a, al) => a * (1 - al), 1);
   assert.ok(together < 0.6, `the layers together are a haze, not a wall (${together.toFixed(2)})`);
-  assert.ok(together > 0, "and the fringe's haze is still there");
+  // one metre past the true face, due west of the bat: the wall, at least the floor
+  const past = mistsRenderAt(m, m.clear.minX - 1, bat.y, 0).alpha;
+  assert.ok(past >= MISTS_PAINT.wallFloor, `just past the true face the paint is the wall (${past.toFixed(2)})`);
 });
 
 test("the fringe is the engine's 400 m band: haze on the clear side that thins toward the clear land", () => {
@@ -141,6 +139,33 @@ test("the viewer paints over the vector wall, which keeps its exact geometry and
   assert.doesNotMatch(painted, /opacity/, "the painted wall carries no fill-opacity or opacity");
   assert.match(svg, /^<g class="wv-mists" aria-hidden="true">/, "its group is the plain one");
   assert.doesNotMatch(svg.match(/^<g[^>]*>/)[0], /opacity|style=/, "and its group carries no opacity or style either");
+});
+
+// THE WALL STEPS BACK (WLD-81, RULED by Darko 2026-10-19 18:18): once the paint is
+// on the page, the opaque vector wall stands back by mistsWallStepM, where the
+// paint is opaque whatever its noise, and the pointer is still taken from the
+// true face by the wall's own path, unpainted.
+test("stepped: the opaque wall stands back behind the ragged face, and the pointer stays on the true face", async () => {
+  const { mistsWallSVG } = await import("../spectator/viewer.mjs");
+  const reg = { originPx: { x: 485, y: 760 }, mPerPx: 5 };
+  const m = mistsAt(272, MISTS);
+  const flat = mistsWallSVG(m, { ...reg, painted: true });
+  const svg = mistsWallSVG(m, { ...reg, painted: true, stepped: true });
+  const ptr = svg.match(/<path class="wv-mists-wall"[^>]*>/)[0], back = svg.match(/<path class="wv-mists-wall-back"[^>]*>/)[0];
+  assert.equal(ptr.match(/ d="[^"]*"/)[0], flat.match(/<path class="wv-mists-wall"[^>]*>/)[0].match(/ d="[^"]*"/)[0], "the pointer's path is the true wall");
+  assert.match(ptr, /pointer-events="all"/);
+  assert.match(ptr, /fill-opacity="0"/, "and unpainted");
+  assert.match(back, /pointer-events="none"/);
+  assert.match(back, new RegExp(`fill="${mistsCoreHex(m)}"`), "the stepped wall in the core colour");
+  // its hole is the clear box grown by the step on every side
+  const st = mistsWallStepM(m) / reg.mPerPx, a0 = reg.originPx.x + m.clear.minX / reg.mPerPx;
+  assert.ok(back.includes(` M ${(a0 - st).toFixed(1)} `), "stepped back by mistsWallStepM");
+  // every point the step leaves bare is under the floor's paint, and past the step opaque
+  for (let d = 1; d < mistsWallStepM(m); d += 37) assert.ok(mistsRenderAt(m, m.clear.minX - d, 0, 0).alpha >= MISTS_PAINT.wallFloor);
+  for (const y of [-3000, 0, 3000, 6000]) assert.equal(mistsRenderAt(m, m.clear.minX - mistsWallStepM(m) - 1, y, 0).alpha, 1);
+  // and the page swaps it in once the paint is on
+  const SRC = readFileSync(join(ROOT, "spectator/viewer.mjs"), "utf8");
+  assert.match(SRC, /mapCtx\.mistsCam\.replaceChildren\(g\);\s*\/\/[^\n]*\n\s*mapCtx\.mistsLayer\.innerHTML = mistsWallSVG\(drawn, \{ \.\.\.mapCtx, painted: true, stepped: true \}\);/);
 });
 
 // THE TOWN IS KEPT CLEAR (Darko 2026-10-10 09:45): at 284, no parcel's or
@@ -227,7 +252,7 @@ test("with the sheet's frame: the hard rule holds, the town stays clear, and the
   for (const n of [244, 259, 272, 284]) {
     const plain = mistsAt(n, MISTS), m = { ...plain, frame: FRAME };
     for (const p of samples(m)) {
-      if (mistsHere(p, m).inWall) assert.equal(mistsRenderAt(m, p.x, p.y, 0, KEEP).alpha, 1);
+      if (mistsHere(p, m).inWall) assert.ok(mistsRenderAt(m, p.x, p.y, 0, KEEP).alpha >= MISTS_PAINT.wallFloor);
       for (const li of [0, 1, 2]) assert.deepEqual(mistsRenderAt(m, p.x, p.y, li), mistsRenderAt(plain, p.x, p.y, li), `the frame changes nothing at (${p.x}, ${p.y})`);
     }
     for (const mk of MARKS) {
@@ -290,22 +315,21 @@ test("MAY COVER, in the paint: the far south-west's wetland moved out of its cle
   assert.deepEqual(notes, CROSSINGS.map((n) => `${WETLAND} is not in a clearing at ${n}`));
 });
 
-test("the bake's face is ragged, never a straight line, on the west and south at 244 (within its thin band, WLD-81)", () => {
+test("the bake's opaque face is ragged, never a straight line, on the west and south at 244", () => {
   const m = { ...mistsAt(244, MISTS), frame: FRAME };
   const faces = { west: [], south: [] };   // read every 50 m: the town's margins (every household's mark, any size) take whole stretches of the strip
   for (let y = FRAME.minY + 600; y < FRAME.maxY - 600; y += 50) {
-    let x = FRAME.maxX - 2000; while (x > m.clear.minX - 200 && mistsBakeAt(m, 0, x, y).alpha < 1) x -= 10;
+    let x = FRAME.maxX - 2000; while (x > m.clear.minX - mistsWallStepM(m) - 200 && mistsBakeAt(m, 0, x, y).alpha < 1) x -= 10;
     if (KEEP(x, y) < 1) faces.west.push(x);
   }
   for (let x = FRAME.minX + 600; x < FRAME.maxX - 600; x += 50) {
-    let y = FRAME.minY + 3000; while (y < m.clear.maxY + 200 && mistsBakeAt(m, 0, x, y).alpha < 1) y += 10;
+    let y = FRAME.minY + 3000; while (y < m.clear.maxY + mistsWallStepM(m) + 200 && mistsBakeAt(m, 0, x, y).alpha < 1) y += 10;
     if (KEEP(x, y) < 1) faces.south.push(y);
   }
   for (const [side, list] of Object.entries(faces)) {
     assert.ok(list.length >= 8, `${side}: the face was read clear of the town (${list.length} points)`);
     const spread = Math.max(...list) - Math.min(...list);
-    assert.ok(spread > MISTS_PAINT.clearBandM / 2, `${side}: the face wanders ${spread} m, not a straight line`);
-    assert.ok(spread <= MISTS_PAINT.clearBandM + 20, `${side}: and only within its band (${spread} m)`);
+    assert.ok(spread > 150, `${side}: the face wanders ${spread} m, not a straight line`);
     // and no long straight run: consecutive points never all equal
     const runs = list.slice(1).filter((v, i) => v === list[i]).length;
     assert.ok(runs < list.length / 2, `${side}: ${runs} of ${list.length} steps lie on one line`);
@@ -347,7 +371,6 @@ test("open country is the town's own, read from the id when by and household are
 // 244 and 28 at 284, the sheet's edge 31 (the sea's long flat bank, the far
 // shore's margin against the true face, and the dark band at the bank's foot).
 const STRAIGHT_TOL_M = 20, STRAIGHT_MAX = 15;
-const FACE_TOL_M = MISTS_PAINT.clearBandM / 8, FACE_MAX = 20;   // the true face's thin band (WLD-81)
 export function longestStraightRun(ys, tol = STRAIGHT_TOL_M) {
   let best = 0;
   for (let i = 0; i < ys.length; i++) {
@@ -372,9 +395,9 @@ export function southFaceAndFoot(m, keep = KEEP) {
     const y0 = FRAME.maxY - 5000;
     // a column the sheet's east or west fog already covers at its start is not the south's: no reading
     if (mistsBakeAt(m, 0, x, y0, keep).alpha >= 0.5) { face.push(null); foot.push(null); continue; }
-    for (let y = y0; y < m.clear.maxY + 2500; y += 5) {
+    for (let y = y0; y < m.clear.maxY + mistsCoreM(m) + 500; y += 5) {
       const r = mistsBakeAt(m, 0, x, y, keep);
-      if (f == null && r.alpha >= 0.5) f = y;
+      if (f == null && r.alpha >= 1) f = y;   // the ragged face (WLD-81: the floor's 0.9 starts on the true face)
       if (f != null && r.depth >= 0.6) { ft = y; break; }
     }
     face.push(f); foot.push(ft);
@@ -387,11 +410,8 @@ test("no straight runs: the fog's face, its dark foot and the sheet's own edge a
     const { face, foot } = southFaceAndFoot(m);
     const read = face.filter((v, i) => v != null && foot[i] != null).length;
     assert.ok(read > 90, `the south was read at ${n} (${read} of ${face.length} samples)`);
-    // the face is the true face's thin band now (WLD-81: at most clearBandM, a
-    // straighter face accepted as the cost), so its wander is judged at its own
-    // scale: never within ±10 m of one line for more than 1 km
-    const a = longestStraightRun(face, FACE_TOL_M), b = longestStraightRun(foot);
-    assert.ok(a <= FACE_MAX, `${n}: the face runs straight (±${FACE_TOL_M} m) for ${a} samples of 50 m`);
+    const a = longestStraightRun(face), b = longestStraightRun(foot);
+    assert.ok(a <= STRAIGHT_MAX, `${n}: the face runs straight (±${STRAIGHT_TOL_M} m) for ${a} samples of 50 m`);
     assert.ok(b <= STRAIGHT_MAX, `${n}: the foot runs straight (±${STRAIGHT_TOL_M} m) for ${b} samples of 50 m`);
   }
   const edge = [];
@@ -462,12 +482,18 @@ test("no faint rectangles: at every bake box's edge, inset by the widest drift, 
     const m = { ...mistsAt(n, MISTS), frame: FRAME }, core = mistsCoreHex(m);
     const inset = Math.max(...MISTS_PAINT.layers.map((L) => L.driftM)) + 1;
     let read = 0;
-    for (const { li, box } of mistsBakePlan(m)) {
+    const plan = mistsBakePlan(m);
+    for (const { li, box, skip } of plan) {
       for (let t = 0; t <= 1; t += 0.01) for (const d of [0, inset]) {
         const pts = [{ x: box.minX + d + t * (box.maxX - box.minX - 2 * d), y: box.minY + d }, { x: box.minX + d + t * (box.maxX - box.minX - 2 * d), y: box.maxY - d },
           { x: box.minX + d, y: box.minY + d + t * (box.maxY - box.minY - 2 * d) }, { x: box.maxX - d, y: box.minY + d + t * (box.maxY - box.minY - 2 * d) }];
         for (const p of pts) {
           if (!(mistsTrueDistance(m, p.x, p.y) > 0)) continue;   // a box over clear ground ends in the clear, past every bank
+          if (skip && p.x >= skip.minX && p.x <= skip.maxX && p.y >= skip.minY && p.y <= skip.maxY) continue;   // the main bake's own ground
+          // another bake of this layer carries the paint on past this edge (a clearing's box round
+          // the main box's corner, WLD-81's wider boxes): an edge there is no edge on the page
+          const inside = (b) => p.x > b.minX && p.x < b.maxX && p.y > b.minY && p.y < b.maxY;
+          if (plan.some((q) => q.li === li && q.box !== box && inside(q.box))) continue;
           const r = mistsBakeAt(m, li, p.x, p.y, KEEP);
           if (li > 0) assert.equal(r.alpha, 0, `layer ${li} at ${n} paints ${r.alpha} at its box's edge (${p.x.toFixed(0)}, ${p.y.toFixed(0)})`);
           else assert.equal("#" + mistsColourAt(m, r.depth).map((v) => v.toString(16).padStart(2, "0")).join(""), core, `the back layer at ${n} is the wall's colour at its box's edge`);
