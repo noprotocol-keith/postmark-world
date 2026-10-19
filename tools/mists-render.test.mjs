@@ -1,9 +1,11 @@
 // mists-render.test.mjs — the Mists as the page paints them (POS-553).
 //
-// THE ONE HARD RULE first: the paint may cover more than the physics, never
-// less. At the schedule's crossings 244, 272 and 282, every point the engine
-// puts behind the wall (mistsHere → inWall) is fully opaque in the paint's back
-// layer, on a dense grid over the whole band and around every clearing.
+// THE ONE HARD RULE first: the paint never covers less than the physics, and
+// on the clear side more only by a thin ragged band (WLD-81, Darko 2026-10-19,
+// superseding POS-553's "more than the physics"). At the schedule's crossings
+// 244, 272 and 282, every point the engine puts behind the wall (mistsHere →
+// inWall) is fully opaque in the paint's back layer, on a dense grid over the
+// whole band and around every clearing.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -51,19 +53,45 @@ for (const n of CROSSINGS) {
   });
 }
 
-test("the paint covers more than the physics: the corners round into banks, and the banks reach inward", () => {
-  const m = mistsAt(282, MISTS), c = m.clear;
-  // 60 m inside the true corner is clear ground, and painted opaque
-  assert.equal(mistsHere({ x: c.minX + 60, y: c.minY + 60 }, m).inWall, false);
-  assert.equal(mistsRenderAt(m, c.minX + 60, c.minY + 60, 0).alpha, 1);
-  // along a side, the opaque face stands inward of the true face by an uneven amount
-  const depths = [];
-  for (let x = c.minX + 1500; x < c.maxX - 1500; x += 250) {
-    let d = 0; while (mistsRenderAt(m, x, c.minY + d + 5, 0).alpha >= 1 && d < 2000) d += 5;
-    depths.push(d);
-  }
-  assert.ok(Math.min(...depths) >= mistsReachM(m) * 0.3 - 5, "never less than the reach's floor");
-  assert.ok(Math.max(...depths) - Math.min(...depths) > 100, `uneven along the side (${Math.min(...depths)}..${Math.max(...depths)} m)`);
+// WLD-81 (RULED by Darko 2026-10-19 17:14): the solid paint reaches past the true
+// face onto clear ground by a thin ragged band only (clearBandM, 80 m); past it the
+// clear side carries the fringe's translucent haze. SUPERSEDES POS-553's "the paint
+// covers more than the physics: the corners round into banks, and the banks reach
+// inward" (up to ~1.4 km in, 600 m corners).
+for (const n of [244, 259, 272, 282]) {
+  test(`the solid paint stands on clear ground by a thin ragged band only, at ${n}`, () => {
+    const m = mistsAt(n, MISTS), c = m.clear;
+    // along every side, how far in from the true face the back layer stays opaque
+    const sides = {
+      north: (s, d) => [c.minX + s, c.minY + d], south: (s, d) => [c.minX + s, c.maxY - d],
+      west: (s, d) => [c.minX + d, c.minY + s], east: (s, d) => [c.maxX - d, c.minY + s],
+    };
+    for (const [side, at] of Object.entries(sides)) {
+      const len = side === "north" || side === "south" ? c.maxX - c.minX : c.maxY - c.minY, depths = [];
+      for (let s = 1500; s < len - 1500; s += 250) {
+        let d = 0; while (mistsRenderAt(m, ...at(s, d + 1), 0).alpha >= 1 && d < 2000) d += 1;
+        depths.push(d);
+      }
+      assert.ok(Math.max(...depths) <= MISTS_PAINT.clearBandM, `${side}: never past the band (${Math.max(...depths)} m)`);
+      assert.ok(Math.min(...depths) > 0, `${side}: the face never steps back off the true one`);
+      assert.ok(Math.max(...depths) - Math.min(...depths) > 20, `${side}: ragged within it (${Math.min(...depths)}..${Math.max(...depths)} m)`);
+    }
+    // the corner is the box's own: no 600 m rounding into clear ground
+    let k = 0; while (mistsRenderAt(m, c.minX + k + 1, c.minY + k + 1, 0).alpha >= 1 && k < 2000) k += 1;
+    assert.ok(k <= MISTS_PAINT.clearBandM, `the corner's solid reach, diagonally (${k} m)`);
+  });
+}
+
+test("FALSIFIER (WLD-81): the bat the office reads 94 m clear at 259 is not under solid paint", () => {
+  const m = mistsAt(259, MISTS), bat = { x: -4297, y: 2233 };
+  const here = mistsHere(bat, m);
+  assert.equal(here.inWall, false);
+  assert.equal(Math.round(here.wallM), 94, "the office's own read (orient: in_wall false, wall_m 94)");
+  const layers = MISTS_PAINT.layers.map((_, i) => mistsRenderAt(m, bat.x, bat.y, i).alpha);
+  assert.ok(layers[0] < 1, `the back layer is not opaque there (${layers[0].toFixed(2)})`);
+  const together = 1 - layers.reduce((a, al) => a * (1 - al), 1);
+  assert.ok(together < 0.6, `the layers together are a haze, not a wall (${together.toFixed(2)})`);
+  assert.ok(together > 0, "and the fringe's haze is still there");
 });
 
 test("the fringe is the engine's 400 m band: haze on the clear side that thins toward the clear land", () => {
