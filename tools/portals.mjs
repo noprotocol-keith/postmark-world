@@ -22,6 +22,7 @@
 
 import { marksContain, overlapArea, pointInPolygon, pointInRect, polygonBBox, polygonOf, rect } from "./geometry.mjs";
 import { entryLawOf, isStairs } from "./enter-exit.mjs";
+import { nameInSentence } from "./mark-name.mjs";
 
 export const DUNGEON_CLASS = "dungeon";
 /** How far a `lands_at` anchor may stand from its `into` shape before the lint refuses it. */
@@ -518,6 +519,65 @@ export function dungeonLanding(dungeonId, marks, { enteredVia = null, state = nu
     ? [...ways].sort((a, b) => Math.hypot(a.at.x - sx, a.at.y - sy) - Math.hypot(b.at.x - sx, b.at.y - sy))[0]
     : ways[0];
   return { x: near.at.x, y: near.at.y, via: near.id, chosen: true };
+}
+
+// ── THE EXIT LOCK (WLD-5, Darko, Sitting B 2026-10-18 20:22/20:27; words 2026-10-19 09:21) ──
+//
+// Leaving a dungeon by the `exit` verb locks that resident out of it until the
+// next settlement (06:00/18:00Z, the nominal clock: a late settlement does not
+// extend it, and there is no minimum). Leaving through a portal's inside face
+// spends nothing, and moving between rooms never counts. It is the dungeon
+// class's law, counted per dungeon (any portal, or entering from its outline)
+// and per resident. The office holds the record (the exit act's `locked_until`)
+// and hands a passage the locks in force as `lockedOut`: { <dungeon id>:
+// { until, left_at } }. What the lock does and what it says are here.
+
+const pad2 = (n) => String(n).padStart(2, "0");
+/** An instant as the town says settlement times: "18:00Z". Null when unreadable. */
+export function hhmmZ(iso) {
+  const d = new Date(iso ?? NaN);
+  return Number.isNaN(d.getTime()) ? null : `${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}Z`;
+}
+
+/** The exit's accept step (A-G1, ruled 09:21): "Leave the Spire from here? You
+ *  can't come back in until the next settlement (18:00Z). Walking out through a
+ *  door doesn't count. You'll be set down outside, at the Gilded Doors." */
+export function exitLockWords({ dungeon, until = null, setDownAt = null, determined = {} }) {
+  const when = hhmmZ(until);
+  return `Leave ${nameInSentence(dungeon, determined)} from here? You can't come back in until the next settlement${when ? ` (${when})` : ""}.`
+    + " Walking out through a door doesn't count."
+    + (setDownAt ? ` You'll be set down outside, at ${nameInSentence(setDownAt, determined)}.` : "");
+}
+
+/** A refused re-entry (A-G2, ruled 09:21): "You left the Spire by exit at
+ *  17:12Z, so you can't come back in until the next settlement (18:00Z).
+ *  Nothing was recorded." */
+export function lockedOutWords({ dungeon, until, left_at = null, determined = {} }) {
+  const left = hhmmZ(left_at);
+  return `You left ${nameInSentence(dungeon, determined)} by exit${left ? ` at ${left}` : ""}, so you can't come back in`
+    + ` until the next settlement (${hhmmZ(until) ?? until}). Nothing was recorded.`;
+}
+
+/** Whether a passage through `portal` would enter a dungeon the walker is locked
+ *  out of. The ways asked are the one picked, or every way `into` names: a list
+ *  with an open way still answers with its choices, and the pick is asked again.
+ *  Null when the passage is free; otherwise the lock that holds, with its words.
+ *  A dungeon already held is never asked (moving between rooms never counts). */
+export function lockedPassage(portal, { pick = null, marks = [], held = [], lockedOut = null, determined = {} } = {}) {
+  if (!lockedOut || !Object.keys(lockedOut).length) return null;
+  const ways = entryLawOf(portal)?.into ?? [];
+  const asked = pick && ways.includes(pick) ? [pick] : ways;
+  if (!asked.length) return null;
+  const byId = new Map(marks.map((m) => [m.id, m]));
+  const locks = asked.map((way) => {
+    const t = byId.get(way);
+    const target = t ? passageTargetOf(portal, t, marks) ?? t : null;
+    const d = target ? dungeonsOf(target, marks).find((id) => lockedOut[id] && !held.includes(id)) : null;
+    return d ? { dungeon: d, ...lockedOut[d] } : null;
+  });
+  if (locks.some((l) => !l)) return null;
+  const lock = locks[0];
+  return { ...lock, words: lockedOutWords({ ...lock, determined }) };
 }
 
 // ── the lint (mark-lint.mjs § portals reads this) ────────────────────────────

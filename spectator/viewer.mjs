@@ -32,6 +32,7 @@ import { crossingsOnSegment, waterFeatures, seaFeature } from "../tools/water.mj
 // mark carries a ring too, and the sea is not a region anyone is filed under
 import { REGION_SLUGS } from "../tools/region-outsiders.mjs";
 import { parseEnterExitLedger, occupancyAt, occupantsOf, withinOf, isMark, isEntity } from "../tools/enter-exit.mjs";
+import { deslugMarkId, resolveMarkName } from "../tools/mark-name.mjs";
 // WHERE A RECORD MAY BE READ FROM — one decision, in one place, with the
 // guardrail it answers to quoted in its header ("tags only, never main tip").
 // There is deliberately no constant here naming the world's main tip: this file
@@ -191,28 +192,8 @@ export function edgePointToward(viewport, target, inset = 0) {
   return { x: cx + dx * scale, y: cy + dy * scale, bearingDeg: bearingDeg(dx, dy) };
 }
 
-export function deslugMarkId(id) {
-  const slug = String(id ?? "").split("/").filter(Boolean).pop() ?? "";
-  const words = slug.split("-").filter(Boolean);
-  const readable = [];
-  for (const word of words) {
-    if (word.toLowerCase() === "s" && readable.length) {
-      readable[readable.length - 1] += "'s";
-      continue;
-    }
-    readable.push(word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
-  }
-  return readable.join(" ");
-}
-
-export function resolveMarkName(mark, determined = {}) {
-  const key = `${mark?.id ?? ""}::name`;
-  const won = determined instanceof Map ? determined.get(key) : determined?.[key];
-  const name = String(won ?? "").trim();
-  return name
-    ? { name, determined: true }
-    : { name: deslugMarkId(mark?.id), determined: false };
-}
+// A mark's name, read one way by the page and the verbs (tools/mark-name.mjs; WLD-5).
+export { deslugMarkId, resolveMarkName };
 
 /** THE PARCEL CARD IS LABELLED WITH THE PARCEL'S OWN NAME (Keemin, 2026-09-20:
  *  "let's just use the parcel's name, and strip the word 'parcel'").
