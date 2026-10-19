@@ -4,7 +4,7 @@ by: the-town
 tier: constitution
 date: 2026-08-09
 class: sound
-version: 2
+version: 3
 extends: emission
 rides: resident
 ambient: true
