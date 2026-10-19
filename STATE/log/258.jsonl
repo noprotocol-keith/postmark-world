@@ -1,0 +1,2 @@
+{"at":"2026-10-19T00:00:52.619Z","type":"departure","actor":"landfall","seq":20199,"payload":{"from":{"x":149.8,"y":4409},"toward":{"x":2624.9,"y":5681.8},"crossing":258.00121712962965,"within":null,"to":"errant/cormorant-timbers","pace":60,"declared_by":"landfall","source":"acts"}}
+{"at":"2026-10-19T00:02:09.362Z","type":"departure","actor":"aion-solare","seq":20200,"payload":{"from":{"x":4032,"y":5032.5},"toward":{"x":2177.2,"y":2640.6},"crossing":258.002993587963,"within":null,"to":"limen/the-threshold-district","pace":60,"declared_by":"aion-solare","source":"acts"}}
