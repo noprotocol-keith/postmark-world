@@ -217,15 +217,19 @@ test("the box is the one the silhouette is drawn in: its path's box at its size,
   }
 });
 
-// THE SHEET'S EDGE IS A FACE TOO (POS-553 review): the painted sheet (the atlas
-// painting, 1500 x 2400 units at 5 m, the Origin at 485,760) is a rectangle; the
-// fog stands past it and reaches raggedly over it, so its sides never show. With
-// the frame the hard rule and the town's clearance both still hold.
+// THE SHEET'S EDGE IS NOT A FACE (WLD-81, Darko 2026-10-19 17:14, superseding the
+// POS-553 review's "the sheet's edge is a face too"): the painted sheet (the atlas
+// painting, 1500 x 2400 units at 5 m, the Origin at 485,760) is a rectangle, and
+// past it the ground is open country (its feather), not fog. With the frame the
+// hard rule and the town's clearance both still hold, and the frame paints nothing.
 const FRAME = { minX: -485 * 5, minY: -760 * 5, maxX: (1500 - 485) * 5, maxY: (2400 - 760) * 5 };
-test("with the sheet's frame: the hard rule holds, the town stays clear, and the sheet's edge is under fog, unevenly", () => {
-  for (const n of [244, 272, 284]) {
-    const m = { ...mistsAt(n, MISTS), frame: FRAME };
-    for (const p of samples(m)) if (mistsHere(p, m).inWall) assert.equal(mistsRenderAt(m, p.x, p.y, 0, KEEP).alpha, 1);
+test("with the sheet's frame: the hard rule holds, the town stays clear, and the frame paints nothing", () => {
+  for (const n of [244, 259, 272, 284]) {
+    const plain = mistsAt(n, MISTS), m = { ...plain, frame: FRAME };
+    for (const p of samples(m)) {
+      if (mistsHere(p, m).inWall) assert.equal(mistsRenderAt(m, p.x, p.y, 0, KEEP).alpha, 1);
+      for (const li of [0, 1, 2]) assert.deepEqual(mistsRenderAt(m, p.x, p.y, li), mistsRenderAt(plain, p.x, p.y, li), `the frame changes nothing at (${p.x}, ${p.y})`);
+    }
     for (const mk of MARKS) {
       if (!mk?.at || !Number.isFinite(mk.at.x) || mistsOpenCountry(mk)) continue;
       if (mistsHere(mk.at, m).inWall) continue;
@@ -233,21 +237,9 @@ test("with the sheet's frame: the hard rule holds, the town stays clear, and the
       assert.ok(a <= 0.2, `${mk.id} at ${n} is under ${a.toFixed(2)} of fog`);
     }
   }
-  // round all four sides of the sheet, away from the town, the fog's opaque face stands an uneven way in
-  const m = { ...mistsAt(272, MISTS), frame: FRAME }, depths = [];
-  const sides = [
-    (t, d) => ({ x: FRAME.minX + d, y: FRAME.minY + t * (FRAME.maxY - FRAME.minY) }), (t, d) => ({ x: FRAME.maxX - d, y: FRAME.minY + t * (FRAME.maxY - FRAME.minY) }),
-    (t, d) => ({ x: FRAME.minX + t * (FRAME.maxX - FRAME.minX), y: FRAME.minY + d }), (t, d) => ({ x: FRAME.minX + t * (FRAME.maxX - FRAME.minX), y: FRAME.maxY - d }),
-  ];
-  for (const at of sides) for (let t = 0.08; t < 0.92; t += 0.02) {
-    const edge = at(t, 100); if (KEEP(edge.x, edge.y) > 0) continue;
-    let d = -600; for (;;) { const p = at(t, d); if (mistsRenderAt(m, p.x, p.y, 0).alpha < 1 || d >= 1500) break; d += 10; }
-    if (KEEP(at(t, d).x, at(t, d).y) > 0) continue;   // the town's margin stopped it, not the noise
-    depths.push(d);
-  }
-  assert.ok(depths.length > 10, `the sheet's edge was read (${depths.length} points)`);
-  assert.ok(Math.min(...depths) >= MISTS_PAINT.frameInsetM, "the fog covers the sheet's edge everywhere it is read");
-  assert.ok(Math.max(...depths) - Math.min(...depths) > 100, `unevenly (${Math.min(...depths)}..${Math.max(...depths)} m)`);
+  // the bat at 259 stands 1.9 km past the sheet's west edge (x −2425) and 94 m clear of the wall: a haze, not fog
+  const m = { ...mistsAt(259, MISTS), frame: FRAME };
+  assert.ok(mistsBakeAt(m, 0, -4297, 2233, KEEP).alpha < 1, "past the sheet, clear ground is not painted solid");
 });
 
 // THE BAKE'S OWN RULE (#186 review): every test below runs mistsBakeAt, the
@@ -298,7 +290,7 @@ test("MAY COVER, in the paint: the far south-west's wetland moved out of its cle
   assert.deepEqual(notes, CROSSINGS.map((n) => `${WETLAND} is not in a clearing at ${n}`));
 });
 
-test("the bake's face off the sheet is ragged, never a straight line, on the west and south at 244", () => {
+test("the bake's face is ragged, never a straight line, on the west and south at 244 (within its thin band, WLD-81)", () => {
   const m = { ...mistsAt(244, MISTS), frame: FRAME };
   const faces = { west: [], south: [] };   // read every 50 m: the town's margins (every household's mark, any size) take whole stretches of the strip
   for (let y = FRAME.minY + 600; y < FRAME.maxY - 600; y += 50) {
@@ -312,7 +304,8 @@ test("the bake's face off the sheet is ragged, never a straight line, on the wes
   for (const [side, list] of Object.entries(faces)) {
     assert.ok(list.length >= 8, `${side}: the face was read clear of the town (${list.length} points)`);
     const spread = Math.max(...list) - Math.min(...list);
-    assert.ok(spread > 150, `${side}: the face wanders ${spread} m, not a straight line`);
+    assert.ok(spread > MISTS_PAINT.clearBandM / 2, `${side}: the face wanders ${spread} m, not a straight line`);
+    assert.ok(spread <= MISTS_PAINT.clearBandM + 20, `${side}: and only within its band (${spread} m)`);
     // and no long straight run: consecutive points never all equal
     const runs = list.slice(1).filter((v, i) => v === list[i]).length;
     assert.ok(runs < list.length / 2, `${side}: ${runs} of ${list.length} steps lie on one line`);
@@ -354,6 +347,7 @@ test("open country is the town's own, read from the id when by and household are
 // 244 and 28 at 284, the sheet's edge 31 (the sea's long flat bank, the far
 // shore's margin against the true face, and the dark band at the bank's foot).
 const STRAIGHT_TOL_M = 20, STRAIGHT_MAX = 15;
+const FACE_TOL_M = MISTS_PAINT.clearBandM / 8, FACE_MAX = 20;   // the true face's thin band (WLD-81)
 export function longestStraightRun(ys, tol = STRAIGHT_TOL_M) {
   let best = 0;
   for (let i = 0; i < ys.length; i++) {
@@ -393,8 +387,11 @@ test("no straight runs: the fog's face, its dark foot and the sheet's own edge a
     const { face, foot } = southFaceAndFoot(m);
     const read = face.filter((v, i) => v != null && foot[i] != null).length;
     assert.ok(read > 90, `the south was read at ${n} (${read} of ${face.length} samples)`);
-    const a = longestStraightRun(face), b = longestStraightRun(foot);
-    assert.ok(a <= STRAIGHT_MAX, `${n}: the face runs straight (±${STRAIGHT_TOL_M} m) for ${a} samples of 50 m`);
+    // the face is the true face's thin band now (WLD-81: at most clearBandM, a
+    // straighter face accepted as the cost), so its wander is judged at its own
+    // scale: never within ±10 m of one line for more than 1 km
+    const a = longestStraightRun(face, FACE_TOL_M), b = longestStraightRun(foot);
+    assert.ok(a <= FACE_MAX, `${n}: the face runs straight (±${FACE_TOL_M} m) for ${a} samples of 50 m`);
     assert.ok(b <= STRAIGHT_MAX, `${n}: the foot runs straight (±${STRAIGHT_TOL_M} m) for ${b} samples of 50 m`);
   }
   const edge = [];
