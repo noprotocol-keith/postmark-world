@@ -32,7 +32,8 @@ test("the set: pictured marks = the hung art, plus every near-tier picture the f
 });
 
 test("the class: the pip loop hands `ov-pip-pictured` to exactly the marks in the set", () => {
-  assert.match(SOURCE, /classes: markClasses\(m\) \+ \(pictured\.has\(m\.id\) \? " ov-pip-pictured" : ""\)/);
+  // …except a mark whose pip carries its icon (play fix 48): one pip for every icon
+  assert.match(SOURCE, /const isPictured = pictured\.has\(m\.id\) && !what;\s*s \+= overlayPipSVG\(\{\s*at: p, id: m\.id, classes: markClasses\(m\) \+ \(isPictured \? " ov-pip-pictured" : ""\)/);
   // the pure emitter passes the class through untouched, onto the circle that is the anchor
   const pip = overlayPipSVG({ at: { x: 10, y: 20 }, id: "a/b", classes: "t-home ov-pip-pictured" });
   assert.match(pip, new RegExp(`<circle cx="0" cy="0" r="${OVERLAY_PIP_R}" class="ov-pip t-home ov-pip-pictured" data-id="a/b">`),

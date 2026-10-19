@@ -259,6 +259,32 @@ instances of any of them.
 it was ruled from wrote it as `town | sovereign`, a one-of, which 15:12 rules
 out …, so the shape waits on Darko's read."*
 
+**Admin households may make the passage classes (ruled 2026-10-18 19:38,
+19:51 and 19:52, and 21:23 on the gap read's six calls; WLD-21).** A household
+is an admin household when a GitHub account in the household's own registry
+entry, the account the household is tied to, is an owner of the
+`postmark-town` GitHub organisation (19:51: *"map the GitHub account to the
+household and then scope the admin to the household rather than expect
+resident scoped GitHub accounts"*). A resident's own GitHub account never
+makes its household admin, and every resident of an admin household acts with
+the household's admin. An admin household may make instances of exactly three
+classes whose `makers` answers false: `the-town/dungeon`, `the-town/stairs`
+and `the-town/portal-ground`. It is the classes themselves and not what
+extends them, so `arena` and `vehicle` stay the town's. Admin never reaches
+`parcel`, nor any class whose instance mints or confers standing, and
+`the-town/nothing-you-control-mints` holds for everything else (19:52).
+Whether a household is admin is derived in one record, the office's role
+registry, refreshed from GitHub at each settlement and printed into
+`WORLD/households.json` (`admins`) for the World's gates; no gate asks GitHub
+itself (19:52). A refresh that cannot read GitHub keeps the last answer and
+says it is unverified. When the ownership ends, the next refresh removes the
+role: from then on the household makes no new instance and changes none it
+made, and what it already made stands. Enforced: `tools/admin-makers.mjs` (the
+three names and the one check), read by `tools/lane-wall.mjs` § 5 over what a
+PR adds or changes, by `tools/board-grammar.test.mjs` over the live tree, and
+by the office's leave-mark door. *"Nothing super fancy yet. We don't need to
+populate an entire scoped, fine-grained permission system"* (19:38).
+
 **An idea is a class, never a place or a kind (founder-ruled 2026-09-01 —
 "Ideas can be predicates.").** `class: idea` says what a mark IS; where it
 stands says only what it is an idea OF. So an idea may stand **sited**
@@ -923,6 +949,32 @@ two cuts: "it fades or it flees" and "it is no one's".)
   every ordinary public act a resident takes inside it — a walk, an entry or
   exit, a say, a take, give or drop, a mark left — is its trigger. The
   resident's acts stay one set; combat is the dungeon's.
+  *SUPERSEDED in part 2026-10-16 17:47 and 18:06 (POS-637, WLD-56; the next
+  bullet), **taking effect when the afforded-actions build ships** (POS-672).
+  Ruled, not yet built: until that build ships, nothing runs these verbs.
+  `tools/creature-kind.mjs` still refuses any verb outside the ring's set, the
+  creature class still lists no actions, and the ambient trigger above is all
+  that runs. From that build, "No verbs of its own to be acted on" and "The
+  resident's acts stay one set" are superseded: a creature declares afforded
+  actions of its own, a resident may act on them, and they are additions, not
+  replacements. The awareness ring and its ambient trigger stand: Darko,
+  17:47, "I think we should add these reactions in addition to the existing
+  turns that get fired if a resident does something within the creature's
+  radius." Combat is still the dungeon's.*
+- **A creature's afforded actions** (ruled, not yet built; they take effect
+  with the build, POS-672. Ruled 2026-10-16: Darko, 17:47, *"Okay,
+  I like these"*, of Wright's proposal of 17:43; 18:06, call 1, *"rec"*, which
+  took Wright's recommendation of shared plus kind-specific; named 18:06,
+  *"let's call them afforded actions"*). Every creature has **watch**,
+  **approach** and **shoo**, declared on the creature class. Each kind adds
+  its own: the **wolf** call and offer, the **raven** call and offer, the
+  **bat** whisper. When a creature is visible they show as verbs in `can`
+  (§ Verbs show only when usable in
+  [reads-and-affordances.md](reads-and-affordances.md)). Further, as ruled at
+  18:06: approach is its own verb (call 3, *"rec"*); **offer uses up what you
+  are carrying** (call 2, *"it absolutely does"*); a creature notices you the
+  moment your walk's path enters its ring (call 6, *"yes"*); and an aimed
+  afforded action's reply is the creature's reaction (call 7, *"yes"*).
 - **Code decides what is possible; Jev only chooses among it.** The ring is
   measured, the menu is the reactions whose `when` holds, and a public d20
   samples the judgment. A reaction changes only the creature: no nerve, no
@@ -939,8 +991,15 @@ two cuts: "it fades or it flees" and "it is no one's".)
   creatures overlap across a crossing rather than turning over at once. In
   w44 a creature stands where it spawned and holds nothing: its stalking and
   circling are lines, and fleeing is its only leaving early.
-- **Off until the town says so.** The class's `from_crossing` dial is null,
-  and a null dial spawns nothing.
+  *SUPERSEDED 2026-10-17 13:58 (Darko, WLD-56): one creature a window, the
+  kinds in turn, a bat first.* Each kind's `count_per_window` is 1, and the class's
+  `rotation` dial names the kinds in turn, `bat raven wolf`: window
+  N brings only the kind whose turn it is, counted from the launch dial
+  (`tools/creatures.mjs § countsFor`). A null `rotation` brings every kind at
+  its own count.
+- **Off until the town says so.** A null `from_crossing` dial spawns nothing.
+  It stands at 259, the window that opens 2026-10-19 at 12:00Z, the first
+  window seeded after that day's 06:00Z settlement.
 
 Rendered in the world as `the-town/creature`, `the-town/wolf`, `the-town/raven` and `the-town/bat`.
 
@@ -1824,8 +1883,13 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   property with two child properties: `capacity`, how many it can hold, and
   `open`, whether other households may give and take.
   - **On `resident`:** `holder: true` and `capacity: 24`, both constitution
-    and locked (today's `carry_cap`). A resident has no `open`: a give to a
-    resident follows the general consent law below.
+    and locked (today's `carry_cap`). `holders`, how many holders a
+    resident carries, is constitution and unset: **a resident carries any
+    number of holders** (ruled 2026-10-18 12:17, below). A resident has no
+    `open`: a give to a resident follows the general consent law below.
+    *SUPERSEDED 2026-10-18 12:17: "and `holders: 1`, constitution and
+    locked: a resident carries at most one holder at a time (ruled
+    2026-10-17 23:29, below)."*
   - **On `thing`:** `holder` is sovereign, default false, so a thing holds
     nothing unless its maker says so. When it is true, `capacity` (sovereign,
     default 30, with constitution children `min` 1 and `max` 120) and `open`
@@ -1863,8 +1927,23 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
   taken by `take`, with the holder only as where they are. Only portable
   things show `take` (12:36, under the 12:38 `portable` ruling), so taking a
   thing that holds needs `portable: true`. **A carried
-  holder's contents travel inside it,** and it counts 1 toward its carrier's
-  `capacity`, whatever it holds (ruled 16:02).
+  holder's contents travel inside it.**
+- **Any number of holders, and counts confer up** (ruled 2026-10-18 12:17,
+  Darko, of WLD-76's recommended shape: *"Yeah, I agree with your
+  recommended shape"*; counts confer up ruled 2026-10-17 23:29: *"yes, rule
+  it, one holder and counts confer up"*):
+  - **A resident carries any number of holders.** The resident's `holders`
+    is unset, and unset means no limit.
+    *SUPERSEDED 2026-10-18 12:17: "A resident carries at most one holder at
+    a time (the resident's `holders`, 1, constitution and locked)."*
+  - **Counts confer up between holders:** a holder counts 1 plus everything
+    it holds, recursively, toward the room of whatever holds it.
+  - **In a resident's hands, each top-level thing counts 1.** The 24 is
+    unchanged, and the carried holder is 1 of the 24, however full.
+  - **The loop check is complete; there is no depth cap.**
+  *SUPERSEDED 2026-10-17 23:29 for a holder inside a holder (counts confer
+  up); it still stands for a resident's hands: "it counts 1 toward its
+  carrier's `capacity`, whatever it holds (ruled 16:02)."*
 - **Holders confer their state on what they hold** (ruled 16:02, Darko:
   *"Holders confer their state to the held, which is **why** these can be
   live. If a chest is published, anything you put in it is de facto
