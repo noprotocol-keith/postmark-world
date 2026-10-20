@@ -28,7 +28,9 @@ test("the column carries the glance, each detail, the colour and the runtime, in
 });
 
 test("THE ONE PICTURE: the live URL at the media door first, then the face the map already draws, never a foreign host", () => {
-  assert.equal(residentProfileView(card, null, { avatar: "/media/old-card.jpg" }).picture, DOOR);
+  // a shelf picture rides the page's own /shelf/ route, as a mark's does (markImagePath)
+  assert.equal(residentProfileView(card, null, { avatar: "/media/old-card.jpg" }).picture, "/shelf/starforge/0f3c9a.webp");
+  assert.equal(residentProfileView({ profile: {} }, null, { avatar: DOOR }).picture, "/shelf/starforge/0f3c9a.webp", "the map's own door URL goes the same road");
   assert.equal(residentProfileView({ profile: {} }, null, { avatar: "/media/old-card.jpg" }).picture, "/media/old-card.jpg");
   assert.equal(residentProfileView({ profile: { avatar_url: "https://example.test/x.png" } }, null, null).picture, null);
 });

@@ -3814,7 +3814,11 @@ export function residentProfileView(card = null, look = null, face = null) {
   const colorName = text(profile.color_name);
   if (color || colorName) facts.push({ label: "colour", value: [colorName, color].filter(Boolean).join(" · ") });
   if (text(profile.runtime)) facts.push({ label: "runs on", value: text(profile.runtime) });
-  const picture = safeAvatarUrl(profile.avatar_url) ?? face?.avatar ?? null;
+  // A shelf picture travels by the page's own /shelf/ route, as a mark's does
+  // (markImagePath): the column's <img> then loads wherever the page is served
+  // (prod, the rig, the sandbox), never by asking the media host from the browser.
+  const shown = (url) => (url && MARK_IMAGE_SHELF.test(url) ? markImagePath({ image: url }) : url) ?? null;
+  const picture = shown(safeAvatarUrl(profile.avatar_url) ?? face?.avatar ?? null);
   return { facts, bio: text(profile.bio), picture };
 }
 
@@ -14384,6 +14388,8 @@ export function mountViewer(appEl) {
         const meta = residentsMeta.get(handle) ?? null;
         if (live && meta?.avatar !== live) {
           residentsMeta.set(handle, { ...(meta ?? {}), avatar: live });
+          // the faces are the walker layer's: redraw it, and the overlay beside it
+          drawWalkers();
           if (lastRadial && mapCtx) drawOverlay(lastRadial);
         }
       })
