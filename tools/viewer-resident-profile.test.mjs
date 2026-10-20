@@ -46,6 +46,12 @@ test("a tree the close look cut says how many more details a closer look holds",
 });
 
 test("a resident who set nothing gets a quiet column, never an invented line", () => {
-  assert.deepEqual(residentProfileView(null, null, null), { facts: [], bio: null, picture: null });
+  assert.deepEqual(residentProfileView(null, null, null), { facts: [], bio: null, picture: null, pronouns: null });
   assert.deepEqual(residentProfileView({ profile: { color: "not-a-colour", bio: "  " } }).facts, [], "a bad colour and an empty bio say nothing");
+});
+
+test("PRONOUNS BESIDE THE NAME (Darko 2026-10-20 08:44): the close look's, else the card's; absent when unwritten, never guessed", () => {
+  assert.equal(residentProfileView({ profile: {}, pronouns: "she/her" }, null).pronouns, "she/her", "the card's");
+  assert.equal(residentProfileView({ profile: {}, pronouns: "she/her" }, { pronouns: "they/them" }).pronouns, "they/them", "the close look's, read fresh");
+  assert.equal(residentProfileView({ profile: {} }, {}).pronouns, null);
 });

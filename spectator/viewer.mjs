@@ -3819,7 +3819,9 @@ export function residentProfileView(card = null, look = null, face = null) {
   // (prod, the rig, the sandbox), never by asking the media host from the browser.
   const shown = (url) => (url && MARK_IMAGE_SHELF.test(url) ? markImagePath({ image: url }) : url) ?? null;
   const picture = shown(safeAvatarUrl(profile.avatar_url) ?? face?.avatar ?? null);
-  return { facts, bio: text(profile.bio), picture };
+  // their pronouns beside the name: the close look's, else the card's; absent when unwritten
+  const pronouns = text(look?.pronouns) ?? text(card?.pronouns);
+  return { facts, bio: text(profile.bio), picture, pronouns };
 }
 
 // The resident page for a handle. Handles are lowercase-hyphenated by the
@@ -14538,11 +14540,12 @@ export function mountViewer(appEl) {
     const profile = residentProfileView(card, inv, face);
     return {
       // the place line is in the key: it changes when the page learns a kind is a thing (not ground)
-      key: ["resident", handle, carriersEpoch, inv ? "read" : "-", card ? "card" : "-", JSON.stringify(profile.facts), profile.picture ?? "", moving ? "m" : "s", things.join(","), lines?.count ?? "-", region].join("|"),
+      key: ["resident", handle, carriersEpoch, inv ? "read" : "-", card ? "card" : "-", JSON.stringify(profile.facts), profile.picture ?? "", profile.pronouns ?? "", moving ? "m" : "s", things.join(","), lines?.count ?? "-", region].join("|"),
       handle, residentLink: false,
       residentHref: residentHref(handle),
       kicker: face.household || "a resident",
       title: face.name || handle,
+      pronouns: profile.pronouns,
       region,
       leadImage: profile.picture,
       // their bio, in their own words, is the column's body
