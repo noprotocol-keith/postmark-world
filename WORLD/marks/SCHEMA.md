@@ -212,8 +212,8 @@ mark it describes is preferred.
 
 A predicate on an **entity** (`parent: resident:<handle>`, WLD-83, 2026-10-19) is
 **not filed in this tree**. It is an act in the store's log, canon live, folded
-by the office and photographed by the crossing-save (LOGOS/classes.md § The
-appearance class). This tree stays the ground.
+by the office and photographed by the crossing-save (LOGOS/classes.md §
+Predicates on an entity). This tree stays the ground.
 
 **² `points:` — reserved, coarsely honored.** A mark may carry `points:` — an
 optional polygon (an SVG-polygon-style list of grid-meter vertices, a closed
