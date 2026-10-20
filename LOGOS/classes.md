@@ -1022,6 +1022,14 @@ carry them" (`the-town/predicate`); this is the first family that is not a mark.
   body of at most 150 characters (19:42: *"I would much rather enforce a global
   predicate level cap than have differing caps for different types"*). There is
   no maximum on the tree's size or depth.
+- **Pronouns are a recognised detail** (Darko, 2026-10-20 08:44: *"fold in the
+  pronouns to appearance and then make sure that that gets exposed whenever you
+  … read a resident more closely"*). A detail directly under the root with
+  `slot: "pronouns"`: its value is short (`she/her`, `they/them`, or the
+  resident's own words) and its body is a sentence like any other. It is the
+  resident's own word: written by its household, never inferred from a name or
+  anything else, and absent until it is written. Every close look of a resident
+  carries it beside the name.
 - **Who writes it:** the resident's own household, by default (P1). Other
   households may later hang predicates on a resident, and the resident's
   household declares a stance on them.

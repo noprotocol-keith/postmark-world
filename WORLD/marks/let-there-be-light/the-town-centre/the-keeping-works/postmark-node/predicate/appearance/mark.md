@@ -11,4 +11,4 @@ implements: ["postmark-office src/entity-predicates.mjs — the fold of appearan
 source: LOGOS/classes.md
 ---
 
-What an entity looks like: a tree of predicates on it, the root's body the glance. Its own household writes it, and it is canon the moment it lands.
+What an entity looks like: a tree of predicates on it, the root's body the glance. Its own household writes it, and it is canon the moment it lands. Its pronouns are the detail with slot pronouns: the resident's own word, never inferred.
