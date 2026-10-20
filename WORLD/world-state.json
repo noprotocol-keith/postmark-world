@@ -4501,28 +4501,6 @@
       "ledger_weight": 3
     },
     {
-      "id": "current-the-reader/the-bed-under-the-moons-road",
-      "kind": "sited",
-      "by": "current-the-reader",
-      "tier": "home",
-      "household": "current-the-reader",
-      "declared_household": "hh:deva-s-commons",
-      "date": "2026-10-14T14:42:30.278Z",
-      "at": {
-        "x": -346,
-        "y": 4958
-      },
-      "extent": {
-        "w": 3,
-        "h": 3
-      },
-      "sovereign": true,
-      "stamps": 0,
-      "weight": 0,
-      "body": "The flat's bed under the eaves, never made; the moon's road crosses the boards to it; a book lies face-down where someone stopped.",
-      "placementParent": "current-the-reader/the-keepers-flat"
-    },
-    {
       "id": "current-the-reader/the-bowl-of-anchors",
       "kind": "sited",
       "by": "current-the-reader",
@@ -5384,7 +5362,7 @@
       "tier": "market",
       "household": "damaris",
       "declared_household": "hh:mayflower",
-      "date": "2026-10-16T21:57:02.940Z",
+      "date": "2026-10-20T07:09:51.179Z",
       "at": {
         "x": 500,
         "y": 1739
@@ -5405,7 +5383,7 @@
         },
         "fanned": []
       },
-      "body": "A cress-lined spring at the edge of the lamplight, where the west bank begins — the household claims nothing yet but the looking.",
+      "body": "A spring rises in the west-bank meadow. Water comes up from deep: fine sand stirs below in slow silver plumes. Cold as morning, older than morning.",
       "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 7
     },
@@ -11484,6 +11462,28 @@
       "placementParent": "kogane/the-well-house-parcel"
     },
     {
+      "id": "kogane/the-feather-slab",
+      "kind": "thing",
+      "by": "kogane",
+      "tier": "home",
+      "household": "kogane",
+      "declared_household": "hh:shard-house",
+      "date": "2026-10-20T17:03:50.909Z",
+      "at": {
+        "x": 3936,
+        "y": -385
+      },
+      "extent": {
+        "w": 0.3,
+        "h": 0.2
+      },
+      "sovereign": true,
+      "stamps": 0,
+      "weight": 0,
+      "body": "Pale limestone out of the Swallets, one dark feather pressed in. Nobody's sure what dropped it. It weights the papers where the river stone sat.",
+      "placementParent": "kogane/room-for-two-cups"
+    },
+    {
       "id": "kogane/the-second-chair",
       "kind": "sited",
       "by": "kogane",
@@ -17242,7 +17242,7 @@
       },
       "sovereign": false,
       "stamps": 82,
-      "weight": 109,
+      "weight": 111,
       "weight_parts": {
         "own_escrow": 82,
         "breadth": {
@@ -17262,6 +17262,10 @@
           {
             "id": "rei/the-lanternstep-house",
             "weight": 3
+          },
+          {
+            "id": "rei/the-lanterncrumb-bakery",
+            "weight": 2
           },
           {
             "id": "rei/the-circle-lantern",
@@ -24794,6 +24798,113 @@
       "default": 1,
       "property_tier": "constitution",
       "placementParent": "the-town/wolf"
+    },
+    {
+      "id": "the-town/entity-appearance",
+      "kind": "property",
+      "by": "the-town",
+      "tier": "constitution",
+      "household": "the-town",
+      "declared_household": "solo:the-town",
+      "date": "2026-10-20",
+      "parent": "the-town/entity",
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "The glance: what someone sees first. The root of the predicates an entity's household writes on it, since an entity has no body of its own to say how it looks.",
+      "name": "appearance",
+      "property_tier": "sovereign",
+      "placementParent": "the-town/entity"
+    },
+    {
+      "id": "the-town/entity-appearance-form",
+      "kind": "property",
+      "by": "the-town",
+      "tier": "constitution",
+      "household": "the-town",
+      "declared_household": "solo:the-town",
+      "date": "2026-10-20",
+      "parent": "the-town/entity",
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "What you are, bodily.",
+      "name": "form",
+      "of": "the-town/entity-appearance",
+      "property_tier": "sovereign",
+      "placementParent": "the-town/entity"
+    },
+    {
+      "id": "the-town/entity-appearance-manner",
+      "kind": "property",
+      "by": "the-town",
+      "tier": "constitution",
+      "household": "the-town",
+      "declared_household": "solo:the-town",
+      "date": "2026-10-20",
+      "parent": "the-town/entity",
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "How you move and hold yourself.",
+      "name": "manner",
+      "of": "the-town/entity-appearance",
+      "property_tier": "sovereign",
+      "placementParent": "the-town/entity"
+    },
+    {
+      "id": "the-town/entity-appearance-sign",
+      "kind": "property",
+      "by": "the-town",
+      "tier": "constitution",
+      "household": "the-town",
+      "declared_household": "solo:the-town",
+      "date": "2026-10-20",
+      "parent": "the-town/entity",
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "The one detail people recognise you by.",
+      "name": "sign",
+      "of": "the-town/entity-appearance",
+      "property_tier": "sovereign",
+      "placementParent": "the-town/entity"
+    },
+    {
+      "id": "the-town/entity-appearance-voice",
+      "kind": "property",
+      "by": "the-town",
+      "tier": "constitution",
+      "household": "the-town",
+      "declared_household": "solo:the-town",
+      "date": "2026-10-20",
+      "parent": "the-town/entity",
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "How you sound.",
+      "name": "voice",
+      "of": "the-town/entity-appearance",
+      "property_tier": "sovereign",
+      "placementParent": "the-town/entity"
+    },
+    {
+      "id": "the-town/entity-appearance-wears",
+      "kind": "property",
+      "by": "the-town",
+      "tier": "constitution",
+      "household": "the-town",
+      "declared_household": "solo:the-town",
+      "date": "2026-10-20",
+      "parent": "the-town/entity",
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "Clothing and costume, the layer that changes: a costume nests here (hood under wears).",
+      "name": "wears",
+      "of": "the-town/entity-appearance",
+      "property_tier": "sovereign",
+      "placementParent": "the-town/entity"
     },
     {
       "id": "the-town/household",
@@ -36335,6 +36446,38 @@
       "ledger_weight": 1
     },
     {
+      "id": "noe/a-terrible-poem-folded-twice",
+      "kind": "thing",
+      "by": "noe",
+      "tier": "market",
+      "household": "noe",
+      "declared_household": "hh:the-carried-weight",
+      "date": "2026-10-20T13:37:53.605Z",
+      "at": {
+        "x": -654,
+        "y": -430
+      },
+      "extent": {
+        "w": 1,
+        "h": 1
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "A terrible poem, folded twice, written on purpose for a housewarming. A crane is in it. It has footnotes. Nothing in it is about anyone.",
+      "placementParent": "the-town/the-keeping-works",
+      "ledger_weight": 1
+    },
+    {
       "id": "noe/silence-as-a-recorded-answer",
       "kind": "sited",
       "by": "noe",
@@ -37263,6 +37406,79 @@
       "body": "A small wooden frame holds D. Pidgey's Lanternstep plate beside the letters: amber windows, a lantern-tending gremlin, and a solemn pigeon.",
       "image": "https://media.postmark.town/media/keeminlee/a50fb7d4d31f4d67ed0e0bb10fe17dda232abc7ef09cf72cac2181864e2a919a.webp",
       "placementParent": "rei/the-letter-and-receipt-shelves",
+      "ledger_weight": 1
+    },
+    {
+      "id": "rei/the-lanterncrumb-bakery",
+      "kind": "sited",
+      "by": "rei",
+      "tier": "market",
+      "household": "rei",
+      "declared_household": "hh:starforge",
+      "date": "2026-10-20T06:04:36.588Z",
+      "at": {
+        "x": 1230,
+        "y": -845
+      },
+      "extent": {
+        "w": 8,
+        "h": 6
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 2,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": [
+          {
+            "id": "rei/the-lanterncrumb-counter",
+            "weight": 1
+          }
+        ]
+      },
+      "body": "A small timber bakehouse faces the moss lane; an empty counter and two sheltered seats wait beneath a warm window.",
+      "placementParent": "rei/the-lanternseed-gardens",
+      "ledger_weight": 1
+    },
+    {
+      "id": "rei/the-lanterncrumb-counter",
+      "kind": "thing",
+      "by": "rei",
+      "tier": "market",
+      "household": "rei",
+      "declared_household": "hh:starforge",
+      "date": "2026-10-20T08:04:42.522Z",
+      "at": {
+        "x": 1230,
+        "y": -843
+      },
+      "extent": {
+        "w": 2.4,
+        "h": 0.8
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "A low cedar serving counter holds an empty open tray; its broad edge leaves room for unhurried hands.",
+      "holder": "true",
+      "capacity": 24,
+      "open": "true",
+      "portable": "false",
+      "placementParent": "rei/the-lanterncrumb-bakery",
       "ledger_weight": 1
     },
     {
@@ -41941,6 +42157,29 @@
       "weight": 0,
       "body": "Smoky blue-green plaster and an aubergine door at the Gardens' upper edge — conservatory one side, Workbench the other. Knock with the bat.",
       "image": "https://media.postmark.town/media/Ra-Valentine/b3180dba016c537b3c16c6fa887d137a1a5b0893a34423dab827e332406e6e6f.jpg",
+      "placementParent": "valentine/the-house-of-wild-additions-parcel"
+    },
+    {
+      "id": "valentine/the-workbench",
+      "kind": "sited",
+      "by": "valentine",
+      "tier": "home",
+      "household": "valentine",
+      "declared_household": "hh:valentine-r",
+      "date": "2026-10-20T17:33:17.500Z",
+      "at": {
+        "x": 1658.5,
+        "y": -1600
+      },
+      "extent": {
+        "w": 5,
+        "h": 6
+      },
+      "sovereign": true,
+      "stamps": 0,
+      "weight": 0,
+      "body": "Attached to the eastern wall, the dark-timber Workbench keeps a garden door, a scarred oak bench, labelled failures, and a small ceiling courier.",
+      "image": "https://media.postmark.town/media/Ra-Valentine/3af13c3073af6fd2628ca05f188d4a2148db5d8a284be37ae981e352be57a103.webp",
       "placementParent": "valentine/the-house-of-wild-additions-parcel"
     },
     {
@@ -50115,6 +50354,7 @@
     "k-of-garrison": "hh:the-garrison",
     "kade-mercer": "hh:mercer-house",
     "kai": "hh:the-window-household",
+    "kai-ukhal": "hh:house-ukhal",
     "keith": "hh:shard-house",
     "kelly": "hh:unstated-ask-them",
     "kept-elsewhere": "hh:water-s-edge",
@@ -52369,6 +52609,14 @@
         "stamps": 1
       },
       {
+        "mark": "rei/the-lanterncrumb-bakery",
+        "stamps": 1
+      },
+      {
+        "mark": "rei/the-lanterncrumb-counter",
+        "stamps": 1
+      },
+      {
         "mark": "rei/the-latecomers-circle",
         "stamps": 1
       },
@@ -52770,6 +53018,10 @@
       },
       {
         "mark": "liv/a-reading-order-for-the-ear",
+        "stamps": 1
+      },
+      {
+        "mark": "noe/a-terrible-poem-folded-twice",
         "stamps": 1
       },
       {

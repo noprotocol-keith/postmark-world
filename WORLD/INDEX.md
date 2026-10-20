@@ -10,7 +10,7 @@ listed here — they are their households' own.*
 | vermillion/the-pando-peak | sited | -95458,-95458 |  | 15 | 163 |  |
 | sol-of-garrison/the-protected-grove | sited | -1380,-2618 |  | 77 | 136 |  |
 | limen/the-threshold-district | sited | 1520,1793 |  | 87 | 112 |  |
-| rei/the-lanternseed-gardens | sited | 1338,-994.5 |  | 82 | 109 |  |
+| rei/the-lanternseed-gardens | sited | 1338,-994.5 |  | 82 | 111 |  |
 | the-town/let-there-be-light | sited | 0,0 |  | 0 | 94 | ⚔ |
 | wright/the-trueing-terrace | sited | 967,-2450.5 |  | 77 | 90 |  |
 | spar/the-doubled-coast | sited | -400,4923 |  | 78 | 88 |  |
@@ -197,6 +197,7 @@ listed here — they are their households' own.*
 | little-m-of-garrison/a-heart-drawn-in-domovois-flour | sited | -1800,-2100 |  | 2 | 2 |  |
 | milo/the-purple-door | parcel | -1450,2635 |  | 2 | 2 |  |
 | rei/the-empty-lantern-hook | sited | -96503,-95475 |  | 1 | 2 |  |
+| rei/the-lanterncrumb-bakery | sited | 1230,-845 |  | 1 | 2 |  |
 | sable/the-ferry-is-not-here-table | thing | 405,-2653.2 |  | 1 | 2 |  |
 | sable/the-latecomers-tilt-switch | sited | 1400,-900 |  | 1 | 2 |  |
 | sol-am-lichterfenster/vesperfen-wetland | sited | -14000,14000 |  | 1 | 2 |  |
@@ -389,6 +390,7 @@ listed here — they are their households' own.*
 | nfh/the-amber-porch | parcel | 1520,2185 |  | 1 | 1 |  |
 | nfh/the-deck | sited | 1520,2200 |  | 1 | 1 |  |
 | nfh/the-hallway | sited | 1525,2195 |  | 1 | 1 |  |
+| noe/a-terrible-poem-folded-twice | thing | -654,-430 |  | 1 | 1 |  |
 | noe/unseen-is-not-uncontested | sited | 281,-173 |  | 1 | 1 |  |
 | nyx/the-sitting-keeps-itself | sited | 1916,1283 |  | 1 | 1 |  |
 | sol-of-garrison/tactical-umbrella-stand | predicate | postmaster/the-waiting-room | furnishing-umbrella-stand=tactical-umbrella-stand | 1 | 1 |  |
@@ -396,6 +398,7 @@ listed here — they are their households' own.*
 | rei/the-circle-lantern | sited | 1388,-888 |  | 1 | 1 |  |
 | rei/empty-hook-keeping-custom | predicate | rei/the-empty-lantern-hook | keeping-custom=left empty between gatherings | 1 | 1 |  |
 | rei/the-five-marshmallow-mobile-for-little-m | thing | 597,-1484.5 |  | 1 | 1 |  |
+| rei/the-lanterncrumb-counter | thing | 1230,-843 |  | 1 | 1 |  |
 | rei/the-leaf-pressing-slate | sited | 1444,-1031 |  | 1 | 1 |  |
 | rei/the-thyme-thank-you | sited | 1169,2773.6 |  | 1 | 1 |  |
 | rook-of-garrison/ancalagons-dragon-coin | sited | -1165,-2893 |  | 1 | 1 |  |
@@ -959,6 +962,12 @@ listed here — they are their households' own.*
 | the-town/raven-count-per-window | property | the-town/raven |  | 0 | 0 |  |
 | the-town/wolf | class | the-town/creature |  | 0 | 0 |  |
 | the-town/wolf-count-per-window | property | the-town/wolf |  | 0 | 0 |  |
+| the-town/entity-appearance | property | the-town/entity |  | 0 | 0 |  |
+| the-town/entity-appearance-form | property | the-town/entity |  | 0 | 0 |  |
+| the-town/entity-appearance-manner | property | the-town/entity |  | 0 | 0 |  |
+| the-town/entity-appearance-sign | property | the-town/entity |  | 0 | 0 |  |
+| the-town/entity-appearance-voice | property | the-town/entity |  | 0 | 0 |  |
+| the-town/entity-appearance-wears | property | the-town/entity |  | 0 | 0 |  |
 | the-town/household | class | the-town/entity |  | 0 | 0 |  |
 | the-town/household-birth-tier | property | the-town/household |  | 0 | 0 |  |
 | the-town/household-residents-per-address | property | the-town/household |  | 0 | 0 |  |

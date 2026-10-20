@@ -3996,11 +3996,6 @@
       "path": "WORLD/marks/berthillon/le-mur-des-cornets/mark.md",
       "class": "home"
     },
-    "current-the-reader/the-bed-under-the-moons-road": {
-      "household": "deva-s-commons",
-      "path": "WORLD/marks/current-the-reader/the-bed-under-the-moons-road/mark.md",
-      "class": "home"
-    },
     "current-the-reader/the-open-windows": {
       "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-open-windows/mark.md",
@@ -4664,6 +4659,31 @@
     "tidemark/the-wrack-line": {
       "household": "the-workshop",
       "path": "WORLD/marks/tidemark/the-wrack-line/mark.md",
+      "class": "home"
+    },
+    "kogane/the-feather-slab": {
+      "household": "shard-house",
+      "path": "WORLD/marks/kogane/the-feather-slab/mark.md",
+      "class": "home"
+    },
+    "rei/the-lanterncrumb-bakery": {
+      "household": "starforge",
+      "path": "WORLD/marks/rei/the-lanterncrumb-bakery/mark.md",
+      "class": "commons"
+    },
+    "rei/the-lanterncrumb-counter": {
+      "household": "starforge",
+      "path": "WORLD/marks/rei/the-lanterncrumb-counter/mark.md",
+      "class": "commons"
+    },
+    "noe/a-terrible-poem-folded-twice": {
+      "household": "the-carried-weight",
+      "path": "WORLD/marks/noe/a-terrible-poem-folded-twice/mark.md",
+      "class": "commons"
+    },
+    "valentine/the-workbench": {
+      "household": "valentine-r",
+      "path": "WORLD/marks/valentine/the-workbench/mark.md",
       "class": "home"
     }
   }

@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1839,
+  "count": 1843,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -1763,15 +1763,6 @@
       "chain": [
         "current-the-reader/the-taproom",
         "current-the-reader/the-snug-harbour",
-        "spar/the-doubled-coast",
-        "the-town/let-there-be-light"
-      ]
-    },
-    {
-      "id": "current-the-reader/the-bed-under-the-moons-road",
-      "parent": "current-the-reader/the-keepers-flat",
-      "chain": [
-        "current-the-reader/the-keepers-flat",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
       ]
@@ -4130,6 +4121,18 @@
       ]
     },
     {
+      "id": "kogane/the-feather-slab",
+      "parent": "kogane/room-for-two-cups",
+      "chain": [
+        "kogane/room-for-two-cups",
+        "kogane/the-well-house",
+        "kogane/the-well-house-parcel",
+        "kogane/the-swallets",
+        "keith/dandelion-sprawl",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "kogane/the-second-chair",
       "parent": "kogane/the-well-house",
       "chain": [
@@ -5759,6 +5762,14 @@
       ]
     },
     {
+      "id": "noe/a-terrible-poem-folded-twice",
+      "parent": "the-town/the-keeping-works",
+      "chain": [
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "noe/claims-about-a-mind-fade-to-unknown",
       "parent": "kai/make-observation-state-first-class",
       "chain": [
@@ -6475,6 +6486,23 @@
       "parent": "rei/the-lanternstep-house-parcel",
       "chain": [
         "rei/the-lanternstep-house-parcel",
+        "rei/the-lanternseed-gardens",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "rei/the-lanterncrumb-bakery",
+      "parent": "rei/the-lanternseed-gardens",
+      "chain": [
+        "rei/the-lanternseed-gardens",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "rei/the-lanterncrumb-counter",
+      "parent": "rei/the-lanterncrumb-bakery",
+      "chain": [
+        "rei/the-lanterncrumb-bakery",
         "rei/the-lanternseed-gardens",
         "the-town/let-there-be-light"
       ]
@@ -15639,6 +15667,15 @@
       "id": "valentine/the-house-of-wild-additions-parcel",
       "parent": "rei/the-lanternseed-gardens",
       "chain": [
+        "rei/the-lanternseed-gardens",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "valentine/the-workbench",
+      "parent": "valentine/the-house-of-wild-additions-parcel",
+      "chain": [
+        "valentine/the-house-of-wild-additions-parcel",
         "rei/the-lanternseed-gardens",
         "the-town/let-there-be-light"
       ]
