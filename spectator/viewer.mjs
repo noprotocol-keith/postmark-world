@@ -3777,6 +3777,51 @@ export function residentFace(handle, meta = null) {
   };
 }
 
+// THE RESIDENT'S COLUMN IS THE WHOLE PROFILE (WLD-83, Darko 2026-10-19 17:50:
+// "This should really be where we have everything"): what they look like, their
+// bio, their colour and what they run on, beside where they are and what they
+// carry. Pure, so it is tested without a browser.
+//
+// `card` is the office's GET /residents/{handle} answer (its `profile` is the
+// resident's PROFILE.md bubble, its `appearance` their own tree, canon live);
+// `look` is their close look (`world { investigate }`), whose `appearance` is
+// the same tree. The close look's is preferred: it is the read the page already
+// holds fresh. Every value is the resident's own text, set as text, never HTML.
+//
+// THE ONE PICTURE (WLD-83 part 1): the URL at the town's media door first, then
+// the face the map already draws; the live card can only make it newer.
+export function residentProfileView(card = null, look = null, face = null) {
+  const profile = card?.profile && typeof card.profile === "object" ? card.profile : {};
+  const tree = (look?.appearance && !look.appearance.unavailable ? look.appearance : null)
+    ?? (card?.appearance && !card.appearance.unavailable ? card.appearance : null);
+  const text = (v) => (typeof v === "string" && v.trim() ? v.trim() : null);
+  const facts = [];
+  if (tree && text(tree.body)) {
+    facts.push({ label: "looks", value: text(tree.body) });
+    for (const p of tree.predicates ?? []) {
+      if (!text(p?.slot)) continue;
+      const value = text(p.value) ?? "";
+      const body = text(p.body);
+      facts.push({ label: p.slot, value: value || body || "", ...(body && body !== value ? { detail: body } : {}) });
+    }
+    const more = Number(tree.more?.predicates ?? 0);
+    if (more > 0) facts.push({ label: "and", value: `${more} more detail${more === 1 ? "" : "s"}, on a closer look` });
+  }
+  // the colour they chose, or none: never the map's default gold (safeHexColor's
+  // fallback), because a colour on this line reads as theirs
+  const hex = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(profile.color ?? "").trim());
+  const color = hex ? `#${hex[1].toLowerCase()}` : null;
+  const colorName = text(profile.color_name);
+  if (color || colorName) facts.push({ label: "colour", value: [colorName, color].filter(Boolean).join(" · ") });
+  if (text(profile.runtime)) facts.push({ label: "runs on", value: text(profile.runtime) });
+  // A shelf picture travels by the page's own /shelf/ route, as a mark's does
+  // (markImagePath): the column's <img> then loads wherever the page is served
+  // (prod, the rig, the sandbox), never by asking the media host from the browser.
+  const shown = (url) => (url && MARK_IMAGE_SHELF.test(url) ? markImagePath({ image: url }) : url) ?? null;
+  const picture = shown(safeAvatarUrl(profile.avatar_url) ?? face?.avatar ?? null);
+  return { facts, bio: text(profile.bio), picture };
+}
+
 // The resident page for a handle. Handles are lowercase-hyphenated by the
 // town's own law, but this is a link built from map data, so it is encoded
 // rather than trusted — and a handle that isn't handle-shaped gets no link at
@@ -14326,6 +14371,32 @@ export function mountViewer(appEl) {
   /** The close look in hand for a mark, or null while it is being asked. */
   function markCloseLook(id) { return loadCloseLook("mark", id)?.read ?? null; }
   function residentCloseLook(handle) { return loadCloseLook("investigate", handle)?.read ?? null; }
+  // THE RESIDENT'S CARD (WLD-83): GET /residents/{handle}, keyless and public,
+  // asked at most every CLOSE_LOOK_MS while their column is open. Its picture is
+  // the one the office holds now, so a picture changed since the site last built
+  // `residents-meta.json` reaches the map's face the moment the column is opened.
+  const residentCards = new Map();   // handle -> { at, card, pending }
+  function residentCard(handle) {
+    const held = residentCards.get(handle);
+    if (held && (held.pending || Date.now() - held.at < CLOSE_LOOK_MS)) return held.card ?? null;
+    residentCards.set(handle, { ...(held ?? {}), pending: true, at: held?.at ?? 0 });
+    fetch(officeUrl(`/residents/${encodeURIComponent(handle)}`), { headers: { accept: "application/json" }, credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((card) => {
+        residentCards.set(handle, { at: Date.now(), card: card && !card.error ? card : null });
+        const live = safeAvatarUrl(card?.profile?.avatar_url);
+        const meta = residentsMeta.get(handle) ?? null;
+        if (live && meta?.avatar !== live) {
+          residentsMeta.set(handle, { ...(meta ?? {}), avatar: live });
+          // the faces are the walker layer's: redraw it, and the overlay beside it
+          drawWalkers();
+          if (lastRadial && mapCtx) drawOverlay(lastRadial);
+        }
+      })
+      .catch(() => residentCards.set(handle, { at: Date.now(), card: null }))
+      .finally(() => syncMarkInteractionViews());
+    return held?.card ?? null;
+  }
   // what a close look says a kind IS: only a yes is kept (holdings.mjs § thingKindLedger)
   function noteThingKind(mark, focus) { thingKinds.fromLook(classToken(instanceClassOf(mark)), focus); }
   // A KIND THE PAGE HOLDS NO CLASS MARK FOR is asked of the class layer once, at
@@ -14462,20 +14533,24 @@ export function mountViewer(appEl) {
     const moving = w.moving ?? (!w.arrived && !w.standing);
     const things = lines?.things ?? [];
     const region = moving ? walkingLabel(w.remaining_m, w.eta_crossings) : walkerPlace(w);
+    // the whole profile (WLD-83): the office's card, read live like the close look
+    const card = residentCard(handle);
+    const profile = residentProfileView(card, inv, face);
     return {
       // the place line is in the key: it changes when the page learns a kind is a thing (not ground)
-      key: ["resident", handle, carriersEpoch, inv ? "read" : "-", moving ? "m" : "s", things.join(","), lines?.count ?? "-", region].join("|"),
+      key: ["resident", handle, carriersEpoch, inv ? "read" : "-", card ? "card" : "-", JSON.stringify(profile.facts), profile.picture ?? "", moving ? "m" : "s", things.join(","), lines?.count ?? "-", region].join("|"),
       handle, residentLink: false,
       residentHref: residentHref(handle),
       kicker: face.household || "a resident",
       title: face.name || handle,
       region,
-      leadImage: null,
-      door: { description: "" },
+      leadImage: profile.picture,
+      // their bio, in their own words, is the column's body
+      door: { description: profile.bio ?? "" },
       byline: handle === state.handle && onResidentPath() ? "you" : handle,
       // the whole things are the relation below, each a way into its own column
-      facts: lines ? holdingFacts({ ...lines, things: [] }, "carrying")
-        : closeLooks.get(`${asWho()}|investigate|${handle}`)?.at ? [] : [{ label: "carrying", value: "reading their hands…" }],
+      facts: [...profile.facts, ...(lines ? holdingFacts({ ...lines, things: [] }, "carrying")
+        : closeLooks.get(`${asWho()}|investigate|${handle}`)?.at ? [] : [{ label: "carrying", value: "reading their hands…" }])],
       relations: things.length ? [{ label: "whole things", items: things.map((t) => ({ id: t, name: lines.names?.get(t) ?? markIdentity(byId.get(t) ?? { id: t }) })) }] : [],
     };
   }
