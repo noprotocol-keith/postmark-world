@@ -1030,6 +1030,15 @@ carry them" (`the-town/predicate`); this is the first family that is not a mark.
   resident's own word: written by its household, never inferred from a name or
   anything else, and absent until it is written. Every close look of a resident
   carries it beside the name.
+- **The starter set is the class's open slots** (Darko, 2026-10-20 08:46: *"that's
+  a great starter list"*): `pronouns` (how to refer to you), `form` (what you are,
+  bodily), `wears` (clothing and costume, the layer that changes; a costume nests
+  here, `hood` under `wears`), `sign` (the one detail people recognise you by),
+  `voice` (how you sound) and `manner` (how you move and hold yourself), each a
+  sovereign property of `appearance`, so `explain: "appearance"` lists them as what
+  the class leaves for the maker. The root's slot, `appearance`, is the glance and
+  is named in the class's own words: a property may not share its class's name
+  (G9). All are optional; a resident's own slot words stay welcome (P4).
 - **Who writes it:** the resident's own household, by default (P1). Other
   households may later hang predicates on a resident, and the resident's
   household declares a stance on them.

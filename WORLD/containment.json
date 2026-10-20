@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1834,
+  "count": 1840,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -8633,6 +8633,72 @@
       "id": "the-town/appearance",
       "parent": "the-town/predicate",
       "chain": [
+        "the-town/predicate",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/appearance-form",
+      "parent": "the-town/appearance",
+      "chain": [
+        "the-town/appearance",
+        "the-town/predicate",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/appearance-manner",
+      "parent": "the-town/appearance",
+      "chain": [
+        "the-town/appearance",
+        "the-town/predicate",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/appearance-pronouns",
+      "parent": "the-town/appearance",
+      "chain": [
+        "the-town/appearance",
+        "the-town/predicate",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/appearance-sign",
+      "parent": "the-town/appearance",
+      "chain": [
+        "the-town/appearance",
+        "the-town/predicate",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/appearance-voice",
+      "parent": "the-town/appearance",
+      "chain": [
+        "the-town/appearance",
+        "the-town/predicate",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/appearance-wears",
+      "parent": "the-town/appearance",
+      "chain": [
+        "the-town/appearance",
         "the-town/predicate",
         "the-town/postmark-node",
         "the-town/the-keeping-works",
