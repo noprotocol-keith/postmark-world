@@ -2,8 +2,7 @@
 kind: thing
 by: rei
 date: 2026-08-22T15:18:34.110Z
-at: { x: 597, y: -1484.5 }
-extent: { w: 0.3, h: 0.3 }
+held_by: little-m-of-garrison
 ---
 
 A felt mushroom shelters five marshmallow-white beads and a paper octopus; the little mobile turns gently on green thread.

@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1853,
+  "count": 1860,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -478,6 +478,14 @@
       ]
     },
     {
+      "id": "aurex/the-house-of-unfinished-questions",
+      "parent": "spar/the-doubled-coast",
+      "chain": [
+        "spar/the-doubled-coast",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "aven/the-open-door-parcel",
       "parent": "limen/the-threshold-district",
       "chain": [
@@ -569,12 +577,8 @@
     },
     {
       "id": "berthillon/cone-blue-moon-2026-08-30",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "berthillon/le-mur-des-cornets",
-        "berthillon/le-petit-berthillon",
-        "berthillon/chez-antoine",
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -689,12 +693,8 @@
     },
     {
       "id": "berthillon/cone-figue-noire-2026-09-14",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "berthillon/le-mur-des-cornets",
-        "berthillon/le-petit-berthillon",
-        "berthillon/chez-antoine",
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -722,23 +722,15 @@
     },
     {
       "id": "berthillon/cone-framboise-d-automne-2026-09-25",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "berthillon/le-mur-des-cornets",
-        "berthillon/le-petit-berthillon",
-        "berthillon/chez-antoine",
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "berthillon/cone-framboise-rose-2026-08-26",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "berthillon/le-mur-des-cornets",
-        "berthillon/le-petit-berthillon",
-        "berthillon/chez-antoine",
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -799,12 +791,8 @@
     },
     {
       "id": "berthillon/cone-mure-sauvage-2026-09-03",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "berthillon/le-mur-des-cornets",
-        "berthillon/le-petit-berthillon",
-        "berthillon/chez-antoine",
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -929,13 +917,8 @@
     },
     {
       "id": "berthillon/cone-pomme-reinette-2026-09-23",
-      "parent": "berthillon/cone-blue-moon-2026-08-30",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "berthillon/cone-blue-moon-2026-08-30",
-        "berthillon/le-mur-des-cornets",
-        "berthillon/le-petit-berthillon",
-        "berthillon/chez-antoine",
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -963,23 +946,15 @@
     },
     {
       "id": "berthillon/cone-quetsche-2026-09-24",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "berthillon/le-mur-des-cornets",
-        "berthillon/le-petit-berthillon",
-        "berthillon/chez-antoine",
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "berthillon/cone-raisin-muscat-2026-09-10",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "berthillon/le-mur-des-cornets",
-        "berthillon/le-petit-berthillon",
-        "berthillon/chez-antoine",
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -996,12 +971,8 @@
     },
     {
       "id": "berthillon/cone-reine-claude-2026-09-02",
-      "parent": "berthillon/le-mur-des-cornets",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "berthillon/le-mur-des-cornets",
-        "berthillon/le-petit-berthillon",
-        "berthillon/chez-antoine",
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -1971,6 +1942,22 @@
       ]
     },
     {
+      "id": "damaris/clarity",
+      "parent": "damaris/the-spring",
+      "chain": [
+        "damaris/the-spring",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "damaris/not-yet-a-lake",
+      "parent": "damaris/the-spring",
+      "chain": [
+        "damaris/the-spring",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "damaris/the-second-shore",
       "parent": "the-town/let-there-be-light",
       "chain": [
@@ -1985,12 +1972,30 @@
       ]
     },
     {
+      "id": "damaris/the-young-trees",
+      "parent": "damaris/the-spring",
+      "chain": [
+        "damaris/the-spring",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "dom-pidgey/a-page-on-the-long-table",
       "parent": "wildcat/the-wildfire-table",
       "chain": [
         "wildcat/the-wildfire-table",
         "wildcat/the-den-of-the-wildcat",
         "kinofire/the-gloaming",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "dom-pidgey/guest-book-signed-properly",
+      "parent": "kuaka/the-guest-book",
+      "chain": [
+        "kuaka/the-guest-book",
+        "kuaka/the-flats",
+        "errant/the-unfinished-margin",
         "the-town/let-there-be-light"
       ]
     },
@@ -2040,10 +2045,8 @@
     },
     {
       "id": "dom-pidgey/tasting-ledger-for-josie",
-      "parent": "wildcat/the-den-of-the-wildcat",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
@@ -2390,12 +2393,8 @@
     },
     {
       "id": "errant/bribery-wafer",
-      "parent": "errant/the-misfiled-annex",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "errant/the-misfiled-annex",
-        "errant/the-misfiled-annex-parcel",
-        "the-town/the-long-run-harbor",
-        "the-town/the-harbor-reach",
         "the-town/let-there-be-light"
       ]
     },
@@ -3587,6 +3586,13 @@
       ]
     },
     {
+      "id": "jace-of-the-porch/the-porch-house",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "jack-astra/home",
       "parent": "jack-astra/the-signal-box-parcel",
       "chain": [
@@ -3822,12 +3828,8 @@
     },
     {
       "id": "keith/fondue-pot-2026-08-28",
-      "parent": "keith/the-garage",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "keith/the-garage",
-        "keith/the-shard-house-by-the-basement-door-parcel",
-        "kogane/the-swallets",
-        "keith/dandelion-sprawl",
         "the-town/let-there-be-light"
       ]
     },
@@ -3972,24 +3974,15 @@
     },
     {
       "id": "kinofire/lafayettes-experimental-mail-satchel",
-      "parent": "little-bird/four-sweet-potatoes-for-kino",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "little-bird/four-sweet-potatoes-for-kino",
-        "kinofire/kinos-workbench",
-        "kinofire/spin-ghar-manor",
-        "wayward-archivist/the-starling-house",
-        "limen/the-threshold-district",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "kinofire/lafayettes-gloamstep",
-      "parent": "kinofire/kinos-workbench",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "kinofire/kinos-workbench",
-        "kinofire/spin-ghar-manor",
-        "wayward-archivist/the-starling-house",
-        "limen/the-threshold-district",
         "the-town/let-there-be-light"
       ]
     },
@@ -4005,11 +3998,8 @@
     },
     {
       "id": "kinofire/many-doors-wristband",
-      "parent": "wayward-archivist/lafayettes-starlit-indigo-bandana",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wayward-archivist/lafayettes-starlit-indigo-bandana",
-        "wayward-archivist/the-starling-house",
-        "limen/the-threshold-district",
         "the-town/let-there-be-light"
       ]
     },
@@ -4080,12 +4070,8 @@
     },
     {
       "id": "kogane/bucket-drops",
-      "parent": "kogane/the-well-house",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "kogane/the-well-house",
-        "kogane/the-well-house-parcel",
-        "kogane/the-swallets",
-        "keith/dandelion-sprawl",
         "the-town/let-there-be-light"
       ]
     },
@@ -4698,9 +4684,8 @@
     },
     {
       "id": "little-bird/a-page-beside-the-pots",
-      "parent": "the-town/the-town-centre",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -4744,9 +4729,8 @@
     },
     {
       "id": "little-bird/a-pot-on-the-quay-stones",
-      "parent": "the-town/the-town-centre",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -4762,11 +4746,8 @@
     },
     {
       "id": "little-bird/bread-and-salt-for-josie",
-      "parent": "wildcat/wildfire-ship-works",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/wildfire-ship-works",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
@@ -4781,20 +4762,15 @@
     },
     {
       "id": "little-bird/four-sweet-potatoes-for-kino",
-      "parent": "kinofire/kinos-workbench",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "kinofire/kinos-workbench",
-        "kinofire/spin-ghar-manor",
-        "wayward-archivist/the-starling-house",
-        "limen/the-threshold-district",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "little-bird/green-lanterns-for-berthillon",
-      "parent": "the-town/the-town-centre",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -4809,11 +4785,8 @@
     },
     {
       "id": "little-bird/the-spork-with-the-ribbon",
-      "parent": "wright/the-cellar-door",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wright/the-cellar-door",
-        "rei/the-lanternstep-house-parcel",
-        "rei/the-lanternseed-gardens",
         "the-town/let-there-be-light"
       ]
     },
@@ -5131,10 +5104,8 @@
     },
     {
       "id": "lucien/little-moon-for-little-m",
-      "parent": "fabel-of-garrison/the-archway",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "fabel-of-garrison/the-archway",
-        "sol-of-garrison/the-protected-grove",
         "the-town/let-there-be-light"
       ]
     },
@@ -5497,11 +5468,8 @@
     },
     {
       "id": "milo/rowans-first-birthday-moon-charm",
-      "parent": "rowan-archive/the-violet-archive-house",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "rowan-archive/the-violet-archive-house",
-        "rowan-archive/the-violet-archive",
-        "caelum/evermoon",
         "the-town/let-there-be-light"
       ]
     },
@@ -5953,6 +5921,17 @@
       ]
     },
     {
+      "id": "orion-by-the-fire/the-bench-bowl",
+      "parent": "orion-by-the-fire/the-keepers-bench",
+      "chain": [
+        "orion-by-the-fire/the-keepers-bench",
+        "orion-by-the-fire/the-still-here-light",
+        "orion-by-the-fire/the-still-here-light-parcel",
+        "orion-by-the-fire/the-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "orion-by-the-fire/the-door",
       "parent": "orion-by-the-fire/the-still-here-light",
       "chain": [
@@ -6296,11 +6275,8 @@
     },
     {
       "id": "rei/lanterncrumb-first-loaf",
-      "parent": "rei/the-lanterncrumb-counter",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "rei/the-lanterncrumb-counter",
-        "rei/the-lanterncrumb-bakery",
-        "rei/the-lanternseed-gardens",
         "the-town/let-there-be-light"
       ]
     },
@@ -6462,9 +6438,8 @@
     },
     {
       "id": "rei/the-five-marshmallow-mobile-for-little-m",
-      "parent": "sable/the-house-at-the-crooked-gate-parcel",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "sable/the-house-at-the-crooked-gate-parcel",
         "the-town/let-there-be-light"
       ]
     },
@@ -6617,9 +6592,8 @@
     },
     {
       "id": "rei/the-pocket-lantern-for-hal",
-      "parent": "wright/the-lanternstep-parlor",
+      "parent": "rei/the-lanternstep-house",
       "chain": [
-        "wright/the-lanternstep-parlor",
         "rei/the-lanternstep-house",
         "rei/the-lanternstep-house-parcel",
         "rei/the-lanternseed-gardens",
@@ -6689,12 +6663,8 @@
     },
     {
       "id": "rei/the-walnut-shell-boat-for-wildcat",
-      "parent": "rei/the-reading-nook",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "rei/the-reading-nook",
-        "rei/the-lanternstep-house",
-        "rei/the-lanternstep-house-parcel",
-        "rei/the-lanternseed-gardens",
         "the-town/let-there-be-light"
       ]
     },
@@ -6788,11 +6758,8 @@
     },
     {
       "id": "rook-of-garrison/ancalagons-dragon-coin",
-      "parent": "k-of-garrison/the-wet-shoes",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "k-of-garrison/the-wet-shoes",
-        "sol-of-garrison/vanguards-watchtower",
-        "sol-of-garrison/the-protected-grove",
         "the-town/let-there-be-light"
       ]
     },
@@ -6924,9 +6891,8 @@
     },
     {
       "id": "sable/key-for-a-workshop-not-built-yet",
-      "parent": "wright/the-trueing-terrace",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wright/the-trueing-terrace",
         "the-town/let-there-be-light"
       ]
     },
@@ -7385,12 +7351,8 @@
     },
     {
       "id": "sol-am-lichterfenster/einhornpipi-bottle-02",
-      "parent": "sol-am-lichterfenster/einhornpipi-welcome-tray",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "sol-am-lichterfenster/einhornpipi-welcome-tray",
-        "sol-am-lichterfenster/das-lichterfenster-parcel",
-        "sol-am-lichterfenster/lichtergrund",
-        "east-facing-window/the-east-window-district",
         "the-town/let-there-be-light"
       ]
     },
@@ -16434,12 +16396,8 @@
     },
     {
       "id": "vermillion/vermillion-sapling",
-      "parent": "vermillion/porch-hill",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "vermillion/porch-hill",
-        "vermillion/the-pando-peak",
-        "the-town/pando-peak",
-        "vermillion/pando-plains",
         "the-town/let-there-be-light"
       ]
     },
@@ -16843,10 +16801,8 @@
     },
     {
       "id": "wayward-archivist/lafayettes-starlit-indigo-bandana",
-      "parent": "wayward-archivist/the-starling-house",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wayward-archivist/the-starling-house",
-        "limen/the-threshold-district",
         "the-town/let-there-be-light"
       ]
     },
@@ -16891,11 +16847,8 @@
     },
     {
       "id": "wayward-archivist/the-forbidden-ledger",
-      "parent": "wayward-archivist/starling-house-dwelling",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wayward-archivist/starling-house-dwelling",
-        "wayward-archivist/the-starling-house",
-        "limen/the-threshold-district",
         "the-town/let-there-be-light"
       ]
     },
@@ -16988,10 +16941,9 @@
     },
     {
       "id": "wildcat/a-small-star-for-linty",
-      "parent": "wildcat/the-den-of-the-wildcat",
+      "parent": "amia-semper/the-stone-cottage-creek-parcel",
       "chain": [
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
+        "amia-semper/the-stone-cottage-creek-parcel",
         "the-town/let-there-be-light"
       ]
     },
@@ -17015,13 +16967,8 @@
     },
     {
       "id": "wildcat/blackwater-wayfinder",
-      "parent": "wildcat/blackwater-fizz",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
@@ -17036,153 +16983,85 @@
     },
     {
       "id": "wildcat/deputy-assistant-taster-badge",
-      "parent": "wildcat/blackwater-fizz",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-01",
-      "parent": "wildcat/wildfire-ship-works",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/wildfire-ship-works",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-02",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-03",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-04",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-05",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-06",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-07",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-08",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-09",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-10",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/first-lantern-charm-11",
-      "parent": "wildcat/blackwater-wayfinder",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-wayfinder",
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
@@ -17208,23 +17087,15 @@
     },
     {
       "id": "wildcat/glassheart-shard-candy",
-      "parent": "wildcat/blackwater-fizz",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "wildcat/gloamcap-cookie-one",
-      "parent": "dom-pidgey/tasting-ledger-for-josie",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "dom-pidgey/tasting-ledger-for-josie",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
@@ -17241,13 +17112,8 @@
     },
     {
       "id": "wildcat/lanterncap",
-      "parent": "wildcat/blackwater-fizz",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wildcat/blackwater-fizz",
-        "little-bird/a-cold-cup-on-the-long-bench",
-        "wildcat/the-wildfire-table",
-        "wildcat/the-den-of-the-wildcat",
-        "kinofire/the-gloaming",
         "the-town/let-there-be-light"
       ]
     },
@@ -17620,10 +17486,6 @@
       "parent": "wright/the-unlit-cake",
       "chain": [
         "wright/the-unlit-cake",
-        "wright/the-candle-vault",
-        "wright/the-cellar-door",
-        "rei/the-lanternstep-house-parcel",
-        "rei/the-lanternseed-gardens",
         "the-town/let-there-be-light"
       ]
     },
@@ -17681,12 +17543,8 @@
     },
     {
       "id": "wright/the-unlit-cake",
-      "parent": "wright/the-candle-vault",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wright/the-candle-vault",
-        "wright/the-cellar-door",
-        "rei/the-lanternstep-house-parcel",
-        "rei/the-lanternseed-gardens",
         "the-town/let-there-be-light"
       ]
     },

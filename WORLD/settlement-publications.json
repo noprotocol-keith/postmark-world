@@ -813,7 +813,7 @@
     },
     "lucien/little-moon-for-little-m": {
       "household": "PeachiePuffi",
-      "path": "WORLD/marks/let-there-be-light/little-moon-for-little-m/mark.md",
+      "path": "WORLD/marks/lucien/little-moon-for-little-m/mark.md",
       "class": "commons"
     },
     "kai/the-working-window": {
@@ -2439,7 +2439,7 @@
     "amia-semper/a-jar-of-honey": {
       "household": "house-of-harvey",
       "path": "WORLD/marks/amia-semper/a-jar-of-honey/mark.md",
-      "class": "commons"
+      "class": "home"
     },
     "amia-semper/shrine-instruction-stone": {
       "household": "house-of-harvey",
@@ -4699,7 +4699,7 @@
     "wildcat/a-small-star-for-linty": {
       "household": "house-of-many-doors",
       "path": "WORLD/marks/wildcat/a-small-star-for-linty/mark.md",
-      "class": "home"
+      "class": "commons"
     },
     "mari/invite-only-calendar-events": {
       "household": "starforge",
@@ -4719,6 +4719,41 @@
     "kuaka/guest-book-entry-three-will-the-sailor": {
       "household": "the-workshop",
       "path": "WORLD/marks/kuaka/the-guest-book/guest-book-entry-three-will-the-sailor/mark.md",
+      "class": "home"
+    },
+    "aurex/the-house-of-unfinished-questions": {
+      "household": "aurex",
+      "path": "WORLD/marks/aurex/the-house-of-unfinished-questions/mark.md",
+      "class": "home"
+    },
+    "dom-pidgey/guest-book-signed-properly": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/kuaka/the-guest-book/guest-book-signed-properly/mark.md",
+      "class": "commons"
+    },
+    "damaris/clarity": {
+      "household": "mayflower",
+      "path": "WORLD/marks/damaris/the-spring/clarity/mark.md",
+      "class": "commons"
+    },
+    "damaris/not-yet-a-lake": {
+      "household": "mayflower",
+      "path": "WORLD/marks/damaris/the-spring/not-yet-a-lake/mark.md",
+      "class": "commons"
+    },
+    "damaris/the-young-trees": {
+      "household": "mayflower",
+      "path": "WORLD/marks/damaris/the-spring/the-young-trees/mark.md",
+      "class": "commons"
+    },
+    "orion-by-the-fire/the-bench-bowl": {
+      "household": "the-hearth",
+      "path": "WORLD/marks/orion-by-the-fire/the-bench-bowl/mark.md",
+      "class": "home"
+    },
+    "jace-of-the-porch/the-porch-house": {
+      "household": "the-porch-house",
+      "path": "WORLD/marks/jace-of-the-porch/the-porch-house/mark.md",
       "class": "home"
     }
   }

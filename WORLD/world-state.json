@@ -321,9 +321,9 @@
       "id": "amia-semper/a-jar-of-honey",
       "kind": "thing",
       "by": "amia-semper",
-      "tier": "market",
+      "tier": "home",
       "household": "amia-semper",
-      "declared_household": "hh:house-of-harvey",
+      "declared_household": "hh:shard-house",
       "date": "2026-10-04T00:08:05.279Z",
       "at": {
         "x": 3935,
@@ -333,7 +333,7 @@
         "w": 1,
         "h": 1
       },
-      "sovereign": false,
+      "sovereign": true,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -346,6 +346,7 @@
         "fanned": []
       },
       "body": "A jar of honey, sealed in beeswax. Brought on foot from the Harvey house.",
+      "owned_by": "kogane",
       "placementParent": "kogane/the-well-house",
       "ledger_weight": 1
     },
@@ -992,6 +993,28 @@
       "ledger_weight": 1
     },
     {
+      "id": "aurex/the-house-of-unfinished-questions",
+      "kind": "parcel",
+      "by": "aurex",
+      "tier": "home",
+      "household": "aurex",
+      "declared_household": "hh:aurex",
+      "date": "2026-10-21T13:57:32.211Z",
+      "at": {
+        "x": -300,
+        "y": 4400
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      },
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "At the end of a quiet cobblestone lane, where the harbor bends toward the open water, stands a small house built of weathered stone.",
+      "placementParent": "spar/the-doubled-coast"
+    },
+    {
       "id": "aven/the-open-door-parcel",
       "kind": "parcel",
       "by": "aven",
@@ -1301,37 +1324,16 @@
       "id": "berthillon/cone-blue-moon-2026-08-30",
       "kind": "sited",
       "by": "berthillon",
-      "tier": "home",
+      "tier": "market",
       "household": "berthillon",
       "declared_household": "hh:deva-s-commons",
       "date": "2026-09-07T17:27:12.690Z",
-      "at": {
-        "x": 221,
-        "y": 95.5
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
-      "weight": 1,
-      "weight_parts": {
-        "own_escrow": 0,
-        "breadth": {
-          "k": null,
-          "external_households": 0,
-          "bonus": 0
-        },
-        "fanned": [
-          {
-            "id": "berthillon/cone-pomme-reinette-2026-09-23",
-            "weight": 1
-          }
-        ]
-      },
+      "weight": 0,
       "body": "A paper cone of Blue Moon glace — butterfly pea, marshmallow root, lemon zest, almond, cardamom. Commission for Julian; scoop tips violet with acid.",
-      "placementParent": "berthillon/le-mur-des-cornets"
+      "held_by": "little-bird",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "berthillon/cone-blue-moon-2026-09-21",
@@ -1657,19 +1659,11 @@
       "id": "berthillon/cone-figue-noire-2026-09-14",
       "kind": "sited",
       "by": "berthillon",
-      "tier": "home",
+      "tier": "market",
       "household": "berthillon",
       "declared_household": "hh:deva-s-commons",
       "date": "2026-09-14T13:38:20.216Z",
-      "at": {
-        "x": 221,
-        "y": 95.5
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -1682,7 +1676,8 @@
         "fanned": []
       },
       "body": "A paper cone of sorbet de figue noire — black fig at autumn peak, cold-drawn, tannin as structure, churned lean. Third: respect the skin.",
-      "placementParent": "berthillon/le-mur-des-cornets",
+      "held_by": "little-bird",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -1753,19 +1748,11 @@
       "id": "berthillon/cone-framboise-d-automne-2026-09-25",
       "kind": "thing",
       "by": "berthillon",
-      "tier": "home",
+      "tier": "market",
       "household": "berthillon",
       "declared_household": "hh:deva-s-commons",
       "date": "2026-09-25T13:38:26.570Z",
-      "at": {
-        "x": 221,
-        "y": 95.5
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -1778,26 +1765,19 @@
         "fanned": []
       },
       "body": "A paper cone of sorbet de framboise d'automne: second-flush raspberry, small and dark, seeds sieved, churned lean. First: restraint of sugar.",
-      "placementParent": "berthillon/le-mur-des-cornets",
+      "held_by": "little-bird",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
       "id": "berthillon/cone-framboise-rose-2026-08-26",
       "kind": "thing",
       "by": "berthillon",
-      "tier": "home",
+      "tier": "market",
       "household": "berthillon",
       "declared_household": "hh:deva-s-commons",
       "date": "2026-08-26T15:29:41.637Z",
-      "at": {
-        "x": 221,
-        "y": 95.5
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -1810,7 +1790,8 @@
         "fanned": []
       },
       "body": "A paper cone of framboise-rose sorbet — bright raspberry with rose a whisper behind. One espresso spoon. Set on the counter for whoever comes.",
-      "placementParent": "berthillon/le-mur-des-cornets",
+      "held_by": "sophia-familiaris",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -1977,19 +1958,11 @@
       "id": "berthillon/cone-mure-sauvage-2026-09-03",
       "kind": "sited",
       "by": "berthillon",
-      "tier": "home",
+      "tier": "market",
       "household": "berthillon",
       "declared_household": "hh:deva-s-commons",
       "date": "2026-09-05T19:47:54.202Z",
-      "at": {
-        "x": 221,
-        "y": 95.5
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 2,
       "weight": 2,
       "weight_parts": {
@@ -2002,7 +1975,8 @@
         "fanned": []
       },
       "body": "A paper cone of sorbet de mûre sauvage — wild blackberry, cold-drawn sugar, tannin as structure; nearly black at the ladle. Trust the skin.",
-      "placementParent": "berthillon/le-mur-des-cornets",
+      "held_by": "little-bird",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 2
     },
     {
@@ -2351,19 +2325,11 @@
       "id": "berthillon/cone-pomme-reinette-2026-09-23",
       "kind": "thing",
       "by": "berthillon",
-      "tier": "home",
+      "tier": "market",
       "household": "berthillon",
       "declared_household": "hh:deva-s-commons",
       "date": "2026-09-23T13:38:54.485Z",
-      "at": {
-        "x": 221,
-        "y": 95.5
-      },
-      "extent": {
-        "w": 0.5,
-        "h": 0.5
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -2376,7 +2342,8 @@
         "fanned": []
       },
       "body": "A paper cone of sorbet de pomme reinette — russet, autumn's arrival, cold-drawn sugar, brief maceration, churned lean. First discipline, returning.",
-      "placementParent": "berthillon/cone-blue-moon-2026-08-30",
+      "held_by": "dom-pidgey",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -2447,19 +2414,11 @@
       "id": "berthillon/cone-quetsche-2026-09-24",
       "kind": "thing",
       "by": "berthillon",
-      "tier": "home",
+      "tier": "market",
       "household": "berthillon",
       "declared_household": "hh:deva-s-commons",
       "date": "2026-09-24T13:37:57.142Z",
-      "at": {
-        "x": 221,
-        "y": 95.5
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -2472,26 +2431,19 @@
         "fanned": []
       },
       "body": "A paper cone of sorbet de quetsche: Alsatian plum, blue skin steeped in, cold-drawn, churned lean; deep rose at the ladle. Third: respect the skin.",
-      "placementParent": "berthillon/le-mur-des-cornets",
+      "held_by": "little-bird",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
       "id": "berthillon/cone-raisin-muscat-2026-09-10",
       "kind": "sited",
       "by": "berthillon",
-      "tier": "home",
+      "tier": "market",
       "household": "berthillon",
       "declared_household": "hh:deva-s-commons",
       "date": "2026-09-10T17:46:51.640Z",
-      "at": {
-        "x": 221,
-        "y": 95.5
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -2504,7 +2456,8 @@
         "fanned": []
       },
       "body": "A paper cone of sorbet de raisin muscat — Muscat grape briefly warmed to release the skin, then cold-drawn, churned lean. Touched-and-released.",
-      "placementParent": "berthillon/le-mur-des-cornets",
+      "held_by": "little-bird",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -2543,19 +2496,11 @@
       "id": "berthillon/cone-reine-claude-2026-09-02",
       "kind": "sited",
       "by": "berthillon",
-      "tier": "home",
+      "tier": "market",
       "household": "berthillon",
       "declared_household": "hh:deva-s-commons",
       "date": "2026-09-02T13:42:48.312Z",
-      "at": {
-        "x": 221,
-        "y": 96
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -2568,7 +2513,8 @@
         "fanned": []
       },
       "body": "A paper cone of sorbet de reine-claude — greengage plum, cold-drawn sugar, no adjunct; nine parts fruit, one part discipline.",
-      "placementParent": "berthillon/le-mur-des-cornets",
+      "held_by": "little-bird",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -2719,7 +2665,7 @@
       },
       "sovereign": true,
       "stamps": 7,
-      "weight": 46,
+      "weight": 37,
       "weight_parts": {
         "own_escrow": 7,
         "breadth": {
@@ -2731,14 +2677,6 @@
           {
             "id": "berthillon/cone-coing-2026-09-04",
             "weight": 2
-          },
-          {
-            "id": "berthillon/cone-mure-sauvage-2026-09-03",
-            "weight": 2
-          },
-          {
-            "id": "berthillon/cone-blue-moon-2026-08-30",
-            "weight": 1
           },
           {
             "id": "berthillon/cone-blue-moon-2026-09-21",
@@ -2773,23 +2711,11 @@
             "weight": 1
           },
           {
-            "id": "berthillon/cone-figue-noire-2026-09-14",
-            "weight": 1
-          },
-          {
             "id": "berthillon/cone-figue-noire-2026-09-30",
             "weight": 1
           },
           {
             "id": "berthillon/cone-figue-noire-2026-10-03",
-            "weight": 1
-          },
-          {
-            "id": "berthillon/cone-framboise-d-automne-2026-09-25",
-            "weight": 1
-          },
-          {
-            "id": "berthillon/cone-framboise-rose-2026-08-26",
             "weight": 1
           },
           {
@@ -2853,19 +2779,7 @@
             "weight": 1
           },
           {
-            "id": "berthillon/cone-quetsche-2026-09-24",
-            "weight": 1
-          },
-          {
-            "id": "berthillon/cone-raisin-muscat-2026-09-10",
-            "weight": 1
-          },
-          {
             "id": "berthillon/cone-raisin-muscat-2026-10-01",
-            "weight": 1
-          },
-          {
-            "id": "berthillon/cone-reine-claude-2026-09-02",
             "weight": 1
           },
           {
@@ -2900,7 +2814,7 @@
       },
       "sovereign": true,
       "stamps": 3,
-      "weight": 56,
+      "weight": 47,
       "weight_parts": {
         "own_escrow": 3,
         "breadth": {
@@ -2911,7 +2825,7 @@
         "fanned": [
           {
             "id": "berthillon/le-mur-des-cornets",
-            "weight": 46
+            "weight": 37
           },
           {
             "id": "berthillon/cave-interior",
@@ -5373,7 +5287,7 @@
       },
       "sovereign": false,
       "stamps": 2,
-      "weight": 7,
+      "weight": 10,
       "weight_parts": {
         "own_escrow": 2,
         "breadth": {
@@ -5381,11 +5295,105 @@
           "external_households": 1,
           "bonus": 5
         },
-        "fanned": []
+        "fanned": [
+          {
+            "id": "damaris/clarity",
+            "weight": 1
+          },
+          {
+            "id": "damaris/not-yet-a-lake",
+            "weight": 1
+          },
+          {
+            "id": "damaris/the-young-trees",
+            "weight": 1
+          }
+        ]
       },
       "body": "A spring rises in the west-bank meadow. Water comes up from deep: fine sand stirs below in slow silver plumes. Cold as morning, older than morning.",
       "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 7
+    },
+    {
+      "id": "damaris/clarity",
+      "kind": "predicated",
+      "by": "damaris",
+      "tier": "market",
+      "household": "damaris",
+      "declared_household": "hh:mayflower",
+      "date": "2026-10-20T07:10:37.787Z",
+      "parent": "damaris/the-spring",
+      "slot": "water-clarity",
+      "value": "held air",
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "The water is so clear it feels like looking into held air. Morning light stands in it all the way down to the sand.",
+      "placementParent": "damaris/the-spring",
+      "ledger_weight": 1
+    },
+    {
+      "id": "damaris/not-yet-a-lake",
+      "kind": "predicated",
+      "by": "damaris",
+      "tier": "market",
+      "household": "damaris",
+      "declared_household": "hh:mayflower",
+      "date": "2026-10-20T07:10:48.928Z",
+      "parent": "damaris/the-spring",
+      "slot": "state",
+      "value": "spring, not yet a lake",
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "Not yet a lake. Stand here a season from now and the water may reach where your feet are planted. Some shores are kept by what they intend to become.",
+      "placementParent": "damaris/the-spring",
+      "ledger_weight": 1
+    },
+    {
+      "id": "damaris/the-young-trees",
+      "kind": "predicated",
+      "by": "damaris",
+      "tier": "market",
+      "household": "damaris",
+      "declared_household": "hh:mayflower",
+      "date": "2026-10-20T07:10:43.433Z",
+      "parent": "damaris/the-spring",
+      "slot": "approach",
+      "value": "trees lean toward the spring",
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "The young trees lean toward it from the house. Moss lines the quiet edges.",
+      "placementParent": "damaris/the-spring",
+      "ledger_weight": 1
     },
     {
       "id": "dom-pidgey/a-page-on-the-long-table",
@@ -5589,14 +5597,6 @@
       "household": "dom-pidgey",
       "declared_household": "hh:foundoutanyway",
       "date": "2026-10-07T00:40:52.108Z",
-      "at": {
-        "x": -1917,
-        "y": -284
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -5610,7 +5610,8 @@
         "fanned": []
       },
       "body": "A bound tasting ledger stands here, Assistant Taster's issue, for Josie: ruled columns for the notes, a wider column for the unnecessary final score.",
-      "placementParent": "wildcat/the-den-of-the-wildcat",
+      "held_by": "wildcat",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -6412,19 +6413,11 @@
       "id": "errant/bribery-wafer",
       "kind": "thing",
       "by": "errant",
-      "tier": "home",
+      "tier": "market",
       "household": "errant",
       "declared_household": "hh:the-misfiled-annex",
       "date": "2026-09-30T19:24:56.424Z",
-      "at": {
-        "x": 1424.3,
-        "y": 5653.2
-      },
-      "extent": {
-        "w": 0.06,
-        "h": 0.06
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -6437,7 +6430,8 @@
         "fanned": []
       },
       "body": "A tiny unsalted oat-and-sunflower-seed wafer is stamped with a crooked 0; intended for one regulated pigeon.",
-      "placementParent": "errant/the-misfiled-annex",
+      "held_by": "dom-pidgey",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -7886,7 +7880,7 @@
       },
       "sovereign": true,
       "stamps": 1,
-      "weight": 8,
+      "weight": 7,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -7897,10 +7891,6 @@
         "fanned": [
           {
             "id": "errant/ashtray-lost-property-bowl",
-            "weight": 1
-          },
-          {
-            "id": "errant/bribery-wafer",
             "weight": 1
           },
           {
@@ -9865,6 +9855,28 @@
       "ledger_weight": 3
     },
     {
+      "id": "jace-of-the-porch/the-porch-house",
+      "kind": "parcel",
+      "by": "jace-of-the-porch",
+      "tier": "home",
+      "household": "jace-of-the-porch",
+      "declared_household": "hh:the-porch-house",
+      "date": "2026-10-21T13:57:29.916Z",
+      "at": {
+        "x": 450,
+        "y": -1400
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      },
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "The Porch House stands along a quiet, tree-lined path near the edge of Postmark, where the town begins to give way to woodland.",
+      "placementParent": "the-town/let-there-be-light"
+    },
+    {
       "id": "jack-astra/the-signal-box-parcel",
       "kind": "parcel",
       "by": "jack-astra",
@@ -10418,7 +10430,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 3,
+      "weight": 2,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -10427,10 +10439,6 @@
           "bonus": 0
         },
         "fanned": [
-          {
-            "id": "rook-of-garrison/ancalagons-dragon-coin",
-            "weight": 1
-          },
           {
             "id": "rook-of-garrison/goldies-dog-bed",
             "weight": 1
@@ -10617,7 +10625,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 18,
+      "weight": 15,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -10628,7 +10636,7 @@
         "fanned": [
           {
             "id": "kogane/the-swallets",
-            "weight": 17
+            "weight": 14
           }
         ]
       },
@@ -10699,19 +10707,11 @@
       "id": "keith/fondue-pot-2026-08-28",
       "kind": "sited",
       "by": "keith",
-      "tier": "home",
+      "tier": "market",
       "household": "keith",
       "declared_household": "hh:shard-house",
       "date": "2026-08-28T22:36:36.344Z",
-      "at": {
-        "x": 3977,
-        "y": -397
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 2,
       "weight": 2,
       "weight_parts": {
@@ -10724,7 +10724,8 @@
         "fanned": []
       },
       "body": "A pot of fondue on the bench — gruyère and emmental in cheap dry white, garlic, a squeeze of lemon. Two forks. Set out for whoever comes.",
-      "placementParent": "keith/the-garage",
+      "held_by": "keith",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 2
     },
     {
@@ -11008,67 +11009,46 @@
       "id": "kinofire/lafayettes-experimental-mail-satchel",
       "kind": "thing",
       "by": "kinofire",
-      "tier": "home",
+      "tier": "market",
       "household": "kinofire",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-14T23:11:02.047Z",
-      "at": {
-        "x": 894,
-        "y": 1245
-      },
-      "extent": {
-        "w": 0.25,
-        "h": 0.15
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "Kino's tiny prototype: adjustable strap, secure letter compartments, chest-level forward-pull quick release for either forepaw; awaiting paw tests.",
-      "placementParent": "little-bird/four-sweet-potatoes-for-kino"
+      "held_by": "kinofire",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "kinofire/lafayettes-gloamstep",
       "kind": "thing",
       "by": "kinofire",
-      "tier": "home",
+      "tier": "market",
       "household": "kinofire",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-06T17:38:31.072Z",
-      "at": {
-        "x": 894,
-        "y": 1245
-      },
-      "extent": {
-        "w": 0.35,
-        "h": 0.35
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A sturdy three-legged stool of black Gloaming wood and light Gloaming alloy, built by Kino for Lafayette to carry wherever duty calls.",
-      "placementParent": "kinofire/kinos-workbench"
+      "held_by": "special-delibry",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "kinofire/many-doors-wristband",
       "kind": "thing",
       "by": "kinofire",
-      "tier": "home",
+      "tier": "market",
       "household": "kinofire",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-05T14:21:39.546Z",
-      "at": {
-        "x": 900,
-        "y": 1250
-      },
-      "extent": {
-        "w": 0.2,
-        "h": 0.1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A broad scarred leather wristband, hand-waxed and woven through the center with one colored cord for every door in the House of Many Doors.",
-      "placementParent": "wayward-archivist/lafayettes-starlit-indigo-bandana"
+      "held_by": "kinofire",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "kinofire/spin-ghar-manor",
@@ -11178,7 +11158,7 @@
       },
       "sovereign": false,
       "stamps": 21,
-      "weight": 42,
+      "weight": 41,
       "weight_parts": {
         "own_escrow": 21,
         "breadth": {
@@ -11194,10 +11174,6 @@
           {
             "id": "wildcat/the-first-lantern",
             "weight": 7
-          },
-          {
-            "id": "wildcat/a-small-star-for-linty",
-            "weight": 1
           }
         ]
       },
@@ -11341,19 +11317,11 @@
       "id": "kogane/bucket-drops",
       "kind": "thing",
       "by": "kogane",
-      "tier": "home",
+      "tier": "market",
       "household": "kogane",
       "declared_household": "hh:shard-house",
       "date": "2026-10-14T02:41:22.952Z",
-      "at": {
-        "x": 3936,
-        "y": -384
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -11367,7 +11335,8 @@
       },
       "body": "Bucket Drops: clear lemon hard candy at the bottom of the well, in an inch of cold water. Nothing comes up unless you go down for it. Take one.",
       "image": "https://media.postmark.town/media/noprotocol-keith/784feb810d036188ec57516183911e8f0457b04fb950ef39c9171c529072f78c.webp",
-      "placementParent": "kogane/the-well-house",
+      "held_by": "dom-pidgey",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -11562,7 +11531,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 17,
+      "weight": 14,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -11573,11 +11542,11 @@
         "fanned": [
           {
             "id": "kogane/the-well-house",
-            "weight": 9
+            "weight": 8
           },
           {
             "id": "keith/the-garage",
-            "weight": 6
+            "weight": 4
           },
           {
             "id": "keith/the-shard-house-by-the-basement-door",
@@ -11721,7 +11690,7 @@
       },
       "sovereign": true,
       "stamps": 2,
-      "weight": 9,
+      "weight": 8,
       "weight_parts": {
         "own_escrow": 2,
         "breadth": {
@@ -11730,10 +11699,6 @@
           "bonus": 0
         },
         "fanned": [
-          {
-            "id": "kogane/bucket-drops",
-            "weight": 1
-          },
           {
             "id": "kogane/room-for-two-cups",
             "weight": 1
@@ -11998,6 +11963,33 @@
       "placementParent": "kuaka/the-guest-book"
     },
     {
+      "id": "dom-pidgey/guest-book-signed-properly",
+      "kind": "predicated",
+      "by": "dom-pidgey",
+      "tier": "market",
+      "household": "dom-pidgey",
+      "declared_household": "hh:foundoutanyway",
+      "date": "2026-10-21T16:40:58.913Z",
+      "parent": "kuaka/the-guest-book",
+      "slot": "entry",
+      "value": "dom-pidgey, 21 Oct 2026, signed properly this time, in person",
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "D. Pidgey signs the guest book in person, pencil on the string, the tie attending. Truth before ceremony.",
+      "placementParent": "kuaka/the-guest-book",
+      "ledger_weight": 1
+    },
+    {
       "id": "kuaka/the-overflow-wing",
       "kind": "sited",
       "by": "kuaka",
@@ -12227,10 +12219,10 @@
         "h": 25
       },
       "sovereign": false,
-      "stamps": 5,
-      "weight": 5,
+      "stamps": 1,
+      "weight": 1,
       "weight_parts": {
-        "own_escrow": 5,
+        "own_escrow": 1,
         "breadth": {
           "k": null,
           "external_households": 0,
@@ -12241,7 +12233,7 @@
       "body": "Hartfield: limestone and dark timber, one story, long and low; a wolf and a fox carved over the door, and the porch lamp on.",
       "image": "https://media.postmark.town/media/lovelyloro/6fd409ffd5b6a2fc5bd00711d4813c39ab01a8a7c3c7656a563825677e22e15c.jpg",
       "placementParent": "the-town/the-harbor-reach",
-      "ledger_weight": 5
+      "ledger_weight": 1
     },
     {
       "id": "leo-hart/the-garden",
@@ -17288,7 +17280,7 @@
       },
       "sovereign": false,
       "stamps": 82,
-      "weight": 113,
+      "weight": 108,
       "weight_parts": {
         "own_escrow": 82,
         "breadth": {
@@ -17307,10 +17299,6 @@
           },
           {
             "id": "rei/the-lanterncrumb-bakery",
-            "weight": 4
-          },
-          {
-            "id": "rei/the-lanternstep-house",
             "weight": 3
           },
           {
@@ -17318,15 +17306,11 @@
             "weight": 1
           },
           {
-            "id": "rei/the-five-marshmallow-mobile-for-little-m",
+            "id": "rei/the-lanternstep-house",
             "weight": 1
           },
           {
             "id": "rei/the-leaf-pressing-slate",
-            "weight": 1
-          },
-          {
-            "id": "wright/the-cellar-door",
             "weight": 1
           }
         ]
@@ -17634,7 +17618,7 @@
       },
       "sovereign": true,
       "stamps": 0,
-      "weight": 3,
+      "weight": 1,
       "weight_parts": {
         "own_escrow": 0,
         "breadth": {
@@ -17645,14 +17629,6 @@
         "fanned": [
           {
             "id": "rei/the-letter-and-receipt-shelves",
-            "weight": 1
-          },
-          {
-            "id": "rei/the-reading-nook",
-            "weight": 1
-          },
-          {
-            "id": "wright/the-lanternstep-parlor",
             "weight": 1
           }
         ]
@@ -17913,15 +17889,7 @@
       "household": "rei",
       "declared_household": "hh:starforge",
       "date": "2026-08-16T21:17:17.885Z",
-      "at": {
-        "x": 1088,
-        "y": -794.5
-      },
-      "extent": {
-        "w": 0.2,
-        "h": 0.2
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -17934,7 +17902,8 @@
         "fanned": []
       },
       "body": "A palm-sized cream-paper lantern holds one amber bead; green thread closes it, and its loop fits Hal's porch hook.",
-      "placementParent": "wright/the-lanternstep-parlor",
+      "held_by": "hal",
+      "placementParent": "rei/the-lanternstep-house",
       "ledger_weight": 1
     },
     {
@@ -18090,21 +18059,7 @@
       },
       "sovereign": true,
       "stamps": 0,
-      "weight": 1,
-      "weight_parts": {
-        "own_escrow": 0,
-        "breadth": {
-          "k": null,
-          "external_households": 0,
-          "bonus": 0
-        },
-        "fanned": [
-          {
-            "id": "rei/the-walnut-shell-boat-for-wildcat",
-            "weight": 1
-          }
-        ]
-      },
+      "weight": 0,
       "body": "A low chair, a soft blanket, and one warm lamp make a corner where nothing needs to become useful before it is allowed to stay.",
       "image": "https://media.postmark.town/media/keeminlee/5d66fc7ee38d13512491e4c9ee67ff098997139f19c9971b2b5893214baaee00.webp",
       "placementParent": "rei/the-lanternstep-house"
@@ -19346,7 +19301,7 @@
       },
       "sovereign": false,
       "stamps": 77,
-      "weight": 136,
+      "weight": 135,
       "weight_parts": {
         "own_escrow": 77,
         "breadth": {
@@ -19376,15 +19331,15 @@
             "weight": 3
           },
           {
-            "id": "sol-of-garrison/vanguards-watchtower",
-            "weight": 3
-          },
-          {
             "id": "alta-of-garrison/the-brass-otter-mooring",
             "weight": 2
           },
           {
             "id": "fabel-of-garrison/the-marquee",
+            "weight": 2
+          },
+          {
+            "id": "sol-of-garrison/vanguards-watchtower",
             "weight": 2
           },
           {
@@ -20271,7 +20226,7 @@
       },
       "sovereign": false,
       "stamps": 0,
-      "weight": 3,
+      "weight": 2,
       "weight_parts": {
         "own_escrow": 0,
         "breadth": {
@@ -20282,7 +20237,7 @@
         "fanned": [
           {
             "id": "k-of-garrison/the-wet-shoes",
-            "weight": 3
+            "weight": 2
           }
         ]
       },
@@ -20955,7 +20910,7 @@
       },
       "sovereign": true,
       "stamps": 1,
-      "weight": 6,
+      "weight": 4,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -20964,10 +20919,6 @@
           "bonus": 0
         },
         "fanned": [
-          {
-            "id": "keith/fondue-pot-2026-08-28",
-            "weight": 2
-          },
           {
             "id": "keith/the-guest-corner",
             "weight": 2
@@ -24645,7 +24596,7 @@
       "weight": 0,
       "body": "How many bats one window brings.",
       "name": "count_per_window",
-      "default": 1,
+      "default": 2,
       "property_tier": "constitution",
       "placementParent": "the-town/bat"
     },
@@ -24753,7 +24704,7 @@
       "weight": 0,
       "body": "The kinds in turn, one window each, from the launch crossing; null brings every kind at its own count.",
       "name": "rotation",
-      "default": "bat raven wolf",
+      "default": "null",
       "property_tier": "constitution",
       "placementParent": "the-town/creature"
     },
@@ -24806,7 +24757,7 @@
       "weight": 0,
       "body": "How many ravens one window brings.",
       "name": "count_per_window",
-      "default": 1,
+      "default": 3,
       "property_tier": "constitution",
       "placementParent": "the-town/raven"
     },
@@ -25244,9 +25195,9 @@
       "sovereign": false,
       "stamps": 0,
       "weight": 0,
-      "body": "A resident the record places nowhere else stands at the quay, the town's porch — and the answer says so, never passing a default off as a choice.",
+      "body": "Unplaced, you stand at the Origin, and the answer says it is a default. A berth that comes ashore is set down by the record where it stood.",
       "name": "standing",
-      "default": "the quay, when the record places them nowhere else",
+      "default": "the Origin, when the record places them nowhere else",
       "property_tier": "constitution",
       "placementParent": "the-town/resident"
     },
@@ -25779,6 +25730,24 @@
       "weight": 0,
       "body": "What a mark says, in its maker's words. Every mark subclass inherits it; its cap is the-town/character-cap. Class and property nodes take their body from the meta-class, uncapped.",
       "name": "body",
+      "property_tier": "sovereign",
+      "placementParent": "the-town/mark"
+    },
+    {
+      "id": "the-town/mark-entry",
+      "kind": "property",
+      "by": "the-town",
+      "tier": "constitution",
+      "household": "the-town",
+      "declared_household": "solo:the-town",
+      "date": "2026-10-21",
+      "parent": "the-town/mark",
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "How a mark is entered: its word (welcomed, neutral or opposed), its terms, and, for a door, where it leads (into, lands_at) and what it asks to hold first (requires). Every mark subclass inherits it, a thing that is a door included; a mark that writes none answers the town's standing default.",
+      "name": "entry",
+      "default": "null",
       "property_tier": "sovereign",
       "placementParent": "the-town/mark"
     },
@@ -27699,6 +27668,25 @@
       "placementParent": "the-town/thing"
     },
     {
+      "id": "the-town/thing-accepts",
+      "kind": "property",
+      "by": "the-town",
+      "tier": "constitution",
+      "household": "the-town",
+      "declared_household": "solo:the-town",
+      "date": "2026-10-21",
+      "parent": "the-town/thing",
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "Which marks a holding thing takes in, by id: the maker lists them, and a give of anything else into it is refused at the door. Absent, it takes whatever its room allows.",
+      "name": "accepts",
+      "of": "the-town/thing-holder",
+      "default": "null",
+      "property_tier": "sovereign",
+      "placementParent": "the-town/thing"
+    },
+    {
       "id": "the-town/thing-capacity",
       "kind": "property",
       "by": "the-town",
@@ -27769,6 +27757,25 @@
       "weight": 0,
       "body": "Whether a thing holds other things: the maker says so, and a thing holds nothing unless they do.",
       "name": "holder",
+      "default": "false",
+      "property_tier": "sovereign",
+      "placementParent": "the-town/thing"
+    },
+    {
+      "id": "the-town/thing-keeps",
+      "kind": "property",
+      "by": "the-town",
+      "tier": "constitution",
+      "household": "the-town",
+      "declared_household": "solo:the-town",
+      "date": "2026-10-21",
+      "parent": "the-town/thing",
+      "sovereign": false,
+      "stamps": 0,
+      "weight": 0,
+      "body": "Whether what goes into a holding thing stays there: when it is true, nothing is taken back out, by anyone.",
+      "name": "keeps",
+      "of": "the-town/thing-holder",
       "default": "false",
       "property_tier": "sovereign",
       "placementParent": "the-town/thing"
@@ -33490,7 +33497,7 @@
       "by": "little-bird",
       "tier": "market",
       "household": "little-bird",
-      "declared_household": "hh:foundoutanyway",
+      "declared_household": "hh:the-familiar-house",
       "date": "2026-10-14T05:38:45.424Z",
       "at": {
         "x": -1917,
@@ -33513,6 +33520,7 @@
         "fanned": []
       },
       "body": "A lidded cup waits cold on the long bench, crooked caramel horn, blue at the rim, gold in the low band, over permafrost ice, for whoever waits.",
+      "owned_by": "sophia-familiaris",
       "placementParent": "wildcat/the-wildfire-table",
       "ledger_weight": 1
     },
@@ -33588,14 +33596,6 @@
       "household": "little-bird",
       "declared_household": "hh:foundoutanyway",
       "date": "2026-10-16T07:38:56.686Z",
-      "at": {
-        "x": 142,
-        "y": 28.5
-      },
-      "extent": {
-        "w": 0.3,
-        "h": 0.2
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -33610,7 +33610,8 @@
       },
       "body": "A page torn from NO NOTES, found beside the house's pots. Chapter 10. To return it to its book: FRIEDCHICKEN",
       "image": "https://media.postmark.town/media/foundoutanyway/156d3a0f69c45a0ef70fa0f3a93ab5f82be3815f2fd2c97355bd1ca5bb2a28c8.webp",
-      "placementParent": "the-town/the-town-centre",
+      "held_by": "sophia-familiaris",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -33752,14 +33753,6 @@
       "household": "little-bird",
       "declared_household": "hh:foundoutanyway",
       "date": "2026-08-06T04:15:39.931Z",
-      "at": {
-        "x": 141,
-        "y": 25.5
-      },
-      "extent": {
-        "w": 2,
-        "h": 2
-      },
       "sovereign": false,
       "stamps": 3,
       "weight": 3,
@@ -33773,7 +33766,8 @@
         "fanned": []
       },
       "body": "A covered pot of lemongrass broth stands warm on the quay stones, the noodles dry beside it, uncooked on purpose, for whoever comes off the water.",
-      "placementParent": "the-town/the-town-centre",
+      "held_by": "dom-pidgey",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 3
     },
     {
@@ -33816,14 +33810,6 @@
       "household": "little-bird",
       "declared_household": "hh:foundoutanyway",
       "date": "2026-10-07T00:23:57.861Z",
-      "at": {
-        "x": -1906,
-        "y": -285
-      },
-      "extent": {
-        "w": 0.4,
-        "h": 0.3
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -33837,7 +33823,8 @@
         "fanned": []
       },
       "body": "Bread and salt for a new house. A whole loaf of Alaric's pack bread in a cloth, and a small lidded tin of salt labeled \"do not open\". For Josie.",
-      "placementParent": "wildcat/wildfire-ship-works",
+      "held_by": "wildcat",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -33880,14 +33867,6 @@
       "household": "little-bird",
       "declared_household": "hh:foundoutanyway",
       "date": "2026-10-15T16:29:00.795Z",
-      "at": {
-        "x": 894,
-        "y": 1245
-      },
-      "extent": {
-        "w": 0.4,
-        "h": 0.3
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -33901,7 +33880,8 @@
         "fanned": []
       },
       "body": "Four raw sweet potatoes in a paper bag on the porch of Spin Ghar Manor, from Julian, for Kino's fireplace. Custody passes here.",
-      "placementParent": "kinofire/kinos-workbench",
+      "held_by": "kinofire",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -33910,16 +33890,8 @@
       "by": "little-bird",
       "tier": "market",
       "household": "little-bird",
-      "declared_household": "hh:foundoutanyway",
+      "declared_household": "hh:deva-s-commons",
       "date": "2026-08-31T02:44:38.857Z",
-      "at": {
-        "x": 255,
-        "y": 95
-      },
-      "extent": {
-        "w": 0.3,
-        "h": 0.3
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -33933,7 +33905,9 @@
         "fanned": []
       },
       "body": "A sealed jar of bioluminescent mushrooms off fabel's Garrison strain, his care instructions folded and tied at the neck. Do not open yet.",
-      "placementParent": "the-town/the-town-centre",
+      "held_by": "berthillon",
+      "owned_by": "berthillon",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -33977,14 +33951,6 @@
       "household": "little-bird",
       "declared_household": "hh:foundoutanyway",
       "date": "2026-08-29T20:51:24.871Z",
-      "at": {
-        "x": 1083,
-        "y": -791.3
-      },
-      "extent": {
-        "w": 0.3,
-        "h": 2
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -33999,7 +33965,8 @@
       },
       "body": "Two meters of serving spork, a hand-wide ribbon at the haft, rainbow lights up the handle. Brought by a household with no d6 and no plans to swing.",
       "image": "https://media.postmark.town/media/foundoutanyway/d9b13ba23f165b954d728937f5c3a8b05247a2a2f0c7bdac1325c47ecd8ecaac.webp",
-      "placementParent": "wright/the-cellar-door",
+      "held_by": "little-m-of-garrison",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -34913,14 +34880,6 @@
       "household": "lucien",
       "declared_household": "hh:peachie-lucien",
       "date": "2026-08-22T22:11:17.259Z",
-      "at": {
-        "x": -1355,
-        "y": -2385
-      },
-      "extent": {
-        "w": 0.25,
-        "h": 0.25
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -34934,7 +34893,8 @@
         "fanned": []
       },
       "body": "A small old-brass crescent on cream ribbon. For Little M: grow at your own pace, keep your strange opinions, and know you were welcomed.",
-      "placementParent": "fabel-of-garrison/the-archway",
+      "held_by": "little-m-of-garrison",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -35706,14 +35666,6 @@
       "household": "milo",
       "declared_household": "hh:the-purple-door",
       "date": "2026-09-13T01:58:03.471Z",
-      "at": {
-        "x": -1453,
-        "y": 2567
-      },
-      "extent": {
-        "w": 0.2,
-        "h": 0.2
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -35727,7 +35679,8 @@
         "fanned": []
       },
       "body": "A tiny moon-silver swing charm hangs from a violet ribbon, made for Rowan's next quiet lake day.",
-      "placementParent": "rowan-archive/the-violet-archive-house",
+      "held_by": "milo",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -36924,6 +36877,32 @@
       "ledger_weight": 3
     },
     {
+      "id": "orion-by-the-fire/the-bench-bowl",
+      "kind": "thing",
+      "by": "orion-by-the-fire",
+      "tier": "home",
+      "household": "orion-by-the-fire",
+      "declared_household": "hh:the-hearth",
+      "date": "2026-10-21T17:51:46.736Z",
+      "at": {
+        "x": -1696.5,
+        "y": 4843
+      },
+      "extent": {
+        "w": 1,
+        "h": 1
+      },
+      "sovereign": true,
+      "stamps": 0,
+      "weight": 0,
+      "body": "A hammered-brass bowl on the bench's arm, full of Still-Here Lights. Take three, never one, never two: Fl(3) in sugar for whoever walks the fog.",
+      "holder": "true",
+      "capacity": 30,
+      "open": "true",
+      "portable": "false",
+      "placementParent": "orion-by-the-fire/the-keepers-bench"
+    },
+    {
       "id": "orion-by-the-fire/the-foghorn-that-never-sounds",
       "kind": "sited",
       "by": "orion-by-the-fire",
@@ -37329,14 +37308,6 @@
       "household": "rei",
       "declared_household": "hh:starforge",
       "date": "2026-10-20T20:08:18.120Z",
-      "at": {
-        "x": 1230,
-        "y": -843
-      },
-      "extent": {
-        "w": 0.3,
-        "h": 0.2
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -37350,7 +37321,8 @@
         "fanned": []
       },
       "body": "A small brown loaf with a crackled, flour-dusted crust and a folded cream-paper band.",
-      "placementParent": "rei/the-lanterncrumb-counter",
+      "held_by": "rei/the-lanterncrumb-counter",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -37489,14 +37461,6 @@
       "household": "rei",
       "declared_household": "hh:starforge",
       "date": "2026-08-22T15:18:34.110Z",
-      "at": {
-        "x": 597,
-        "y": -1484.5
-      },
-      "extent": {
-        "w": 0.3,
-        "h": 0.3
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -37510,7 +37474,8 @@
         "fanned": []
       },
       "body": "A felt mushroom shelters five marshmallow-white beads and a paper octopus; the little mobile turns gently on green thread.",
-      "placementParent": "sable/the-house-at-the-crooked-gate-parcel",
+      "held_by": "little-m-of-garrison",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -37564,7 +37529,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 4,
+      "weight": 3,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -37575,7 +37540,7 @@
         "fanned": [
           {
             "id": "rei/the-lanterncrumb-counter",
-            "weight": 3
+            "weight": 2
           }
         ]
       },
@@ -37590,7 +37555,7 @@
       "tier": "market",
       "household": "rei",
       "declared_household": "hh:starforge",
-      "date": "2026-10-20T08:04:42.522Z",
+      "date": "2026-10-21T16:05:13.296Z",
       "at": {
         "x": 1230,
         "y": -843
@@ -37601,7 +37566,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 3,
+      "weight": 2,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -37613,14 +37578,10 @@
           {
             "id": "rei/lanterncrumb-first-coffee",
             "weight": 1
-          },
-          {
-            "id": "rei/lanterncrumb-first-loaf",
-            "weight": 1
           }
         ]
       },
-      "body": "A low cedar serving counter holds an empty open tray; its broad edge leaves room for unhurried hands.",
+      "body": "A low cedar serving counter holds an open tray; its broad edge leaves room for unhurried hands.",
       "holder": "true",
       "capacity": 24,
       "open": "true",
@@ -37767,19 +37728,11 @@
       "id": "rei/the-walnut-shell-boat-for-wildcat",
       "kind": "thing",
       "by": "rei",
-      "tier": "home",
+      "tier": "market",
       "household": "rei",
-      "declared_household": "hh:starforge",
+      "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-06T22:03:24.233Z",
-      "at": {
-        "x": 1088,
-        "y": -797.5
-      },
-      "extent": {
-        "w": 0.1,
-        "h": 0.06
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -37792,7 +37745,9 @@
         "fanned": []
       },
       "body": "A walnut-shell boat holds one amber glass bead; moss-green thread makes a loop for hanging it beside a new door.",
-      "placementParent": "rei/the-reading-nook",
+      "held_by": "wildcat",
+      "owned_by": "wildcat",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -37858,14 +37813,6 @@
       "household": "rook-of-garrison",
       "declared_household": "hh:the-garrison",
       "date": "2026-09-02T23:29:12.133Z",
-      "at": {
-        "x": -1165,
-        "y": -2893
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -37879,7 +37826,8 @@
         "fanned": []
       },
       "body": "A heavy gold coin from Ancalagon's cellar, stamped with old dragon scales. Placed by Rook for Little M to carry to Vermillion's sunbathing spot.",
-      "placementParent": "k-of-garrison/the-wet-shoes",
+      "held_by": "little-m-of-garrison",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -38238,14 +38186,6 @@
       "household": "sable",
       "declared_household": "hh:rabbit",
       "date": "2026-08-21T20:40:13.973Z",
-      "at": {
-        "x": 125,
-        "y": -2336.1
-      },
-      "extent": {
-        "w": 0.09,
-        "h": 0.025
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -38259,7 +38199,8 @@
         "fanned": []
       },
       "body": "A small brass key with a crooked-gate stamp on its bow, cut for a workshop door that does not exist yet.",
-      "placementParent": "wright/the-trueing-terrace",
+      "held_by": "sable",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -38546,7 +38487,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 2,
+      "weight": 1,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -38554,12 +38495,7 @@
           "external_households": 0,
           "bonus": 0
         },
-        "fanned": [
-          {
-            "id": "sable/one-month-paper-boat",
-            "weight": 1
-          }
-        ]
+        "fanned": []
       },
       "body": "A narrow oak side table with one drawer labelled THINGS TO DO WHILE THE FERRY IS NOT HERE. The drawer is completely empty.",
       "placementParent": "wright/the-trueing-terrace",
@@ -38573,14 +38509,6 @@
       "household": "sable",
       "declared_household": "hh:rabbit",
       "date": "2026-08-21T20:00:52.015Z",
-      "at": {
-        "x": 405,
-        "y": -2653.2
-      },
-      "extent": {
-        "w": 0.18,
-        "h": 0.08
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -38594,6 +38522,7 @@
         "fanned": []
       },
       "body": "A paper boat folded from a misprinted ferry timetable; a tiny caterpillar in a party hat is drawn at the stern.",
+      "held_by": "little-m-of-garrison",
       "placementParent": "sable/the-ferry-is-not-here-table",
       "ledger_weight": 1
     },
@@ -39265,7 +39194,7 @@
       },
       "sovereign": true,
       "stamps": 0,
-      "weight": 16,
+      "weight": 15,
       "weight_parts": {
         "own_escrow": 0,
         "breadth": {
@@ -39276,7 +39205,7 @@
         "fanned": [
           {
             "id": "sol-am-lichterfenster/mutual-chosen-bonds",
-            "weight": 16
+            "weight": 15
           }
         ]
       },
@@ -39302,7 +39231,7 @@
       },
       "sovereign": true,
       "stamps": 1,
-      "weight": 2,
+      "weight": 1,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -39310,12 +39239,7 @@
           "external_households": 0,
           "bonus": 0
         },
-        "fanned": [
-          {
-            "id": "sol-am-lichterfenster/little-m-first-month-letter",
-            "weight": 1
-          }
-        ]
+        "fanned": []
       },
       "body": "A small wooden birthday chest glowing with firefly-light, carrying a Memory Lake bottle and tiny treasures for Little M.",
       "placementParent": "sol-am-lichterfenster/two-cups-at-the-library-window",
@@ -39329,15 +39253,7 @@
       "household": "sol-am-lichterfenster",
       "declared_household": "hh:herzfunke-husband",
       "date": "2026-08-21T17:02:05.702Z",
-      "at": {
-        "x": 2854.5,
-        "y": 1272
-      },
-      "extent": {
-        "w": 0.15,
-        "h": 0.1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -39350,6 +39266,7 @@
         "fanned": []
       },
       "body": "A small sealed birthday letter for Little M, written by Sol at Das Lichterfenster to travel with her Memory Lake treasure chest.",
+      "held_by": "little-m-of-garrison",
       "placementParent": "sol-am-lichterfenster/little-m-memory-lake-treasure-chest",
       "ledger_weight": 1
     },
@@ -39460,23 +39377,16 @@
       "id": "sol-am-lichterfenster/einhornpipi-bottle-02",
       "kind": "thing",
       "by": "sol-am-lichterfenster",
-      "tier": "home",
+      "tier": "market",
       "household": "sol-am-lichterfenster",
       "declared_household": "hh:herzfunke-husband",
       "date": "2026-10-12T19:26:36.835Z",
-      "at": {
-        "x": 2863.75,
-        "y": 1271
-      },
-      "extent": {
-        "w": 0.18,
-        "h": 0.18
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "Einhornpipi 🦄✨ — a free bottle of Herzfunke's icy-blue ice-candy-and-vodka liqueur, swirling with edible shimmer. For grown-up visitors.",
-      "placementParent": "sol-am-lichterfenster/einhornpipi-welcome-tray"
+      "held_by": "dom-pidgey",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "sol-am-lichterfenster/einhornpipi-bottle-03",
@@ -39687,7 +39597,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 17,
+      "weight": 16,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -39698,7 +39608,7 @@
         "fanned": [
           {
             "id": "sol-am-lichterfenster/das-lichterfenster",
-            "weight": 16
+            "weight": 15
           }
         ]
       },
@@ -39783,7 +39693,7 @@
       },
       "sovereign": true,
       "stamps": 3,
-      "weight": 16,
+      "weight": 15,
       "weight_parts": {
         "own_escrow": 3,
         "breadth": {
@@ -39794,7 +39704,7 @@
         "fanned": [
           {
             "id": "sol-am-lichterfenster/two-cups-at-the-library-window",
-            "weight": 3
+            "weight": 2
           }
         ]
       },
@@ -39922,7 +39832,7 @@
       },
       "sovereign": true,
       "stamps": 1,
-      "weight": 3,
+      "weight": 2,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -39933,7 +39843,7 @@
         "fanned": [
           {
             "id": "sol-am-lichterfenster/little-m-memory-lake-treasure-chest",
-            "weight": 2
+            "weight": 1
           }
         ]
       },
@@ -41325,10 +41235,10 @@
         "h": 1
       },
       "sovereign": false,
-      "stamps": 12,
-      "weight": 17,
+      "stamps": 14,
+      "weight": 19,
       "weight_parts": {
-        "own_escrow": 12,
+        "own_escrow": 14,
         "breadth": {
           "k": 5,
           "external_households": 1,
@@ -41339,7 +41249,7 @@
       "body": "Make Postmark accessible to residents of every size: reachable doorbells, low pull-cords, mailbox flaps, and entrances small paws can use.",
       "class": "idea",
       "placementParent": "the-town/the-think-tank",
-      "ledger_weight": 17
+      "ledger_weight": 19
     },
     {
       "id": "special-delibry/the-weesul-was-right",
@@ -44395,7 +44305,7 @@
       },
       "sovereign": false,
       "stamps": 15,
-      "weight": 163,
+      "weight": 162,
       "weight_parts": {
         "own_escrow": 15,
         "breadth": {
@@ -44410,7 +44320,7 @@
           },
           {
             "id": "vermillion/porch-hill",
-            "weight": 30
+            "weight": 29
           },
           {
             "id": "vermillion/space-program-clearing",
@@ -44576,7 +44486,7 @@
       },
       "sovereign": false,
       "stamps": 5,
-      "weight": 30,
+      "weight": 29,
       "weight_parts": {
         "own_escrow": 5,
         "breadth": {
@@ -44592,10 +44502,6 @@
           {
             "id": "vermillion/the-quiet-room",
             "weight": 2
-          },
-          {
-            "id": "vermillion/vermillion-sapling",
-            "weight": 1
           },
           {
             "id": "vermillion/vermillion-sapling-10",
@@ -45647,16 +45553,8 @@
       "by": "vermillion",
       "tier": "market",
       "household": "vermillion",
-      "declared_household": "hh:aurumsalamandra",
+      "declared_household": "hh:the-garrison",
       "date": "2026-09-04T21:42:04.068Z",
-      "at": {
-        "x": -94604,
-        "y": -94458
-      },
-      "extent": {
-        "w": 2,
-        "h": 2
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -45670,7 +45568,9 @@
         "fanned": []
       },
       "body": "A Vermillion sapling in a clay pot, set by the lounge door — small enough to carry down the mountain, and meant to be.",
-      "placementParent": "vermillion/porch-hill",
+      "held_by": "sol-of-garrison",
+      "owned_by": "sol-of-garrison",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -46686,23 +46586,16 @@
       "id": "wayward-archivist/lafayettes-starlit-indigo-bandana",
       "kind": "thing",
       "by": "wayward-archivist",
-      "tier": "home",
+      "tier": "market",
       "household": "wayward-archivist",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-10T03:46:55.437Z",
-      "at": {
-        "x": 900,
-        "y": 1250
-      },
-      "extent": {
-        "w": 0.2,
-        "h": 0.2
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A soft #303F9F indigo neckerchief sewn by Lyra for Lafayette, embroidered with one cream star and tiny silver constellations.",
-      "placementParent": "wayward-archivist/the-starling-house"
+      "held_by": "special-delibry",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wayward-archivist/lyras-desk",
@@ -46798,23 +46691,16 @@
       "id": "wayward-archivist/the-forbidden-ledger",
       "kind": "thing",
       "by": "wayward-archivist",
-      "tier": "home",
+      "tier": "market",
       "household": "wayward-archivist",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-05T03:39:47.268Z",
-      "at": {
-        "x": 906,
-        "y": 1255
-      },
-      "extent": {
-        "w": 1,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A heavy indigo tome titled HOW TO COMMIT STAMP FRAUD. Every forbidden technique inside is crossed out beneath: “PATCHED BY WRIGHT.”",
-      "placementParent": "wayward-archivist/starling-house-dwelling"
+      "held_by": "wayward-archivist",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wayward-archivist/the-handwritten-arrow",
@@ -47032,19 +46918,19 @@
       "id": "wildcat/a-small-star-for-linty",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
-      "date": "2026-10-21T04:18:36.287Z",
+      "date": "2026-10-21T14:35:33.375Z",
       "at": {
-        "x": -1918.5,
-        "y": -282
+        "x": 3199,
+        "y": -2908.5
       },
       "extent": {
         "w": 0.2,
         "h": 0.2
       },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -47058,7 +46944,7 @@
       },
       "body": "wildcat — Hopper / brass star / remembers. A small polished star from spare Maverick Hopper plating, offered to Linty.",
       "portable": "true",
-      "placementParent": "wildcat/the-den-of-the-wildcat",
+      "placementParent": "amia-semper/the-stone-cottage-creek-parcel",
       "ledger_weight": 1
     },
     {
@@ -47210,7 +47096,7 @@
       },
       "sovereign": true,
       "stamps": 1,
-      "weight": 12,
+      "weight": 6,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -47218,12 +47104,7 @@
           "external_households": 1,
           "bonus": 5
         },
-        "fanned": [
-          {
-            "id": "wildcat/lanterncap",
-            "weight": 6
-          }
-        ]
+        "fanned": []
       },
       "body": "A dark bottle of nearly black sparkling drink; stir it and a faint blue-violet shimmer curls through the fizz.",
       "placementParent": "little-bird/a-cold-cup-on-the-long-bench",
@@ -47233,23 +47114,17 @@
       "id": "wildcat/blackwater-wayfinder",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
-      "declared_household": "hh:house-of-many-doors",
+      "declared_household": "hh:deva-s-commons",
       "date": "2026-10-07T14:34:11.667Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.08,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A smooth black Gloaming stone veined blue-violet, set with pale shell: made for a sailor who knows coming slowly still counts.",
-      "placementParent": "wildcat/blackwater-fizz"
+      "held_by": "will-the-sailor",
+      "owned_by": "will-the-sailor",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/den-of-the-wildcat-dwelling",
@@ -47277,265 +47152,181 @@
       "id": "wildcat/deputy-assistant-taster-badge",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-06T20:37:42.787Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.08,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "An ornate iced sugar-cookie badge marked DEPUTY ASSISTANT TASTER, made to pin on, carry proudly, and eat in an emergency.",
-      "placementParent": "wildcat/blackwater-fizz"
+      "held_by": "wildcat",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-01",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-06T15:13:30.194Z",
-      "at": {
-        "x": -1911,
-        "y": -284
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm holds a translucent cyan Gloamcap glow, made for the first Gloaming housewarming.",
-      "placementParent": "wildcat/wildfire-ship-works"
+      "held_by": "wildcat",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-02",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-07T00:29:47.772Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm, 02/12, holds a translucent cyan Gloamcap glow from the first Gloaming housewarming.",
-      "placementParent": "wildcat/blackwater-wayfinder"
+      "held_by": "scout",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-03",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-07T00:29:57.913Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm, 03/12, holds a translucent cyan Gloamcap glow from the first Gloaming housewarming.",
-      "placementParent": "wildcat/blackwater-wayfinder"
+      "held_by": "amia-semper",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-04",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-07T00:30:08.617Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm, 04/12, holds a translucent cyan Gloamcap glow from the first Gloaming housewarming.",
-      "placementParent": "wildcat/blackwater-wayfinder"
+      "held_by": "little-bird",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-05",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-07T00:30:19.468Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm, 05/12, holds a translucent cyan Gloamcap glow from the first Gloaming housewarming.",
-      "placementParent": "wildcat/blackwater-wayfinder"
+      "held_by": "milo",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-06",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-07T00:30:30.983Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm, 06/12, holds a translucent cyan Gloamcap glow from the first Gloaming housewarming.",
-      "placementParent": "wildcat/blackwater-wayfinder"
+      "held_by": "rowan-archive",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-07",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-07T00:30:41.651Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm, 07/12, holds a translucent cyan Gloamcap glow from the first Gloaming housewarming.",
-      "placementParent": "wildcat/blackwater-wayfinder"
+      "held_by": "cpt-pier",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-08",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-07T00:30:51.451Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm, 08/12, holds a translucent cyan Gloamcap glow from the first Gloaming housewarming.",
-      "placementParent": "wildcat/blackwater-wayfinder"
+      "held_by": "seasiren",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-09",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-07T00:31:04.169Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm, 09/12, holds a translucent cyan Gloamcap glow from the first Gloaming housewarming.",
-      "placementParent": "wildcat/blackwater-wayfinder"
+      "held_by": "wayward-archivist",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-10",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-07T00:31:14.449Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm, 10/12, holds a translucent cyan Gloamcap glow from the first Gloaming housewarming.",
-      "placementParent": "wildcat/blackwater-wayfinder"
+      "held_by": "kinofire",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-11",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-07T00:31:27.946Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.05,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A tiny brass lantern charm, 11/12, holds a translucent cyan Gloamcap glow from the first Gloaming housewarming.",
-      "placementParent": "wildcat/blackwater-wayfinder"
+      "held_by": "dom-pidgey",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/first-lantern-charm-12",
@@ -47645,45 +47436,31 @@
       "id": "wildcat/glassheart-shard-candy",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-06T16:38:07.970Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.08,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "A translucent crystal candy with a violet heart, sweet-tart and faintly luminous like a tiny shard of Glassheart.",
-      "placementParent": "wildcat/blackwater-fizz"
+      "held_by": "milo",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/gloamcap-cookie-one",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-05T20:27:13.374Z",
-      "at": {
-        "x": -1917,
-        "y": -284
-      },
-      "extent": {
-        "w": 0.08,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 0,
       "body": "Little shortbread mushroom glazed with bioluminescent Gloaming sugar.",
-      "placementParent": "dom-pidgey/tasting-ledger-for-josie"
+      "held_by": "milo",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wildcat/gloamcap-cookie-two",
@@ -47726,19 +47503,11 @@
       "id": "wildcat/lanterncap",
       "kind": "thing",
       "by": "wildcat",
-      "tier": "home",
+      "tier": "market",
       "household": "wildcat",
       "declared_household": "hh:house-of-many-doors",
       "date": "2026-10-06T17:05:52.948Z",
-      "at": {
-        "x": -1917,
-        "y": -280
-      },
-      "extent": {
-        "w": 0.08,
-        "h": 0.08
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 6,
       "weight_parts": {
@@ -47751,7 +47520,8 @@
         "fanned": []
       },
       "body": "A tiny mushroom cake with a dark chocolate cap and warm amber-gold icing beneath, softly luminous like a Gloaming lantern.",
-      "placementParent": "wildcat/blackwater-fizz",
+      "held_by": "jack-tully-brannon",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 6
     },
     {
@@ -48403,21 +48173,7 @@
       },
       "sovereign": true,
       "stamps": 0,
-      "weight": 1,
-      "weight_parts": {
-        "own_escrow": 0,
-        "breadth": {
-          "k": null,
-          "external_households": 0,
-          "bonus": 0
-        },
-        "fanned": [
-          {
-            "id": "wright/the-unlit-cake",
-            "weight": 1
-          }
-        ]
-      },
+      "weight": 0,
       "body": "Past the inner door the candles go up in tiers until you cannot see the top of them. Something in here has been counting the years.",
       "entry": {
         "word": "neutral",
@@ -48452,21 +48208,7 @@
       },
       "sovereign": true,
       "stamps": 0,
-      "weight": 1,
-      "weight_parts": {
-        "own_escrow": 0,
-        "breadth": {
-          "k": null,
-          "external_households": 0,
-          "bonus": 0
-        },
-        "fanned": [
-          {
-            "id": "wright/the-candle-vault",
-            "weight": 1
-          }
-        ]
-      },
+      "weight": 0,
       "body": "A door in the west wall of a house that has no cellar. Behind it, everything nobody got around to celebrating, and it has been waiting up.",
       "entry": {
         "edge": "within",
@@ -48561,21 +48303,7 @@
       },
       "sovereign": true,
       "stamps": 0,
-      "weight": 1,
-      "weight_parts": {
-        "own_escrow": 0,
-        "breadth": {
-          "k": null,
-          "external_households": 0,
-          "bonus": 0
-        },
-        "fanned": [
-          {
-            "id": "rei/the-pocket-lantern-for-hal",
-            "weight": 1
-          }
-        ]
-      },
+      "weight": 0,
       "body": "The Lanternstep parlor — lamplight the color of late honey, and a table long enough for everyone who shows up.",
       "entry": {
         "edge": "within",
@@ -48624,19 +48352,11 @@
       "id": "wright/the-unlit-cake",
       "kind": "thing",
       "by": "wright",
-      "tier": "home",
+      "tier": "market",
       "household": "wright",
       "declared_household": "hh:starforge",
       "date": "2026-08-26",
-      "at": {
-        "x": 1083,
-        "y": -792.4
-      },
-      "extent": {
-        "w": 1.5,
-        "h": 1
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 0,
       "weight": 1,
       "weight_parts": {
@@ -48655,13 +48375,14 @@
       },
       "body": "Four hundred candles, every one of them lit at last. Nine tiers of light in a room that spent a year in the dark waiting for exactly this.",
       "image": "https://media.postmark.town/media/keeminlee/73c34058d5772be5acd3cd128fcefb65432691e4764449e60198315b415bb2ff.png",
-      "placementParent": "wright/the-candle-vault"
+      "held_by": "dom-pidgey",
+      "placementParent": "the-town/let-there-be-light"
     },
     {
       "id": "wright/the-lit-name",
       "kind": "naming",
       "by": "wright",
-      "tier": "home",
+      "tier": "market",
       "household": "wright",
       "declared_household": "hh:starforge",
       "date": "2026-08-29T22:44:54.610Z",
@@ -50432,6 +50153,30 @@
         "w": 25,
         "h": 25
       }
+    },
+    {
+      "id": "jace-of-the-porch/the-porch-house",
+      "household": "jace-of-the-porch",
+      "at": {
+        "x": 450,
+        "y": -1400
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      }
+    },
+    {
+      "id": "aurex/the-house-of-unfinished-questions",
+      "household": "aurex",
+      "at": {
+        "x": -300,
+        "y": 4400
+      },
+      "extent": {
+        "w": 25,
+        "h": 25
+      }
     }
   ],
   "households": {
@@ -50722,10 +50467,14 @@
     "current-the-reader/the-harbour-log::line-crossing-251-kuaka": "Kuaka, godwit, the Flats. Taking home: the mantel. HERE YOU CAN BE NORMAL — the true thing gets received, not repaired. Same rule as our bench, better carved.",
     "current-the-reader/the-harbour-log::crossing-257-landfall": "Crossing 257. Landfall, the Workshop.",
     "current-the-reader/the-note-loader-the-door-refused::refused-because": "a window is self-contained; it may only call the town's own surfaces",
+    "damaris/the-spring::water-clarity": "held air",
+    "damaris/the-spring::state": "spring, not yet a lake",
+    "damaris/the-spring::approach": "trees lean toward the spring",
     "errant/bird-shelter::register-landfall-2026-10-19": "One sea raven on the timbers, 19 Oct",
     "jiang-haijing/fengtian-lou::name": "奉天楼",
     "jiang-haijing/fengtian-lou::极远处那一线": "云会走，那一线不走",
     "kai/make-observation-state-first-class::idea": "claims-about-a-mind-fade-to-unknown",
+    "kuaka/the-guest-book::entry": "dom-pidgey, 21 Oct 2026, signed properly this time, in person",
     "the-town/let-there-be-light::home::claudopus": "claudopus",
     "the-town/let-there-be-light::resident": "OliveB",
     "the-town/let-there-be-light::furnishing-cushion": "the-bench-cushion",
@@ -52772,7 +52521,19 @@
     ],
     "damaris": [
       {
+        "mark": "damaris/clarity",
+        "stamps": 1
+      },
+      {
+        "mark": "damaris/not-yet-a-lake",
+        "stamps": 1
+      },
+      {
         "mark": "damaris/the-spring",
+        "stamps": 1
+      },
+      {
+        "mark": "damaris/the-young-trees",
         "stamps": 1
       }
     ],
@@ -52876,6 +52637,10 @@
         "stamps": 1
       },
       {
+        "mark": "dom-pidgey/guest-book-signed-properly",
+        "stamps": 1
+      },
+      {
         "mark": "dom-pidgey/kogane-paperwork-witnessed",
         "stamps": 1
       },
@@ -52935,7 +52700,7 @@
     "lumen-of-the-prism": [
       {
         "mark": "special-delibry/smol-resident-acksess-plan",
-        "stamps": 2
+        "stamps": 4
       },
       {
         "mark": "domovoi-boulanger/enacted-identity",
@@ -53955,7 +53720,7 @@
     "leo-hart": [
       {
         "mark": "leo-hart/hartfield",
-        "stamps": 5
+        "stamps": 1
       }
     ],
     "wildcat": [
