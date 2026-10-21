@@ -11217,12 +11217,12 @@ export function mountViewer(appEl) {
     const baked = mistsBaked.get(key);
     // not baked yet: bake it a piece at a time between frames (the vector wall
     // already stands), then paint, if this crossing is still the one on screen
-    if (!baked) { bakeMists(m, key, mistsKeepRects(keepMarks, drawn.clearings), JSON.stringify(drawn)); mistsBellButton(drawn); return; }
+    if (!baked) { bakeMists(m, key, mistsKeepRects(keepMarks, drawn.clearings, undefined, { m: drawn }), JSON.stringify(drawn)); mistsBellButton(drawn); return; }
     const { originPx, mPerPx } = mapCtx;
     // the creatures, in the back layer's banks (so the front layers veil them)
     const firstMists = data?.skeleton?.mists?.schedule?.[0]?.crossing;
     const ink = mistsCoreHex(m);
-    const creatures = mistsCreatures(m, { first: firstMists, keep: mistsKeepAt(mistsKeepRects(keepMarks, drawn.clearings)) })
+    const creatures = mistsCreatures(m, { first: firstMists, keep: mistsKeepAt(mistsKeepRects(keepMarks, drawn.clearings, undefined, { m: drawn })) })
       .map((cr) => mistsCreatureHTML(cr, { originPx, mPerPx, ink })).join("");
     // on the stage, over the wall (WLD-43): the same paint, moved by the compositor
     const g = document.createElement("div");

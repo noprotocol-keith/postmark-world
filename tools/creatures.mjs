@@ -369,7 +369,7 @@ export function scheduleFor(crossing, secret, { mists, marks = [], dials = null,
   const { startMs } = windowOf(N);
   const spanMs = Number(dials.span_h) * 3600 * 1000;
   const from = Number(dials.band_from_m), to = Number(dials.band_to_m), apart = Number(dials.apart_m) || 0;
-  const keep = mistsKeepRects(marks, mists?.clearings_m ?? [], Number(dials.keep_m));
+  const keep = mistsKeepRects(marks, mists?.clearings_m ?? [], Number(dials.keep_m), { m });
   const waters = townWaterRings(marks);
   const minutes = CROSSING_MS / 60000;
   // Each spawn's draws are named by its own id (its minute, then two per try), so
