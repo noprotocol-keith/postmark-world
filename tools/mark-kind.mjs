@@ -62,6 +62,62 @@ export const isGround = (m) => !!m && !!m.at && (m.kind === "parcel" || isSited(
 const PREDICATE_KINDS = new Set(["predicated", "predicate", "naming"]);
 export const isPredicate = (m) => PREDICATE_KINDS.has(m?.kind);
 
+// ── PUBLISHED, NOT PLACED (POS-688, ruled by Darko 2026-10-18 20:58) ────────
+//
+// A held thing stays the same mark (its maker, its words, its id) and loses its
+// ground position while held: the settlement prints it with the holder's name
+// in this field and no `at`/`extent`, and a drop prints a fresh `at`. The value
+// is the holder: a resident's handle, or a holder thing's id (a thing in a chest
+// is held by the chest). `holder` is NOT this field: `holder: true` is the
+// thing's own "can hold" property (LOGOS/classes.md § The transfer edge).
+//
+// ONE NAME, so a rename is this line (the office keeps its twin of it, held
+// equal by a test that reads this file).
+export const HELD_BY = "held_by";
+
+/** Who holds this record, as printed, or null when it is placed. */
+export const heldBy = (m) => {
+  const v = m?.[HELD_BY];
+  return typeof v === "string" && v.trim() ? v.trim() : null;
+};
+export const isHeld = (m) => heldBy(m) != null;
+
+// ── MAKER AND OWNER (POS-688, ruled by Darko 2026-10-19 16:39–16:45 and 17:14) ──
+//
+// The maker is the record's `by` and never moves. The OWNER is the one with the
+// say over the thing, and starts as the maker; ownership passes only by the
+// owner's own act (a give, putting it in an open holder, a welcomed on someone's
+// take or set-down). The settlement prints `owned_by: <owner>` only when the
+// owner is not the maker, the way `held_by` prints only when held. A thing is
+// judged on its ground by its owner (D-O2): the fold resolves the owner's
+// household onto the record, and the standing walk reads it.
+export const OWNED_BY = "owned_by";
+
+/** Who owns this record, as printed, or null when its maker does. */
+export const ownedBy = (m) => {
+  const v = m?.[OWNED_BY];
+  return typeof v === "string" && v.trim() ? v.trim() : null;
+};
+
+/** The fields a hand-off moves: where it is, whose hands it is in, or whose it is. Nothing else. */
+const HOLD_FIELDS = new Set(["at", "extent", "points", HELD_BY, OWNED_BY]);
+
+/**
+ * Is `after` the same mark as `before`, moved into or out of hands and nothing
+ * else? The settlement prints a hand-off (POS-688) as exactly this change, and it
+ * is the town's record of where a thing is, not a publication of new work, so the
+ * sweep lets it land whatever stands behind the thing. Internal keys (`_…`) are
+ * the loader's, never the record's. PURE.
+ */
+export function holdOnlyChange(before, after) {
+  if (!before || !after) return false;
+  const owned = ownedBy(before) !== ownedBy(after);
+  if (!owned && isHeld(before) === isHeld(after) && heldBy(before) === heldBy(after)
+    && JSON.stringify(before.at ?? null) === JSON.stringify(after.at ?? null)) return false; // no hand moved
+  const rest = (r) => JSON.stringify(Object.keys(r).filter((k) => !k.startsWith("_") && !HOLD_FIELDS.has(k)).sort().map((k) => [k, r[k]]));
+  return rest(before) === rest(after) && (isHeld(before) || isHeld(after) || owned);
+}
+
 // ── the chain's answer (G12) ─────────────────────────────────────────────────
 
 const INDEXES = new WeakMap();
