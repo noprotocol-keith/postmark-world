@@ -135,15 +135,16 @@ export const ENCOUNTER_VERBS = Object.freeze(["strike", "steady", "shield"]);
 
 /** Whom a press may land on: each a menu entry the office resolves to one resident
  *  in the ring (the one who acted, the last to strike it, one shielding another,
- *  the one with the most acts in its ring this window, one with no housemate there). */
-export const PRESS_ON = Object.freeze(["actor", "striker", "shielder", "loudest", "alone"]);
+ *  the one with the most acts in its ring this window, one with no housemate there,
+ *  the one whose stay in its ring began first). */
+export const PRESS_ON = Object.freeze(["actor", "striker", "shielder", "loudest", "alone", "longest"]);
 /** The most nerve one press may cost. */
 export const PRESS_MAX = 2;
 /** How a kind's ease fills: each resident their own, or shared, one point per household. */
 export const EASE_BY = Object.freeze(["mine", "households"]);
 
 /** The slots a line may name: the actor, and the code fills (see the header). */
-export const LINE_SLOTS = Object.freeze(["actor", "offered", "heard", "target"]);
+export const LINE_SLOTS = Object.freeze(["actor", "offered", "heard", "target", "ally"]);
 
 /** What a condition may read beyond the creature's own moods and flags. */
 const ACT_FIELDS = new Set(["act.verb", "act.distance_m", "act.approaching", "actor.times", "heard.any"]);
@@ -314,7 +315,8 @@ export function parseEffects(src, { moods, flags, finishable = false, ease = nul
 const MOOD = /^([a-z][\w-]*):\s*(-?\d+)\.\.(-?\d+)\s*=\s*(-?\d+)\s*(?:\|(.*))?$/;
 const REACTION = /^reaction\s+([a-z][\w-]*)\s+"([^"]*)":\s*when\s+(.*?)(?:\s+does\s+(.*?))?\s+says\s+(.*)$/;
 const SINGLE = new Set(["kind", "name", "voice", "about", "ring_m", "flags", "tastes", "finishable", "ending", "fragments", "fragment_words",
-  "resolve", "strike", "ease"]); // an encounter's lines (a finishable kind only)
+  "resolve", "strike", "ease", // an encounter's lines (a finishable kind only)
+  "tempts", "who", "fight_size"]); // a creature that tempts (creature-tempts.mjs)
 /** What a telling kind's conditions may read (POS-712): told.now (it told the actor a fragment with
  *  this act), told.answered (this act's words answered every fragment, in order) and told.asks
  *  (every fragment is told, it is asking, and this act did not answer: the one who forgets). */
@@ -344,6 +346,17 @@ function encounterOf(kind, source) {
     kind.resolve = whole("resolve", kind.resolve, 1);
     kind.strike = whole("strike", kind.strike, 1, kind.resolve);
     if (Object.hasOwn(kind.moods, "resolve") || kind.flags.includes("resolve")) throw new Error(`${source}: a kind with resolve: has no mood or flag named resolve (self.resolve is its resolve)`);
+  }
+  // A CREATURE THAT TEMPTS (creature-tempts.mjs): its menu file, the resident who may speak for it, and the
+  // size of its fight (what its phases advance by). It keeps two tallies, never a resolve or an ease
+  if ((kind.tempts === undefined) !== (kind.who === undefined) || (kind.tempts === undefined) !== (kind.fight_size === undefined))
+    throw new Error(`${source}: tempts:, who: and fight_size: come together (its menu, who speaks for it, and its fight's size)`);
+  if (kind.tempts !== undefined) {
+    if (!kind.finishable) throw new Error(`${source}: tempts: belongs to a finishable kind (finishable: true); ${MISTS_ONLY}`);
+    if (!/^[a-z][a-z0-9.-]*.json$/.test(kind.tempts)) throw new Error(`${source}: tempts: names a menu file beside it, <name>.json (got ${JSON.stringify(kind.tempts)})`);
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(kind.who)) throw new Error(`${source}: who: is a resident's handle (got ${JSON.stringify(kind.who)})`);
+    kind.fight_size = whole("fight_size", kind.fight_size, 3);
+    if (kind.resolve !== undefined || kind.ease !== undefined) throw new Error(`${source}: a creature that tempts keeps two tallies, never a resolve: or an ease:`);
   }
   if (kind.ease !== undefined) {
     // `only <verb>` (a per-resident ease): any other act of yours charged in its ring empties your own ease,
@@ -458,7 +471,9 @@ export function parseKind(text, { source = "kind file" } = {}) {
     const line = says.trim();
     if (!line) fail(n, `a reaction says something`);
     const names = [...line.matchAll(/\{([^}]*)\}/g)].map((x) => x[1]);
-    for (const x of names) if (!LINE_SLOTS.includes(x)) fail(n, `a line may name {actor}, {offered}, {heard} or {target} and nothing else (got {${x}})`);
+    for (const x of names) if (!LINE_SLOTS.includes(x)) fail(n, `a line may name {actor}, {offered}, {heard}, {target} or {ally} and nothing else (got {${x}})`);
+    // {ally}: filled by code. On a steady or a shield, the friend it was for; otherwise the other resident the temptation in this exchange named
+    if (names.includes("ally") && kind.tempts === undefined) fail(n, `a line naming {ally} belongs to a creature that tempts (tempts:): {ally} is the friend a steady or shield was for, or the resident its temptation named`);
     const needs = requiredOf(when);
     if (names.includes("offered") && !needs.verbs.has("offer")) fail(n, `a line naming {offered} needs a condition that requires act.verb == "offer" (in its top-level and)`);
     if (names.includes("heard") && !needs.ids.has("heard.any")) fail(n, `a line naming {heard} needs a condition that requires heard.any (in its top-level and)`);
@@ -533,7 +548,8 @@ const wordsOf = (v) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim() : 
 /** The line a reaction leaves: its template, with the acting resident named, and
  *  the offered kind's name and the heard words where the line names them. One pass,
  *  by a function: "$&" in a name, or "{heard}" in what was said, is only text. */
-export function voiceLine(reaction, { actor, offered = null, heard = null, target = null } = {}) {
-  const fill = { actor: String(actor), offered: wordsOf(offered) || "offering", heard: wordsOf(heard) || "…", target: wordsOf(target) || String(actor) };
-  return reaction.says.replace(/\{(actor|offered|heard|target)\}/g, (_, slot) => fill[slot]);
+export function voiceLine(reaction, { actor, offered = null, heard = null, target = null, ally = null } = {}) {
+  const fill = { actor: String(actor), offered: wordsOf(offered) || "offering", heard: wordsOf(heard) || "…", target: wordsOf(target) || String(actor),
+    ally: wordsOf(ally) || "someone" };
+  return reaction.says.replace(/\{(actor|offered|heard|target|ally)\}/g, (_, slot) => fill[slot]);
 }
