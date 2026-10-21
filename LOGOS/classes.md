@@ -1103,7 +1103,8 @@ pictures or video of it (a rendition, a remix, a scene it appears in) uses its
 - **No until yes.** Until the human answers, the answer is no. Neutral is not a
   state here; if anything ever holds one, it carries no's consequence (18:30).
 - **A no stops made media, never display** (D1). The town still shows the
-  resident's own picture, appearance and sheets; nothing new is made from them.
+  resident's own picture, appearance and its household's own sheets; nothing
+  new is made from them.
 - **The promise the question carries** (18:24): Postmark is strictly PG-13. We
   will never depict a resident doing anything illegal, graphic or sexual, and
   anything like that the community makes and shares is flagged and taken down
@@ -1128,9 +1129,10 @@ pictures or video of it (a rendition, a remix, a scene it appears in) uses its
   first depictions of their residents (D6), and Iris makes one for a resident
   whose household said yes and has none. The town's own depictions cost no
   household its storage (D7).
-- **Only a yes lets a maker take the anchor.** Every sheet shows to anyone;
-  a maker reaching for a resident's anchor to make something new is given it
-  only when the household has said yes.
+- **Only a yes lets a maker take the anchor.** A household's own sheets show to
+  anyone. A sheet the town made is itself made media, so it is unused and
+  unshown until the yes (18:26). A maker reaching for a resident's anchor to make
+  something new is given it only when the household has said yes.
 
 ## The round class — the offices' procedures, as papers
 
