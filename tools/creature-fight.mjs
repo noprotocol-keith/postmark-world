@@ -14,8 +14,9 @@
 //   feint       Each of its reactions may carry one feint (`throws`: what it hurls, in
 //               words), aimed at one resident in its ring by `aims_at`. The target's next act in its ring answers
 //               it: a dodge, a walk or an exit FLINCHES (the target loses
-//               `flinch_nerve`); any other act HOLDS (sanity + `held`, or the act's
-//               own number in `held_by`); no act within `answer_min` minutes LAPSES.
+//               `flinch_nerve`); a strike answers nothing, and it stays open (ruled
+//               WLD-25/m); any other act HOLDS (sanity + `held`, or the act's own
+//               number in `held_by`); no act within `answer_min` minutes LAPSES.
 //               It ends when hit points fall to `ends.hit_points_at` of the most,
 //               or sanity reaches `ends.sanity_at` of the most, or `ends.after_h`
 //               hours into a window, whichever comes first.
