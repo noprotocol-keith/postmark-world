@@ -20,9 +20,9 @@
 // so what a portal does and what the lint holds it to are one definition. Pure:
 // no fs, no engine import, browser-safe like geometry.mjs.
 
-import { isSited, instanceClassOf } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
+import { isSited, instanceClassOf, heldBy } from "./mark-kind.mjs"; // what a record is and how it stands, in either form (LOGOS v2 part 2, W2)
 import { marksContain, overlapArea, pointInPolygon, pointInRect, polygonBBox, polygonOf, rect, rectCorners } from "./geometry.mjs";
-import { entryLawOf, isStairs } from "./enter-exit.mjs";
+import { entryLawOf, isStairs, REQUIRES_AT_SETTLEMENT, requiresHoldersIn } from "./enter-exit.mjs";
 import { nameInSentence } from "./mark-name.mjs";
 
 export const DUNGEON_CLASS = "dungeon";
@@ -634,35 +634,89 @@ export function lockedPassage(portal, { pick = null, marks = [], held = [], lock
 // the office hands it in as `holdings` ({ holder id: [the ids it holds] }). A
 // holder the passage was told nothing about holds nothing, and a condition that
 // cannot be read refuses: the door stays shut, never open. Nothing is written.
+//
+// `in` may be a list (each mark counts when any one of the holders holds it),
+// and `at: "settlement"` reads the world as the last settlement printed it
+// instead of the record: a mark counts when its printed `held_by` names one of
+// the holders (enter-exit.mjs § requires). Such a door needs nothing from the
+// office, so a new door works unchanged through an office that predates it.
 
-/** The holder a portal's `requires` asks, or null when it asks nothing. */
+/** The one holder a portal's `requires` asks the office about, or null when it
+ *  asks nothing. The older, single-holder read: a door that names a list or
+ *  reads the settlement answers null here, so an office that knows only this
+ *  hands it nothing, and a live list door stays shut there (never open). An
+ *  office that knows `requiresHoldersOf` asks that instead. */
 export function requiresHolderOf(portal) {
   const req = entryLawOf(portal)?.requires;
-  return req ? (req.in ?? portal?.id ?? null) : null;
+  if (!req) return null;
+  if (Array.isArray(req.in) || req.at === REQUIRES_AT_SETTLEMENT) return null;
+  return req.in ?? portal?.id ?? null;
 }
 
+/** Every holder whose live holdings a portal's `requires` asks the office for:
+ *  `in` as a list, or the one holder. Empty for a door that reads the settlement
+ *  (it asks the record nothing); null when it asks nothing at all. */
+export function requiresHoldersOf(portal) {
+  const req = entryLawOf(portal)?.requires;
+  if (!req) return null;
+  if (req.malformed || req.at === REQUIRES_AT_SETTLEMENT) return [];
+  return requiresHoldersIn(req, portal);
+}
+
+/** "a", "a and b", "a, b and c". */
+const andList = (xs) => xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
+
 /** The refusal's words. `says` is the door's own line, `{held}` and `{asks}` in
- *  it read as the counts; with no line of its own, the town's plain one. */
-export function requiresWords({ portal, holder, held, asks, says = null, determined = {} }) {
+ *  it read as the counts; with no line of its own, the town's plain one. `holder`
+ *  may be a list; `at` is the door's `at` (a settlement count says so, and says
+ *  when what is put in now will count). */
+export function requiresWords({ portal, holder, held, asks, says = null, at = null, shown = true, determined = {} }) {
+  const holders = Array.isArray(holder) ? holder : [holder];
+  const settled = at === REQUIRES_AT_SETTLEMENT;
+  // NOT SHOWN: the line and the count, naming nothing it asks for and no holder
+  if (shown === false && !says)
+    return `${nameInSentence(portal, determined).replace(/^./, (c) => c.toUpperCase())} stays shut until what it asks for is in place, ${settled
+      ? `and at the last settlement ${held} of ${asks} were; what is put in now counts from the next settlement`
+      : `and ${held} of ${asks} are`}. Nothing was recorded.`;
+  const self = holders.length === 1 && holders[0] === portal;
+  const many = holders.length > 1;
+  const who = self ? "it" : andList(holders.map((h) => nameInSentence(h, determined)));
+  const count = at === REQUIRES_AT_SETTLEMENT
+    ? `and at the last settlement ${many ? "they" : "it"} held ${held}; what is put in now counts from the next settlement`
+    : `and ${many ? "they hold" : "it holds"} ${held}`;
   const line = says
     ? String(says).replace(/{held}/g, String(held)).replace(/{asks}/g, String(asks))
-    : `${nameInSentence(portal, determined).replace(/^./, (c) => c.toUpperCase())} opens only when ${holder === portal ? "it holds" : `${nameInSentence(holder, determined)} holds`} the ${asks} ${asks === 1 ? "thing" : "things"} it asks for, and it holds ${held}.`;
+    : `${nameInSentence(portal, determined).replace(/^./, (c) => c.toUpperCase())} opens only when ${who} ${many ? "hold" : "holds"} the ${asks} ${asks === 1 ? "thing" : "things"} it asks for, ${count}.`;
   return `${line.trim()} Nothing was recorded.`;
 }
 
-/** Null when `portal` asks nothing, or its holder holds all it asks for;
- *  otherwise `{ words, requires: { in, holds, held, missing } }`. */
-export function unmetRequires(portal, { holdings = null, determined = {} } = {}) {
+/** Null when `portal` asks nothing, or its holders hold all it asks for;
+ *  otherwise `{ words, requires: { in, holds, held, missing } }` (and `at`, when
+ *  the door writes it). `in` is as the door wrote it: one id, or the list.
+ *  `marks` is the world the passage stands on, which a settlement door reads. */
+export function unmetRequires(portal, { holdings = null, marks = [], determined = {} } = {}) {
   const req = entryLawOf(portal)?.requires;
   if (!req) return null;
-  const holder = req.in ?? portal.id;
+  const holder = Array.isArray(req.in) ? req.in : req.in ?? portal.id;
   if (req.malformed) return { words: `${portal.id}'s entry asks for something it does not say plainly (${req.malformed}), so it stays shut. Nothing was recorded.`, requires: { in: holder, malformed: req.malformed } };
-  const inside = new Set((holdings && Array.isArray(holdings[holder]) ? holdings[holder] : []).map(String));
+  const holders = new Set(requiresHoldersIn(req, portal));
+  let inside;
+  if (req.at === REQUIRES_AT_SETTLEMENT) {
+    // as printed: a mark the world does not carry, or carries placed, is held by no one
+    const printed = new Map((marks ?? []).map((m) => [m?.id, heldBy(m)]));
+    inside = new Set(req.holds.filter((id) => holders.has(printed.get(id))));
+  } else {
+    inside = new Set([...holders].flatMap((h) => (holdings && Array.isArray(holdings[h]) ? holdings[h] : [])).map(String));
+  }
   const held = req.holds.filter((id) => inside.has(id));
   if (held.length === req.holds.length) return null;
   return {
-    words: requiresWords({ portal: portal.id, holder, held: held.length, asks: req.holds.length, says: req.says, determined }),
-    requires: { in: holder, holds: [...req.holds], held, missing: req.holds.filter((id) => !inside.has(id)) },
+    words: requiresWords({ portal: portal.id, holder, held: held.length, asks: req.holds.length, says: req.says, at: req.at ?? null, shown: req.shown !== false, determined }),
+    // NOT SHOWN: the counts alone, no id of what it asks for or where it looks
+    requires: req.shown === false
+      ? { shown: false, held: held.length, asks: req.holds.length, ...(req.at ? { at: req.at } : {}) }
+      : { in: Array.isArray(holder) ? [...holder] : holder, holds: [...req.holds], held, missing: req.holds.filter((id) => !inside.has(id)),
+        ...(req.at ? { at: req.at } : {}) },
   };
 }
 
@@ -780,11 +834,12 @@ export function portalFindings(marks) {
       if (req.malformed) say(m.id, "requires-names-marks", `entry.requires: ${req.malformed}`);
       else {
         for (const id of req.holds) if (!byId.has(id)) say(m.id, "requires-names-marks", `entry.requires.holds: ${JSON.stringify(id)} names no mark — the door would ask for something that does not exist`);
-        const holderId = req.in ?? m.id;
-        const holder = byId.get(holderId);
-        if (!holder) say(m.id, "requires-names-marks", `entry.requires.in: ${JSON.stringify(holderId)} names no mark`);
-        else if (holder.holder !== true && String(holder.holder) !== "true")
-          say(m.id, "requires-in-a-holder", `${holderId} is asked to hold what this door requires, but it does not write holder: true — nothing can ever be put in it`);
+        for (const holderId of requiresHoldersIn(req, m)) {
+          const holder = byId.get(holderId);
+          if (!holder) say(m.id, "requires-names-marks", `entry.requires.in: ${JSON.stringify(holderId)} names no mark`);
+          else if (holder.holder !== true && String(holder.holder) !== "true")
+            say(m.id, "requires-in-a-holder", `${holderId} is asked to hold what this door requires, but it does not write holder: true — nothing can ever be put in it`);
+        }
       }
     }
     // THE LANDING STANDS INSIDE THE ROOM IT ENTERS (row 68 (a), review-231). A

@@ -1901,6 +1901,19 @@ that already stood: a mark's `entry: {word, edge, consequence}` is its fixed ans
   passes for everyone. Things go in by an ordinary give. The refusal says `says`, the door's own line, with
   `{held}` and `{asks}` read as the counts, so the door shows how far it has come. An exit never carries one (locked
   from the outside, never from the inside), and the lint holds every id it names to a mark. `entry` itself is a property of every mark (`the-town/mark-entry`), so a thing that is a door carries it like any other mark.
+  - **Several holders** (2026-10-22, carrying out WLD-25/k): `in` may be a list of holders. Then each mark `holds`
+    names counts once any one of them holds it, and which mark goes in which holder is each holder's own law (its
+    `accepts`). The lint holds every holder in the list to a mark that writes `holder: true`.
+  - **Counted at a settlement** (2026-10-22, carrying out WLD-25/k, "opens at the next settlement"): with `at:
+    "settlement"`, the door reads no live record. A mark counts as held when the world as the last settlement
+    printed it says so (its `held_by`). What is put in now opens the door at the next settlement, never before, and
+    there is no second clock. Its refusal says how many the last settlement counted, and that what is put in now
+    counts from the next one. `at` has that one value, or is absent.
+  - **Not shown** (2026-10-22, carrying out WLD-25/k: the hint is the door's own body): with `shown: false`
+    (the maker's choice; default true), the door's refusal is its `says` line and the count, and it names
+    nothing the door asks for and none of its holders. Without a line of its own, the town's plain words name
+    nothing either. The condition stays readable in the door's law, for anyone who reads it there. Every
+    other door keeps today's answer.
 
 **Later** (named in the sitting, not law yet): other `requires:` conditions on a portal, secret portals (a hidden
 entry in the list), and exit routing for marks that are not dungeons.
@@ -2036,7 +2049,10 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
     asks for): `accepts` (sovereign, default none) lists by id the marks it
     takes in, and a give of anything else into it is refused at the door;
     `keeps` (sovereign, default false) means what goes in stays, and nothing is
-    taken back out, by anyone.
+    taken back out, by anyone. And `accepts_shown` (sovereign, default true;
+    2026-10-22, carrying out WLD-25/l): when it is true, a holder that refuses
+    something lists what it does take; when it is false, its refusal says only
+    that it does not take that, and the list stays in its law.
     `fill` (sovereign, default true; WLD-26, ruled 2026-10-19 17:48) says
     whether the World page tints a picture-less thing's ground: `fill: false`
     draws its outline alone, so art beneath it shows through.
