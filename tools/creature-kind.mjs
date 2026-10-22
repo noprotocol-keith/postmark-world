@@ -126,7 +126,7 @@ export const RING_VERBS = Object.freeze(["walk", "enter", "exit", "say", "take",
 /** The afforded actions a creature class may declare (POS-672; ruled 2026-10-16
  *  18:06): watch, approach and shoo on every creature; call and offer on the wolf
  *  and the raven; whisper on the bat. A creature whose fight runs in set pieces
- *  (creature-fight.mjs) adds dodge (from a fireball aimed at you) and persuade
+ *  (creature-fight.mjs) adds dodge (from a feint aimed at you) and persuade
  *  (WLD-25, ruled 2026-10-22). Which ones a creature takes is its classes'
  *  `actions`, never this list: this is only every verb a kind file may key on. */
 export const AFFORDED_VERBS = Object.freeze(["watch", "approach", "shoo", "call", "offer", "whisper", "dodge", "persuade"]);
@@ -158,8 +158,8 @@ const EASE_FIELDS = new Set(["ease.mine", "ease.all", "ease.first_m"]);
  *  actor's housemates there, the actor's nerve, and whether the actor has struck it. */
 const RING_FIELDS = new Set(["ring.residents", "ring.households", "actor.housemates", "actor.nerve", "actor.struck"]);
 /** What a kind whose fight runs in set pieces may read besides (creature-fight.mjs): the set piece it is
- *  in ("fireballs", "disguise", "empowered"), its sanity this window, and whether this act flinched
- *  from a fireball aimed at the actor or held under it. */
+ *  in ("feint", "disguise", "unbreakable"), its sanity this window, and whether this act flinched
+ *  from a feint aimed at the actor or held under it. */
 export const FIGHT_FIELDS = Object.freeze(["fight.piece", "fight.sanity", "fight.flinched", "fight.held"]);
 
 // ── the expression language ────────────────────────────────────────────────────
@@ -529,7 +529,7 @@ export function scopeOf(state, act = {}, actor = {}, encounter = {}) {
     ease: { mine: num(encounter.ease?.mine), all: num(encounter.ease?.all), first_m: num(encounter.ease?.first_m) },
     // POS-712: the office's word on a telling creature's act; a kind that does not tell never reads it
     told: { now: !!act.told?.now, answered: !!act.told?.answered, asks: !!act.told?.asks },
-    // a fight in set pieces (creature-fight.mjs), as the office reads it: its set piece, its sanity, and this act's answer to a fireball
+    // a fight in set pieces (creature-fight.mjs), as the office reads it: its set piece, its sanity, and this act's answer to a feint
     fight: { piece: String(encounter.fight?.piece ?? ""), sanity: num(encounter.fight?.sanity), flinched: !!encounter.fight?.flinched, held: !!encounter.fight?.held },
   };
 }

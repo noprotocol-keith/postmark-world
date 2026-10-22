@@ -9,10 +9,10 @@
 // time. The set piece reached persists across windows; both bars reset at each
 // settlement. The office runs the fight; this file only reads it.
 //
-// THE SET PIECES (SET_PIECES, each at most once, in any order but `empowered` last):
+// THE SET PIECES (SET_PIECES, each at most once, in any order but `unbreakable` last):
 //
-//   fireballs   Each of its reactions may carry one fireball, aimed at one resident
-//               in its ring by `aims_at`. The target's next act in its ring answers
+//   feint       Each of its reactions may carry one feint (`throws`: what it hurls, in
+//               words), aimed at one resident in its ring by `aims_at`. The target's next act in its ring answers
 //               it: a dodge, a walk or an exit FLINCHES (the target loses
 //               `flinch_nerve`); any other act HOLDS (sanity + `held`, or the act's
 //               own number in `held_by`); no act within `answer_min` minutes LAPSES.
@@ -25,7 +25,7 @@
 //               on it from inside its ring breaks it for everyone: the creature
 //               says `admits` to the one who broke it, and the next piece begins.
 //               It has no clock.
-//   empowered   Hit points cannot be worn (a strike does nothing, and still costs
+//   unbreakable Hit points cannot be worn (a strike does nothing, and still costs
 //               its nerve). Sanity is 0 when it begins and at each settlement.
 //               `persuade` is its peaceful act: once per household per settlement,
 //               scored from `persuade.low` to `persuade.high` (Jev reads it against
@@ -42,14 +42,14 @@
 // Every line the creature itself says (its cackle when someone flinches, its
 // answer to a strike or a persuade) is a reaction in its kind file, keyed on the
 // `fight.*` fields (creature-kind.mjs § FIGHT_FIELDS). Only the lines said outside
-// a reaction (`surrender`, `admits`) and the fireball's own words live here.
+// a reaction (`surrender`, `admits`) and what a feint throws live here.
 
 /** The set pieces a fight may run. */
-export const SET_PIECES = Object.freeze(["fireballs", "disguise", "empowered"]);
-/** The acts that flinch from a fireball aimed at you; any other act holds. */
+export const SET_PIECES = Object.freeze(["feint", "disguise", "unbreakable"]);
+/** The acts that flinch from a feint aimed at you; any other act holds. */
 export const FLINCH_VERBS = Object.freeze(["dodge", "walk", "exit"]);
-/** Whom a fireball may be aimed at (the press's own words; creature-kind.mjs § PRESS_ON). */
-export const FIREBALL_AIMS = Object.freeze(["loudest", "longest", "alone", "actor"]);
+/** Whom a feint may be aimed at (the press's own words; creature-kind.mjs § PRESS_ON). */
+export const FEINT_AIMS = Object.freeze(["loudest", "longest", "alone", "actor"]);
 /** The longest line a fight file may hold. */
 export const LINE_MAX = 400;
 
@@ -85,12 +85,12 @@ export function parseFight(text, { source = "fight file" } = {}) {
     if (!SET_PIECES.includes(p?.piece)) fail(at, `is one of ${SET_PIECES.join(", ")} (got ${JSON.stringify(p?.piece)})`);
     if (seen.has(p.piece)) fail(at, `${p.piece} is given twice`);
     seen.add(p.piece);
-    if (p.piece === "empowered" && i !== j.pieces.length - 1) fail(at, "empowered is the last set piece: nothing comes after it");
+    if (p.piece === "unbreakable" && i !== j.pieces.length - 1) fail(at, "unbreakable is the last set piece: nothing comes after it");
     const out = { piece: p.piece, looks: line(`${at}.looks`, p.looks) };
-    if (p.piece === "fireballs") {
+    if (p.piece === "feint") {
       const e = p.ends ?? {};
-      out.fireball = line(`${at}.fireball`, p.fireball);
-      if (!FIREBALL_AIMS.includes(p.aims_at)) fail(`${at}.aims_at`, `is one of ${FIREBALL_AIMS.join(", ")}`);
+      out.throws = line(`${at}.throws`, p.throws);
+      if (!FEINT_AIMS.includes(p.aims_at)) fail(`${at}.aims_at`, `is one of ${FEINT_AIMS.join(", ")}`);
       out.aims_at = p.aims_at;
       out.flinch_nerve = whole(`${at}.flinch_nerve`, p.flinch_nerve, 1, 10);
       out.held = whole(`${at}.held`, p.held, 1, sanity_max);
@@ -107,7 +107,7 @@ export function parseFight(text, { source = "fight file" } = {}) {
       out.surrender = line(`${at}.surrender`, p.surrender);
       out.admits = line(`${at}.admits`, p.admits);
     }
-    if (p.piece === "empowered") {
+    if (p.piece === "unbreakable") {
       const q = p.persuade ?? {};
       const low = whole(`${at}.persuade.low`, q.low, 1, sanity_max);
       const high = whole(`${at}.persuade.high`, q.high, low, sanity_max);
