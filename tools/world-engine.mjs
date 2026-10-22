@@ -453,7 +453,7 @@ export const MISTS_STRIDE_FLOOR = 1e-4;
 const KEPT_AIR_SINCE = 272;
 const KEPT_AIR = [
   { minX: 3690, maxX: 3770, minY: -5340, maxY: -3340 },
-  { minX: 3690, maxX: 3890, minY: -5540, maxY: -5300 },
+  { minX: 3690, maxX: 3912, minY: -5586, maxY: -5300 }, // widened to the servants' door (3902, -5575.5): Darko, WLD-6/b
 ];
 function onKeptAir(p, crossing) {
   if (!(crossing >= KEPT_AIR_SINCE)) return false;

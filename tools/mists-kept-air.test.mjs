@@ -66,3 +66,10 @@ test("standing within the Grounds reads the Grounds, though its anchor is past 2
   assert.deepEqual(containmentChain(standing, [grounds]).map((w) => w.id), ["stand-in-grounds"]);
   assert.equal(mistsRoad({ x: 3730, y: -5340 }, standing, 272, mists).refused, undefined, "and the track walks there");
 });
+
+test("box 2 covers the way to the servants' door (WLD-6/b): the road there is a road from 272, the Mists as ever before", () => {
+  const door = { x: 3902, y: -5575.5 };
+  const atBend = { x: 3730, y: -5340 };
+  assert.equal(mistsRoad(atBend, door, 272, mists).refused, undefined, "from the bend to the door, from 272");
+  assert.notEqual(mistsRoad(atBend, door, 271, mists).refused, undefined, "before 272 the wall still stops it");
+});
