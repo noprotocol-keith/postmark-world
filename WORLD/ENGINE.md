@@ -321,6 +321,11 @@ same night (W1–W11). A season's mechanics, kept here rather than in LOGOS (the
   `named`: a slug, a place, what it carries, the crossing it comes from). Each is
   spawned ONCE EVER by the-town at its place with `stays: true`: it never fades.
   Its kind file says `finishable: true`, so it never flees either.
+- **Waiting on a door (2026-10-22, carrying out WLD-25/k).** A declaration may name
+  `after_door`, a door's mark id. The creature then comes out at the first
+  settlement whose world shows that door open: its `requires` met as that
+  settlement printed it. The door must count `at: "settlement"`, which the lint
+  holds it to, so the door and the creature open at the same settlement.
 - **Finished by anyone, by any road.** A reaction carrying the effect `finish`,
   or a mechanic that checks its own answer in code, writes one `finish` row: the
   creature, the resident and the resident's act that earned it. Once per resident.

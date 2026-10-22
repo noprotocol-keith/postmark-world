@@ -1262,8 +1262,17 @@ const TOP_LEVEL_MD = new Set(["SCHEMA.md", "README.md"]);
   const creatureClass = marks.find((m) => m?.kind === "class" && m.by === TOWN && String(m.class) === "creature");
   if (creatureClass) {
     const { creatureLaw } = await import("./creatures.mjs");
-    try { creatureLaw(marks); }
+    let law = null;
+    try { law = creatureLaw(marks); }
     catch (e) { err(creatureClass, `the creature law cannot be read whole, so the creatures' tick would spawn nothing: ${e.message}`); }
+    // A NAMED CREATURE THAT WAITS ON A DOOR (`after_door`, 2026-10-22): the door is a mark whose
+    // `requires` counts at a settlement, so the creature and the door open at the same settlement.
+    // A door that reads the live record, or none, would keep the creature in for good.
+    const { afterDoorRefusal } = await import("./creatures.mjs");
+    for (const d of law?.named ?? []) {
+      const why = afterDoorRefusal(d, marks);
+      if (why) err(creatureClass, `the named creature ${d.id}: ${why}`);
+    }
   }
 }
 
