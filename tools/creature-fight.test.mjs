@@ -73,6 +73,7 @@ reaction fine "nothing is wrong": when fight.piece == "disguise" says Nothing is
 reaction glance "it laughs off a blow": when act.verb == "strike" and fight.piece == "empowered" says That tickles.
 reaction listen "it listens": when act.verb == "persuade" says Say that again.
 reaction duck "it sees you duck": when act.verb == "dodge" says Duck all you like.
+reaction stood "it sees a friend shielded": when act.verb == "shield" says {actor} stood in front of {ally}.
 `);
   assert.equal(k.fight, "test-fighter.fight.json");
   assert.ok(AFFORDED_VERBS.includes("dodge") && AFFORDED_VERBS.includes("persuade"));

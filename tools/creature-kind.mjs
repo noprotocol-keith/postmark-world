@@ -488,7 +488,7 @@ export function parseKind(text, { source = "kind file" } = {}) {
     const names = [...line.matchAll(/\{([^}]*)\}/g)].map((x) => x[1]);
     for (const x of names) if (!LINE_SLOTS.includes(x)) fail(n, `a line may name {actor}, {offered}, {heard}, {target} or {ally} and nothing else (got {${x}})`);
     // {ally}: filled by code. On a steady or a shield, the friend it was for; otherwise the other resident the temptation in this exchange named
-    if (names.includes("ally") && kind.tempts === undefined) fail(n, `a line naming {ally} belongs to a creature that tempts (tempts:): {ally} is the friend a steady or shield was for, or the resident its temptation named`);
+    if (names.includes("ally") && kind.tempts === undefined && kind.fight === undefined) fail(n, `a line naming {ally} belongs to a creature that tempts (tempts:) or fights in set pieces (fight:): {ally} is the friend a steady or shield was for, or the resident its temptation named`);
     const needs = requiredOf(when);
     if (names.includes("offered") && !needs.verbs.has("offer")) fail(n, `a line naming {offered} needs a condition that requires act.verb == "offer" (in its top-level and)`);
     if (names.includes("heard") && !needs.ids.has("heard.any")) fail(n, `a line naming {heard} needs a condition that requires heard.any (in its top-level and)`);
