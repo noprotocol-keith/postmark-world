@@ -6,7 +6,8 @@
 // its own to see") is the `keep` a caller hands the world tools' one sight
 // function, standpointSight; the office's `lens: "outsider"` hands it none, and
 // the page asks the office for that read and lays none of the household's own
-// rows over it. One switch on one rule, never a second copy of sight.
+// rows over it. (The switch itself is the office's, tested there:
+// test/outsider-lens.test.mjs.) One switch on one rule, never a second copy of sight.
 //
 // THE FILL FLAG. A picture-less thing draws a tinted block; `fill: false` (the
 // thing class's sovereign property, default true) draws its outline alone, so a
@@ -19,8 +20,8 @@ import { cpSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, wri
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
-import { placeholderExtentSVG, lensQuery, mineForSight, foldForSight, OUTSIDER_LENS } from "../spectator/viewer.mjs";
-import { standpointSight } from "./world-verbs.mjs";
+import { placeholderExtentSVG, lensQuery, mineForSight, foldForSight, lensAnswered, readStillWanted, residentReadKey, OUTSIDER_LENS, OUTSIDER_UNAVAILABLE } from "../spectator/viewer.mjs";
+import vm from "node:vm";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -86,23 +87,6 @@ test("the thing class declares fill: sovereign, default true", () => {
 });
 
 // ── the outsider view ────────────────────────────────────────────────────────
-// a closed place (a dungeon) made by the household `mason`, with a room inside
-const TOWER = "mason/the-tower";
-const WORLD = { marks: [
-  { id: "mason/yard", kind: "sited", by: "mason", at: { x: 1000, y: 1000 }, extent: { w: 500, h: 400 } },
-  { id: TOWER, kind: "sited", by: "mason", class: "dungeon", at: { x: 1000, y: 1000 }, extent: { w: 300, h: 300 } },
-  { id: "mason/hall", kind: "sited", by: "mason", at: { x: 1030, y: 1000 }, extent: { w: 200, h: 200 } },
-] };
-const ids = (w) => w.marks.map((m) => m.id).sort();
-
-test("the one switch: the owner rule is the keep the sight function is handed, and the lens hands none", () => {
-  const own = standpointSight(WORLD, { handle: "mason", keep: (m) => m.by === "mason" });
-  assert.ok(ids(own).includes("mason/hall"), "without the lens, a household reads inside its own closed place");
-  const outsider = standpointSight(WORLD, { handle: "mason", keep: null });
-  const stranger = standpointSight(WORLD, { handle: "ann" });
-  assert.deepEqual(ids(outsider), ids(stranger), "with it, exactly what a stranger reads");
-  assert.ok(!ids(outsider).includes("mason/hall"));
-});
 
 test("the page's lens: the read asks for it, lays none of your own rows over it, and draws the town's fold", () => {
   assert.equal(lensQuery(false), "", "off: the read you always asked for, byte for byte");
@@ -117,11 +101,80 @@ test("the page's lens: the read asks for it, lays none of your own rows over it,
 
 test("[pin] the toggle: off at every load, offered only to someone with a household, and every resident read carries the lens", () => {
   // ⚑ THE FLIP: drop `${lensQuery(state.outsider)}` from loadResidentRead's url → the first line reds
-  assert.match(SOURCE, /\+ `&crossing=\$\{state\.crossing\}&telling=true\$\{lensQuery\(state\.outsider\)\}`\);/, "the resident read");
+  assert.match(SOURCE, /\+ `&crossing=\$\{state\.crossing\}&telling=true\$\{lensQuery\(askedLens\)\}`\);/, "the resident read, under the lens it was asked with");
   assert.match(SOURCE, /&handle=\$\{encodeURIComponent\(who\)\}\$\{lensQuery\(state\.outsider\)\}/, "the close look");
   assert.match(SOURCE, /outsider: false,\s+\/\/ the outsider lens \(WLD-26\): off at every load/);
   assert.match(SOURCE, /<button type="button" class="ctl wv-outsider-toggle" aria-pressed="false" hidden aria-label="view as an outsider"/);
   assert.match(SOURCE, /const offered = canAct\(\) && !!state\.handle;/);
   assert.match(SOURCE, /data\.worldState = foldForSight\(data, state\.outsider\);/);
   assert.doesNotMatch(SOURCE, /residentById\(\w+( \?\? \{\})?, mineSet\.marks\)/, "every resident index asks mineForSight");
+});
+
+// ── the resident read under the lens, driven (WLD-110 F1, F2) ───────────────
+// loadResidentRead's own body, run in a context whose fetch we answer by hand,
+// as lights-lifecycle.test.mjs drives it.
+function bodyOf(name) {
+  const text = SOURCE.match(new RegExp(`^  function ${name}\\([^\\n]*\\) \\{[\\s\\S]*?^  \\}`, "m"))?.[0];
+  assert.ok(text, `source extraction: ${name}`);
+  return text;
+}
+function readHarness() {
+  const requests = [], indexed = [], unavailable = [];
+  const context = vm.createContext({
+    residentReadKey, lensQuery, mineForSight, lensAnswered, readStillWanted, OUTSIDER_LENS, requests, indexed, unavailable,
+    fetch: (url) => new Promise((resolve) => { requests.push({ url, answer: (j) => resolve({ ok: true, json: async () => j }) }); }),
+    authHeaders: () => ({}), residentById: (read) => { indexed.push(read); return new Map(); },
+    loadTownHouses: () => {}, loadHands: () => {}, withTownHouses: () => {}, buildHomeSet: () => new Set(), allMarks: () => [],
+    outsiderUnavailable: () => unavailable.push(1),
+  });
+  vm.runInContext(`
+    const officeBase = () => "https://office-a.invalid";
+    const officeUrl = (path) => officeBase() + path;
+    const state = { handle: "rig-actor", crossing: 500, outsider: false };
+    const walkState = { walkers: [{ handle: "rig-actor" }] };
+    const readCache = new Map(), readPending = new Map();
+    let readError = null, byId, homeSet;
+    const mineSet = { marks: new Map() };
+    ${bodyOf("residentStandpointKey")}
+    ${bodyOf("loadResidentRead")}
+    globalThis.probe = { state, readCache, read: () => loadResidentRead(null, state.handle) };
+  `, context);
+  return { probe: context.probe, requests, indexed, unavailable };
+}
+
+test("F1: an outsider read that lands after the lens was turned off draws nothing (the guard pins the lens)", async () => {
+  const h = readHarness();
+  h.probe.state.outsider = true;
+  const pending = h.probe.read();
+  assert.match(h.requests[0].url, /&lens=outsider$/, "asked under the lens");
+  h.probe.state.outsider = false;   // the reader turned it off before the answer came
+  h.requests[0].answer({ handle: "rig-actor", lens: OUTSIDER_LENS, records: {} });
+  await pending;
+  // ⚑ THE FLIP: drop `lens` from readStillWanted's check (or askedLens from the guard) → the stale read is indexed and this reds
+  assert.equal(h.indexed.length, 0, "the lens read is not drawn into the owner's page");
+  assert.equal(readStillWanted({ handle: "a", office: "o", lens: true }, { handle: "a", office: "o", lens: false }), false);
+  assert.equal(readStillWanted({ handle: "a", office: "o", lens: false }, { handle: "a", office: "o", lens: false }), true);
+});
+
+test("F2: an office that ignores the lens is never believed: the toggle goes off and says why", async () => {
+  const h = readHarness();
+  h.probe.state.outsider = true;
+  const pending = h.probe.read();
+  h.requests[0].answer({ handle: "rig-actor", records: {} });   // an office without the lens: the owner's own sight, unmarked
+  const read = await pending;
+  // ⚑ THE FLIP: drop the lensAnswered check in loadResidentRead → the owner's sight is drawn under the lens and this reds
+  assert.equal(read, null);
+  assert.equal(h.unavailable.length, 1, "the toggle is turned off, with its reason");
+  assert.equal(h.indexed.length, 0, "and nothing is drawn as the outsider's");
+  assert.equal(h.probe.readCache.size, 0, "nor kept as the lens's answer");
+  assert.equal(lensAnswered(true, { lens: OUTSIDER_LENS }), true);
+  assert.equal(lensAnswered(false, {}), true, "no lens asked, nothing to check");
+  assert.equal(OUTSIDER_UNAVAILABLE, "the office can't show the outsider view yet");
+  assert.ok(SOURCE.includes("if (!lensAnswered(askedLens, read)) { outsiderUnavailable(); return null; }"));
+});
+
+test("[pin] under the lens you own and hold nothing: the green own-mark colouring and your hands are off", () => {
+  assert.ok(SOURCE.includes("const isOwnMark = (m) => !!m?.id && !state.outsider && state.ownIds.has(m.id);"), "no green own-mark colouring");
+  assert.ok(SOURCE.includes("const handle = onResidentPath() && !state.outsider ? state.handle : null;"), "no hands");
+  assert.match(SOURCE, /state\.outsider = !state\.outsider;\s+paintOutsiderButton\(\);\s+loadHands\(\{ fresh: true \}\);/, "and the hands are asked again on every switch");
 });
