@@ -671,6 +671,17 @@ for (const rec of marks) {
   }
 }
 
+// 5d. THE FILL FLAG IS A TRUE/FALSE (WLD-26, ruled 2026-10-19 17:48): `fill` is
+// the-town/thing's sovereign property, default true, read by the World page (a
+// picture-less thing's ground is tinted, or with `fill: false` drawn as its
+// outline alone). The record grammar keeps a true/false as the word, so the word
+// is read the way every property's value is (class-properties.mjs § propertyValue).
+for (const rec of marks) {
+  if (rec._error || rec.fill === undefined || rec.kind === "class" || rec.kind === "property") continue;
+  if (typeof propertyValue(rec.fill) !== "boolean")
+    err(rec, `fill: is true or false — whether the World page tints this thing's ground when it has no picture (false: its outline alone); got ${JSON.stringify(rec.fill)}`);
+}
+
 // THE FRAME LAW, written out here rather than imported from the loader.
 // §6b needs a second opinion on what the loader already did — and a check that
 // asks the loader whether it agrees with itself proves nothing. This walks

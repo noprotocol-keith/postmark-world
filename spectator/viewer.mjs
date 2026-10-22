@@ -27,7 +27,7 @@ import { ringRoomOf, ringRoomOutline } from "../tools/portals.mjs"; // a creatur
 import { assembleWorld } from "../tools/world-build.mjs";
 import { DIALS, bearingDeg, quantizeBearing, mistsAt, mistsHere, mistsRoad } from "../tools/world-engine.mjs";
 import { marksContain, pointInPolygon, pointInRect, polygonBBox, polygonOf, rect } from "../tools/geometry.mjs"; // read-only: home color + point-destination labels
-import { propertyOf } from "../tools/class-properties.mjs"; // a class's properties, up extends (LOGOS v2 part 2)
+import { propertyOf, propertyValue } from "../tools/class-properties.mjs"; // a class's properties, up extends (LOGOS v2 part 2); a property's value as the record writes it
 import { markStanding } from "../tools/mark-standing.mjs"; // the ONE standing rule: in a parcel's directory → home
 import { fractionalCrossing, positionAt, parseWalkLedger, targetEntryT, currentDeparture, WALK_KM_PER_CROSSING } from "../tools/walk.mjs";
 import { crossingsOnSegment, waterFeatures, seaFeature } from "../tools/water.mjs";
@@ -1415,7 +1415,10 @@ export function placeholderExtentSVG(mark, px, { ignoreArt = false } = {}) {
   // default without an image. And reserve the slight opacity to things"). An
   // image-less mark is its outline; only a thing keeps the tinted fill, so a thing
   // reads as an object and a place reads as ground, and art underneath shows through.
-  const thing = classToken(instanceClassOf(mark)) === "thing";
+  // THE FILL FLAG (WLD-26, ruled 2026-10-19 17:48): a thing that says `fill: false`
+  // (the-town/thing's sovereign property, default true) is its outline alone, like
+  // ground, so a floor's own art beneath it is not buried. Absent, it draws as ever.
+  const thing = classToken(instanceClassOf(mark)) === "thing" && propertyValue(mark.fill) !== false;
   const fill = `hsl(${hue} 22% 76%)`, edge = `hsl(${hue} 26% 58%)`;
   const attrs = `class="wv-ph-extent${portal ? " c-portal-ground" : ""}${thing ? " is-thing" : ""}" data-id="${esc(mark.id)}" fill="${fill}" stroke="${edge}"`;
   const ring = polygonOf(mark);
@@ -7231,6 +7234,8 @@ const MARKUP = `
                well as the every mark's true extent button"). The layers and their
                toggles (mapCtx.toggleGrid / toggleFp) still exist for the dev pane;
                the rail no longer offers them. -->
+          <button type="button" class="ctl wv-outsider-toggle" aria-pressed="false" hidden aria-label="view as an outsider"
+            title="view as an outsider: the world as a stranger sees it, as if your household owned nothing (read-only)">👁</button>
           <button class="ctl wv-map-convo" aria-label="conversations" title="where the town is talking — live threads and the last day's, drawn as the ground they covered; labels link to the record">💬</button>
           <button type="button" class="ctl wv-tour-open" aria-label="Take the tour"
             title="a short tour of the world">?</button>
@@ -7555,6 +7560,28 @@ export async function walkMinePages(fetchPage, { pageSize = MINE_PAGE_SIZE, page
  * reverse order would quietly serve a resident their own thinner copy of a mark
  * the town can see whole.
  */
+// ── THE OUTSIDER LENS (WLD-26, ruled in Sitting B, 2026-10-19 17:48) ────────
+// "View as an outsider" reads the world as if your household owned nothing: the
+// office's `lens: "outsider"` turns off its one owner rule ("a household's own
+// marks are always its own to see"), and the page lays none of your own rows
+// over the read (your drafts, and your marks the read did not tell). Read-only and
+// off by default: nothing is written, and every act is still your own.
+export const OUTSIDER_LENS = "outsider";
+/** The query a resident read carries under the lens; empty without it. Pure. */
+export const lensQuery = (outsider) => (outsider ? `&lens=${OUTSIDER_LENS}` : "");
+/** Your own rows to lay over a read: none under the lens. Pure. */
+export const mineForSight = (outsider, mine) => (outsider ? new Map() : mine);
+/** Did the office answer the lens it was asked for? An office that predates it
+ *  ignores the undeclared query key and answers your own sight, so an outsider
+ *  read is believed only when it says `lens: "outsider"`. Pure. */
+export const lensAnswered = (asked, read) => !asked || read?.lens === OUTSIDER_LENS;
+/** Is a read that just landed still the one the page wants? The office, the
+ *  actor AND the lens it was asked under must all still hold (WLD-110 F1). Pure. */
+export const readStillWanted = ({ handle, office, lens }, now) => handle === now.handle && office === now.office && lens === now.lens;
+export const OUTSIDER_UNAVAILABLE = "the office can't show the outsider view yet";
+/** The fold the page draws: the household's composed one (its drafts in), or the town's under the lens. Pure. */
+export const foldForSight = ({ trueWorld = null, myWorld = null } = {}, outsider = false) => (outsider ? trueWorld : myWorld || trueWorld);
+
 export function residentById(read = {}, mine = new Map()) {
   const byId = new Map();
   for (const [id, row] of mine) byId.set(id, row);
@@ -7964,6 +7991,7 @@ export function mountViewer(appEl) {
     step: STEP_NOTCHES[STEP_DEFAULT_I], // 100 m
     crossing: liveCrossing(),           // default to the live crossing
     crossingOverride: false,            // a dev/principal time-travel override
+    outsider: false,                    // the outsider lens (WLD-26): off at every load
     view: "telling",
     paintingOnly: readPaintingOnly(typeof localStorage === "undefined" ? null : localStorage),
     markFilter: "everything",           // "everything" | "mine" | "new" — the one marks vocabulary
@@ -8228,7 +8256,7 @@ export function mountViewer(appEl) {
       worldEpoch += 1;
       return;
     }
-    data.worldState = data?.myWorld || data.trueWorld;
+    data.worldState = foldForSight(data, state.outsider);   // the lens draws the town's fold, not your drafts (WLD-26)
     world = sightOf(assembleWorld({ worldState: data.worldState, skeleton: data.skeleton }));
     byId = new Map(allMarks().map((m) => [m.id, m]));
     homeSet = buildHomeSet(world.marks);
@@ -8355,7 +8383,7 @@ export function mountViewer(appEl) {
   //
   // Both answer FALSE for a spectator, by construction: no key, no portfolio,
   // no handles. Nothing on that path changes.
-  const isOwnMark = (m) => !!m?.id && state.ownIds.has(m.id);
+  const isOwnMark = (m) => !!m?.id && !state.outsider && state.ownIds.has(m.id);   // an outsider owns nothing (WLD-110)
   const isOwnHandle = (h) => !!h && (state.whoami?.handles ?? []).includes(h);
   // ── WHAT A MARK IS, AS ICONS (Darko, playground sitting 2026-10-15) ──────
   //
@@ -14415,10 +14443,10 @@ export function mountViewer(appEl) {
   function asWho() { return onResidentPath() ? state.handle : ""; }
   function closeLookUrl(param, id) {
     const who = asWho();
-    return officeUrl(`/world/apex?${param}=${encodeURIComponent(id)}&cards=names${who ? `&handle=${encodeURIComponent(who)}` : ""}`);
+    return officeUrl(`/world/apex?${param}=${encodeURIComponent(id)}&cards=names${who ? `&handle=${encodeURIComponent(who)}${lensQuery(state.outsider)}` : ""}`);   // the close look sees as the read does (WLD-26)
   }
   function loadCloseLook(param, id) {
-    const key = `${asWho()}|${param}|${id}`;
+    const key = `${asWho()}|${param}|${id}${state.outsider ? "|" + OUTSIDER_LENS : ""}`;
     const held = closeLooks.get(key);
     if (held && (held.pending || Date.now() - held.at < CLOSE_LOOK_MS)) return held;
     const gen = closeLookGen;
@@ -14500,7 +14528,7 @@ export function mountViewer(appEl) {
   // and on the walkers poll, at most every HANDS_MS; a fresh ask (after an act)
   // supersedes any still pending.
   async function loadHands({ fresh = false } = {}) {
-    const handle = onResidentPath() ? state.handle : null;
+    const handle = onResidentPath() && !state.outsider ? state.handle : null;   // an outsider holds nothing (WLD-110)
     if (!handle) { if (hands.for) hands = { for: null, at: 0, holdings: null, ground: null, pending: false }; return; }
     if (!fresh && (hands.pending || (hands.for === handle && Date.now() - hands.at < HANDS_MS))) return;
     const seq = ++handsSeq;
@@ -15886,7 +15914,48 @@ export function mountViewer(appEl) {
       ? `crossing <b>${state.crossing}</b> <span class="wv-quiet">· time-travelling</span>`
       : `crossing <b>${state.crossing}</b> <span class="crosslive-tag">· live</span>`;
   }
+  // THE OUTSIDER TOGGLE (WLD-26): only for someone with a household to look past;
+  // a spectator already sees as a stranger. Off at every load.
+  function paintOutsiderButton() {
+    const btn = root.querySelector(".wv-outsider-toggle");
+    if (!btn) return;
+    const offered = canAct() && !!state.handle;
+    if (!offered && state.outsider) state.outsider = false;
+    btn.hidden = !offered;
+    btn.classList.toggle("on", !!state.outsider);
+    btn.setAttribute("aria-pressed", state.outsider ? "true" : "false");
+    btn.title = state.outsider
+      ? "viewing as an outsider: the world as a stranger sees it (read-only). Click to see as yourself again."
+      : "view as an outsider: the world as a stranger sees it, as if your household owned nothing (read-only)";
+  }
+  function outsiderUnavailable() {
+    if (!state.outsider) return;
+    state.outsider = false;
+    paintOutsiderButton();
+    const btn = root.querySelector(".wv-outsider-toggle");
+    if (btn) btn.title = OUTSIDER_UNAVAILABLE + ". Showing your own sight.";
+    const note = document.createElement("div");
+    note.textContent = OUTSIDER_UNAVAILABLE + ".";
+    note.classList.add("refusal");
+    walkNote(note);
+    applyWorldLayer();
+    if (onResidentPath() && state.handle) loadResidentRead(null, state.handle).then(() => renderCurrent()).catch(() => {});
+    renderCurrent();
+  }
+  function toggleOutsider() {
+    state.outsider = !state.outsider;
+    paintOutsiderButton();
+    loadHands({ fresh: true });   // your hands are no outsider's (WLD-110)
+    applyWorldLayer();
+    if (onResidentPath() && state.handle) {
+      const cached = readCache.get(residentStandpointKey(null, state.handle));
+      if (cached) { byId = residentById(cached, mineForSight(state.outsider, mineSet.marks)); withTownHouses(); homeSet = buildHomeSet(allMarks()); }
+      else loadResidentRead(null, state.handle).then(() => renderCurrent()).catch(() => {});
+    }
+    renderCurrent();
+  }
   function renderCurrent() {
+    paintOutsiderButton();
     renderStandpointReadouts();
     if (state.view === "telling") renderTelling();
     renderModeControls();
@@ -16058,6 +16127,7 @@ export function mountViewer(appEl) {
     if (e.target.closest(".wv-map-home")) { mapCtx?.fitAll?.(); return; }
     const fbtn = e.target.closest(".wv-map-follow");
     if (fbtn) { if (!mapCtx) return; mapCtx.follow = !mapCtx.follow; fbtn.classList.toggle("on", mapCtx.follow); if (mapCtx.follow) mapCtx.lockOn(); return; }
+    if (e.target.closest(".wv-outsider-toggle")) { toggleOutsider(); return; }
     const cvbtn = e.target.closest(".wv-map-convo");
     if (cvbtn) { if (!mapCtx?.toggleConvo) return; cvbtn.classList.toggle("on", !!mapCtx.toggleConvo()); return; }
     if (e.target.closest("[data-root-mark]")) { selectMark(chipMarkId(), { scrollCell: true }); return; }
@@ -16496,7 +16566,7 @@ export function mountViewer(appEl) {
     // THE OFFICE IS PART OF WHOSE READ IT IS (WLD-29 first review, R2): a read
     // and its digests are one office's answer, never another's — switching the
     // office base asks again rather than serving the last office's law.
-    return `${officeBase()}#${residentReadKey({ handle, crossing: state.crossing })}`;
+    return `${officeBase()}#${residentReadKey({ handle, crossing: state.crossing })}${state.outsider ? "#" + OUTSIDER_LENS : ""}`;   // a lens read is its own answer (WLD-26)
   }
 
   /**
@@ -16509,25 +16579,30 @@ export function mountViewer(appEl) {
     // WHO ASKED, fixed BEFORE the request leaves (R2): the office, actor and
     // crossing this answer will belong to — never read again after the await
     const askedOffice = officeBase();
+    const askedLens = !!state.outsider;   // and the lens it was asked under (WLD-110 F1)
     if (readCache.has(key)) return Promise.resolve(readCache.get(key));
     if (readPending.has(key)) return readPending.get(key);
     // NO x/y. The office stands the resident where their BODY is and refuses
     // to do otherwise; asking for both is a 422, which is how I found out.
     const url = officeUrl(`/world/apex?handle=${encodeURIComponent(handle)}`
-      + `&crossing=${state.crossing}&telling=true`);
+      + `&crossing=${state.crossing}&telling=true${lensQuery(askedLens)}`);
     const p = fetch(url, { headers: authHeaders(), credentials: "same-origin" })
       .then(async (r) => {
         if (!r.ok) throw new Error(`the office answered ${r.status}`);
         const read = await r.json();
         if (read?.error) throw new Error(read.defect ?? read.error);
+        // AN OFFICE THAT CANNOT LOOK AS AN OUTSIDER answers your own sight and says
+        // nothing (its GET ignores a key it does not declare): never draw that under
+        // the lens. The toggle goes off and says why (WLD-110 F2).
+        if (!lensAnswered(askedLens, read)) { outsiderUnavailable(); return null; }
         readCache.set(key, read);
         readError = null;
         // THE INDEX, FILLED FROM THE READ. `byId` is what forty call sites ask
         // "what is this id", and on this path this is the only thing that fills
         // it — the records the read carries, plus the resident's own rows.
         // `homeSet` follows from the same set, so green still means home.
-        if (handle === state.handle && officeBase() === askedOffice) {
-          byId = residentById(read, mineSet.marks);
+        if (readStillWanted({ handle, office: askedOffice, lens: askedLens }, { handle: state.handle, office: officeBase(), lens: !!state.outsider })) {
+          byId = residentById(read, mineForSight(askedLens, mineSet.marks));
           loadTownHouses();      // once; fills + repaints when it lands
           loadHands();           // your hands and the ground in reach (LOGOS v2 part 2)
           withTownHouses();      // and at once, when it already has
@@ -16652,7 +16727,7 @@ export function mountViewer(appEl) {
     if (!id) return null;
     const standpoint = { x: state.cam.x, y: state.cam.y };
     const read = readCache.get(residentStandpointKey(standpoint, state.handle));
-    return residentById(read ?? {}, mineSet.marks).get(id) ?? null;
+    return residentById(read ?? {}, mineForSight(state.outsider, mineSet.marks)).get(id) ?? null;
   }
 
   let mineSet = { marks: new Map(), unplaced: [], sentinel: [], complete: true, pages: 0, exhausted: false };
@@ -16860,7 +16935,7 @@ export function mountViewer(appEl) {
     // the compose pass asks for it and this repeats when it lands.
     const cachedRead = readCache.get(residentStandpointKey(null, actor));   // this office's read only (R2)
     if (cachedRead) {
-      byId = residentById(cachedRead, mineSet.marks);
+      byId = residentById(cachedRead, mineForSight(state.outsider, mineSet.marks));
       withTownHouses();
       homeSet = buildHomeSet(allMarks());
     }
@@ -17526,7 +17601,7 @@ export function mountViewer(appEl) {
     if (!onResidentPath()) return allMarks();
     const standpoint = { x: state.cam.x, y: state.cam.y };
     const read = readCache.get(residentStandpointKey(standpoint, state.handle));
-    return [...residentById(read ?? {}, mineSet.marks).values()];
+    return [...residentById(read ?? {}, mineForSight(state.outsider, mineSet.marks)).values()];
   }
   function composeActivity(page) {
     const marks = activityMarks();

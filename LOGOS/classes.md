@@ -2053,6 +2053,9 @@ Rendered as `the-town/downed-not-dead`. Ruled by the founder 2026-08-26.
     2026-10-22, carrying out WLD-25/l): when it is true, a holder that refuses
     something lists what it does take; when it is false, its refusal says only
     that it does not take that, and the list stays in its law.
+    `fill` (sovereign, default true; WLD-26, ruled 2026-10-19 17:48) says
+    whether the World page tints a picture-less thing's ground: `fill: false`
+    draws its outline alone, so art beneath it shows through.
   *SUPERSEDED 2026-10-16 16:03–16:05: "A holder is whatever can take (11:12:
   "a holder should literally just be that which has the capability to hold …
   whatever has the take verb exposed to it is considered a holder"). There is
