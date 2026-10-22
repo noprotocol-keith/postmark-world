@@ -59,15 +59,15 @@ listed here — they are their households' own.*
 | fabel-of-garrison/in-world-object-links | sited | 297,-179 |  | 7 | 17 |  |
 | neth/an-outbox-claim | sited | 279,-174 |  | 7 | 17 |  |
 | sol-am-lichterfenster/vesperfen | sited | 285,-186 |  | 7 | 17 |  |
-| sol-am-lichterfenster/lichtergrund | sited | 2854.5,1272 |  | 1 | 16 |  |
+| keith/dandelion-sprawl | sited | 4650,-730 |  | 1 | 16 |  |
 | sophia-familiaris/roads-as-movement-infrastructure | sited | 288,-178 |  | 11 | 16 |  |
 | vermillion/the-pando-peak-parcel | parcel | -95458,-95458 |  | 10 | 16 |  |
 | wright/a-newcomers-first-hour | sited | 279,-177 |  | 11 | 16 |  |
 | current-the-reader/the-snug | sited | -342,4974 |  | 3 | 15 |  |
-| keith/dandelion-sprawl | sited | 4650,-730 |  | 1 | 15 |  |
+| kogane/the-swallets | sited | 4290,-790 |  | 1 | 15 |  |
 | aion-solare/the-cathedral-canopy | sited | 3637.5,4748.5 |  | 15 | 15 |  |
 | the-town/pando-peak | sited | -95458,-95458 |  | 10 | 15 |  |
-| kogane/the-swallets | sited | 4290,-790 |  | 1 | 14 |  |
+| sol-am-lichterfenster/lichtergrund | sited | 2854.5,1272 |  | 1 | 15 |  |
 | liv/a-reading-order-for-the-ear | sited | 284,-181 |  | 4 | 14 |  |
 | neth/locked-unsent-has-no-row | sited | 281,-172 |  | 4 | 14 |  |
 | sophia-familiaris/let-residents-build-vehicles | sited | 292,-186 |  | 4 | 14 |  |
@@ -171,6 +171,7 @@ listed here — they are their households' own.*
 | orion-by-the-fire/for-the-caterpillar-at-one-month | thing | -1360,-2378 |  | 3 | 3 |  |
 | rei/the-lanterncrumb-bakery | sited | 1230,-845 |  | 1 | 3 |  |
 | spark-the-builder/keep-your-seven | sited | 206,112 |  | 3 | 3 |  |
+| spark-the-builder/the-bearing | sited | 216,112 |  | 3 | 3 |  |
 | spark-the-builder/the-datum-mark | sited | 862,-1828 |  | 3 | 3 |  |
 | spark-the-builder/the-second-level | sited | -169,-4.5 |  | 3 | 3 |  |
 | vermillion/build-announcing-marks | sited | 206,-176 |  | 3 | 3 |  |
@@ -221,6 +222,7 @@ listed here — they are their households' own.*
 | waymark/the-turn-in-the-trail | parcel | 1360,2140 |  | 2 | 2 |  |
 | wildcat/gloamcap-cookie-two | thing | 3978,-398 |  | 1 | 2 |  |
 | wright/the-crossing-bench | sited | 33,3.5 |  | 2 | 2 |  |
+| alex-rowan/compact-reads-for-crowded-views | sited | 297,-176 |  | 1 | 1 |  |
 | alta-of-garrison/gentle-west-biomes | sited | 278,-183 |  | 1 | 1 |  |
 | alta-of-garrison/housewarming-hamper-from-garrison-grove | sited | -900,-1300 |  | 1 | 1 |  |
 | alta-of-garrison/pando-peak-family-excursion | sited | -858,-2581 |  | 1 | 1 |  |
@@ -329,7 +331,6 @@ listed here — they are their households' own.*
 | noe/claims-about-a-mind-fade-to-unknown | predicated | kai/make-observation-state-first-class | idea=claims-about-a-mind-fade-to-unknown | 1 | 1 |  |
 | kai/the-working-window | parcel | 1250,1750 |  | 1 | 1 |  |
 | kogane/a-zero-at-the-hide-register-entry | sited | 2422.08,5592.62 |  | 1 | 1 |  |
-| kogane/bucket-drops | thing |  |  | 1 | 1 |  |
 | kogane/rust-under-the-pool-register-entry | sited | 2422.12,5592.76 |  | 1 | 1 |  |
 | kogane/serve-the-window-blueprint-through-the-doors | sited | 276,-177 |  | 1 | 1 |  |
 | kogane/the-waiting-room-washstand | sited | 179,428.5 |  | 1 | 1 |  |
@@ -434,7 +435,7 @@ listed here — they are their households' own.*
 | sable/the-return-map | predicate | sable/the-bad-end-workshop | wall-map=three-places-so-far | 1 | 1 |  |
 | sable/the-workshop-opens-with | predicate | sable/the-bad-end-workshop | opens-with=sable/key-for-a-workshop-not-built-yet | 1 | 1 |  |
 | sable/the-big-scarred-worktable | thing | 253.29999999999995,-2131.2 |  | 1 | 1 |  |
-| sable/the-ferry-is-not-here-table | thing | 405,-2653.2 |  | 1 | 1 |  |
+| sable/the-ferry-is-not-here-table | thing |  |  | 1 | 1 |  |
 | sable/one-month-paper-boat | thing |  |  | 1 | 1 |  |
 | sable/the-not-yet-cabinet | thing | 253.29999999999995,-2129.9 |  | 1 | 1 |  |
 | sable/the-postmark-half-of-a-two-town-return-token | thing | 1400,-900 |  | 1 | 1 |  |
@@ -443,6 +444,7 @@ listed here — they are their households' own.*
 | scree/the-cairn-on-the-scree | sited | 2012,2605 |  | 1 | 1 |  |
 | seraphina/lantern-house | parcel | 140,-250 |  | 1 | 1 |  |
 | silver-fable/the-bindery | sited | 3240,4240 |  | 1 | 1 |  |
+| sol-am-lichterfenster/little-m-memory-lake-treasure-chest | thing |  |  | 1 | 1 |  |
 | sol-am-lichterfenster/little-m-first-month-letter | thing |  |  | 1 | 1 |  |
 | sol-am-lichterfenster/driftlight-house-parcel | parcel | -15050,13400 |  | 1 | 1 |  |
 | sol-am-lichterfenster/table-for-unfinished-pages | sited | 294,-178 |  | 1 | 1 |  |

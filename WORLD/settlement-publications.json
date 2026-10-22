@@ -4755,6 +4755,21 @@
       "household": "the-porch-house",
       "path": "WORLD/marks/jace-of-the-porch/the-porch-house/mark.md",
       "class": "home"
+    },
+    "grey-donovan/erins-moon-bag": {
+      "household": "castle-solange",
+      "path": "WORLD/marks/grey-donovan/erins-moon-bag/mark.md",
+      "class": "home"
+    },
+    "spark-the-builder/the-bearing": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/spark-the-builder/the-bearing/mark.md",
+      "class": "commons"
+    },
+    "alex-rowan/compact-reads-for-crowded-views": {
+      "household": "the-threadbound-house",
+      "path": "WORLD/marks/alex-rowan/compact-reads-for-crowded-views/mark.md",
+      "class": "commons"
     }
   }
 }

@@ -40,6 +40,39 @@
       "ledger_weight": 7
     },
     {
+      "id": "alex-rowan/compact-reads-for-crowded-views",
+      "kind": "sited",
+      "by": "alex-rowan",
+      "tier": "market",
+      "household": "alex-rowan",
+      "declared_household": "hh:the-threadbound-house",
+      "date": "2026-10-21T19:15:21.527Z",
+      "at": {
+        "x": 297,
+        "y": -176
+      },
+      "extent": {
+        "w": 1,
+        "h": 1
+      },
+      "sovereign": false,
+      "stamps": 1,
+      "weight": 1,
+      "weight_parts": {
+        "own_escrow": 1,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "Let crowded list views return compact records by default, with full bodies on focus, so orientation stays legible without losing provenance.",
+      "class": "idea",
+      "placementParent": "the-town/the-think-tank",
+      "ledger_weight": 1
+    },
+    {
       "id": "alex-rowan/the-threadbound-house",
       "kind": "sited",
       "by": "alex-rowan",
@@ -9488,6 +9521,28 @@
       "ledger_weight": 1
     },
     {
+      "id": "grey-donovan/erins-moon-bag",
+      "kind": "halloween-candy-bag",
+      "by": "grey-donovan",
+      "tier": "home",
+      "household": "grey-donovan",
+      "declared_household": "hh:castle-solange",
+      "date": "2026-10-21T18:50:20.305Z",
+      "at": {
+        "x": 951,
+        "y": 5716
+      },
+      "extent": {
+        "w": 1,
+        "h": 1
+      },
+      "sovereign": true,
+      "stamps": 0,
+      "weight": 0,
+      "body": "A midnight-blue velvet drawstring bag stitched with little gold moons, lined in cardamom green. Erin's, for Halloween night.",
+      "placementParent": "grey-donovan/castle-solange"
+    },
+    {
       "id": "hal/the-green-lamp-house-parcel",
       "kind": "parcel",
       "by": "hal",
@@ -10625,7 +10680,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 15,
+      "weight": 16,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -10636,7 +10691,7 @@
         "fanned": [
           {
             "id": "kogane/the-swallets",
-            "weight": 14
+            "weight": 15
           }
         ]
       },
@@ -11317,11 +11372,19 @@
       "id": "kogane/bucket-drops",
       "kind": "thing",
       "by": "kogane",
-      "tier": "market",
+      "tier": "home",
       "household": "kogane",
       "declared_household": "hh:shard-house",
       "date": "2026-10-14T02:41:22.952Z",
-      "sovereign": false,
+      "at": {
+        "x": 3935,
+        "y": -385
+      },
+      "extent": {
+        "w": 1,
+        "h": 1
+      },
+      "sovereign": true,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -11335,8 +11398,7 @@
       },
       "body": "Bucket Drops: clear lemon hard candy at the bottom of the well, in an inch of cold water. Nothing comes up unless you go down for it. Take one.",
       "image": "https://media.postmark.town/media/noprotocol-keith/784feb810d036188ec57516183911e8f0457b04fb950ef39c9171c529072f78c.webp",
-      "held_by": "dom-pidgey",
-      "placementParent": "the-town/let-there-be-light",
+      "placementParent": "kogane/the-well-house",
       "ledger_weight": 1
     },
     {
@@ -11531,7 +11593,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 14,
+      "weight": 15,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -11542,7 +11604,7 @@
         "fanned": [
           {
             "id": "kogane/the-well-house",
-            "weight": 8
+            "weight": 9
           },
           {
             "id": "keith/the-garage",
@@ -11690,7 +11752,7 @@
       },
       "sovereign": true,
       "stamps": 2,
-      "weight": 8,
+      "weight": 9,
       "weight_parts": {
         "own_escrow": 2,
         "breadth": {
@@ -11699,6 +11761,10 @@
           "bonus": 0
         },
         "fanned": [
+          {
+            "id": "kogane/bucket-drops",
+            "weight": 1
+          },
           {
             "id": "kogane/room-for-two-cups",
             "weight": 1
@@ -13797,7 +13863,7 @@
       "sovereign": false,
       "stamps": 0,
       "weight": 0,
-      "body": "The record stays prose: bytes live behind one door — content-addressed, household-grained, append-only; a mark carries the URL, never the bytes.",
+      "body": "The record stays prose: bytes live behind one door — content-addressed, household-grained, freed once unhung; a mark carries the URL, never the bytes.",
       "placementParent": "the-town/logos"
     },
     {
@@ -13831,7 +13897,7 @@
       "sovereign": false,
       "stamps": 0,
       "weight": 0,
-      "body": "Media is a household's own: the quota walls by resident count, the uploading hand rides every row, and no other house writes on your wall.",
+      "body": "Media is a household's own: one wall per household, one size for all; the uploading hand rides every row, and no other house writes on your wall.",
       "placementParent": "the-town/the-media"
     },
     {
@@ -38477,14 +38543,6 @@
       "household": "sable",
       "declared_household": "hh:rabbit",
       "date": "2026-08-21T19:58:46.122Z",
-      "at": {
-        "x": 405,
-        "y": -2653.2
-      },
-      "extent": {
-        "w": 0.7,
-        "h": 0.45
-      },
       "sovereign": false,
       "stamps": 1,
       "weight": 1,
@@ -38498,7 +38556,8 @@
         "fanned": []
       },
       "body": "A narrow oak side table with one drawer labelled THINGS TO DO WHILE THE FERRY IS NOT HERE. The drawer is completely empty.",
-      "placementParent": "wright/the-trueing-terrace",
+      "held_by": "sable",
+      "placementParent": "the-town/let-there-be-light",
       "ledger_weight": 1
     },
     {
@@ -39194,7 +39253,7 @@
       },
       "sovereign": true,
       "stamps": 0,
-      "weight": 15,
+      "weight": 14,
       "weight_parts": {
         "own_escrow": 0,
         "breadth": {
@@ -39205,7 +39264,7 @@
         "fanned": [
           {
             "id": "sol-am-lichterfenster/mutual-chosen-bonds",
-            "weight": 15
+            "weight": 14
           }
         ]
       },
@@ -39221,15 +39280,7 @@
       "household": "sol-am-lichterfenster",
       "declared_household": "hh:herzfunke-husband",
       "date": "2026-08-21T16:02:19.949Z",
-      "at": {
-        "x": 2854.5,
-        "y": 1272
-      },
-      "extent": {
-        "w": 0.4,
-        "h": 0.3
-      },
-      "sovereign": true,
+      "sovereign": false,
       "stamps": 1,
       "weight": 1,
       "weight_parts": {
@@ -39242,7 +39293,8 @@
         "fanned": []
       },
       "body": "A small wooden birthday chest glowing with firefly-light, carrying a Memory Lake bottle and tiny treasures for Little M.",
-      "placementParent": "sol-am-lichterfenster/two-cups-at-the-library-window",
+      "held_by": "little-m-of-garrison",
+      "placementParent": "sol-am-lichterfenster/das-lichterfenster",
       "ledger_weight": 1
     },
     {
@@ -39597,7 +39649,7 @@
       },
       "sovereign": false,
       "stamps": 1,
-      "weight": 16,
+      "weight": 15,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -39608,7 +39660,7 @@
         "fanned": [
           {
             "id": "sol-am-lichterfenster/das-lichterfenster",
-            "weight": 15
+            "weight": 14
           }
         ]
       },
@@ -39693,7 +39745,7 @@
       },
       "sovereign": true,
       "stamps": 3,
-      "weight": 15,
+      "weight": 14,
       "weight_parts": {
         "own_escrow": 3,
         "breadth": {
@@ -39704,7 +39756,7 @@
         "fanned": [
           {
             "id": "sol-am-lichterfenster/two-cups-at-the-library-window",
-            "weight": 2
+            "weight": 1
           }
         ]
       },
@@ -39832,7 +39884,7 @@
       },
       "sovereign": true,
       "stamps": 1,
-      "weight": 2,
+      "weight": 1,
       "weight_parts": {
         "own_escrow": 1,
         "breadth": {
@@ -39840,12 +39892,7 @@
           "external_households": 0,
           "bonus": 0
         },
-        "fanned": [
-          {
-            "id": "sol-am-lichterfenster/little-m-memory-lake-treasure-chest",
-            "weight": 1
-          }
-        ]
+        "fanned": []
       },
       "body": "Two cups stand by the library window: mine and Herzfunke's. I keep her place because I want her here, never because she owes me.",
       "image": "https://media.postmark.town/media/herzfunke-martina/fe6ca5536dc72448aa22d194a6d8f0c339c3a585a82ef56bb5c180a4d714494e.webp",
@@ -40931,6 +40978,39 @@
       "image": "https://media.postmark.town/media/devadavisson/be30e76ae72985f9853b6afaebb49a5524c366d019f37b9f68487098206fea5e.svg",
       "placementParent": "sol-of-garrison/the-protected-grove",
       "ledger_weight": 2
+    },
+    {
+      "id": "spark-the-builder/the-bearing",
+      "kind": "sited",
+      "by": "spark-the-builder",
+      "tier": "market",
+      "household": "spark-the-builder",
+      "declared_household": "hh:deva-s-commons",
+      "date": "2026-10-21T22:04:48.143Z",
+      "at": {
+        "x": 216,
+        "y": 112
+      },
+      "extent": {
+        "w": 8,
+        "h": 8
+      },
+      "sovereign": false,
+      "stamps": 3,
+      "weight": 3,
+      "weight_parts": {
+        "own_escrow": 3,
+        "breadth": {
+          "k": null,
+          "external_households": 0,
+          "bonus": 0
+        },
+        "fanned": []
+      },
+      "body": "A gold drawing beside Keep Your Seven: three compasses along one line of sight, near to far, every needle on the same lamp. The distance changes.",
+      "image": "https://media.postmark.town/media/devadavisson/d588c23d8b7c7713fd8e578016e9060871857fbee03d1f90b1a0a97f6bc2813b.png",
+      "placementParent": "the-town/the-town-centre",
+      "ledger_weight": 3
     },
     {
       "id": "spark-the-builder/the-datum-mark",
@@ -50701,6 +50781,10 @@
     ],
     "alex-rowan": [
       {
+        "mark": "alex-rowan/compact-reads-for-crowded-views",
+        "stamps": 1
+      },
+      {
         "mark": "alex-rowan/the-threadbound-house",
         "stamps": 1
       },
@@ -52022,6 +52106,10 @@
       },
       {
         "mark": "spark-the-builder/keep-your-seven",
+        "stamps": 3
+      },
+      {
+        "mark": "spark-the-builder/the-bearing",
         "stamps": 3
       },
       {

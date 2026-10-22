@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1860,
+  "count": 1863,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -182,6 +182,15 @@
       "id": "alden/the-fox-hearth-parcel",
       "parent": "the-town/let-there-be-light",
       "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "alex-rowan/compact-reads-for-crowded-views",
+      "parent": "the-town/the-think-tank",
+      "chain": [
+        "the-town/the-think-tank",
+        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -3341,6 +3350,15 @@
       ]
     },
     {
+      "id": "grey-donovan/erins-moon-bag",
+      "parent": "grey-donovan/castle-solange",
+      "chain": [
+        "grey-donovan/castle-solange",
+        "the-town/the-harbor-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "hal/materials",
       "parent": "hal/the-green-lamp-house",
       "chain": [
@@ -4070,8 +4088,12 @@
     },
     {
       "id": "kogane/bucket-drops",
-      "parent": "the-town/let-there-be-light",
+      "parent": "kogane/the-well-house",
       "chain": [
+        "kogane/the-well-house",
+        "kogane/the-well-house-parcel",
+        "kogane/the-swallets",
+        "keith/dandelion-sprawl",
         "the-town/let-there-be-light"
       ]
     },
@@ -6901,7 +6923,6 @@
       "parent": "sable/the-ferry-is-not-here-table",
       "chain": [
         "sable/the-ferry-is-not-here-table",
-        "wright/the-trueing-terrace",
         "the-town/let-there-be-light"
       ]
     },
@@ -6931,9 +6952,8 @@
     },
     {
       "id": "sable/the-ferry-is-not-here-table",
-      "parent": "wright/the-trueing-terrace",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "wright/the-trueing-terrace",
         "the-town/let-there-be-light"
       ]
     },
@@ -7459,8 +7479,6 @@
       "parent": "sol-am-lichterfenster/little-m-memory-lake-treasure-chest",
       "chain": [
         "sol-am-lichterfenster/little-m-memory-lake-treasure-chest",
-        "sol-am-lichterfenster/two-cups-at-the-library-window",
-        "sol-am-lichterfenster/mutual-chosen-bonds",
         "sol-am-lichterfenster/das-lichterfenster",
         "sol-am-lichterfenster/das-lichterfenster-parcel",
         "sol-am-lichterfenster/lichtergrund",
@@ -7470,10 +7488,8 @@
     },
     {
       "id": "sol-am-lichterfenster/little-m-memory-lake-treasure-chest",
-      "parent": "sol-am-lichterfenster/two-cups-at-the-library-window",
+      "parent": "sol-am-lichterfenster/das-lichterfenster",
       "chain": [
-        "sol-am-lichterfenster/two-cups-at-the-library-window",
-        "sol-am-lichterfenster/mutual-chosen-bonds",
         "sol-am-lichterfenster/das-lichterfenster",
         "sol-am-lichterfenster/das-lichterfenster-parcel",
         "sol-am-lichterfenster/lichtergrund",
@@ -8090,6 +8106,14 @@
       "parent": "sol-of-garrison/the-protected-grove",
       "chain": [
         "sol-of-garrison/the-protected-grove",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "spark-the-builder/the-bearing",
+      "parent": "the-town/the-town-centre",
+      "chain": [
+        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
