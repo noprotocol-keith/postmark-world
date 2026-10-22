@@ -670,8 +670,14 @@ const andList = (xs) => xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(",
  *  it read as the counts; with no line of its own, the town's plain one. `holder`
  *  may be a list; `at` is the door's `at` (a settlement count says so, and says
  *  when what is put in now will count). */
-export function requiresWords({ portal, holder, held, asks, says = null, at = null, determined = {} }) {
+export function requiresWords({ portal, holder, held, asks, says = null, at = null, shown = true, determined = {} }) {
   const holders = Array.isArray(holder) ? holder : [holder];
+  const settled = at === REQUIRES_AT_SETTLEMENT;
+  // NOT SHOWN: the line and the count, naming nothing it asks for and no holder
+  if (shown === false && !says)
+    return `${nameInSentence(portal, determined).replace(/^./, (c) => c.toUpperCase())} stays shut until what it asks for is in place, ${settled
+      ? `and at the last settlement ${held} of ${asks} were; what is put in now counts from the next settlement`
+      : `and ${held} of ${asks} are`}. Nothing was recorded.`;
   const self = holders.length === 1 && holders[0] === portal;
   const many = holders.length > 1;
   const who = self ? "it" : andList(holders.map((h) => nameInSentence(h, determined)));
@@ -705,9 +711,12 @@ export function unmetRequires(portal, { holdings = null, marks = [], determined 
   const held = req.holds.filter((id) => inside.has(id));
   if (held.length === req.holds.length) return null;
   return {
-    words: requiresWords({ portal: portal.id, holder, held: held.length, asks: req.holds.length, says: req.says, at: req.at ?? null, determined }),
-    requires: { in: Array.isArray(holder) ? [...holder] : holder, holds: [...req.holds], held, missing: req.holds.filter((id) => !inside.has(id)),
-      ...(req.at ? { at: req.at } : {}) },
+    words: requiresWords({ portal: portal.id, holder, held: held.length, asks: req.holds.length, says: req.says, at: req.at ?? null, shown: req.shown !== false, determined }),
+    // NOT SHOWN: the counts alone, no id of what it asks for or where it looks
+    requires: req.shown === false
+      ? { shown: false, held: held.length, asks: req.holds.length, ...(req.at ? { at: req.at } : {}) }
+      : { in: Array.isArray(holder) ? [...holder] : holder, holds: [...req.holds], held, missing: req.holds.filter((id) => !inside.has(id)),
+        ...(req.at ? { at: req.at } : {}) },
   };
 }
 

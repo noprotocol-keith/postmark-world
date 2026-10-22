@@ -184,3 +184,27 @@ test("G1 LINT: every holder a list names is a mark that holds", () => {
   const notHolder = world({ requires: { holds: ASKS, in: KEEPERS }, extra: keepers().map((k, i) => i === 1 ? { ...k, holder: false } : k) });
   assert.deepEqual(rules(notHolder), [`${DOOR} requires-in-a-holder`]);
 });
+
+// ── `shown: false` (Wright 2026-10-22, from Darko's § 4: the hint is the door's own body) ──
+
+test("NOT SHOWN: the refusal is the door's line and the count, and no id of what it asks for or where it looks, anywhere", () => {
+  const w = listDoor({ at: "settlement", shown: false, says: "The doors hold fast. At the last settlement, {held} of {asks} were in place." });
+  assert.deepEqual(requiresOf({ holds: ASKS, shown: false }), { holds: ASKS, in: null, says: null, shown: false });
+  assert.equal("shown" in requiresOf({ holds: ASKS, shown: true }), false, "shown is the default, absent when not hidden");
+  assert.match(requiresOf({ holds: ASKS, shown: "maybe" }).malformed, /shown is true or false/);
+  const r = pass(printed(w, [[ASKS[0], KEEPERS[0]], [ASKS[1], KEEPERS[1]]]), null);
+  assert.equal(r.refused, "requires");
+  assert.equal(r.error, "The doors hold fast. At the last settlement, 2 of 3 were in place. Nothing was recorded.");
+  assert.deepEqual(r.requires, { shown: false, held: 2, asks: 3, at: "settlement" });
+  const said = JSON.stringify(r);
+  for (const id of [...ASKS, ...KEEPERS]) assert.ok(!said.includes(id), `${id} appears nowhere in the refusal`);
+  // with no line of its own, the town's plain words name nothing either
+  const plain = pass(printed(listDoor({ at: "settlement", shown: false }), []), null);
+  assert.equal(plain.error, "Inner Door stays shut until what it asks for is in place, and at the last settlement 0 of 3 were; what is put in now counts from the next settlement. Nothing was recorded.");
+  for (const id of [...ASKS, ...KEEPERS]) assert.ok(!JSON.stringify(plain).includes(id));
+  // the condition is the door's law, readable there, and three printed still opens it
+  assert.deepEqual(entryLawOf(portalOf(w)).requires.holds, ASKS);
+  assert.equal(pass(printed(w, KEEPERS.map((k, i) => [ASKS[i], k])), null).refused, null);
+  // every other door keeps today's answer
+  assert.deepEqual(pass(printed(listDoor({ at: "settlement" }), []), null).requires.holds, ASKS);
+});

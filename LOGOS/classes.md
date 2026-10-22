@@ -1863,6 +1863,11 @@ that already stood: a mark's `entry: {word, edge, consequence}` is its fixed ans
     printed it says so (its `held_by`). What is put in now opens the door at the next settlement, never before, and
     there is no second clock. Its refusal says how many the last settlement counted, and that what is put in now
     counts from the next one. `at` has that one value, or is absent.
+  - **Not shown** (2026-10-22, carrying out WLD-25/k: the hint is the door's own body): with `shown: false`
+    (the maker's choice; default true), the door's refusal is its `says` line and the count, and it names
+    nothing the door asks for and none of its holders. Without a line of its own, the town's plain words name
+    nothing either. The condition stays readable in the door's law, for anyone who reads it there. Every
+    other door keeps today's answer.
 
 **Later** (named in the sitting, not law yet): other `requires:` conditions on a portal, secret portals (a hidden
 entry in the list), and exit routing for marks that are not dungeons.

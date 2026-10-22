@@ -58,3 +58,9 @@ test("THE LINT'S QUESTION: a door counted at a settlement passes; any other is n
   assert.match(afterDoorRefusal(DECL, world(0, { holds: ASKS, in: HOLDERS })), /a creature waits on a door that counts at: "settlement"/);
   assert.match(afterDoorRefusal(DECL, []), /names no mark/);
 });
+
+test("a door that is not shown counts the same for the creature", () => {
+  const hidden = { ...LOCK, shown: false };
+  assert.deepEqual(afterDoorOpen(DECL, world(2, hidden)), { open: false, shut: true, why: `its door ${DOOR} is shut: 2 of 3 in place at this settlement` });
+  assert.deepEqual(afterDoorOpen(DECL, world(3, hidden)), { open: true });
+});

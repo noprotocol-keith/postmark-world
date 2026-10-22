@@ -227,7 +227,8 @@ export function afterDoorOpen(decl, marks = []) {
   const bad = afterDoorRefusal(decl, marks);
   if (bad) return { open: false, why: bad };
   const unmet = unmetRequires((marks ?? []).find((m) => m?.id === decl.after_door), { marks });
-  return unmet ? { open: false, shut: true, why: `its door ${decl.after_door} is shut: ${unmet.requires.held.length} of ${unmet.requires.holds.length} in place at this settlement` } : { open: true };
+  const n = (v) => (Array.isArray(v) ? v.length : Number(v));   // a door that is not shown says only its counts
+  return unmet ? { open: false, shut: true, why: `its door ${decl.after_door} is shut: ${n(unmet.requires.held)} of ${unmet.requires.asks ?? n(unmet.requires.holds)} in place at this settlement` } : { open: true };
 }
 
 /** WHERE AN AFFORDED ACTION MAY BE TAKEN FROM: in sight of the creature, or inside its ring. */

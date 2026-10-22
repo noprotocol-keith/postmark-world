@@ -235,6 +235,10 @@ export function parseEnterExitLedger(text) {
 //               opens the door at the next settlement, never before, and there
 //               is no second clock. Carried exactly as written, `at` present only
 //               when written.
+//               `shown: false` (the maker's, default true): the refusal names
+//               nothing the door asks for and nowhere it looks, only its line and
+//               the count; the condition stays readable in the door's law, for
+//               anyone who reads it there (a puzzle whose hint is elsewhere).
 //
 // ── THE STAIRS CLASS (WLD-21, ruled by Darko 2026-10-15) ─────────────────────
 //
@@ -276,8 +280,11 @@ export function requiresOf(v) {
   if (v.at !== undefined && v.at !== null && v.at !== REQUIRES_AT_SETTLEMENT)
     return { malformed: `requires.at is "${REQUIRES_AT_SETTLEMENT}" or absent` };
   if (v.says !== undefined && v.says !== null && typeof v.says !== "string") return { malformed: "requires.says is a line of words" };
+  const shown = v.shown === undefined || v.shown === null ? true : v.shown === true || v.shown === "true" ? true : v.shown === false || v.shown === "false" ? false : null;
+  if (shown === null) return { malformed: "requires.shown is true or false" };
   return { holds: [...holds], in: Array.isArray(v.in) ? [...v.in] : v.in ?? null, says: v.says ?? null,
-    ...(v.at === REQUIRES_AT_SETTLEMENT ? { at: REQUIRES_AT_SETTLEMENT } : {}) };
+    ...(v.at === REQUIRES_AT_SETTLEMENT ? { at: REQUIRES_AT_SETTLEMENT } : {}),
+    ...(shown === false ? { shown: false } : {}) };
 }
 
 /** The holders a well-formed `requires` looks in, as a list: `in` as written, or the portal. */
