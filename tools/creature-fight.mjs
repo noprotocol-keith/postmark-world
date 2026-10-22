@@ -37,7 +37,7 @@
 //
 //   sanity_max   the most sanity (a whole number)
 //   pieces       [{ piece, looks, ...that piece's own fields above }]
-//   restores     the class its ending turns back on (a class slug), or absent
+//   restores     the class its ending turns back on (its key, as the law keys it), or absent
 //
 // Every line the creature itself says (its cackle when someone flinches, its
 // answer to a strike or a persuade) is a reaction in its kind file, keyed on the
