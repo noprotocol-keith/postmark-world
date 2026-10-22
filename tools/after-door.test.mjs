@@ -38,7 +38,8 @@ test("the grammar: after_door is a door's mark id, carried as written", () => {
 });
 
 test("OPEN AT THE SETTLEMENT THAT PRINTS THE LAST ONE: two printed, it waits; three printed, it comes out", () => {
-  assert.deepEqual(afterDoorOpen(DECL, world(0)), { open: false, why: `its door ${DOOR} is shut: 0 of 3 in place at this settlement` });
+  assert.deepEqual(afterDoorOpen(DECL, world(0)), { open: false, shut: true, why: `its door ${DOOR} is shut: 0 of 3 in place at this settlement` });
+  assert.equal(afterDoorOpen(DECL, world(3).slice(1)).shut, undefined, "a door that is no lock is a fault, never a wait");
   assert.equal(afterDoorOpen(DECL, world(2)).open, false);
   assert.deepEqual(afterDoorOpen(DECL, world(3)), { open: true });
   assert.deepEqual(afterDoorOpen({ id: "creature:wolf-den" }, []), { open: true }, "no after_door: nothing to wait on");

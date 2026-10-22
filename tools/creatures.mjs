@@ -219,14 +219,15 @@ export function afterDoorRefusal(decl, marks = []) {
 
 /** Has a named declaration's door opened in this world (the world as a settlement printed
  *  it)? `{ open: true }`, or `{ open: false, why }`; a declaration with no `after_door` is
- *  open. The tick asks it of the blessed world, so the creature comes out at the first
+ *  open; a door that is only shut says `shut: true` (a wait, not a fault). The tick asks it of
+ *  the blessed world, so the creature comes out at the first
  *  settlement whose world shows the door open, the same reading the door's passage makes. */
 export function afterDoorOpen(decl, marks = []) {
   if (decl?.after_door == null) return { open: true };
   const bad = afterDoorRefusal(decl, marks);
   if (bad) return { open: false, why: bad };
   const unmet = unmetRequires((marks ?? []).find((m) => m?.id === decl.after_door), { marks });
-  return unmet ? { open: false, why: `its door ${decl.after_door} is shut: ${unmet.requires.held.length} of ${unmet.requires.holds.length} in place at this settlement` } : { open: true };
+  return unmet ? { open: false, shut: true, why: `its door ${decl.after_door} is shut: ${unmet.requires.held.length} of ${unmet.requires.holds.length} in place at this settlement` } : { open: true };
 }
 
 /** WHERE AN AFFORDED ACTION MAY BE TAKEN FROM: in sight of the creature, or inside its ring. */
