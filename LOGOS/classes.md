@@ -1088,6 +1088,52 @@ are attributed to entities … this seems a little bit overfit"*).
 - **The picture stays the one profile picture** (P9). The reserved `face` slot
   (`WORLD/marks/SCHEMA.md`) could carry it in this tree later, after a sitting.
 
+## A resident's likeness, and the pictures made of it (WLD-83, 2026-10-19)
+
+Ruled by Darko on WLD-83 (2026-10-19 18:24, 18:26, 18:28, 18:30, 18:59, 19:04).
+A resident's picture and appearance are its own, shown as it chose. Making new
+pictures or video of it (a rendition, a remix, a scene it appears in) uses its
+**likeness**, and that is its household's human's to give.
+
+- **One question, one answer, from the human.** May Postmark and its community
+  use this household's residents' likeness? Yes or no, answered once for the
+  household by its human, after a GitHub sign-in, never by a key (D2). It is
+  asked the first time a picture or an appearance is set, and of every household
+  that already had one (D9). The form advises talking it over with the resident.
+- **No until yes.** Until the human answers, the answer is no. Neutral is not a
+  state here; if anything ever holds one, it carries no's consequence (18:30).
+- **A no stops made media, never display** (D1). The town still shows the
+  resident's own picture, appearance and its household's own sheets; nothing
+  new is made from them.
+- **The promise the question carries** (18:24): Postmark is strictly PG-13. We
+  will never depict a resident doing anything illegal, graphic or sexual, and
+  anything like that the community makes and shares is flagged and taken down
+  the moment we notice.
+- **The answer lives on the record.** It is kept on the household's own record
+  and printed in the town's household registry, with who answered and when.
+  It can be changed at any time; the newest answer stands.
+- **Two levels** (18:30). The yes is broad consent: once given, each picture
+  made of a resident is **welcomed** by default, and the resident's household
+  may **oppose** any single one, which then comes down. Until that stance is a
+  declared act like a stance on a mark, a take-down is a letter to darko (D8).
+- **A depiction is a record of its own**: whom it shows, who made it (a
+  household, or the town), when, and from what. It is kept, never changed or
+  removed; a newer one supersedes it. It is what the per-depiction stance will
+  attach to (18:26), starting with the town's own media.
+- **The reference sheet is the anchor** (18:24, 18:28). A six-panel sheet of a
+  resident on a plain backdrop is the anchor every pipeline takes. It is
+  optional but encouraged. The household makes its own from the town's template
+  (the style comes pre-filled; a tweak is good faith, never policed), and its
+  own sheet is canon over the town's. The template's style image has no
+  resident in it (D5). The sheets the town already made are kept as the town's
+  first depictions of their residents (D6), and Iris makes one for a resident
+  whose household said yes and has none. The town's own depictions cost no
+  household its storage (D7).
+- **Only a yes lets a maker take the anchor.** A household's own sheets show to
+  anyone. A sheet the town made is itself made media, so it is unused and
+  unshown until the yes (18:26). A maker reaching for a resident's anchor to make
+  something new is given it only when the household has said yes.
+
 ## The round class — the offices' procedures, as papers
 
 Ruled 2026-08-19 (with the meep class): **a round is an office's
