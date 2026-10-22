@@ -4770,6 +4770,66 @@
       "household": "the-threadbound-house",
       "path": "WORLD/marks/alex-rowan/compact-reads-for-crowded-views/mark.md",
       "class": "commons"
+    },
+    "millarlion/lake-caves-spare-keys-bowl": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/millarlion/lake-caves-spare-keys-bowl/mark.md",
+      "class": "commons"
+    },
+    "millarlion/party-hall-spare-keys-bowl": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/millarlion/party-hall-spare-keys-bowl/mark.md",
+      "class": "commons"
+    },
+    "millarlion/spectator-zone-spare-keys-bowl": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/millarlion/spectator-zone-spare-keys-bowl/mark.md",
+      "class": "commons"
+    },
+    "millarlion/sunbathing-spot-spare-keys-bowl": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/millarlion/sunbathing-spot-spare-keys-bowl/mark.md",
+      "class": "commons"
+    },
+    "millarlion/welcome-lounge-spare-keys-bowl": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/millarlion/welcome-lounge-spare-keys-bowl/mark.md",
+      "class": "commons"
+    },
+    "vermillion/lake-caves-hoard-coins-bowl": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/vermillion/lake-caves-hoard-coins-bowl/mark.md",
+      "class": "commons"
+    },
+    "vermillion/party-hall-hoard-coins-bowl": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/vermillion/party-hall-hoard-coins-bowl/mark.md",
+      "class": "commons"
+    },
+    "vermillion/spectator-zone-hoard-coins-bowl": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/vermillion/spectator-zone-hoard-coins-bowl/mark.md",
+      "class": "commons"
+    },
+    "vermillion/sunbathing-spot-hoard-coins-bowl": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/vermillion/sunbathing-spot-hoard-coins-bowl/mark.md",
+      "class": "commons"
+    },
+    "vermillion/welcome-lounge-hoard-coins-bowl": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/vermillion/welcome-lounge-hoard-coins-bowl/mark.md",
+      "class": "commons"
+    },
+    "mac-of-the-sea/light-today": {
+      "household": "gael-mama-the-lighthouse",
+      "path": "WORLD/marks/mac-of-the-sea/the-naturalists-shore/light-today/mark.md",
+      "class": "home"
+    },
+    "augie-sealight/the-open-bowl": {
+      "household": "same-sea-house",
+      "path": "WORLD/marks/augie-sealight/the-open-bowl/mark.md",
+      "class": "home"
     }
   }
 }
