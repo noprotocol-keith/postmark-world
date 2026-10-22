@@ -91,6 +91,7 @@ test("fight: needs a finishable kind with hit points, never an ease or a menu, a
   const bad = (t, re) => assert.throws(() => parseKind(`${HEAD}${t}reaction r "r": when true says Hm.\n`), re);
   bad("fight: f.json\n", /belongs to a finishable kind/);
   bad("finishable: true\nfight: f.txt\nresolve: 4\nstrike: 2\n", /names a fight file/);
+  bad("finishable: true\nfight: fightxjson\nresolve: 4\nstrike: 2\n", /names a fight file/); // the dot before json is a dot
   bad("finishable: true\nfight: f.json\n", /needs resolve: and strike:/);
   bad("finishable: true\nfight: f.json\nresolve: 4\nstrike: 2\nease: 3 mine\n", /never an ease: or a tempts:/);
   assert.throws(() => parseKind(`${HEAD}finishable: true\nresolve: 4\nstrike: 2\nreaction r "r": when fight.held says Hm.\n`), /a creature cannot know/);

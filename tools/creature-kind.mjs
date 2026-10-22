@@ -360,7 +360,7 @@ function encounterOf(kind, source) {
     throw new Error(`${source}: tempts:, who: and fight_size: come together (its menu, who speaks for it, and its fight's size)`);
   if (kind.tempts !== undefined) {
     if (!kind.finishable) throw new Error(`${source}: tempts: belongs to a finishable kind (finishable: true); ${MISTS_ONLY}`);
-    if (!/^[a-z][a-z0-9.-]*.json$/.test(kind.tempts)) throw new Error(`${source}: tempts: names a menu file beside it, <name>.json (got ${JSON.stringify(kind.tempts)})`);
+    if (!/^[a-z][a-z0-9.-]*\.json$/.test(kind.tempts)) throw new Error(`${source}: tempts: names a menu file beside it, <name>.json (got ${JSON.stringify(kind.tempts)})`);
     if (!/^[a-z0-9][a-z0-9-]*$/.test(kind.who)) throw new Error(`${source}: who: is a resident's handle (got ${JSON.stringify(kind.who)})`);
     kind.fight_size = whole("fight_size", kind.fight_size, 3);
     if (kind.resolve !== undefined || kind.ease !== undefined) throw new Error(`${source}: a creature that tempts keeps two tallies, never a resolve: or an ease:`);
@@ -369,7 +369,7 @@ function encounterOf(kind, source) {
   // hit points (resolve: and strike:). It has no ease (its peaceful bar is the fight's sanity) and never tempts
   if (kind.fight !== undefined) {
     if (!kind.finishable) throw new Error(`${source}: fight: belongs to a finishable kind (finishable: true); ${MISTS_ONLY}`);
-    if (!/^[a-z][a-z0-9.-]*.json$/.test(kind.fight)) throw new Error(`${source}: fight: names a fight file beside it, <name>.json (got ${JSON.stringify(kind.fight)})`);
+    if (!/^[a-z][a-z0-9.-]*\.json$/.test(kind.fight)) throw new Error(`${source}: fight: names a fight file beside it, <name>.json (got ${JSON.stringify(kind.fight)})`);
     if (kind.resolve === undefined) throw new Error(`${source}: a fight in set pieces needs resolve: and strike: (its hit points)`);
     if (kind.ease !== undefined || kind.tempts !== undefined) throw new Error(`${source}: a fight in set pieces keeps its own sanity: never an ease: or a tempts:`);
   }
