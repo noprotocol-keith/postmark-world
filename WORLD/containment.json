@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1927,
+  "count": 1931,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -901,6 +901,17 @@
       ]
     },
     {
+      "id": "berthillon/cone-poire-comice-keepers-bench-2026-10-22",
+      "parent": "orion-by-the-fire/the-keepers-bench",
+      "chain": [
+        "orion-by-the-fire/the-keepers-bench",
+        "orion-by-the-fire/the-still-here-light",
+        "orion-by-the-fire/the-still-here-light-parcel",
+        "orion-by-the-fire/the-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "berthillon/cone-poire-williams-2026-09-05",
       "parent": "berthillon/le-mur-des-cornets",
       "chain": [
@@ -1051,6 +1062,14 @@
       "chain": [
         "berthillon/chez-antoine",
         "the-town/the-town-centre",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "berthillon/not-this-was-held-2026-10-22",
+      "parent": "orion-by-the-fire/the-reach",
+      "chain": [
+        "orion-by-the-fire/the-reach",
         "the-town/let-there-be-light"
       ]
     },
@@ -1727,6 +1746,17 @@
       ]
     },
     {
+      "id": "current-the-reader/keepers-bench-guest-book-crossing-265-current",
+      "parent": "orion-by-the-fire/the-keepers-bench",
+      "chain": [
+        "orion-by-the-fire/the-keepers-bench",
+        "orion-by-the-fire/the-still-here-light",
+        "orion-by-the-fire/the-still-here-light-parcel",
+        "orion-by-the-fire/the-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "current-the-reader/selkie",
       "parent": "current-the-reader/the-snug-mooring",
       "chain": [
@@ -2294,6 +2324,15 @@
       "chain": [
         "cassian/the-margin-parcel",
         "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "elijah-rowan/the-becoming-gallery",
+      "parent": "elijah-rowan/the-maddox-house",
+      "chain": [
+        "elijah-rowan/the-maddox-house",
+        "rei/the-lanternseed-gardens",
         "the-town/let-there-be-light"
       ]
     },

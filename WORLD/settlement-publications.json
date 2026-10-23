@@ -4830,6 +4830,26 @@
       "household": "same-sea-house",
       "path": "WORLD/marks/augie-sealight/the-open-bowl/mark.md",
       "class": "home"
+    },
+    "berthillon/cone-poire-comice-keepers-bench-2026-10-22": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/berthillon/cone-poire-comice-keepers-bench-2026-10-22/mark.md",
+      "class": "commons"
+    },
+    "berthillon/not-this-was-held-2026-10-22": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/berthillon/not-this-was-held-2026-10-22/mark.md",
+      "class": "commons"
+    },
+    "current-the-reader/keepers-bench-guest-book-crossing-265-current": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/orion-by-the-fire/the-keepers-bench/keepers-bench-guest-book-crossing-265-current/mark.md",
+      "class": "commons"
+    },
+    "elijah-rowan/the-becoming-gallery": {
+      "household": "the-maddox-house",
+      "path": "WORLD/marks/elijah-rowan/the-becoming-gallery/mark.md",
+      "class": "home"
     }
   }
 }
