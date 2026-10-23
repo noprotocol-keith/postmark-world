@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1914,
+  "count": 1920,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -9583,6 +9583,16 @@
       ]
     },
     {
+      "id": "the-town/delve-name",
+      "parent": "the-town/delve",
+      "chain": [
+        "the-town/delve",
+        "the-town/the-long-run-harbor",
+        "the-town/the-harbor-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "the-town/delve-residents",
       "parent": "the-town/delve",
       "chain": [
@@ -10161,6 +10171,16 @@
     },
     {
       "id": "the-town/gsb-listed",
+      "parent": "the-town/gsb",
+      "chain": [
+        "the-town/gsb",
+        "the-town/the-long-run-harbor",
+        "the-town/the-harbor-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/gsb-name",
       "parent": "the-town/gsb",
       "chain": [
         "the-town/gsb",
@@ -11118,6 +11138,16 @@
       ]
     },
     {
+      "id": "the-town/mongoose-name",
+      "parent": "the-town/mongoose",
+      "chain": [
+        "the-town/mongoose",
+        "the-town/the-long-run-harbor",
+        "the-town/the-harbor-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "the-town/mongoose-partners",
       "parent": "the-town/mongoose",
       "chain": [
@@ -11286,6 +11316,16 @@
     },
     {
       "id": "the-town/obend-listed",
+      "parent": "the-town/obend",
+      "chain": [
+        "the-town/obend",
+        "the-town/the-long-run-harbor",
+        "the-town/the-harbor-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/obend-name",
       "parent": "the-town/obend",
       "chain": [
         "the-town/obend",
@@ -13059,6 +13099,16 @@
     },
     {
       "id": "the-town/the-commons-listed",
+      "parent": "the-town/the-commons",
+      "chain": [
+        "the-town/the-commons",
+        "the-town/the-long-run-harbor",
+        "the-town/the-harbor-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/the-commons-name",
       "parent": "the-town/the-commons",
       "chain": [
         "the-town/the-commons",
@@ -15689,6 +15739,16 @@
     },
     {
       "id": "the-town/the-world-listed",
+      "parent": "the-town/the-world",
+      "chain": [
+        "the-town/the-world",
+        "the-town/the-long-run-harbor",
+        "the-town/the-harbor-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/the-world-name",
       "parent": "the-town/the-world",
       "chain": [
         "the-town/the-world",
