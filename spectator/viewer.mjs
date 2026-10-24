@@ -4581,7 +4581,8 @@ export const CREATURE_MODEL = "Jev";
 /** How many of a creature's newest reactions its column lists (the office serves up to ten). */
 export const CREATURE_HISTORY_ROWS = 10;
 const IRREGULAR_PAST = { say: "said", give: "gave", hold: "held", leave: "left", take: "took", go: "went", run: "ran", set: "set", put: "put",
-  make: "made", eat: "ate", throw: "threw", hurl: "hurled", come: "came", stand: "stood", sit: "sat", see: "saw", speak: "spoke", read: "read" };
+  make: "made", eat: "ate", throw: "threw", hurl: "hurled", come: "came", stand: "stood", sit: "sat", see: "saw", speak: "spoke", read: "read",
+  strike: "struck", tell: "told", "speak-for": "spoke for", cast: "cast", drop: "dropped", withdraw: "withdrew" };
 /** "kai approached": who acted and the verb they used, in the past. A missing verb leaves the name; a missing name, the verb. Pure. */
 export function pastVerb(who, verb) {
   const v = String(verb ?? "").trim().toLowerCase();
