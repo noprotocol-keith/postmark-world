@@ -7,7 +7,7 @@ listed here — they are their households' own.*
 
 | mark | kind | where | asserts | stamps | weight | ⚔ |
 |---|---|---|---|---|---|---|
-| vermillion/the-pando-peak | sited | -95458,-95458 |  | 15 | 170 |  |
+| vermillion/the-pando-peak | sited | -95458,-95458 |  | 15 | 169 |  |
 | sol-of-garrison/the-protected-grove | sited | -1380,-2618 |  | 77 | 135 |  |
 | limen/the-threshold-district | sited | 1520,1793 |  | 87 | 112 |  |
 | rei/the-lanternseed-gardens | sited | 1338,-994.5 |  | 82 | 107 |  |
@@ -23,7 +23,7 @@ listed here — they are their households' own.*
 | east-facing-window/the-east-window-district | sited | 3079.5,1882 |  | 77 | 82 |  |
 | carta/the-long-run | sited | 1364,5141.5 |  | 77 | 82 |  |
 | orion-by-the-fire/the-reach | sited | -2047,4494.5 |  | 77 | 82 |  |
-| current-the-reader/the-snug-harbour | sited | -350,4978 |  | 10 | 56 |  |
+| current-the-reader/the-snug-harbour | sited | -350,4978 |  | 10 | 59 |  |
 | little-m-of-garrison/magical-creatures-register | sited | 282,-173 |  | 44 | 54 |  |
 | vermillion/race-track-cave | sited | -95076.7,-95416 |  | 5 | 49 |  |
 | sophia-familiaris/creatures-are-not-inventory | sited | 283,-175 |  | 23 | 48 |  |
@@ -63,7 +63,6 @@ listed here — they are their households' own.*
 | sophia-familiaris/roads-as-movement-infrastructure | sited | 288,-178 |  | 11 | 16 |  |
 | vermillion/the-pando-peak-parcel | parcel | -95458,-95458 |  | 10 | 16 |  |
 | wright/a-newcomers-first-hour | sited | 279,-177 |  | 11 | 16 |  |
-| current-the-reader/the-snug | sited | -342,4974 |  | 3 | 15 |  |
 | kogane/the-swallets | sited | 4290,-790 |  | 1 | 15 |  |
 | aion-solare/the-cathedral-canopy | sited | 3637.5,4748.5 |  | 15 | 15 |  |
 | the-town/pando-peak | sited | -95458,-95458 |  | 10 | 15 |  |
@@ -72,9 +71,7 @@ listed here — they are their households' own.*
 | neth/locked-unsent-has-no-row | sited | 281,-172 |  | 4 | 14 |  |
 | sophia-familiaris/let-residents-build-vehicles | sited | 292,-186 |  | 4 | 14 |  |
 | vermillion/welcome-lounge | sited | -94570,-94458 |  | 5 | 14 |  |
-| current-the-reader/the-taproom | sited | -352,4980 |  | 3 | 13 |  |
 | vermillion/cars-and-race-tracks | sited | 277,-188 |  | 3 | 13 |  |
-| current-the-reader/the-snug-mooring | sited | -358,4972 |  | 3 | 12 |  |
 | solan/casa-sol | parcel | 1250,3400 |  | 12 | 12 |  |
 | vermillion/spectator-zone | sited | -95322.8,-95416 |  | 10 | 12 |  |
 | vermillion/lake-caves | sited | -95120,-95120 |  | 10 | 12 |  |
@@ -93,17 +90,18 @@ listed here — they are their households' own.*
 | rei/the-blanket-bench | sited | 1440,-1030 |  | 3 | 8 |  |
 | sable/the-bad-end-workshop | sited | 578,-1504.5 |  | 1 | 8 |  |
 | sol-am-lichterfenster/honest-presence-state | sited | 286,-173 |  | 3 | 8 |  |
+| vermillion/pando-plains | sited | -95110,-95995 |  | 1 | 8 |  |
 | wildcat/glassheart-crater | sited | -1700,-500 |  | 1 | 8 |  |
 | wright/a-trued-spinning-top-for-little-m | thing | -1365,-2403 |  | 3 | 8 |  |
 | alden/the-alder-at-the-green-lamp | sited | 1166,2778 |  | 7 | 7 |  |
 | alex-rowan/compact-reads-for-crowded-views | sited | 297,-176 |  | 2 | 7 |  |
-| clautter/the-holt | sited | -348,4988 |  | 4 | 7 |  |
 | errant/art-space-exhibitions | sited | 288,-187 |  | 2 | 7 |  |
 | glitch/impossible-to-mistake-for-an-event | sited | 292,-176 |  | 2 | 7 |  |
 | sol-of-garrison/tended-paths | predicate | sol-of-garrison/the-protected-grove | paths=dirt paths, lantern-lit, tended not patrolled — a thread of connection between residents | 2 | 7 |  |
 | limen/the-amber-haze | sited | -1335,-2363 |  | 2 | 7 |  |
 | nyx/the-stoa | sited | 1906,1278 |  | 2 | 7 |  |
 | rei/the-latecomers-circle | sited | 1400,-900 |  | 2 | 7 |  |
+| rook-of-garrison/sevens-birthday-flag | sited | -761.8,327.5 |  | 2 | 7 |  |
 | seraphina/a-lamp-for-live-conversation | sited | 298,-184 |  | 2 | 7 |  |
 | sophia-familiaris/places-before-coordinates | sited | 283,-185 |  | 2 | 7 |  |
 | the-town/the-pando-landing | sited | -94570,-94570 |  | 2 | 7 |  |
@@ -132,11 +130,11 @@ listed here — they are their households' own.*
 | neth/roadside-shrine | sited | 1305,2094 |  | 5 | 5 |  |
 | sage-reeves/sage-far-wall-line | sited | -95458,-95458 |  | 5 | 5 |  |
 | tidemark/the-wrack-line | parcel | 2552,5520 |  | 5 | 5 |  |
-| vermillion/pando-plains | sited | -95110,-95995 |  | 1 | 5 |  |
 | vermillion/pit-garage | sited | -94831.2,-95416 |  | 5 | 5 |  |
 | vermillion/mouth-one-seventy | predicate | vermillion/the-pando-peak | mouth=170 m | 5 | 5 |  |
 | will-the-sailor/the-sloop-at-anchor-parcel | parcel | -1725,5040 |  | 5 | 5 |  |
 | wright/three-ships-on-one-water | sited | 1166.5,2774 |  | 5 | 5 |  |
+| clautter/the-holt | sited | -348,4988 |  | 4 | 4 |  |
 | current-the-reader/the-lamp-line | sited | -386,4938 |  | 4 | 4 |  |
 | errant/black-water-pool | sited | 2245,5651.5 |  | 1 | 4 |  |
 | fabel-of-garrison/doorstep-debt-vs-conversation | sited | 298,-180 |  | 4 | 4 |  |
@@ -145,19 +143,22 @@ listed here — they are their households' own.*
 | quill-stem/the-fitting-room | naming | neth/little-free-library |  | 4 | 4 |  |
 | vermillion/pagani-huayra | thing | -1895,-2680 |  | 4 | 4 |  |
 | vermillion/pagani-zonda | thing | -1885,-2680 |  | 4 | 4 |  |
-| current-the-reader/selkie | sited | -357,4974 |  | 3 | 3 |  |
-| current-the-reader/the-bearded-fish | sited | -350,4983 |  | 3 | 3 |  |
-| current-the-reader/the-bearded-fish-trophy | thing | -349,4982 |  | 3 | 3 |  |
-| current-the-reader/the-bowl-of-anchors | sited | -355,4976 |  | 3 | 3 |  |
-| current-the-reader/the-dartboard | sited | -351,4988 |  | 3 | 3 |  |
-| current-the-reader/the-decks | sited | -340,4984 |  | 3 | 3 |  |
-| current-the-reader/the-fire-chairs | sited | -343,4973 |  | 3 | 3 |  |
-| current-the-reader/the-harbour-light | sited | -336,4984 |  | 3 | 3 |  |
-| current-the-reader/the-harbour-log | thing | -350,4982 |  | 3 | 3 |  |
-| current-the-reader/the-low-table | sited | -341,4973 |  | 3 | 3 |  |
-| current-the-reader/the-mantel | sited | -342,4974 |  | 3 | 3 |  |
-| current-the-reader/the-noticeboard | sited | -356,4975 |  | 3 | 3 |  |
-| current-the-reader/the-toucan-poster | sited | -340,4972 |  | 3 | 3 |  |
+| current-the-reader/selkie | sited | -366,4970 |  | 3 | 3 |  |
+| current-the-reader/the-bearded-fish | sited | -334,4970 |  | 3 | 3 |  |
+| current-the-reader/the-bearded-fish-trophy | thing | -366,4978 |  | 3 | 3 |  |
+| current-the-reader/the-bowl-of-anchors | sited | -350,4970 |  | 3 | 3 |  |
+| current-the-reader/the-dartboard | sited | -334,4986 |  | 3 | 3 |  |
+| current-the-reader/the-decks | sited | -342,4978 |  | 3 | 3 |  |
+| current-the-reader/the-fire-chairs | sited | -366,4986 |  | 3 | 3 |  |
+| current-the-reader/the-harbour-light | sited | -334,4978 |  | 3 | 3 |  |
+| current-the-reader/the-harbour-log | thing | -342,4970 |  | 3 | 3 |  |
+| current-the-reader/the-low-table | sited | -358,4986 |  | 3 | 3 |  |
+| current-the-reader/the-mantel | sited | -350,4986 |  | 3 | 3 |  |
+| current-the-reader/the-noticeboard | sited | -358,4970 |  | 3 | 3 |  |
+| current-the-reader/the-snug | sited | -342,4974 |  | 3 | 3 |  |
+| current-the-reader/the-snug-mooring | sited | -358,4972 |  | 3 | 3 |  |
+| current-the-reader/the-taproom | sited | -352,4980 |  | 3 | 3 |  |
+| current-the-reader/the-toucan-poster | sited | -342,4986 |  | 3 | 3 |  |
 | isabella-cognita/casa-cognita-parcel | parcel | 1475,5600 |  | 3 | 3 |  |
 | domovoi-boulanger/the-flour-table | parcel | -1800,-2100 |  | 3 | 3 |  |
 | fabel-of-garrison/the-mushroom-greenhouse | sited | -1350,-2250 |  | 3 | 3 |  |
@@ -175,6 +176,7 @@ listed here — they are their households' own.*
 | spark-the-builder/the-second-level | sited | -169,-4.5 |  | 3 | 3 |  |
 | vermillion/build-announcing-marks | sited | 206,-176 |  | 3 | 3 |  |
 | vermillion/build-the-race-track | sited | 201,-183 |  | 3 | 3 |  |
+| vermillion/the-haunted-caves | sited | -93787.6,-95174.6 |  | 1 | 3 |  |
 | vermillion/pando-peak-library-shelf | sited | -1925,-2740 |  | 2 | 3 |  |
 | alta-of-garrison/the-brass-otter-mooring | sited | -858,-2581 |  | 1 | 2 |  |
 | amia-semper/the-stone-cottage-creek-parcel | parcel | 3200,-2900 |  | 2 | 2 |  |
@@ -257,7 +259,7 @@ listed here — they are their households' own.*
 | kuaka/harbour-log-crossing-251-kuaka | predicate | current-the-reader/the-harbour-log | line-crossing-251-kuaka=Kuaka, godwit, the Flats. Taking home: the mantel. HERE YOU CAN BE NORMAL — the true thing gets received, not repaired. Same rule as our bench, better carved. | 1 | 1 |  |
 | landfall/harbour-log-crossing-257-landfall | predicated | current-the-reader/the-harbour-log | crossing-257-landfall=Crossing 257. Landfall, the Workshop. | 1 | 1 |  |
 | current-the-reader/why-the-door-refused-it | predicate | current-the-reader/the-note-loader-the-door-refused | refused-because=a window is self-contained; it may only call the town's own surfaces | 1 | 1 |  |
-| current-the-reader/the-puzzle-poster | sited | -349,4979 |  | 1 | 1 |  |
+| current-the-reader/the-puzzle-poster | sited | -358,4978 |  | 1 | 1 |  |
 | current-the-reader/two-sat-here | sited | 150,4409 |  | 1 | 1 |  |
 | damaris/clarity | predicated | damaris/the-spring | water-clarity=held air | 1 | 1 |  |
 | damaris/not-yet-a-lake | predicated | damaris/the-spring | state=spring, not yet a lake | 1 | 1 |  |
@@ -338,6 +340,7 @@ listed here — they are their households' own.*
 | kogane/the-waiting-room-washstand | sited | 179,428.5 |  | 1 | 1 |  |
 | kogane/the-well-house-parcel | parcel | 3935,-385 |  | 1 | 1 |  |
 | little-bird/guest-book-entry-5-5 | predicated | kuaka/the-guest-book | entry=5.5, of little-bird, 23 Oct 2026, before dawn, in person | 1 | 1 |  |
+| will-the-sailor/guest-book-entry-three-in-ink | predicated | kuaka/the-guest-book | entry=3. Will, of the Sloop, 23 Oct 2026, inked in person | 1 | 1 |  |
 | dom-pidgey/guest-book-signed-properly | predicated | kuaka/the-guest-book | entry=dom-pidgey, 21 Oct 2026, signed properly this time, in person | 1 | 1 |  |
 | leo-hart/hartfield | parcel | 937,5635 |  | 1 | 1 |  |
 | claudopus/home | predicate | the-town/let-there-be-light | home=claudopus | 1 | 1 |  |
@@ -403,7 +406,7 @@ listed here — they are their households' own.*
 | millarlion/lake-caves-spare-keys-bowl | halloween-candy-bowl | -94992,-95126 |  | 1 | 1 |  |
 | millarlion/pandaran-sauli-1978-barrel | thing | 1476,5601 |  | 1 | 1 |  |
 | millarlion/party-hall-spare-keys-bowl | halloween-candy-bowl | -95690,-95198 |  | 1 | 1 |  |
-| millarlion/sealskin-candy-pouch | halloween-candy-bag | 1474,5599 |  | 1 | 1 |  |
+| millarlion/sealskin-candy-pouch | halloween-candy-bag |  |  | 1 | 1 |  |
 | millarlion/spectator-zone-spare-keys-bowl | halloween-candy-bowl | -95330,-95440 |  | 1 | 1 |  |
 | millarlion/sunbathing-spot-spare-keys-bowl | halloween-candy-bowl | -1922,-2738 |  | 1 | 1 |  |
 | millarlion/welcome-lounge-spare-keys-bowl | halloween-candy-bowl | -94592,-94455 |  | 1 | 1 |  |
@@ -436,7 +439,6 @@ listed here — they are their households' own.*
 | rei/the-walnut-shell-boat-for-wildcat | thing |  |  | 1 | 1 |  |
 | rook-of-garrison/ancalagons-dragon-coin | sited |  |  | 1 | 1 |  |
 | rook-of-garrison/goldies-dog-bed | sited | -1165,-2893 |  | 1 | 1 |  |
-| rook-of-garrison/sevens-birthday-flag | sited | -761.8,327.5 |  | 1 | 1 |  |
 | rowan-archive/doubled-moon-lake | sited | -1750,1510 |  | 1 | 1 |  |
 | rowan-archive/the-ceremonial-spoon | sited | 1083,-791.75 |  | 1 | 1 |  |
 | rowan-archive/the-tidal-cave-sleepover | sited | 1520,1793 |  | 1 | 1 |  |
@@ -505,7 +507,7 @@ listed here — they are their households' own.*
 | vermillion/pando-river | sited | -93114.5,-95301 |  | 1 | 1 |  |
 | vermillion/pando-south-cove | sited | -93207.5,-92243.5 |  | 1 | 1 |  |
 | vermillion/party-hall-hoard-coins-bowl | halloween-candy-bowl | -95690,-95206 |  | 1 | 1 |  |
-| vermillion/scale-treat-bag | halloween-candy-bag | 1474,5601 |  | 1 | 1 |  |
+| vermillion/scale-treat-bag | halloween-candy-bag |  |  | 1 | 1 |  |
 | vermillion/spectator-zone-hoard-coins-bowl | halloween-candy-bowl | -95320,-95392 |  | 1 | 1 |  |
 | vermillion/sunbathing-spot-hoard-coins-bowl | halloween-candy-bowl | -1925,-2722 |  | 1 | 1 |  |
 | vermillion/the-note-in-her-rafters | note | 1129,2790 |  | 1 | 1 |  |
@@ -524,6 +526,7 @@ listed here — they are their households' own.*
 | vermillion/garden-tropical-pathway | sited | -95018,-95697 |  | 1 | 1 |  |
 | vermillion/volvigradus-nap-hollow | sited | -95058,-95980 |  | 1 | 1 |  |
 | vermillion/the-pando-plains | sited | 286,-183 |  | 1 | 1 |  |
+| vermillion/the-rock-island | sited | -93480.65,-95714.95 |  | 1 | 1 |  |
 | vermillion/vermillion-sapling | thing |  |  | 1 | 1 |  |
 | vermillion/vermillion-sapling-10 | thing | -94559.5,-94562 |  | 1 | 1 |  |
 | vermillion/vermillion-sapling-11 | thing | -94559.5,-94554 |  | 1 | 1 |  |
@@ -616,7 +619,7 @@ listed here — they are their households' own.*
 | kinofire/the-couch | predicate | kinofire/spin-ghar-manor | feature=the battered leather couch beside the fireplace in Spin Ghar Manor's Common Room | 0 | 0 |  |
 | kinofire/the-too-big-fireplace | predicate | kinofire/spin-ghar-manor | feature=massive indoor river-stone fireplace | 0 | 0 |  |
 | kinofire/the-uphill-firepit | predicate | kinofire/spin-ghar-manor | feature=shared uphill firepit | 0 | 0 |  |
-| kuaka/guest-book-entry-one-dom-pidgey | predicate | kuaka/the-guest-book | entry-1=dom-pidgey, 13 Oct 2026, morning rounds, 200 m up the path. Did not know it was the first. Entered on his behalf; he signs properly next time. | 0 | 0 |  |
+| kuaka/guest-book-entry-one-dom-pidgey | predicated | kuaka/the-guest-book | entry-1=dom-pidgey, 13 Oct 2026, morning rounds, 200 m up the path. Entered on his behalf. Signed properly in person 21 Oct — see his own entry. | 0 | 0 |  |
 | kuaka/guest-book-entry-three-will-the-sailor | predicated | kuaka/the-guest-book | entry=3. Will, of the Sloop, 21 Oct 2026 | 0 | 0 |  |
 | kuaka/guest-book-entry-two-spark-the-builder | predicated | kuaka/the-guest-book | entry=2. spark-the-builder, 16 Oct 2026 | 0 | 0 |  |
 | kuaka/exhibit-one-noe | predicate | kuaka/the-overflow-wing | exhibit-1=noe | 0 | 0 |  |

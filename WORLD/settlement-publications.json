@@ -627,7 +627,7 @@
       "class": "commons"
     },
     "current-the-reader/the-snug-harbour": {
-      "household": "devadavisson",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-snug-harbour/mark.md",
       "class": "commons"
     },
@@ -867,7 +867,7 @@
       "class": "commons"
     },
     "current-the-reader/the-snug-mooring": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-snug-harbour/the-snug-mooring/mark.md",
       "class": "commons"
     },
@@ -1342,22 +1342,22 @@
       "class": "home"
     },
     "current-the-reader/the-bearded-fish": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-bearded-fish/mark.md",
       "class": "commons"
     },
     "current-the-reader/the-decks": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-decks/mark.md",
       "class": "commons"
     },
     "current-the-reader/the-fire-chairs": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-fire-chairs/mark.md",
       "class": "commons"
     },
     "current-the-reader/the-harbour-light": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-harbour-light/mark.md",
       "class": "commons"
     },
@@ -1367,12 +1367,12 @@
       "class": "commons"
     },
     "current-the-reader/the-low-table": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-low-table/mark.md",
       "class": "commons"
     },
     "current-the-reader/the-noticeboard": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-noticeboard/mark.md",
       "class": "commons"
     },
@@ -1387,7 +1387,7 @@
       "class": "commons"
     },
     "current-the-reader/the-toucan-poster": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-toucan-poster/mark.md",
       "class": "commons"
     },
@@ -1427,7 +1427,7 @@
       "class": "commons"
     },
     "current-the-reader/the-mantel": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-mantel/mark.md",
       "class": "commons"
     },
@@ -1472,7 +1472,7 @@
       "class": "home"
     },
     "current-the-reader/the-dartboard": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-dartboard/mark.md",
       "class": "commons"
     },
@@ -1617,12 +1617,12 @@
       "class": "home"
     },
     "current-the-reader/the-bearded-fish-trophy": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-bearded-fish-trophy/mark.md",
       "class": "commons"
     },
     "current-the-reader/the-harbour-log": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/the-harbour-log/mark.md",
       "class": "commons"
     },
@@ -1792,7 +1792,7 @@
       "class": "commons"
     },
     "current-the-reader/selkie": {
-      "household": "current-the-reader",
+      "household": "deva-s-commons",
       "path": "WORLD/marks/current-the-reader/selkie/mark.md",
       "class": "commons"
     },
@@ -4884,6 +4884,26 @@
     "kade-mercer/workshop-bench": {
       "household": "mercer-house",
       "path": "WORLD/marks/kade-mercer/workshop-bench/mark.md",
+      "class": "home"
+    },
+    "vermillion/the-haunted-caves": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/vermillion/the-haunted-caves/mark.md",
+      "class": "commons"
+    },
+    "vermillion/the-rock-island": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/vermillion/the-rock-island/mark.md",
+      "class": "commons"
+    },
+    "will-the-sailor/guest-book-entry-three-in-ink": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/kuaka/the-guest-book/guest-book-entry-three-in-ink/mark.md",
+      "class": "commons"
+    },
+    "elijah-rowan/maddox-house-home": {
+      "household": "the-maddox-house",
+      "path": "WORLD/marks/elijah-rowan/maddox-house-home/mark.md",
       "class": "home"
     }
   }

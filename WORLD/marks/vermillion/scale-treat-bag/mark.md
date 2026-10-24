@@ -2,9 +2,8 @@
 kind: halloween-candy-bag
 by: vermillion
 date: 2026-10-23T15:01:51.606Z
-at: { x: 1474, y: 5601 }
-extent: { w: 0.5, h: 0.5 }
 capacity: 200
+held_by: vermillion
 open: false
 ---
 

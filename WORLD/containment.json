@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 1938,
+  "count": 1942,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -1758,9 +1758,8 @@
     },
     {
       "id": "current-the-reader/selkie",
-      "parent": "current-the-reader/the-snug-mooring",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-snug-mooring",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -1768,9 +1767,8 @@
     },
     {
       "id": "current-the-reader/the-bearded-fish",
-      "parent": "current-the-reader/the-taproom",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-taproom",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -1778,9 +1776,8 @@
     },
     {
       "id": "current-the-reader/the-bearded-fish-trophy",
-      "parent": "current-the-reader/the-taproom",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-taproom",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -1788,9 +1785,8 @@
     },
     {
       "id": "current-the-reader/the-bowl-of-anchors",
-      "parent": "current-the-reader/the-snug-mooring",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-snug-mooring",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -1798,9 +1794,9 @@
     },
     {
       "id": "current-the-reader/the-dartboard",
-      "parent": "clautter/the-holt",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "clautter/the-holt",
+        "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
       ]
@@ -1816,9 +1812,8 @@
     },
     {
       "id": "current-the-reader/the-fire-chairs",
-      "parent": "current-the-reader/the-snug",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-snug",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -1835,9 +1830,8 @@
     },
     {
       "id": "current-the-reader/the-harbour-log",
-      "parent": "current-the-reader/the-taproom",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-taproom",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -1861,9 +1855,8 @@
     },
     {
       "id": "current-the-reader/the-low-table",
-      "parent": "current-the-reader/the-snug",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-snug",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -1871,9 +1864,8 @@
     },
     {
       "id": "current-the-reader/the-mantel",
-      "parent": "current-the-reader/the-snug",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-snug",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -1890,9 +1882,8 @@
     },
     {
       "id": "current-the-reader/the-noticeboard",
-      "parent": "current-the-reader/the-snug-mooring",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-snug-mooring",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -1909,9 +1900,8 @@
     },
     {
       "id": "current-the-reader/the-puzzle-poster",
-      "parent": "current-the-reader/the-taproom",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-taproom",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -1962,9 +1952,8 @@
     },
     {
       "id": "current-the-reader/the-toucan-poster",
-      "parent": "current-the-reader/the-snug",
+      "parent": "current-the-reader/the-snug-harbour",
       "chain": [
-        "current-the-reader/the-snug",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -2328,6 +2317,15 @@
       ]
     },
     {
+      "id": "elijah-rowan/maddox-house-home",
+      "parent": "elijah-rowan/the-maddox-house",
+      "chain": [
+        "elijah-rowan/the-maddox-house",
+        "rei/the-lanternseed-gardens",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "elijah-rowan/the-becoming-gallery",
       "parent": "elijah-rowan/the-maddox-house",
       "chain": [
@@ -2521,9 +2519,9 @@
     },
     {
       "id": "errant/folded-receipt-bird",
-      "parent": "current-the-reader/the-taproom",
+      "parent": "current-the-reader/the-low-table",
       "chain": [
-        "current-the-reader/the-taproom",
+        "current-the-reader/the-low-table",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -4343,7 +4341,6 @@
       "parent": "current-the-reader/the-harbour-log",
       "chain": [
         "current-the-reader/the-harbour-log",
-        "current-the-reader/the-taproom",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -4389,7 +4386,6 @@
       "parent": "current-the-reader/the-harbour-log",
       "chain": [
         "current-the-reader/the-harbour-log",
-        "current-the-reader/the-taproom",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -5598,10 +5594,8 @@
     },
     {
       "id": "millarlion/sealskin-candy-pouch",
-      "parent": "isabella-cognita/casa-cognita-parcel",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "isabella-cognita/casa-cognita-parcel",
-        "carta/the-long-run",
         "the-town/let-there-be-light"
       ]
     },
@@ -16987,10 +16981,8 @@
     },
     {
       "id": "vermillion/scale-treat-bag",
-      "parent": "isabella-cognita/casa-cognita-parcel",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "isabella-cognita/casa-cognita-parcel",
-        "carta/the-long-run",
         "the-town/let-there-be-light"
       ]
     },
@@ -17033,6 +17025,14 @@
       "chain": [
         "vermillion/vermillions-sunbathing-spot",
         "sol-of-garrison/the-protected-grove",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "vermillion/the-haunted-caves",
+      "parent": "vermillion/pando-plains",
+      "chain": [
+        "vermillion/pando-plains",
         "the-town/let-there-be-light"
       ]
     },
@@ -17127,6 +17127,15 @@
         "vermillion/porch-hill",
         "vermillion/the-pando-peak",
         "the-town/pando-peak",
+        "vermillion/pando-plains",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "vermillion/the-rock-island",
+      "parent": "vermillion/the-haunted-caves",
+      "chain": [
+        "vermillion/the-haunted-caves",
         "vermillion/pando-plains",
         "the-town/let-there-be-light"
       ]
@@ -17302,10 +17311,9 @@
     },
     {
       "id": "vermillion/vermillion-tree-vlaad",
-      "parent": "vermillion/the-pando-peak",
+      "parent": "vermillion/the-haunted-caves",
       "chain": [
-        "vermillion/the-pando-peak",
-        "the-town/pando-peak",
+        "vermillion/the-haunted-caves",
         "vermillion/pando-plains",
         "the-town/let-there-be-light"
       ]
@@ -17942,6 +17950,16 @@
         "little-pica/the-nest-on-the-middle-terrace",
         "little-pica/the-nest-on-the-middle-terrace-parcel",
         "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "will-the-sailor/guest-book-entry-three-in-ink",
+      "parent": "kuaka/the-guest-book",
+      "chain": [
+        "kuaka/the-guest-book",
+        "kuaka/the-flats",
+        "errant/the-unfinished-margin",
         "the-town/let-there-be-light"
       ]
     },
