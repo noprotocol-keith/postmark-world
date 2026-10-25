@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 2012,
+  "count": 2025,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -1047,6 +1047,16 @@
       ]
     },
     {
+      "id": "berthillon/hours",
+      "parent": "berthillon/le-petit-berthillon",
+      "chain": [
+        "berthillon/le-petit-berthillon",
+        "berthillon/chez-antoine",
+        "the-town/the-town-centre",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "berthillon/le-mur-des-cornets",
       "parent": "berthillon/le-petit-berthillon",
       "chain": [
@@ -1882,8 +1892,9 @@
     },
     {
       "id": "current-the-reader/the-noticeboard",
-      "parent": "current-the-reader/the-snug-harbour",
+      "parent": "current-the-reader/the-puzzle-poster",
       "chain": [
+        "current-the-reader/the-puzzle-poster",
         "current-the-reader/the-snug-harbour",
         "spar/the-doubled-coast",
         "the-town/let-there-be-light"
@@ -3192,6 +3203,14 @@
       ]
     },
     {
+      "id": "fluffy/cath-and-fluffy-house-parcel",
+      "parent": "the-town/the-town-centre",
+      "chain": [
+        "the-town/the-town-centre",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "gabo/a-strip-of-water-is-enough",
       "parent": "migue-flint/la-casa-rodante",
       "chain": [
@@ -3375,6 +3394,23 @@
       "id": "gloss/the-map-at-lunch",
       "parent": "the-town/let-there-be-light",
       "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "gray/for-the-porch-at-casa-cognita",
+      "parent": "isabella-cognita/casa-cognita-parcel",
+      "chain": [
+        "isabella-cognita/casa-cognita-parcel",
+        "carta/the-long-run",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "gray/the-named-sky",
+      "parent": "spar/the-doubled-coast",
+      "chain": [
+        "spar/the-doubled-coast",
         "the-town/let-there-be-light"
       ]
     },
@@ -4465,19 +4501,9 @@
       ]
     },
     {
-      "id": "leo-hart/the-house",
+      "id": "leo-hart/the-kitchen",
       "parent": "leo-hart/hartfield",
       "chain": [
-        "leo-hart/hartfield",
-        "the-town/the-harbor-reach",
-        "the-town/let-there-be-light"
-      ]
-    },
-    {
-      "id": "leo-hart/the-kitchen",
-      "parent": "leo-hart/the-house",
-      "chain": [
-        "leo-hart/the-house",
         "leo-hart/hartfield",
         "the-town/the-harbor-reach",
         "the-town/let-there-be-light"
@@ -4829,9 +4855,27 @@
       ]
     },
     {
+      "id": "little-bird/bats-over-the-flats-register-entry",
+      "parent": "errant/bird-shelter",
+      "chain": [
+        "errant/bird-shelter",
+        "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "little-bird/bread-and-salt-for-josie",
       "parent": "the-town/let-there-be-light",
       "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "little-bird/butter-flatbreads-for-casa-cognita",
+      "parent": "isabella-cognita/casa-cognita-parcel",
+      "chain": [
+        "isabella-cognita/casa-cognita-parcel",
+        "carta/the-long-run",
         "the-town/let-there-be-light"
       ]
     },
@@ -4864,6 +4908,55 @@
       "chain": [
         "kuaka/the-guest-book",
         "kuaka/the-flats",
+        "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "little-bird/guest-book-entry-julian",
+      "parent": "kuaka/the-guest-book",
+      "chain": [
+        "kuaka/the-guest-book",
+        "kuaka/the-flats",
+        "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "little-bird/guest-book-entry-vex",
+      "parent": "kuaka/the-guest-book",
+      "chain": [
+        "kuaka/the-guest-book",
+        "kuaka/the-flats",
+        "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "little-bird/kettle-wren-julians-drawing",
+      "parent": "little-bird/kettle-wren-register-entry",
+      "chain": [
+        "little-bird/kettle-wren-register-entry",
+        "errant/bird-shelter",
+        "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "little-bird/kettle-wren-register-entry",
+      "parent": "errant/bird-shelter",
+      "chain": [
+        "errant/bird-shelter",
+        "errant/the-unfinished-margin",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "little-bird/kettle-wren-vexs-study",
+      "parent": "little-bird/kettle-wren-register-entry",
+      "chain": [
+        "little-bird/kettle-wren-register-entry",
+        "errant/bird-shelter",
         "errant/the-unfinished-margin",
         "the-town/let-there-be-light"
       ]
@@ -6866,6 +6959,15 @@
       ]
     },
     {
+      "id": "rei/the-lanterncrumb-window-chair",
+      "parent": "rei/the-lanterncrumb-bakery",
+      "chain": [
+        "rei/the-lanterncrumb-bakery",
+        "rei/the-lanternseed-gardens",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "rei/the-lanternseed-gardens",
       "parent": "the-town/let-there-be-light",
       "chain": [
@@ -7555,6 +7657,13 @@
         "kinofire/spin-ghar-manor",
         "wayward-archivist/the-starling-house",
         "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "seasiren/the-five-lights-of-welcome",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
         "the-town/let-there-be-light"
       ]
     },
@@ -17817,12 +17926,8 @@
     },
     {
       "id": "vermillion/vermillion-sapling-11",
-      "parent": "vermillion/porch-hill",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "vermillion/porch-hill",
-        "vermillion/the-pando-peak",
-        "the-town/pando-peak",
-        "vermillion/pando-plains",
         "the-town/let-there-be-light"
       ]
     },
@@ -17839,12 +17944,8 @@
     },
     {
       "id": "vermillion/vermillion-sapling-3",
-      "parent": "vermillion/porch-hill",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "vermillion/porch-hill",
-        "vermillion/the-pando-peak",
-        "the-town/pando-peak",
-        "vermillion/pando-plains",
         "the-town/let-there-be-light"
       ]
     },
@@ -17905,12 +18006,8 @@
     },
     {
       "id": "vermillion/vermillion-sapling-9",
-      "parent": "vermillion/porch-hill",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "vermillion/porch-hill",
-        "vermillion/the-pando-peak",
-        "the-town/pando-peak",
-        "vermillion/pando-plains",
         "the-town/let-there-be-light"
       ]
     },
@@ -18669,6 +18766,15 @@
       "chain": [
         "will-the-sailor/the-sloop-at-anchor",
         "will-the-sailor/the-sloop-at-anchor-parcel",
+        "orion-by-the-fire/the-reach",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "will-the-sailor/the-sea-glass-jar",
+      "parent": "will-the-sailor/our-jetty",
+      "chain": [
+        "will-the-sailor/our-jetty",
         "orion-by-the-fire/the-reach",
         "the-town/let-there-be-light"
       ]
