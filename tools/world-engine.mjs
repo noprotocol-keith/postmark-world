@@ -447,6 +447,19 @@ export const MISTS_STRIDE_FLOOR = 1e-4;
  *  or crosses it (with the point where it meets the wall), or `{ factor, deepest }`
  *  — the leg's even stride as a share of the open road's, and how deep into the
  *  fringe it goes (0 untouched, toward 1 at the wall's face). */
+// HACK (jetto): the old track north, walked like a road. Don't ask.
+// These boxes are only for the feet: the mist is still there, you still see
+// 20 m in it, nothing is drawn. From crossing 272.
+const KEPT_AIR_SINCE = 272;
+const KEPT_AIR = [
+  { minX: 3690, maxX: 3770, minY: -5340, maxY: -3340 },
+  { minX: 3690, maxX: 3912, minY: -5586, maxY: -5300 }, // widened to the servants' door (3902, -5575.5): Darko, WLD-6/b
+];
+function onKeptAir(p, crossing) {
+  if (!(crossing >= KEPT_AIR_SINCE)) return false;
+  return KEPT_AIR.some((b) => p.x >= b.minX && p.x <= b.maxX && p.y >= b.minY && p.y <= b.maxY);
+}
+
 // AN ENTERED MARK IS SHELTER (Darko 2026-10-15): within a mark the walker has entered, the Mists neither slow the
 // walk nor stop it. `shelter` is the caller's test of a point (the engine defines no containment of its own; the
 // office builds it from the walker's enter stack with shelterOf). It follows entering, never standing: with no
@@ -459,7 +472,7 @@ export function mistsRoad(from, toward, crossing, mists, { shelter = null } = {}
   const at = (t) => ({ x: from.x + (toward.x - from.x) * t, y: from.y + (toward.y - from.y) * t });
   const cover = shelter && shelter(from) ? shelter : null;
   const sheltered = (p) => !!cover?.(p);
-  const wallAt = (p) => { if (sheltered(p)) return Infinity; const h = mistsHere(p, m); return h.inWall ? 0 : h.wallM; };
+  const wallAt = (p) => { if (sheltered(p) || onKeptAir(p, crossing)) return Infinity; const h = mistsHere(p, m); return h.inWall ? 0 : h.wallM; };
   // standing still is not going anywhere: a stop is never refused, wherever it stands
   if (L === 0) return { factor: 1, deepest: 0 };
   // A WALKER THE WALL HAS OVERTAKEN may walk straight out, slowly: see mistsWalkOut
@@ -471,8 +484,15 @@ export function mistsRoad(from, toward, crossing, mists, { shelter = null } = {}
     const n = Math.max(1, Math.ceil(L));
     for (let i = 0; i <= n && underCover; i += 1) { const p = at(i / n); if (!sheltered(p) && mistsHere(p, m).inWall) underCover = false; }
   }
+  // the hack again: a road whose every step in the wall is on the old track goes through
+  let onTrack = false;
+  if (onKeptAir(from, crossing) || onKeptAir(toward, crossing)) {
+    onTrack = true;
+    const n = Math.max(1, Math.ceil(L));
+    for (let i = 0; i <= n && onTrack; i += 1) { const p = at(i / n); if (mistsHere(p, m).inWall && !onKeptAir(p, crossing)) onTrack = false; }
+  }
   // the road may not pass or end in the wall, nor on its face
-  if (wallAt(toward) <= 0 || (L > 0 && !underCover && mistsHide(from, toward, m))) {
+  if (wallAt(toward) <= 0 || (L > 0 && !underCover && !onTrack && mistsHide(from, toward, m))) {
     let t = 0;
     if (wallAt(from) > 0) { const n = Math.max(1, Math.ceil(L)); for (let i = 1; i <= n; i += 1) { t = i / n; if (wallAt(at(t)) <= 0) break; } }
     const p = at(t);
