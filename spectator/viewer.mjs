@@ -4582,6 +4582,20 @@ export function newReactions(rows = [], seenMs = null, { nowMs = Date.now(), fre
   return { lines, newestMs: Number.isFinite(newest) ? newest : seenMs };
 }
 
+/** The model a creature runs on: Jev answers for every creature (Darko 2026-10-24 14:21). */
+export const CREATURE_MODEL = "Jev";
+/** How many of a creature's newest reactions its column lists (the office serves up to ten). */
+export const CREATURE_HISTORY_ROWS = 10;
+const IRREGULAR_PAST = { say: "said", give: "gave", hold: "held", leave: "left", take: "took", go: "went", run: "ran", set: "set", put: "put",
+  make: "made", eat: "ate", throw: "threw", hurl: "hurled", come: "came", stand: "stood", sit: "sat", see: "saw", speak: "spoke", read: "read",
+  strike: "struck", tell: "told", "speak-for": "spoke for", cast: "cast", drop: "dropped", withdraw: "withdrew" };
+/** "kai approached": who acted and the verb they used, in the past. A missing verb leaves the name; a missing name, the verb. Pure. */
+export function pastVerb(who, verb) {
+  const v = String(verb ?? "").trim().toLowerCase();
+  const past = !v ? "" : IRREGULAR_PAST[v] ?? (/e$/.test(v) ? v + "d" : /[^aeiou]y$/.test(v) ? v.slice(0, -1) + "ied" : v + "ed");
+  return [String(who ?? "").trim(), past].filter(Boolean).join(" ");
+}
+
 /** What a creature's column says beside its words: { facts, lately } from its
  *  find row and its investigate answer (either may be missing). Pure. */
 export function creatureColumnFacts(row = null, inv = null, { timeZone = undefined } = {}) {
@@ -4600,10 +4614,14 @@ export function creatureColumnFacts(row = null, inv = null, { timeZone = undefin
     { label: "kind", value: row?.kind ?? inv?.id?.slice(CREATURE_PREFIX.length).replace(/-\d.*$/, "") ?? "" },
     { label: "doing", value: now?.state ?? "" },
     { label: "out since", value: when(now?.out_since) },
-    { label: "fades", value: [row?.fades_in ? `in ${row.fades_in}` : "", when(now?.fades_at) ? `(${when(now?.fades_at)})` : ""].filter(Boolean).join(" ") },
+    // what it runs on, where a resident's column says "runs on" (Darko 2026-10-24 14:21). A creature never fades (WLD-96), so no fade row
+    { label: "runs on", value: row || inv ? CREATURE_MODEL : "" },
   ].filter((f) => String(f.value ?? "").trim());
-  const lately = (inv?.reactions?.rows ?? []).filter((r) => String(r?.line ?? "").trim()).slice(0, 4)
-    .map((r) => ({ label: "lately", value: String(r.line).trim() + (when(r.at) ? " (" + when(r.at) + ")" : "") }));
+  // WHAT IT DID, AND TO WHOM (POS-781): "kai approached → it snarls at kai (2 min ago)". The office serves these from its acts, so a
+  // creature that has fled still shows them. A row with no words of its own says the reaction's name
+  const lately = (inv?.reactions?.rows ?? []).filter((r) => String(r?.line ?? r?.reaction ?? "").trim()).slice(0, CREATURE_HISTORY_ROWS)
+    .map((r) => ({ label: "lately", value: [pastVerb(r.to, r.verb), String(r.line ?? r.reaction).trim()].filter(Boolean).join(" → ")
+      + (when(r.at) ? " (" + when(r.at) + ")" : "") }));
   // (what it remembers is its lately rows below; the bare count repeated them)
   return { facts, lately, bars };
 }
@@ -14683,7 +14701,7 @@ export function mountViewer(appEl) {
       + '<span class="wv-np-name">' + esc(c.name) + '</span></div>';
   }
   // ITS COLUMN: what it is in its kind's own words, its kind, what it is doing,
-  // its moods, when it came out and when it fades, and what it did lately.
+  // its moods, when it came out, what it runs on, and what was done to it and how it answered.
   function creatureColumnView(id) {
     if (!isCreatureId(id)) return null;
     const c = liveCreatures.get(id) ?? null;
@@ -14700,7 +14718,7 @@ export function mountViewer(appEl) {
     const from = body && [body.x, body.y].every(Number.isFinite) ? { x: Number(body.x), y: Number(body.y) } : state.cam;
     const where = c && !inRoom ? Math.round(Math.hypot(c.x - Number(from.x), c.y - Number(from.y))) : null;
     return {
-      key: [id, read?.at ?? 0, c?.fades_in ?? ""].join("|"),
+      key: [id, read?.at ?? 0].join("|"),
       handle: "the-town", residentLink: false,
       kicker: "a creature",
       title: name.charAt(0).toUpperCase() + name.slice(1),
