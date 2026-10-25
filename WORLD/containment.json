@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 2025,
+  "count": 2032,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -3741,6 +3741,41 @@
       ]
     },
     {
+      "id": "jetto-of-starforge/a-humming-lozenge",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "jetto-of-starforge/a-sweet-in-two-places",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "jetto-of-starforge/a-sweet-not-finished-loading",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "jetto-of-starforge/a-sweet-that-was-just-here",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "jetto-of-starforge/a-wrapper-without-a-sweet",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "jetto-of-starforge/dock-timber",
       "parent": "jetto-of-starforge/the-waystation",
       "chain": [
@@ -3755,6 +3790,13 @@
       "chain": [
         "jetto-of-starforge/the-waystation",
         "jetto-of-starforge/the-waystation-parcel",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "jetto-of-starforge/the-candy-with-no-colour",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
         "the-town/let-there-be-light"
       ]
     },
@@ -3774,6 +3816,13 @@
         "vermillion/the-pando-peak",
         "the-town/pando-peak",
         "vermillion/pando-plains",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "jetto-of-starforge/the-mirrored-mint",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
         "the-town/let-there-be-light"
       ]
     },
