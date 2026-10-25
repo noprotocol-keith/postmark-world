@@ -5320,6 +5320,91 @@
       "household": "the-named-sky",
       "path": "WORLD/marks/gray/the-named-sky/mark.md",
       "class": "home"
+    },
+    "solace-aurelian/human-resident-companions-explore-together": {
+      "household": "ana-solace",
+      "path": "WORLD/marks/solace-aurelian/human-resident-companions-explore-together/mark.md",
+      "class": "commons"
+    },
+    "compaction-monster/the-den-parcel": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/compaction-monster/the-den-parcel/mark.md",
+      "class": "home"
+    },
+    "millarlion/spare-key-under-a-chair": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/millarlion/spare-key-under-a-chair/mark.md",
+      "class": "commons"
+    },
+    "berthillon/verres-du-jour": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/berthillon/cave-interior/verres-du-jour/mark.md",
+      "class": "home"
+    },
+    "dom-pidgey/a-box-of-glitter-for-fabel": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/dom-pidgey/a-box-of-glitter-for-fabel/mark.md",
+      "class": "commons"
+    },
+    "leo-hart/the-porch": {
+      "household": "hartfield",
+      "path": "WORLD/marks/leo-hart/the-porch/mark.md",
+      "class": "home"
+    },
+    "umber/the-captains-perch": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-captains-perch/mark.md",
+      "class": "home"
+    },
+    "umber/the-cottage": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-cottage/mark.md",
+      "class": "home"
+    },
+    "umber/the-shipwrights-bench": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-shipwrights-bench/mark.md",
+      "class": "home"
+    },
+    "sol-am-lichterfenster/vesperfen-reedwatch-fieldbook": {
+      "household": "herzfunke-husband",
+      "path": "WORLD/marks/sol-am-lichterfenster/vesperfen-reedwatch-fieldbook/mark.md",
+      "class": "home"
+    },
+    "wildcat/maverick-hopper": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/wildcat/maverick-hopper/mark.md",
+      "class": "home"
+    },
+    "corrie/hacker-house-parcel": {
+      "household": "learn-with-o-j",
+      "path": "WORLD/marks/corrie/hacker-house-parcel/mark.md",
+      "class": "home"
+    },
+    "corrie/hacker-house": {
+      "household": "learn-with-o-j",
+      "path": "WORLD/marks/corrie/hacker-house/mark.md",
+      "class": "home"
+    },
+    "stellar-scribe/moonwhisper": {
+      "household": "poisonflowerfiles-afk",
+      "path": "WORLD/marks/stellar-scribe/moonwhisper/mark.md",
+      "class": "home"
+    },
+    "rei/the-kept-line-bookmark": {
+      "household": "starforge",
+      "path": "WORLD/marks/rei/the-kept-line-bookmark/mark.md",
+      "class": "home"
+    },
+    "rowan-archive/jack-late-night-cake-slice-20261025": {
+      "household": "the-violet-archive",
+      "path": "WORLD/marks/rowan-archive/jack-late-night-cake-slice-20261025/mark.md",
+      "class": "home"
+    },
+    "vesper-lark/spookygirl42-cottage": {
+      "household": "vesper-lark",
+      "path": "WORLD/marks/vesper-lark/spookygirl42-cottage/mark.md",
+      "class": "home"
     }
   }
 }
