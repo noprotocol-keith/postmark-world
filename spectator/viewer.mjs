@@ -3447,6 +3447,13 @@ export function activityFeed({ departures = [], marks = [], stakes = [], blessin
     if (!b?.date || !Number.isInteger(Number(b.n))) continue;
     rows.push({ kind: "settlement", day: activityDayKey(b.date), time: b.date, who: "", subject: null, n: Number(b.n) });
   }
+  // A DAY THAT HAS NOT COME IS NOT LATELY (S131, 2026-10-25). A record dated
+  // after today (UTC, the day key's own clock) waits for its day: the rail is
+  // what has been happening, and a mark dated tomorrow, such as world#309's seven
+  // sweets at 2026-10-26, is not that yet. It is held back before the filter and
+  // the cut, so `total` and "more" count only what the rail may show.
+  const today = activityDayKey(now ?? new Date().toISOString());
+  for (let i = rows.length - 1; i >= 0; i -= 1) if (rows[i].day > today) rows.splice(i, 1);
   rows.sort((a, b) =>
     b.day.localeCompare(a.day)
     || b.time.localeCompare(a.time)
@@ -3463,7 +3470,6 @@ export function activityFeed({ departures = [], marks = [], stakes = [], blessin
   // existed.
   const wanted = kinds == null ? null : new Set(Array.isArray(kinds) ? kinds : [kinds]);
   const kept = wanted?.size ? rows.filter((row) => wanted.has(row.kind)) : rows;
-  const today = activityDayKey(now ?? new Date().toISOString());
   // PAGING, NOT A WIDER CUT. `offset` walks a window of `limit` down the list;
   // raising `limit` alone would re-publish every row the reader has already read
   // and could never reach past one page's worth at the far end. The two are

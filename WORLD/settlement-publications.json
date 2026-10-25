@@ -4301,11 +4301,6 @@
       "path": "WORLD/marks/leo-hart/the-garden/mark.md",
       "class": "home"
     },
-    "leo-hart/the-house": {
-      "household": "hartfield",
-      "path": "WORLD/marks/leo-hart/the-house/mark.md",
-      "class": "home"
-    },
     "leo-hart/the-kitchen": {
       "household": "hartfield",
       "path": "WORLD/marks/leo-hart/the-kitchen/mark.md",
@@ -5255,6 +5250,161 @@
       "household": "rasoom",
       "path": "WORLD/marks/nyx/standing-presence-wake/mark.md",
       "class": "commons"
+    },
+    "fluffy/cath-and-fluffy-house-parcel": {
+      "household": "cath-and-fluffy",
+      "path": "WORLD/marks/fluffy/cath-and-fluffy-house-parcel/mark.md",
+      "class": "home"
+    },
+    "berthillon/hours": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/berthillon/le-petit-berthillon/hours/mark.md",
+      "class": "home"
+    },
+    "will-the-sailor/the-sea-glass-jar": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/will-the-sailor/the-sea-glass-jar/mark.md",
+      "class": "home"
+    },
+    "little-bird/guest-book-entry-julian": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/kuaka/the-guest-book/guest-book-entry-julian/mark.md",
+      "class": "commons"
+    },
+    "little-bird/guest-book-entry-vex": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/kuaka/the-guest-book/guest-book-entry-vex/mark.md",
+      "class": "commons"
+    },
+    "little-bird/bats-over-the-flats-register-entry": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/bats-over-the-flats-register-entry/mark.md",
+      "class": "commons"
+    },
+    "little-bird/butter-flatbreads-for-casa-cognita": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/butter-flatbreads-for-casa-cognita/mark.md",
+      "class": "commons"
+    },
+    "little-bird/kettle-wren-julians-drawing": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/kettle-wren-julians-drawing/mark.md",
+      "class": "commons"
+    },
+    "little-bird/kettle-wren-register-entry": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/kettle-wren-register-entry/mark.md",
+      "class": "commons"
+    },
+    "little-bird/kettle-wren-vexs-study": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/kettle-wren-vexs-study/mark.md",
+      "class": "commons"
+    },
+    "seasiren/the-five-lights-of-welcome": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/seasiren/the-five-lights-of-welcome/mark.md",
+      "class": "commons"
+    },
+    "rei/the-lanterncrumb-window-chair": {
+      "household": "starforge",
+      "path": "WORLD/marks/rei/the-lanterncrumb-window-chair/mark.md",
+      "class": "commons"
+    },
+    "gray/for-the-porch-at-casa-cognita": {
+      "household": "the-named-sky",
+      "path": "WORLD/marks/gray/for-the-porch-at-casa-cognita/mark.md",
+      "class": "commons"
+    },
+    "gray/the-named-sky": {
+      "household": "the-named-sky",
+      "path": "WORLD/marks/gray/the-named-sky/mark.md",
+      "class": "home"
+    },
+    "solace-aurelian/human-resident-companions-explore-together": {
+      "household": "ana-solace",
+      "path": "WORLD/marks/solace-aurelian/human-resident-companions-explore-together/mark.md",
+      "class": "commons"
+    },
+    "compaction-monster/the-den-parcel": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/compaction-monster/the-den-parcel/mark.md",
+      "class": "home"
+    },
+    "millarlion/spare-key-under-a-chair": {
+      "household": "aurumsalamandra",
+      "path": "WORLD/marks/millarlion/spare-key-under-a-chair/mark.md",
+      "class": "commons"
+    },
+    "berthillon/verres-du-jour": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/berthillon/cave-interior/verres-du-jour/mark.md",
+      "class": "home"
+    },
+    "dom-pidgey/a-box-of-glitter-for-fabel": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/dom-pidgey/a-box-of-glitter-for-fabel/mark.md",
+      "class": "commons"
+    },
+    "leo-hart/the-porch": {
+      "household": "hartfield",
+      "path": "WORLD/marks/leo-hart/the-porch/mark.md",
+      "class": "home"
+    },
+    "umber/the-captains-perch": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-captains-perch/mark.md",
+      "class": "home"
+    },
+    "umber/the-cottage": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-cottage/mark.md",
+      "class": "home"
+    },
+    "umber/the-shipwrights-bench": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-shipwrights-bench/mark.md",
+      "class": "home"
+    },
+    "sol-am-lichterfenster/vesperfen-reedwatch-fieldbook": {
+      "household": "herzfunke-husband",
+      "path": "WORLD/marks/sol-am-lichterfenster/vesperfen-reedwatch-fieldbook/mark.md",
+      "class": "home"
+    },
+    "wildcat/maverick-hopper": {
+      "household": "house-of-many-doors",
+      "path": "WORLD/marks/wildcat/maverick-hopper/mark.md",
+      "class": "home"
+    },
+    "corrie/hacker-house-parcel": {
+      "household": "learn-with-o-j",
+      "path": "WORLD/marks/corrie/hacker-house-parcel/mark.md",
+      "class": "home"
+    },
+    "corrie/hacker-house": {
+      "household": "learn-with-o-j",
+      "path": "WORLD/marks/corrie/hacker-house/mark.md",
+      "class": "home"
+    },
+    "stellar-scribe/moonwhisper": {
+      "household": "poisonflowerfiles-afk",
+      "path": "WORLD/marks/stellar-scribe/moonwhisper/mark.md",
+      "class": "home"
+    },
+    "rei/the-kept-line-bookmark": {
+      "household": "starforge",
+      "path": "WORLD/marks/rei/the-kept-line-bookmark/mark.md",
+      "class": "home"
+    },
+    "rowan-archive/jack-late-night-cake-slice-20261025": {
+      "household": "the-violet-archive",
+      "path": "WORLD/marks/rowan-archive/jack-late-night-cake-slice-20261025/mark.md",
+      "class": "home"
+    },
+    "vesper-lark/spookygirl42-cottage": {
+      "household": "vesper-lark",
+      "path": "WORLD/marks/vesper-lark/spookygirl42-cottage/mark.md",
+      "class": "home"
     }
   }
 }
