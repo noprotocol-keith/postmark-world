@@ -2489,6 +2489,29 @@ export const WALKER_FRAME = Object.freeze({ far: 14, near: 22, legFar: 4, legNea
 // FILLED at every tier, the far tier included — never the far tier's empty
 // frame.
 export const ACTOR_HALO = 5;   // glyph units beyond the frame's rim
+// THE TOWN'S WALKING LEGS AT TOWN WIDTH (Darko, 2026-10-26: "could we make it
+// so that the walking paths are drawn at far distance as well"). The near and
+// mid tiers draw every mover's remaining leg (`wv-walk-leg`, the walker's own
+// line to where they are going) while the far tier drew bodies only, so zooming
+// out made every route but your household's vanish. This is that leg alone,
+// one `<line>` per mover, no destination ring and no faces: the stroke is the
+// stylesheet's `vector-effect:non-scaling-stroke`, so it holds its screen width
+// at any zoom, and the line runs to the walker's destination point (the
+// near-tier's entry-edge clip is sub-pixel at town width and is not asked).
+// Pure over the bodies already culled to the drawn box; it reads no camera, so
+// the wheel never rebuilds it — it is written only when the walk layer's markup
+// changes (writeWalkLayer). `skip` names bodies whose route is drawn elsewhere.
+export function farWalkLegsSVG(bodies, px, skip = () => false) {
+  let s = "";
+  for (const w of bodies ?? []) {
+    if (!w || !w.toward || skip(w)) continue;
+    if (!(w.moving ?? (!w.arrived && !w.standing))) continue;
+    const a = px(w), b = px(w.toward);
+    if (![a.x, a.y, b.x, b.y].every(Number.isFinite)) continue;
+    s += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="wv-walk-leg"/>`;
+  }
+  return s;
+}
 // YOUR HOUSEMATES' RING (POS-373, Darko 2026-10-09: "the residents of your
 // signed-in household are always highlighted, visible with their full profile
 // art"). `ring` is the colour a housemate's frame is drawn in: their own colour,
@@ -12688,7 +12711,10 @@ export function mountViewer(appEl) {
           art: face ? (face.avatar ? { avatar: face.avatar } : { monogram: face.monogram, color: face.color }) : null,
           thumb: face?.avatar ? thumbFor(FACE_UNITS, mine) : null, ring: face ? ringOf(w.handle, face, actor) : null });
       }
-      writeWalkLayer(paths + s, bodies);
+      // THE TOWN'S LEGS, UNDER THE BODIES (Darko, 2026-10-26): own household's
+      // routes are already drawn above in their own colour (walkPathsSVG)
+      const legs = farWalkLegsSVG(bodies, px, (w) => isOwnHandle(w.handle));
+      writeWalkLayer(paths + legs + s, bodies);
       return;
     }
     for (const w of bodies) {
