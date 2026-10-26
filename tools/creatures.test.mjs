@@ -33,7 +33,8 @@ const { rotation: _rotation, ...FULL } = { ...LAW.dials, counts: { bat: 3, raven
 const INPUTS = { mists: MISTS, marks: MARKS, dials: FULL, fromCrossing: 244, world_sha: SHA };
 const STANDING = { mists: MISTS, marks: MARKS, dials: LAW.dials, fromCrossing: LAW.fromCrossing, world_sha: SHA };
 // the ramp's counts (Darko 2026-10-19 20:05, WLD-84): six creatures a window
-const RAMP = { bat: 2, raven: 3, wolf: 1 };
+// the season's named creatures (WLD-25) are kinds too, at 0 a window: declared once, never a window's spawn
+const RAMP = { bat: 2, "candied-bat": 0, "candied-jetto": 0, "candied-raven": 0, "candied-wolf": 0, raven: 3, wolf: 1 };
 const RAMP_N = Object.values(RAMP).reduce((a, b) => a + b, 0);
 // the 10-17 rotation (one a window, a bat first), kept as the machinery's own case
 const ROTATING = { ...LAW.dials, counts: { bat: 1, raven: 1, wolf: 1 }, rotation: ["bat", "raven", "wolf"] };
@@ -79,7 +80,7 @@ test("the law: the class marks carry the ruled numbers (the ramp, Darko 2026-10-
   assert.equal(LAW.dials.span_h, 12, "a creature lasts 12 h from its own spawn");
   assert.equal(LAW.fromCrossing, 259, "the window opening 2026-10-19 12:00Z");
   assert.equal(windowOf(259).startMs, Date.parse("2026-10-19T12:00:00Z"));
-  assert.deepEqual(LAW.kinds, ["bat", "raven", "wolf"].map((k) => ({ kind: k, kind_file: `WORLD/kinds/${k}.kind` })));
+  assert.deepEqual(LAW.kinds, ["bat", "candied-bat", "candied-jetto", "candied-raven", "candied-wolf", "raven", "wolf"].map((k) => ({ kind: k, kind_file: `WORLD/kinds/${k}.kind` })));
 });
 
 test("the law is read whole or not at all", () => {

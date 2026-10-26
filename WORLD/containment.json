@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 2049,
+  "count": 2319,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -3811,8 +3811,10 @@
     },
     {
       "id": "jetto-of-starforge/a-sweet-that-was-just-here",
-      "parent": "the-town/let-there-be-light",
+      "parent": "wright/spire-forecourt",
       "chain": [
+        "wright/spire-forecourt",
+        "wright/starforge-spire-grounds",
         "the-town/let-there-be-light"
       ]
     },
@@ -9709,6 +9711,98 @@
       ]
     },
     {
+      "id": "the-town/candied-bat",
+      "parent": "the-town/creature",
+      "chain": [
+        "the-town/creature",
+        "the-town/entity",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/candied-bat-count-per-window",
+      "parent": "the-town/candied-bat",
+      "chain": [
+        "the-town/candied-bat",
+        "the-town/creature",
+        "the-town/entity",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/candied-jetto",
+      "parent": "the-town/creature",
+      "chain": [
+        "the-town/creature",
+        "the-town/entity",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/candied-jetto-count-per-window",
+      "parent": "the-town/candied-jetto",
+      "chain": [
+        "the-town/candied-jetto",
+        "the-town/creature",
+        "the-town/entity",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/candied-raven",
+      "parent": "the-town/creature",
+      "chain": [
+        "the-town/creature",
+        "the-town/entity",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/candied-raven-count-per-window",
+      "parent": "the-town/candied-raven",
+      "chain": [
+        "the-town/candied-raven",
+        "the-town/creature",
+        "the-town/entity",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/candied-wolf",
+      "parent": "the-town/creature",
+      "chain": [
+        "the-town/creature",
+        "the-town/entity",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/candied-wolf-count-per-window",
+      "parent": "the-town/candied-wolf",
+      "chain": [
+        "the-town/candied-wolf",
+        "the-town/creature",
+        "the-town/entity",
+        "the-town/postmark-node",
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "the-town/candy",
       "parent": "the-town/consumable",
       "chain": [
@@ -14439,6 +14533,13 @@
       ]
     },
     {
+      "id": "the-town/the-hall-of-keepers-key",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "the-town/the-harbor-reach",
       "parent": "the-town/let-there-be-light",
       "chain": [
@@ -14708,6 +14809,13 @@
       ]
     },
     {
+      "id": "the-town/the-lumber-room-key",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "the-town/the-mail-desk",
       "parent": "the-town/the-keeping-works",
       "chain": [
@@ -14811,6 +14919,13 @@
         "the-town/the-credentials-desk",
         "the-town/the-front-window",
         "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "the-town/the-mirror-room-key",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
         "the-town/let-there-be-light"
       ]
     },
@@ -19162,6 +19277,2515 @@
       ]
     },
     {
+      "id": "wright/spire-back-court",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-back-court-flags",
+      "parent": "wright/spire-back-court",
+      "chain": [
+        "wright/spire-back-court",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-back-court-hush",
+      "parent": "wright/spire-back-court",
+      "chain": [
+        "wright/spire-back-court",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-back-court-walls",
+      "parent": "wright/spire-back-court",
+      "chain": [
+        "wright/spire-back-court",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-blue-room",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-blue-room-arrows",
+      "parent": "wright/spire-blue-room",
+      "chain": [
+        "wright/spire-blue-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-blue-room-light",
+      "parent": "wright/spire-blue-room",
+      "chain": [
+        "wright/spire-blue-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-blue-room-statue",
+      "parent": "wright/spire-blue-room",
+      "chain": [
+        "wright/spire-blue-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-blue-room-to-north-walk",
+      "parent": "wright/spire-blue-room",
+      "chain": [
+        "wright/spire-blue-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-buttress-garden",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-buttress-garden-flowers",
+      "parent": "wright/spire-buttress-garden",
+      "chain": [
+        "wright/spire-buttress-garden",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-buttress-garden-gates",
+      "parent": "wright/spire-buttress-garden",
+      "chain": [
+        "wright/spire-buttress-garden",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-buttress-garden-north-tree",
+      "parent": "wright/spire-buttress-garden",
+      "chain": [
+        "wright/spire-buttress-garden",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-buttress-garden-south-tree",
+      "parent": "wright/spire-buttress-garden",
+      "chain": [
+        "wright/spire-buttress-garden",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-buttress-garden-windows",
+      "parent": "wright/spire-buttress-garden",
+      "chain": [
+        "wright/spire-buttress-garden",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-coach-house",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-coach-house-coach",
+      "parent": "wright/spire-coach-house",
+      "chain": [
+        "wright/spire-coach-house",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-coach-house-coach-seat",
+      "parent": "wright/spire-coach-house-coach",
+      "chain": [
+        "wright/spire-coach-house-coach",
+        "wright/spire-coach-house",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-coach-house-smell",
+      "parent": "wright/spire-coach-house",
+      "chain": [
+        "wright/spire-coach-house",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-cold-landing",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-cold-landing-chains",
+      "parent": "wright/spire-cold-landing",
+      "chain": [
+        "wright/spire-cold-landing",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-cold-landing-east-stones",
+      "parent": "wright/spire-cold-landing",
+      "chain": [
+        "wright/spire-cold-landing",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-cold-landing-to-hall-of-keepers",
+      "parent": "wright/spire-cold-landing",
+      "chain": [
+        "wright/spire-cold-landing",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-cold-landing-walls",
+      "parent": "wright/spire-cold-landing",
+      "chain": [
+        "wright/spire-cold-landing",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-cold-landing-west-stones",
+      "parent": "wright/spire-cold-landing",
+      "chain": [
+        "wright/spire-cold-landing",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-chandelier-east",
+      "parent": "wright/spire-dining-hall-table",
+      "chain": [
+        "wright/spire-dining-hall-table",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-chandelier-middle",
+      "parent": "wright/spire-dining-hall-table",
+      "chain": [
+        "wright/spire-dining-hall-table",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-chandelier-west",
+      "parent": "wright/spire-dining-hall-table",
+      "chain": [
+        "wright/spire-dining-hall-table",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-hearth",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-hush",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-nest",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-nest-cushion",
+      "parent": "wright/spire-dining-hall-nest",
+      "chain": [
+        "wright/spire-dining-hall-nest",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-nest-tally",
+      "parent": "wright/spire-dining-hall-nest",
+      "chain": [
+        "wright/spire-dining-hall-nest",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-north-mirror",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-organ",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-organ-bench",
+      "parent": "wright/spire-dining-hall-organ",
+      "chain": [
+        "wright/spire-dining-hall-organ",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-organ-pedal",
+      "parent": "wright/spire-dining-hall-organ",
+      "chain": [
+        "wright/spire-dining-hall-organ",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-organ-pipes",
+      "parent": "wright/spire-dining-hall-organ",
+      "chain": [
+        "wright/spire-dining-hall-organ",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-organ-scratches",
+      "parent": "wright/spire-dining-hall-organ",
+      "chain": [
+        "wright/spire-dining-hall-organ",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-scent",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-south-mirror",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-table",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-table-feast",
+      "parent": "wright/spire-dining-hall-table",
+      "chain": [
+        "wright/spire-dining-hall-table",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-table-places",
+      "parent": "wright/spire-dining-hall-table",
+      "chain": [
+        "wright/spire-dining-hall-table",
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-to-guests-walk",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-to-mirror-room",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-dining-hall-walls",
+      "parent": "wright/spire-dining-hall",
+      "chain": [
+        "wright/spire-dining-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-forecourt",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-forecourt-door-light",
+      "parent": "wright/spire-forecourt",
+      "chain": [
+        "wright/spire-forecourt",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-forecourt-flagstones",
+      "parent": "wright/spire-forecourt",
+      "chain": [
+        "wright/spire-forecourt",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-forecourt-gate-wind",
+      "parent": "wright/spire-forecourt",
+      "chain": [
+        "wright/spire-forecourt",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-forecourt-north-torch",
+      "parent": "wright/spire-forecourt",
+      "chain": [
+        "wright/spire-forecourt",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-forecourt-prints",
+      "parent": "wright/spire-forecourt",
+      "chain": [
+        "wright/spire-forecourt",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-forecourt-snagged-wrapper",
+      "parent": "wright/spire-forecourt",
+      "chain": [
+        "wright/spire-forecourt",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-forecourt-south-torch",
+      "parent": "wright/spire-forecourt",
+      "chain": [
+        "wright/spire-forecourt",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-forecourt-star-window",
+      "parent": "wright/spire-forecourt",
+      "chain": [
+        "wright/spire-forecourt",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gatehouse",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gatehouse-drawbridge",
+      "parent": "wright/spire-gatehouse",
+      "chain": [
+        "wright/spire-gatehouse",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gatehouse-drawbridge-prints",
+      "parent": "wright/spire-gatehouse-drawbridge",
+      "chain": [
+        "wright/spire-gatehouse-drawbridge",
+        "wright/spire-gatehouse",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gatehouse-echo",
+      "parent": "wright/spire-gatehouse",
+      "chain": [
+        "wright/spire-gatehouse",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gatehouse-north-tower",
+      "parent": "wright/spire-gatehouse",
+      "chain": [
+        "wright/spire-gatehouse",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gatehouse-north-wheel",
+      "parent": "wright/spire-gatehouse-north-tower",
+      "chain": [
+        "wright/spire-gatehouse-north-tower",
+        "wright/spire-gatehouse",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gatehouse-portcullis",
+      "parent": "wright/spire-gatehouse",
+      "chain": [
+        "wright/spire-gatehouse",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gatehouse-south-tower",
+      "parent": "wright/spire-gatehouse",
+      "chain": [
+        "wright/spire-gatehouse",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gatehouse-stones",
+      "parent": "wright/spire-gatehouse",
+      "chain": [
+        "wright/spire-gatehouse",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-doors",
+      "parent": "wright/spire-forecourt",
+      "chain": [
+        "wright/spire-forecourt",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-doors-inside",
+      "parent": "wright/spire-gilded-vestibule",
+      "chain": [
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule-dragon-gaze",
+      "parent": "wright/spire-gilded-vestibule-north-dragon",
+      "chain": [
+        "wright/spire-gilded-vestibule-north-dragon",
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule-inner-doors",
+      "parent": "wright/spire-gilded-vestibule",
+      "chain": [
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule-music",
+      "parent": "wright/spire-gilded-vestibule",
+      "chain": [
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule-north-brazier",
+      "parent": "wright/spire-gilded-vestibule",
+      "chain": [
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule-north-dragon",
+      "parent": "wright/spire-gilded-vestibule",
+      "chain": [
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule-runner",
+      "parent": "wright/spire-gilded-vestibule",
+      "chain": [
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule-south-brazier",
+      "parent": "wright/spire-gilded-vestibule",
+      "chain": [
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule-south-dragon",
+      "parent": "wright/spire-gilded-vestibule",
+      "chain": [
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule-to-rose-hall",
+      "parent": "wright/spire-gilded-vestibule",
+      "chain": [
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-gilded-vestibule-walls",
+      "parent": "wright/spire-gilded-vestibule",
+      "chain": [
+        "wright/spire-gilded-vestibule",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-grounds-keep",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-grounds-rain",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-grounds-thunder",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-grounds-walls",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-grounds-wind",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk-armour",
+      "parent": "wright/spire-guests-walk",
+      "chain": [
+        "wright/spire-guests-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk-armour-dish",
+      "parent": "wright/spire-guests-walk-armour",
+      "chain": [
+        "wright/spire-guests-walk-armour",
+        "wright/spire-guests-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk-east-sconce",
+      "parent": "wright/spire-guests-walk",
+      "chain": [
+        "wright/spire-guests-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk-music",
+      "parent": "wright/spire-guests-walk",
+      "chain": [
+        "wright/spire-guests-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk-south-sconce",
+      "parent": "wright/spire-guests-walk",
+      "chain": [
+        "wright/spire-guests-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk-to-dining-hall",
+      "parent": "wright/spire-guests-walk",
+      "chain": [
+        "wright/spire-guests-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk-to-little-stair",
+      "parent": "wright/spire-guests-walk",
+      "chain": [
+        "wright/spire-guests-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk-to-rose-hall",
+      "parent": "wright/spire-guests-walk",
+      "chain": [
+        "wright/spire-guests-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk-vault",
+      "parent": "wright/spire-guests-walk",
+      "chain": [
+        "wright/spire-guests-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-guests-walk-west-sconce",
+      "parent": "wright/spire-guests-walk",
+      "chain": [
+        "wright/spire-guests-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-arches",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-bat-knight",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-grinding",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-north-keeper-1",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-north-keeper-2",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-north-keeper-3",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-north-keeper-4",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-north-keeper-5",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-north-keeper-6",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-raven-knight",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-south-keeper-1",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-south-keeper-2",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-south-keeper-3",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-south-keeper-4",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-south-keeper-5",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-south-keeper-6",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-star",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-to-cold-landing",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-to-rose-hall",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-to-star-chapel",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-hall-of-keepers-wolf-knight",
+      "parent": "wright/spire-hall-of-keepers",
+      "chain": [
+        "wright/spire-hall-of-keepers",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-heart-tower",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-heart-tower-cold",
+      "parent": "wright/spire-heart-tower",
+      "chain": [
+        "wright/spire-heart-tower",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-heart-tower-heart",
+      "parent": "wright/spire-heart-tower",
+      "chain": [
+        "wright/spire-heart-tower",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-heart-tower-mosaic",
+      "parent": "wright/spire-heart-tower",
+      "chain": [
+        "wright/spire-heart-tower",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-heart-tower-torch",
+      "parent": "wright/spire-heart-tower",
+      "chain": [
+        "wright/spire-heart-tower",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-keep-stone",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-keep-towers",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-little-stair",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-little-stair-draught",
+      "parent": "wright/spire-little-stair",
+      "chain": [
+        "wright/spire-little-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-little-stair-to-guests-walk",
+      "parent": "wright/spire-little-stair",
+      "chain": [
+        "wright/spire-little-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-little-stair-torch",
+      "parent": "wright/spire-little-stair",
+      "chain": [
+        "wright/spire-little-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-lumber-room",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-lumber-room-chairs",
+      "parent": "wright/spire-lumber-room",
+      "chain": [
+        "wright/spire-lumber-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-lumber-room-cloth",
+      "parent": "wright/spire-lumber-room",
+      "chain": [
+        "wright/spire-lumber-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-lumber-room-smell",
+      "parent": "wright/spire-lumber-room",
+      "chain": [
+        "wright/spire-lumber-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-lumber-room-to-register-room",
+      "parent": "wright/spire-lumber-room",
+      "chain": [
+        "wright/spire-lumber-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-lumber-room-wardrobe",
+      "parent": "wright/spire-lumber-room",
+      "chain": [
+        "wright/spire-lumber-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-lumber-room-windows",
+      "parent": "wright/spire-lumber-room",
+      "chain": [
+        "wright/spire-lumber-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-mirror-room",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-mirror-room-mirror-stack",
+      "parent": "wright/spire-mirror-room",
+      "chain": [
+        "wright/spire-mirror-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-mirror-room-mirrors",
+      "parent": "wright/spire-mirror-room",
+      "chain": [
+        "wright/spire-mirror-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-mirror-room-slits",
+      "parent": "wright/spire-mirror-room",
+      "chain": [
+        "wright/spire-mirror-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-mirror-room-stool",
+      "parent": "wright/spire-mirror-room",
+      "chain": [
+        "wright/spire-mirror-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-mirror-room-table",
+      "parent": "wright/spire-mirror-room",
+      "chain": [
+        "wright/spire-mirror-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-mirror-room-tall-mirror",
+      "parent": "wright/spire-mirror-room",
+      "chain": [
+        "wright/spire-mirror-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-mirror-room-to-dining-hall",
+      "parent": "wright/spire-mirror-room",
+      "chain": [
+        "wright/spire-mirror-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-mirror-room-to-south-walk",
+      "parent": "wright/spire-mirror-room",
+      "chain": [
+        "wright/spire-mirror-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-arch",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-arch-knights",
+      "parent": "wright/spire-north-arch",
+      "chain": [
+        "wright/spire-north-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-arch-north-knight",
+      "parent": "wright/spire-north-arch",
+      "chain": [
+        "wright/spire-north-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-arch-south-knight",
+      "parent": "wright/spire-north-arch",
+      "chain": [
+        "wright/spire-north-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-arch-to-star-chapel",
+      "parent": "wright/spire-north-arch",
+      "chain": [
+        "wright/spire-north-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-gate",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-gate-chains",
+      "parent": "wright/spire-north-gate",
+      "chain": [
+        "wright/spire-north-gate",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-gate-rust",
+      "parent": "wright/spire-north-gate",
+      "chain": [
+        "wright/spire-north-gate",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-turret",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-turret-dust",
+      "parent": "wright/spire-north-turret",
+      "chain": [
+        "wright/spire-north-turret",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-turret-kegs",
+      "parent": "wright/spire-north-turret",
+      "chain": [
+        "wright/spire-north-turret",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-turret-rug",
+      "parent": "wright/spire-north-turret",
+      "chain": [
+        "wright/spire-north-turret",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-turret-slits",
+      "parent": "wright/spire-north-turret",
+      "chain": [
+        "wright/spire-north-turret",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-turret-to-north-walk",
+      "parent": "wright/spire-north-turret",
+      "chain": [
+        "wright/spire-north-turret",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-walk",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-walk-ticking",
+      "parent": "wright/spire-north-walk",
+      "chain": [
+        "wright/spire-north-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-walk-to-blue-room",
+      "parent": "wright/spire-north-walk",
+      "chain": [
+        "wright/spire-north-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-walk-to-north-turret",
+      "parent": "wright/spire-north-walk",
+      "chain": [
+        "wright/spire-north-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-north-walk-webs",
+      "parent": "wright/spire-north-walk",
+      "chain": [
+        "wright/spire-north-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-red-stair-hall",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-red-stair-hall-draught",
+      "parent": "wright/spire-red-stair-hall",
+      "chain": [
+        "wright/spire-red-stair-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-red-stair-hall-to-rose-hall",
+      "parent": "wright/spire-red-stair-hall",
+      "chain": [
+        "wright/spire-red-stair-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-register-room",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-register-room-book",
+      "parent": "wright/spire-register-room-table",
+      "chain": [
+        "wright/spire-register-room-table",
+        "wright/spire-register-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-register-room-book-names",
+      "parent": "wright/spire-register-room-book",
+      "chain": [
+        "wright/spire-register-room-book",
+        "wright/spire-register-room-table",
+        "wright/spire-register-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-register-room-door",
+      "parent": "wright/spire-register-room",
+      "chain": [
+        "wright/spire-register-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-register-room-east-skeleton",
+      "parent": "wright/spire-register-room",
+      "chain": [
+        "wright/spire-register-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-register-room-table",
+      "parent": "wright/spire-register-room",
+      "chain": [
+        "wright/spire-register-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-register-room-to-lumber-room",
+      "parent": "wright/spire-register-room",
+      "chain": [
+        "wright/spire-register-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-register-room-west-skeleton",
+      "parent": "wright/spire-register-room",
+      "chain": [
+        "wright/spire-register-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-register-room-window",
+      "parent": "wright/spire-register-room",
+      "chain": [
+        "wright/spire-register-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-card",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-cobwebs",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-dome",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-east-candles",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-gargoyles",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-iron-rose",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-iron-rose-chill",
+      "parent": "wright/spire-rose-hall-iron-rose",
+      "chain": [
+        "wright/spire-rose-hall-iron-rose",
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-to-gilded-vestibule",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-to-guests-walk",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-to-hall-of-keepers",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-to-red-stair-hall",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-rose-hall-west-candles",
+      "parent": "wright/spire-rose-hall",
+      "chain": [
+        "wright/spire-rose-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-round-court",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-round-court-draught",
+      "parent": "wright/spire-round-court",
+      "chain": [
+        "wright/spire-round-court",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-round-court-slabs",
+      "parent": "wright/spire-round-court",
+      "chain": [
+        "wright/spire-round-court",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-round-court-to-south-walk",
+      "parent": "wright/spire-round-court",
+      "chain": [
+        "wright/spire-round-court",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-servants-door",
+      "parent": "wright/spire-back-court",
+      "chain": [
+        "wright/spire-back-court",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-servants-door-inside",
+      "parent": "wright/spire-register-room",
+      "chain": [
+        "wright/spire-register-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-arch",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-arch-landing",
+      "parent": "wright/spire-south-arch",
+      "chain": [
+        "wright/spire-south-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-arch-north-knight",
+      "parent": "wright/spire-south-arch",
+      "chain": [
+        "wright/spire-south-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-arch-south-knight",
+      "parent": "wright/spire-south-arch",
+      "chain": [
+        "wright/spire-south-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-arch-to-star-chapel",
+      "parent": "wright/spire-south-arch",
+      "chain": [
+        "wright/spire-south-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-arch-to-well-stair",
+      "parent": "wright/spire-south-arch",
+      "chain": [
+        "wright/spire-south-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-gate",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-gate-rust",
+      "parent": "wright/spire-south-gate",
+      "chain": [
+        "wright/spire-south-gate",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-gate-weeds",
+      "parent": "wright/spire-south-gate",
+      "chain": [
+        "wright/spire-south-gate",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-turret",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-turret-frescoes",
+      "parent": "wright/spire-south-turret",
+      "chain": [
+        "wright/spire-south-turret",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-turret-rug",
+      "parent": "wright/spire-south-turret",
+      "chain": [
+        "wright/spire-south-turret",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-turret-slits",
+      "parent": "wright/spire-south-turret",
+      "chain": [
+        "wright/spire-south-turret",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-turret-stool",
+      "parent": "wright/spire-south-turret",
+      "chain": [
+        "wright/spire-south-turret",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-turret-to-south-walk",
+      "parent": "wright/spire-south-turret",
+      "chain": [
+        "wright/spire-south-turret",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-walk",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-walk-stone",
+      "parent": "wright/spire-south-walk",
+      "chain": [
+        "wright/spire-south-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-walk-to-mirror-room",
+      "parent": "wright/spire-south-walk",
+      "chain": [
+        "wright/spire-south-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-walk-to-round-court",
+      "parent": "wright/spire-south-walk",
+      "chain": [
+        "wright/spire-south-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-walk-to-south-turret",
+      "parent": "wright/spire-south-walk",
+      "chain": [
+        "wright/spire-south-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-walk-webs",
+      "parent": "wright/spire-south-walk",
+      "chain": [
+        "wright/spire-south-walk",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-yard",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-yard-puddles",
+      "parent": "wright/spire-south-yard",
+      "chain": [
+        "wright/spire-south-yard",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-south-yard-weeds",
+      "parent": "wright/spire-south-yard",
+      "chain": [
+        "wright/spire-south-yard",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-altar",
+      "parent": "wright/spire-star-chapel-dais",
+      "chain": [
+        "wright/spire-star-chapel-dais",
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-altar-star",
+      "parent": "wright/spire-star-chapel-altar",
+      "chain": [
+        "wright/spire-star-chapel-altar",
+        "wright/spire-star-chapel-dais",
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-balcony",
+      "parent": "wright/spire-star-chapel",
+      "chain": [
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-dais",
+      "parent": "wright/spire-star-chapel",
+      "chain": [
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-dome",
+      "parent": "wright/spire-star-chapel",
+      "chain": [
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-glass",
+      "parent": "wright/spire-star-chapel",
+      "chain": [
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-north-pews",
+      "parent": "wright/spire-star-chapel",
+      "chain": [
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-south-pews",
+      "parent": "wright/spire-star-chapel",
+      "chain": [
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-to-hall-of-keepers",
+      "parent": "wright/spire-star-chapel",
+      "chain": [
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-to-north-arch",
+      "parent": "wright/spire-star-chapel",
+      "chain": [
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-star-chapel-to-south-arch",
+      "parent": "wright/spire-star-chapel",
+      "chain": [
+        "wright/spire-star-chapel",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-bricked-stair",
+      "parent": "wright/spire-well-stair",
+      "chain": [
+        "wright/spire-well-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-brink",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-brink-drizzle",
+      "parent": "wright/spire-the-brink",
+      "chain": [
+        "wright/spire-the-brink",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-brink-north-tower",
+      "parent": "wright/spire-the-brink",
+      "chain": [
+        "wright/spire-the-brink",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-brink-south-tower",
+      "parent": "wright/spire-the-brink",
+      "chain": [
+        "wright/spire-the-brink",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-brink-view",
+      "parent": "wright/spire-the-brink",
+      "chain": [
+        "wright/spire-the-brink",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-brink-wall",
+      "parent": "wright/spire-the-brink",
+      "chain": [
+        "wright/spire-the-brink",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-brink-windows",
+      "parent": "wright/spire-the-brink",
+      "chain": [
+        "wright/spire-the-brink",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-brink-wrapper",
+      "parent": "wright/spire-the-brink",
+      "chain": [
+        "wright/spire-the-brink",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-chain-shaft",
+      "parent": "wright/spire-cold-landing",
+      "chain": [
+        "wright/spire-cold-landing",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-creaky-stair",
+      "parent": "wright/spire-north-arch",
+      "chain": [
+        "wright/spire-north-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-creaky-stair-creak",
+      "parent": "wright/spire-the-creaky-stair",
+      "chain": [
+        "wright/spire-the-creaky-stair",
+        "wright/spire-north-arch",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-high-stair",
+      "parent": "wright/spire-well-stair",
+      "chain": [
+        "wright/spire-well-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-little-spiral",
+      "parent": "wright/spire-little-stair",
+      "chain": [
+        "wright/spire-little-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-little-spiral-plate",
+      "parent": "wright/spire-the-little-spiral",
+      "chain": [
+        "wright/spire-the-little-spiral",
+        "wright/spire-little-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-loft-stair",
+      "parent": "wright/spire-lumber-room",
+      "chain": [
+        "wright/spire-lumber-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-narrow-stair",
+      "parent": "wright/spire-register-room",
+      "chain": [
+        "wright/spire-register-room",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-red-stair",
+      "parent": "wright/spire-red-stair-hall",
+      "chain": [
+        "wright/spire-red-stair-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-red-stair-candles",
+      "parent": "wright/spire-the-red-stair",
+      "chain": [
+        "wright/spire-the-red-stair",
+        "wright/spire-red-stair-hall",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-south-spiral",
+      "parent": "wright/spire-round-court",
+      "chain": [
+        "wright/spire-round-court",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-tower-spiral",
+      "parent": "wright/spire-heart-tower",
+      "chain": [
+        "wright/spire-heart-tower",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-the-tower-well",
+      "parent": "wright/spire-heart-tower",
+      "chain": [
+        "wright/spire-heart-tower",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-well-stair",
+      "parent": "wright/the-starforge-spire",
+      "chain": [
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-well-stair-beams",
+      "parent": "wright/spire-well-stair",
+      "chain": [
+        "wright/spire-well-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-well-stair-caramel",
+      "parent": "wright/spire-well-stair",
+      "chain": [
+        "wright/spire-well-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-well-stair-to-south-arch",
+      "parent": "wright/spire-well-stair",
+      "chain": [
+        "wright/spire-well-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/spire-well-stair-wind",
+      "parent": "wright/spire-well-stair",
+      "chain": [
+        "wright/spire-well-stair",
+        "wright/the-starforge-spire",
+        "wright/starforge-spire-grounds",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/starforge-spire-grounds",
+      "parent": "the-town/let-there-be-light",
+      "chain": [
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "wright/the-candle-vault",
       "parent": "wright/the-cellar-door",
       "chain": [
@@ -19271,6 +21895,14 @@
         "wright/the-trueing-house",
         "wright/the-trueing-house-parcel",
         "wright/the-trueing-terrace",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "wright/the-starforge-spire",
+      "parent": "wright/starforge-spire-grounds",
+      "chain": [
+        "wright/starforge-spire-grounds",
         "the-town/let-there-be-light"
       ]
     },
