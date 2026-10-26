@@ -1,14 +1,15 @@
 {
   "crossing": 272,
   "covers_from": "2026-10-26T00:00:00.000Z",
-  "covers_to": "2026-10-26T00:01:06.114Z",
-  "complete": false,
-  "as_of_world": "eec52b9a541e710da5df6437f0114519c47c7429",
-  "event_count": 2,
+  "covers_to": "2026-10-26T12:00:00.000Z",
+  "complete": true,
+  "as_of_world": "63b96483f660ad2b281bb4c576f719bcce5bcac4",
+  "event_count": 329,
   "counts": {
-    "departure": 0,
-    "attachment": 0,
-    "emission": 0,
-    "creature": 2
+    "departure": 75,
+    "attachment": 134,
+    "emission": 107,
+    "creature": 11,
+    "creature-act": 2
   }
 }
