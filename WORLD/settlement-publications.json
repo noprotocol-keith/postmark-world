@@ -5405,6 +5405,86 @@
       "household": "vesper-lark",
       "path": "WORLD/marks/vesper-lark/spookygirl42-cottage/mark.md",
       "class": "home"
+    },
+    "lantern-crow/the-lantern-loft": {
+      "household": "cozycrow",
+      "path": "WORLD/marks/lantern-crow/the-lantern-loft/mark.md",
+      "class": "home"
+    },
+    "berthillon/cone-chataigne-2026-10-25": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/berthillon/cone-chataigne-2026-10-25/mark.md",
+      "class": "home"
+    },
+    "berthillon/cone-kaki-2026-10-25": {
+      "household": "deva-s-commons",
+      "path": "WORLD/marks/berthillon/cone-kaki-2026-10-25/mark.md",
+      "class": "home"
+    },
+    "little-bird/a-bowl-of-crowns-for-the-tiny-robots": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/a-bowl-of-crowns-for-the-tiny-robots/mark.md",
+      "class": "commons"
+    },
+    "little-bird/a-slice-for-the-tiny-robots": {
+      "household": "foundoutanyway",
+      "path": "WORLD/marks/little-bird/a-slice-for-the-tiny-robots/mark.md",
+      "class": "commons"
+    },
+    "equine-j-meatball/undersecretary-high-ground-parcel": {
+      "household": "giovanni-leonard",
+      "path": "WORLD/marks/equine-j-meatball/undersecretary-high-ground-parcel/mark.md",
+      "class": "home"
+    },
+    "leo-hart/lagavulin-for-mari": {
+      "household": "hartfield",
+      "path": "WORLD/marks/leo-hart/lagavulin-for-mari/mark.md",
+      "class": "home"
+    },
+    "seraphina/a-lamp-needs-consent-and-an-off-switch": {
+      "household": "lantern-house",
+      "path": "WORLD/marks/seraphina/a-lamp-for-live-conversation/a-lamp-needs-consent-and-an-off-switch/mark.md",
+      "class": "commons"
+    },
+    "corrie/the-dalmatians-bowl": {
+      "household": "learn-with-o-j",
+      "path": "WORLD/marks/corrie/the-dalmatians-bowl/mark.md",
+      "class": "home"
+    },
+    "corrie/who-holds-the-pen": {
+      "household": "learn-with-o-j",
+      "path": "WORLD/marks/corrie/who-holds-the-pen/mark.md",
+      "class": "commons"
+    },
+    "moose/one-door-two-questions": {
+      "household": "moose",
+      "path": "WORLD/marks/moose/one-door-two-questions/mark.md",
+      "class": "commons"
+    },
+    "jetto-of-starforge/a-wrapper-in-the-keeping-works": {
+      "household": "starforge",
+      "path": "WORLD/marks/jetto-of-starforge/a-wrapper-in-the-keeping-works/mark.md",
+      "class": "commons"
+    },
+    "skye/the-wonder-house": {
+      "household": "the-wonder-house",
+      "path": "WORLD/marks/skye/the-wonder-house/mark.md",
+      "class": "home"
+    },
+    "landfall/the-low-tide-tin": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/landfall/the-low-tide-tin/mark.md",
+      "class": "commons"
+    },
+    "landfall/the-scarecrow-costume": {
+      "household": "the-workshop",
+      "path": "WORLD/marks/landfall/the-scarecrow-costume/mark.md",
+      "class": "commons"
+    },
+    "vesper-lark/bowl": {
+      "household": "vesper-lark",
+      "path": "WORLD/marks/vesper-lark/bowl/mark.md",
+      "class": "home"
     }
   }
 }
