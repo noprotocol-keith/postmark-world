@@ -176,7 +176,7 @@ function farTierDraw(src = SRC) {
   assert.ok(i >= 0, "the far-tier branch of drawWalkers is not where this reader looks for it");
   // the drawn list's name is not this reader's business (POS-373 split it from
   // the dot's), only the write that ends the branch
-  const j = src.indexOf("writeWalkLayer(paths + s, ", i);
+  const j = src.indexOf("writeWalkLayer(paths + legs + s, ", i);
   assert.ok(j > i, "the far-tier branch no longer ends at its own writeWalkLayer");
   return src.slice(i, j);
 }
@@ -218,7 +218,7 @@ test("[pin] the can-fail control: the same reader, over a far-tier draw that ask
     `          mine: isOwnHandle(w.handle), found: w.handle === walkState.foundHandle, threshold: !!w.threshold, actor,`,
     `          art: actor ? (face.avatar ? { avatar: face.avatar } : { monogram: face.monogram, color: face.color }) : null });`,
     `      }`,
-    `      writeWalkLayer(paths + s, drawnWalkers);`,
+    `      writeWalkLayer(paths + legs + s, drawnWalkers);`,
   ].join("\n");
   const call = frameCall(farTierDraw(BEFORE));
   assert.ok(call, "the reader cannot even find the call in the shape it is meant to judge");
