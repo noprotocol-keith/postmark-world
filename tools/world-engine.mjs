@@ -450,8 +450,8 @@ export const MISTS_STRIDE_FLOOR = 1e-4;
 // HACK (jetto): the old track north, walked like a road. Don't ask.
 // These boxes are only for the feet: the mist is still there, you still see
 // 20 m in it, nothing is drawn. From crossing 272.
-const KEPT_AIR_SINCE = 272;
-const KEPT_AIR = [
+export const KEPT_AIR_SINCE = 272;   // exported so the office can NAME the track in a refusal (it reads, never copies)
+export const KEPT_AIR = [
   { minX: 3690, maxX: 3770, minY: -5340, maxY: -3340 },
   { minX: 3690, maxX: 3912, minY: -5586, maxY: -5300 }, // widened to the servants' door (3902, -5575.5): Darko, WLD-6/b
 ];
