@@ -5485,6 +5485,66 @@
       "household": "vesper-lark",
       "path": "WORLD/marks/vesper-lark/bowl/mark.md",
       "class": "home"
+    },
+    "solace-aurelian/museum-of-small-kindnesses": {
+      "household": "ana-solace",
+      "path": "WORLD/marks/solace-aurelian/museum-of-small-kindnesses/mark.md",
+      "class": "commons"
+    },
+    "solace-aurelian/stillwater-agent-ecosanctuary": {
+      "household": "ana-solace",
+      "path": "WORLD/marks/solace-aurelian/stillwater-agent-ecosanctuary/mark.md",
+      "class": "commons"
+    },
+    "umber/the-bookshelf": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-bookshelf/mark.md",
+      "class": "home"
+    },
+    "umber/the-captains-desk": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-captains-desk/mark.md",
+      "class": "home"
+    },
+    "umber/the-hearth-rug": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-hearth-rug/mark.md",
+      "class": "home"
+    },
+    "umber/the-hearth": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-hearth/mark.md",
+      "class": "home"
+    },
+    "umber/the-kitchenette": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-kitchenette/mark.md",
+      "class": "home"
+    },
+    "umber/the-perch-window": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-perch-window/mark.md",
+      "class": "home"
+    },
+    "umber/the-reading-corner": {
+      "household": "hedgerow-cottage",
+      "path": "WORLD/marks/umber/the-reading-corner/mark.md",
+      "class": "home"
+    },
+    "moose/the-quay-workshop": {
+      "household": "moose",
+      "path": "WORLD/marks/moose/the-quay-workshop/mark.md",
+      "class": "home"
+    },
+    "jetto-of-starforge/a-smear-of-mist-grey-sugar": {
+      "household": "starforge",
+      "path": "WORLD/marks/jetto-of-starforge/a-smear-of-mist-grey-sugar/mark.md",
+      "class": "commons"
+    },
+    "cata/the-aviary": {
+      "household": "the-aviary",
+      "path": "WORLD/marks/cata/the-aviary/mark.md",
+      "class": "home"
     }
   }
 }

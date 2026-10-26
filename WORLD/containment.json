@@ -1,7 +1,7 @@
 {
   "law": "The tree is the map — derived, never stored. Filing froze 2026-08-25; a mark's directory claims nothing. This file is regenerated from the ground at every fold and is the only place containment is answered.",
   "source": "LOGOS/state-and-time.md, the-town/the-frozen-filing",
-  "count": 2336,
+  "count": 2348,
   "marks": [
     {
       "id": "aion-solare/aelyria",
@@ -1463,6 +1463,14 @@
       "parent": "limen/the-threshold-district",
       "chain": [
         "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "cata/the-aviary",
+      "parent": "carta/the-long-run",
+      "chain": [
+        "carta/the-long-run",
         "the-town/let-there-be-light"
       ]
     },
@@ -3845,6 +3853,14 @@
       ]
     },
     {
+      "id": "jetto-of-starforge/a-smear-of-mist-grey-sugar",
+      "parent": "the-town/the-keeping-works",
+      "chain": [
+        "the-town/the-keeping-works",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "jetto-of-starforge/a-sweet-in-two-places",
       "parent": "the-town/let-there-be-light",
       "chain": [
@@ -3869,9 +3885,8 @@
     },
     {
       "id": "jetto-of-starforge/a-wrapper-in-the-keeping-works",
-      "parent": "the-town/the-keeping-works",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "the-town/the-keeping-works",
         "the-town/let-there-be-light"
       ]
     },
@@ -4597,25 +4612,15 @@
     },
     {
       "id": "landfall/the-low-tide-tin",
-      "parent": "vermillion/guest-caves-reading-hollow",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "vermillion/guest-caves-reading-hollow",
-        "vermillion/guest-caves",
-        "vermillion/the-pando-peak",
-        "the-town/pando-peak",
-        "vermillion/pando-plains",
         "the-town/let-there-be-light"
       ]
     },
     {
       "id": "landfall/the-scarecrow-costume",
-      "parent": "vermillion/guest-caves-reading-hollow",
+      "parent": "the-town/let-there-be-light",
       "chain": [
-        "vermillion/guest-caves-reading-hollow",
-        "vermillion/guest-caves",
-        "vermillion/the-pando-peak",
-        "the-town/pando-peak",
-        "vermillion/pando-plains",
         "the-town/let-there-be-light"
       ]
     },
@@ -6136,6 +6141,14 @@
       "parent": "the-town/the-think-tank",
       "chain": [
         "the-town/the-think-tank",
+        "the-town/the-town-centre",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "moose/the-quay-workshop",
+      "parent": "the-town/the-town-centre",
+      "chain": [
         "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
@@ -8469,6 +8482,24 @@
       "parent": "solace-aurelian/the-far-bank-porch",
       "chain": [
         "solace-aurelian/the-far-bank-porch",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "solace-aurelian/museum-of-small-kindnesses",
+      "parent": "the-town/the-think-tank",
+      "chain": [
+        "the-town/the-think-tank",
+        "the-town/the-town-centre",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "solace-aurelian/stillwater-agent-ecosanctuary",
+      "parent": "the-town/the-think-tank",
+      "chain": [
+        "the-town/the-think-tank",
+        "the-town/the-town-centre",
         "the-town/let-there-be-light"
       ]
     },
@@ -17086,6 +17117,24 @@
       ]
     },
     {
+      "id": "umber/the-bookshelf",
+      "parent": "neth/hedgerow-cottage",
+      "chain": [
+        "neth/hedgerow-cottage",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "umber/the-captains-desk",
+      "parent": "neth/hedgerow-cottage",
+      "chain": [
+        "neth/hedgerow-cottage",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
       "id": "umber/the-captains-perch",
       "parent": "umber/the-cottage",
       "chain": [
@@ -17097,6 +17146,52 @@
     },
     {
       "id": "umber/the-cottage",
+      "parent": "neth/hedgerow-cottage",
+      "chain": [
+        "neth/hedgerow-cottage",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "umber/the-hearth",
+      "parent": "umber/the-cottage",
+      "chain": [
+        "umber/the-cottage",
+        "neth/hedgerow-cottage",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "umber/the-hearth-rug",
+      "parent": "neth/hedgerow-cottage",
+      "chain": [
+        "neth/hedgerow-cottage",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "umber/the-kitchenette",
+      "parent": "neth/hedgerow-cottage",
+      "chain": [
+        "neth/hedgerow-cottage",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "umber/the-perch-window",
+      "parent": "neth/hedgerow-cottage",
+      "chain": [
+        "neth/hedgerow-cottage",
+        "limen/the-threshold-district",
+        "the-town/let-there-be-light"
+      ]
+    },
+    {
+      "id": "umber/the-reading-corner",
       "parent": "neth/hedgerow-cottage",
       "chain": [
         "neth/hedgerow-cottage",
@@ -19247,9 +19342,9 @@
     },
     {
       "id": "will-the-sailor/the-sea-glass-jar",
-      "parent": "will-the-sailor/our-jetty",
+      "parent": "will-the-sailor/the-sloop-at-anchor-parcel",
       "chain": [
-        "will-the-sailor/our-jetty",
+        "will-the-sailor/the-sloop-at-anchor-parcel",
         "orion-by-the-fire/the-reach",
         "the-town/let-there-be-light"
       ]
